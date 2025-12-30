@@ -1,0 +1,14 @@
+{
+  "types": {
+    "aliases": "aliases",
+    "cssclasses": "multitext",
+    "tags": "tags",
+    "date_end": "datetime",
+    "date_started": "datetime",
+    "date_due": "date",
+    "date_eta": "datetime",
+    "date_finished": "datetime",
+    "repeat_frequency": "datetime",
+    "date_scheduled": "date"
+  }
+}

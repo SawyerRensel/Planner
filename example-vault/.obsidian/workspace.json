@@ -1,0 +1,233 @@
+{
+  "main": {
+    "id": "27ac78f0eb163733",
+    "type": "split",
+    "children": [
+      {
+        "id": "03de4eaf1f27fda2",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "17d10671f0f6c09a",
+            "type": "leaf",
+            "state": {
+              "type": "bases",
+              "state": {
+                "file": "TaskNotes/Views/calendar-default.base",
+                "viewName": "Calendar"
+              },
+              "icon": "lucide-layout-list",
+              "title": "calendar-default"
+            }
+          },
+          {
+            "id": "dbdbc63a1614a29b",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "notes/obsidian-planner-prd.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "obsidian-planner-prd"
+            }
+          }
+        ],
+        "currentTab": 1
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "a4667362e8d1d352",
+    "type": "split",
+    "children": [
+      {
+        "id": "abd7819f35029ebb",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "a95a79f411ac4c1f",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "4cece03bf2ddf760",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "565b4ea6abb608f6",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "ed9ed6ed0a6d4bf8",
+    "type": "split",
+    "children": [
+      {
+        "id": "abb59eab83d77066",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "c2c7947f2541e698",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks"
+            }
+          },
+          {
+            "id": "e2f3f7668a69b8ba",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links"
+            }
+          },
+          {
+            "id": "dafbf18b32013851",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "372ff7c9141459bf",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "1f46bdd88facf3ec",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Welcome.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of Welcome"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "dbdbc63a1614a29b",
+  "lastOpenFiles": [
+    "Full Calendar/2025-12-27 Full Calendar Example Event.md",
+    "notes/obsidian-planner-prd.md",
+    "notes/Notes.md",
+    "notes",
+    "Full Calendar/2025-12-28 Full Calendar Example Task.md",
+    "media/gantt_view_mockup_example.png",
+    "Planner/Items/test3.md",
+    "Planner/Items/time task.md",
+    "Planner/Items/test2.md",
+    "Planner/Items/test1.md",
+    "TaskNotes/Tasks/TaskNotes Example Dependency.md",
+    "TaskNotes/Tasks/groceries.md",
+    "TaskNotes/Views/calendar-default.base",
+    "Planner/Views/gantt-default.base",
+    "Planner/Views/calendar-default.base",
+    "Planner/Views/kanban-status.base",
+    "Planner/Views/items-today.base",
+    "Planner/Items/test.md.tmp.32868.1767075941227",
+    "2025-12-29.md",
+    "2025-12-30.md",
+    "Planner/Items",
+    "Planner/Views/relationships.base",
+    "Planner/Views/items-all.base",
+    "TaskNotes/Tasks/TaskNotes Example Recurring Task.md",
+    "TaskNotes/Tasks/TaskNotes Example Task with Specific Time.md",
+    "TaskNotes/Tasks/TaskNotes Example Task.md",
+    "Planner/test.md",
+    "Notes.md",
+    "TaskNotes/Tasks/vacation.md",
+    "TaskNotes/Tasks/test.md",
+    "create a link.md",
+    "Welcome.md"
+  ]
+}
