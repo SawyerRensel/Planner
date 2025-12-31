@@ -328,7 +328,7 @@ export class BasesCalendarView extends BasesView {
     // Get date fields
     const dateStartScheduled = entry.getValue('note.date_start_scheduled' as any);
     const dateEndScheduled = entry.getValue('note.date_end_scheduled' as any);
-    const allDay = entry.getValue('note.all_day' as any);
+    const allDayValue = entry.getValue('note.all_day' as any);
 
     // Must have a start date
     if (!dateStartScheduled) return null;
@@ -341,12 +341,21 @@ export class BasesCalendarView extends BasesView {
     // Get color
     const color = this.getEntryColor(entry, colorByProp);
 
+    // Convert dates to ISO strings (handles both Date objects and strings)
+    const startStr = this.toISOString(dateStartScheduled);
+    const endStr = dateEndScheduled ? this.toISOString(dateEndScheduled) : undefined;
+
+    // Determine if all-day event:
+    // - Explicitly set to true in frontmatter
+    // - OR start date has no time component
+    const isAllDay = this.isAllDayValue(allDayValue) || !this.hasTime(startStr);
+
     return {
       id: entry.file.path,
       title: String(title),
-      start: String(dateStartScheduled),
-      end: dateEndScheduled ? String(dateEndScheduled) : undefined,
-      allDay: Boolean(allDay) || !this.hasTime(String(dateStartScheduled)),
+      start: startStr,
+      end: endStr,
+      allDay: isAllDay,
       backgroundColor: color,
       borderColor: color,
       textColor: this.getContrastColor(color),
@@ -382,7 +391,42 @@ export class BasesCalendarView extends BasesView {
   }
 
   private hasTime(dateStr: string): boolean {
-    return dateStr.includes('T') && !dateStr.endsWith('T00:00:00');
+    // Check if date string contains a non-midnight time
+    if (!dateStr.includes('T')) return false;
+
+    // Extract time portion and check if it's not midnight
+    const timePart = dateStr.split('T')[1];
+    if (!timePart) return false;
+
+    // Check for midnight patterns: 00:00:00, 00:00:00.000, 00:00:00.000Z, etc.
+    const timeWithoutTz = timePart.replace(/[Z+-].*$/, ''); // Remove timezone
+    return !timeWithoutTz.startsWith('00:00:00');
+  }
+
+  private toISOString(value: unknown): string {
+    // Handle Date objects
+    if (value instanceof Date) {
+      return value.toISOString();
+    }
+    // Handle strings that might be dates
+    if (typeof value === 'string') {
+      return value;
+    }
+    // Handle numbers (timestamps)
+    if (typeof value === 'number') {
+      return new Date(value).toISOString();
+    }
+    // Fallback
+    return String(value);
+  }
+
+  private isAllDayValue(value: unknown): boolean {
+    // Handle explicit boolean true
+    if (value === true) return true;
+    // Handle string "true"
+    if (typeof value === 'string' && value.toLowerCase() === 'true') return true;
+    // Everything else (false, "false", null, undefined) is not all-day
+    return false;
   }
 
   private getWeekStartDay(): number {
