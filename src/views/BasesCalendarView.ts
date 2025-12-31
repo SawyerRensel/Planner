@@ -149,9 +149,12 @@ export class BasesCalendarView extends BasesView {
       firstDay: weekStartsOn,
       selectable: true,
       editable: true,
+      eventStartEditable: true,
+      eventDurationEditable: true,
       events: events,
       eventClick: (info) => this.handleEventClick(info),
       eventDrop: (info) => this.handleEventDrop(info),
+      eventResize: (info) => this.handleEventResize(info),
       select: (info) => this.handleDateSelect(info),
       height: '100%',
       nowIndicator: true,
@@ -269,10 +272,41 @@ export class BasesCalendarView extends BasesView {
   private async handleEventDrop(info: any): Promise<void> {
     const entry = info.event.extendedProps.entry as BasesEntry;
     const newStart = info.event.start;
+    const newEnd = info.event.end;
 
-    // Update the file's frontmatter
+    // Update the file's frontmatter - preserve duration by updating both start and end
     await this.app.fileManager.processFrontMatter(entry.file, (fm) => {
-      fm.date_start = newStart.toISOString();
+      // Check if this item uses date_start or date_due as the primary date
+      const hasDateStart = fm.date_start !== undefined;
+      const hasDateDue = fm.date_due !== undefined && !hasDateStart;
+
+      if (hasDateDue) {
+        // Item uses date_due as primary, update it
+        fm.date_due = newStart.toISOString();
+      } else {
+        // Item uses date_start, update both start and end
+        fm.date_start = newStart.toISOString();
+        if (newEnd) {
+          fm.date_end = newEnd.toISOString();
+        }
+      }
+      fm.date_modified = new Date().toISOString();
+    });
+  }
+
+  private async handleEventResize(info: any): Promise<void> {
+    const entry = info.event.extendedProps.entry as BasesEntry;
+    const newStart = info.event.start;
+    const newEnd = info.event.end;
+
+    // Update the file's frontmatter with new start/end times
+    await this.app.fileManager.processFrontMatter(entry.file, (fm) => {
+      if (newStart) {
+        fm.date_start = newStart.toISOString();
+      }
+      if (newEnd) {
+        fm.date_end = newEnd.toISOString();
+      }
       fm.date_modified = new Date().toISOString();
     });
   }
