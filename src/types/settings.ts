@@ -30,6 +30,9 @@ export interface PlannerSettings {
   quickCaptureDefaultTags: string[];
   quickCaptureDefaultStatus: string;
   quickCaptureOpenAfterCreate: boolean;
+
+  // Open Behavior
+  openBehavior: OpenBehavior;
 }
 
 /**
@@ -54,6 +57,11 @@ export interface PriorityConfig {
  * Days of the week for week start setting
  */
 export type WeekDay = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
+
+/**
+ * How to open items and daily notes
+ */
+export type OpenBehavior = 'new-tab' | 'same-tab' | 'split-right' | 'split-down';
 
 /**
  * Default settings
@@ -103,6 +111,9 @@ export const DEFAULT_SETTINGS: PlannerSettings = {
   quickCaptureDefaultTags: [],
   quickCaptureDefaultStatus: 'To-Do',
   quickCaptureOpenAfterCreate: false,
+
+  // Open Behavior
+  openBehavior: 'new-tab',
 };
 
 /**

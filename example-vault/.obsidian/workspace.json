@@ -47,33 +47,6 @@
               "icon": "calendar",
               "title": "Calendar"
             }
-          },
-          {
-            "id": "2923157ad9b77eb2",
-            "type": "leaf",
-            "state": {
-              "type": "bases",
-              "state": {
-                "file": "TaskNotes/Views/calendar-default.base",
-                "viewName": "Calendar"
-              },
-              "icon": "lucide-layout-list",
-              "title": "calendar-default"
-            }
-          },
-          {
-            "id": "59825f58289e43ea",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Planner/Design Mockups.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Design Mockups"
-            }
           }
         ],
         "currentTab": 2
@@ -260,33 +233,34 @@
   },
   "active": "a95a79f411ac4c1f",
   "lastOpenFiles": [
+    "Planner/New Item 2.md",
     "Planner/Calendar.base",
+    "Planner/New Item.md",
+    "Planner/New Item 1.md",
+    "DailyNotes/2025-12-05.md",
+    "DailyNotes/2025-12-04.md",
+    "Planner/Design Mockups.md",
+    "TaskNotes/Views/calendar-default.base",
     "DailyNotes/2025-12-31.md",
     "DailyNotes/2025-12-24.md",
     "notes/feedback-and-ideas.md",
-    "Planner/New Item 1.md",
     "DailyNotes/2025-12-15.md",
     "DailyNotes/2025-12-18.md",
     "DailyNotes/2025-12-16.md",
-    "DailyNotes/2025-12-04.md",
     "DailyNotes/2025-12-10.md",
     "DailyNotes/2025-12-11.md",
-    "Planner/Design Mockups.md",
     "Templates/Daily Note Template.md",
     "Templates",
     "2025-12-03.md",
     "2025-12-31.md",
     "2025-12-12.md",
     "Planner/New Item 3.md",
-    "Planner/New Item 2.md",
     "DailyNotes",
-    "Planner/New Item.md",
     "notes/obsidian-planner-prd.md",
     "Planner/Team Meeting.md",
     "Planner/test.md",
     "News/Russia Doubles Down on Allegations Ukraine Targeted Putin Residence.md",
     "News",
-    "TaskNotes/Views/calendar-default.base",
     "Planner/Sleep in.md",
     "Planner/Tasks.base",
     "Planner/Implement Frontend.md",
@@ -294,7 +268,6 @@
     "Planner/Untitled",
     "Planner/Calendar.base.tmp.990.1767179093609",
     "Planner/Tasks.base.tmp.990.1767179092572",
-    "Planner/Hike next.md",
     "media/gantt_view_mockup_example.png"
   ]
 }

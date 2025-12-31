@@ -1,6 +1,6 @@
 import { App, PluginSettingTab, Setting, Modal, Notice } from 'obsidian';
 import type PlannerPlugin from '../main';
-import { PlannerSettings, StatusConfig, PriorityConfig, DEFAULT_SETTINGS } from '../types/settings';
+import { PlannerSettings, StatusConfig, PriorityConfig, DEFAULT_SETTINGS, OpenBehavior } from '../types/settings';
 import { BaseGeneratorService } from '../services/BaseGeneratorService';
 
 /**
@@ -135,6 +135,20 @@ export class PlannerSettingTab extends PluginSettingTab {
         .setValue(this.plugin.settings.weekStartsOn)
         .onChange(async (value: PlannerSettings['weekStartsOn']) => {
           this.plugin.settings.weekStartsOn = value;
+          await this.plugin.saveSettings();
+        }));
+
+    new Setting(containerEl)
+      .setName('Open behavior')
+      .setDesc('How to open items and daily notes from the calendar')
+      .addDropdown(dropdown => dropdown
+        .addOption('new-tab', 'Open in New Tab')
+        .addOption('same-tab', 'Open in Same Tab')
+        .addOption('split-right', 'Split Right')
+        .addOption('split-down', 'Split Down')
+        .setValue(this.plugin.settings.openBehavior)
+        .onChange(async (value: OpenBehavior) => {
+          this.plugin.settings.openBehavior = value;
           await this.plugin.saveSettings();
         }));
 

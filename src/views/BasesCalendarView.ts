@@ -11,6 +11,7 @@ import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import multiMonthPlugin from '@fullcalendar/multimonth';
 import type PlannerPlugin from '../main';
+import type { OpenBehavior } from '../types/settings';
 
 export const BASES_CALENDAR_VIEW_ID = 'planner-calendar';
 
@@ -344,7 +345,7 @@ export class BasesCalendarView extends BasesView {
       title: String(title),
       start: String(startDate),
       end: dateEnd ? String(dateEnd) : undefined,
-      allDay: allDay === true || !this.hasTime(String(startDate)),
+      allDay: Boolean(allDay) || !this.hasTime(String(startDate)),
       backgroundColor: color,
       borderColor: color,
       textColor: this.getContrastColor(color),
@@ -405,9 +406,35 @@ export class BasesCalendarView extends BasesView {
     return luminance > 0.5 ? '#000000' : '#ffffff';
   }
 
-  private handleEventClick(info: EventClickArg): void {
+  private async openFileWithBehavior(path: string): Promise<void> {
+    const behavior: OpenBehavior = this.plugin.settings.openBehavior;
+
+    switch (behavior) {
+      case 'new-tab':
+        await this.app.workspace.openLinkText(path, '', 'tab');
+        break;
+      case 'same-tab':
+        await this.app.workspace.openLinkText(path, '', false);
+        break;
+      case 'split-right':
+        await this.app.workspace.openLinkText(path, '', 'split');
+        break;
+      case 'split-down': {
+        const leaf = this.app.workspace.getLeaf('split', 'horizontal');
+        const file = this.app.vault.getAbstractFileByPath(path);
+        if (file && 'extension' in file) {
+          await leaf.openFile(file as any);
+        }
+        break;
+      }
+      default:
+        await this.app.workspace.openLinkText(path, '', 'tab');
+    }
+  }
+
+  private async handleEventClick(info: EventClickArg): Promise<void> {
     const entry = info.event.extendedProps.entry as BasesEntry;
-    this.app.workspace.openLinkText(entry.file.path, '', false);
+    await this.openFileWithBehavior(entry.file.path);
   }
 
   private async handleEventDrop(info: any): Promise<void> {
@@ -522,7 +549,7 @@ export class BasesCalendarView extends BasesView {
     }
 
     // Open the file
-    await this.app.workspace.openLinkText(path, '', false);
+    await this.openFileWithBehavior(path);
   }
 
   private processTemplateVariables(content: string, date: Date): string {
@@ -587,7 +614,7 @@ export class BasesCalendarView extends BasesView {
     });
 
     if (item) {
-      await this.app.workspace.openLinkText(item.path, '', false);
+      await this.openFileWithBehavior(item.path);
     }
   }
 }
