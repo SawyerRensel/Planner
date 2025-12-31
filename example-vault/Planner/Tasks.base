@@ -1,6 +1,4 @@
----
 source: Planner/
-filters: note.tags contains "task"
 properties:
   note.title:
     width: 200
@@ -15,6 +13,16 @@ properties:
 views:
   - type: planner-task-list
     name: Task List
+    groupBy:
+      property: calendar
+      direction: ASC
+    order:
+      - file.name
+      - priority
+      - status
+      - calendar
+    sort:
+      - property: priority
+        direction: ASC
   - type: table
     name: Table
----

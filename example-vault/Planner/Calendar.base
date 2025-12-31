@@ -1,4 +1,3 @@
----
 source: Planner/
 properties:
   note.title:
@@ -14,7 +13,10 @@ properties:
 views:
   - type: planner-calendar
     name: Calendar
+    order:
+      - file.name
+    sort: []
     colorBy: note.calendar
+    undefined: "0"
   - type: table
     name: Table
----
