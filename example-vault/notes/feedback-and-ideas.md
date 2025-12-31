@@ -2,8 +2,8 @@
 - [x] Improve Calendar view UI.  Conserve "real-estate".  Match the look, sizing and feel of Task Notes "Advanced Calendar" view.
 - [x] Abbreviate Calendar view mode buttons to single letters.  Let's also shorten the "+ New" button to a single plus "+".  Secondly, let's add an option to to split Year view mode by month or have a continuous scroll like before.  (only shown as a toggle in Calendar view when Year view mode is selected)
 - [x] "Color by" menu is missing
-- [ ] Clicking on day number should open the Daily Note for that date.
-- [ ] Calendar View's Bases' Configure View menu also has "Color by" dropdown, but this doesn't actually change the color of items.  Let's fix that and keep both "Color by" dropdown menus in sync with each other.  
+- [x] Clicking on day number should open the Daily Note for that date.
+- [x] Calendar View's Bases' Configure View menu also has "Color by" dropdown, but this doesn't actually change the color of items.  Let's fix that and keep both "Color by" dropdown menus in sync with each other.  
 - [ ] Need to fix/update date frontmatter fields (Due? Started? Scheduled? etc.)
 
 | Field                  | Description                                        |

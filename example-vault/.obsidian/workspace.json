@@ -48,8 +48,7 @@
               "title": "Calendar"
             }
           }
-        ],
-        "currentTab": 2
+        ]
       }
     ],
     "direction": "vertical"
@@ -231,19 +230,19 @@
       "tasknotes:Create new task": false
     }
   },
-  "active": "a95a79f411ac4c1f",
+  "active": "657d18c0aae1861a",
   "lastOpenFiles": [
-    "Planner/New Item 2.md",
     "Planner/Calendar.base",
     "Planner/New Item.md",
+    "notes/feedback-and-ideas.md",
+    "DailyNotes/2025-12-31.md",
+    "Planner/New Item 2.md",
     "Planner/New Item 1.md",
     "DailyNotes/2025-12-05.md",
     "DailyNotes/2025-12-04.md",
     "Planner/Design Mockups.md",
     "TaskNotes/Views/calendar-default.base",
-    "DailyNotes/2025-12-31.md",
     "DailyNotes/2025-12-24.md",
-    "notes/feedback-and-ideas.md",
     "DailyNotes/2025-12-15.md",
     "DailyNotes/2025-12-18.md",
     "DailyNotes/2025-12-16.md",

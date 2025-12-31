@@ -28,9 +28,16 @@ export class BasesCalendarView extends BasesView {
   private calendarEl: HTMLElement | null = null;
   private calendar: Calendar | null = null;
   private currentView: CalendarViewType = 'dayGridMonth';
-  private colorByField: 'note.calendar' | 'note.priority' | 'note.status' = 'note.calendar';
   private resizeObserver: ResizeObserver | null = null;
   private yearViewSplit: boolean = true; // true = multiMonthYear (split), false = dayGridYear (continuous)
+
+  private getColorByField(): 'note.calendar' | 'note.priority' | 'note.status' {
+    const value = this.config.get('colorBy') as string | undefined;
+    if (value === 'note.priority' || value === 'note.status') {
+      return value;
+    }
+    return 'note.calendar'; // default
+  }
 
   constructor(
     controller: QueryController,
@@ -260,24 +267,20 @@ export class BasesCalendarView extends BasesView {
       { value: 'note.status', label: 'Status' },
     ];
 
+    const currentColorBy = this.getColorByField();
     for (const opt of options) {
       const option = document.createElement('option');
       option.value = opt.value;
       option.textContent = opt.label;
-      if (opt.value === this.colorByField) {
+      if (opt.value === currentColorBy) {
         option.selected = true;
       }
       select.appendChild(option);
     }
 
     select.addEventListener('change', () => {
-      this.colorByField = select.value as typeof this.colorByField;
-      // Re-render calendar with new colors
-      if (this.calendar) {
-        const events = this.getEventsFromData();
-        this.calendar.removeAllEvents();
-        this.calendar.addEventSource(events);
-      }
+      // Update Bases config - this will trigger onDataUpdated and re-render
+      this.config.set('colorBy', select.value);
     });
 
     colorByContainer.appendChild(select);
@@ -311,7 +314,7 @@ export class BasesCalendarView extends BasesView {
 
     for (const group of this.data.groupedData) {
       for (const entry of group.entries) {
-        const event = this.entryToEvent(entry, this.colorByField);
+        const event = this.entryToEvent(entry, this.getColorByField());
         if (event) {
           events.push(event);
         }
