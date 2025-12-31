@@ -9,20 +9,22 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
+import multiMonthPlugin from '@fullcalendar/multimonth';
 import type PlannerPlugin from '../main';
 
 export const BASES_CALENDAR_VIEW_ID = 'planner-calendar';
 
-type CalendarViewType = 'dayGridMonth' | 'dayGridYear' | 'timeGridWeek' | 'timeGridDay' | 'listWeek';
+type CalendarViewType = 'multiMonthYear' | 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek';
 
 /**
  * Calendar view for Obsidian Bases
- * Displays items on a full calendar
+ * Displays items on a full calendar using FullCalendar's built-in headerToolbar
  */
 export class BasesCalendarView extends BasesView {
   type = BASES_CALENDAR_VIEW_ID;
   private plugin: PlannerPlugin;
   private containerEl: HTMLElement;
+  private calendarEl: HTMLElement | null = null;
   private calendar: Calendar | null = null;
   private currentView: CalendarViewType = 'dayGridMonth';
   private colorByField: 'note.calendar' | 'note.priority' | 'note.status' = 'note.calendar';
@@ -36,7 +38,18 @@ export class BasesCalendarView extends BasesView {
     super(controller);
     this.plugin = plugin;
     this.containerEl = containerEl;
+    this.setupContainer();
     this.setupResizeObserver();
+  }
+
+  private setupContainer(): void {
+    this.containerEl.empty();
+    this.containerEl.addClass('planner-bases-calendar');
+    this.containerEl.style.cssText = 'height: 100%; display: flex; flex-direction: column;';
+
+    // Single calendar element - no separate toolbar
+    this.calendarEl = this.containerEl.createDiv({ cls: 'planner-calendar-container' });
+    this.calendarEl.style.cssText = 'flex: 1; min-height: 500px; overflow: auto;';
   }
 
   private setupResizeObserver(): void {
@@ -69,97 +82,55 @@ export class BasesCalendarView extends BasesView {
   private render(): void {
     // Preserve current view and date if calendar exists
     let currentDate: Date | undefined;
+    let currentViewType: CalendarViewType | undefined;
     if (this.calendar) {
       currentDate = this.calendar.getDate();
+      currentViewType = this.calendar.view?.type as CalendarViewType;
       this.calendar.destroy();
+      this.calendar = null;
     }
 
-    this.containerEl.empty();
-    this.containerEl.addClass('planner-bases-calendar');
+    // Re-setup the container if needed
+    if (!this.calendarEl || !this.calendarEl.isConnected) {
+      this.setupContainer();
+    } else {
+      this.calendarEl.empty();
+    }
 
-    // Toolbar
-    const toolbar = this.containerEl.createDiv({ cls: 'planner-calendar-toolbar' });
-    this.renderToolbar(toolbar);
-
-    // Calendar container
-    const calendarEl = this.containerEl.createDiv({ cls: 'planner-calendar-container' });
-
-    this.initCalendar(calendarEl, currentDate);
+    if (this.calendarEl) {
+      this.initCalendar(currentDate, currentViewType);
+    }
   }
 
-  private renderToolbar(toolbar: HTMLElement): void {
-    // View selector
-    const viewSelector = toolbar.createDiv({ cls: 'planner-view-selector' });
+  private initCalendar(initialDate?: Date, initialView?: CalendarViewType): void {
+    if (!this.calendarEl) return;
 
-    const views: { type: CalendarViewType; label: string; icon: string }[] = [
-      { type: 'dayGridYear', label: 'Year', icon: 'Y' },
-      { type: 'dayGridMonth', label: 'Month', icon: 'M' },
-      { type: 'timeGridWeek', label: 'Week', icon: 'W' },
-      { type: 'timeGridDay', label: 'Day', icon: 'D' },
-      { type: 'listWeek', label: 'List', icon: 'L' },
-    ];
-
-    for (const view of views) {
-      const btn = viewSelector.createEl('button', {
-        cls: `planner-view-btn ${this.currentView === view.type ? 'active' : ''}`,
-        text: view.icon,
-        attr: { title: view.label }
-      });
-      btn.addEventListener('click', () => {
-        this.currentView = view.type;
-        if (this.calendar) {
-          this.calendar.changeView(view.type);
-        }
-        // Update button states
-        viewSelector.querySelectorAll('.planner-view-btn').forEach(b => b.removeClass('active'));
-        btn.addClass('active');
-      });
-    }
-
-    // Color by selector
-    const colorByContainer = toolbar.createDiv({ cls: 'planner-color-by' });
-    colorByContainer.createSpan({ text: 'Color by: ' });
-    const colorBySelect = colorByContainer.createEl('select');
-
-    const colorOptions = [
-      { value: 'note.calendar', label: 'Calendar' },
-      { value: 'note.priority', label: 'Priority' },
-      { value: 'note.status', label: 'Status' },
-    ];
-
-    for (const opt of colorOptions) {
-      const option = colorBySelect.createEl('option', {
-        value: opt.value,
-        text: opt.label
-      });
-      if (opt.value === this.colorByField) {
-        option.selected = true;
-      }
-    }
-
-    colorBySelect.addEventListener('change', () => {
-      this.colorByField = colorBySelect.value as typeof this.colorByField;
-      this.render();
-    });
-
-    // New item button
-    const newBtn = toolbar.createEl('button', { cls: 'planner-btn planner-btn-primary' });
-    newBtn.createSpan({ text: '+ New' });
-    newBtn.addEventListener('click', () => this.createNewItem());
-  }
-
-  private initCalendar(containerEl: HTMLElement, initialDate?: Date): void {
     const weekStartsOn = this.getWeekStartDay();
     const events = this.getEventsFromData();
 
-    this.calendar = new Calendar(containerEl, {
-      plugins: [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin],
-      initialView: this.currentView,
+    this.calendar = new Calendar(this.calendarEl, {
+      plugins: [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin, multiMonthPlugin],
+      initialView: initialView || this.currentView,
       initialDate: initialDate,
       headerToolbar: {
         left: 'prev,next today',
         center: 'title',
-        right: '',
+        right: 'multiMonthYear,dayGridMonth,timeGridWeek,timeGridDay,listWeek,newItemButton',
+      },
+      buttonText: {
+        today: 'Today',
+        month: 'Month',
+        week: 'Week',
+        day: 'Day',
+        year: 'Year',
+        list: 'List',
+      },
+      customButtons: {
+        newItemButton: {
+          text: '+ New',
+          hint: 'Create new item',
+          click: () => this.createNewItem(),
+        },
       },
       firstDay: weekStartsOn,
       selectable: true,
@@ -171,7 +142,16 @@ export class BasesCalendarView extends BasesView {
       eventDrop: (info) => this.handleEventDrop(info),
       eventResize: (info) => this.handleEventResize(info),
       select: (info) => this.handleDateSelect(info),
+      viewDidMount: (arg) => {
+        // Track view type changes
+        const newViewType = arg.view.type as CalendarViewType;
+        if (newViewType) {
+          this.currentView = newViewType;
+        }
+      },
       height: '100%',
+      expandRows: true,
+      handleWindowResize: true,
       nowIndicator: true,
       dayMaxEvents: true,
     });
