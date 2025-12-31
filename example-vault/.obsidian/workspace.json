@@ -75,7 +75,8 @@
               "title": "Design Mockups"
             }
           }
-        ]
+        ],
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -257,19 +258,34 @@
       "tasknotes:Create new task": false
     }
   },
-  "active": "657d18c0aae1861a",
+  "active": "a95a79f411ac4c1f",
   "lastOpenFiles": [
-    "Planner/Team Meeting.md",
     "Planner/Calendar.base",
-    "notes/obsidian-planner-prd.md",
-    "Planner/test.md",
-    "notes/feedback-and-ideas.md",
+    "DailyNotes/2025-12-31.md",
+    "Planner/New Item 1.md",
+    "DailyNotes/2025-12-15.md",
+    "DailyNotes/2025-12-18.md",
+    "DailyNotes/2025-12-16.md",
+    "DailyNotes/2025-12-04.md",
+    "DailyNotes/2025-12-10.md",
+    "DailyNotes/2025-12-11.md",
     "Planner/Design Mockups.md",
+    "Templates/Daily Note Template.md",
+    "Templates",
+    "2025-12-03.md",
+    "2025-12-31.md",
+    "2025-12-12.md",
+    "Planner/New Item 3.md",
+    "Planner/New Item 2.md",
+    "DailyNotes",
+    "Planner/New Item.md",
+    "notes/feedback-and-ideas.md",
+    "notes/obsidian-planner-prd.md",
+    "Planner/Team Meeting.md",
+    "Planner/test.md",
     "News/Russia Doubles Down on Allegations Ukraine Targeted Putin Residence.md",
     "News",
     "TaskNotes/Views/calendar-default.base",
-    "Planner/New Item 1.md",
-    "Planner/New Item.md",
     "Planner/Sleep in.md",
     "Planner/Tasks.base",
     "Planner/Implement Frontend.md",
@@ -279,21 +295,6 @@
     "Planner/Tasks.base.tmp.990.1767179092572",
     "Planner/Hike next.md",
     "Full Calendar/2025-12-27 Full Calendar Example Event.md",
-    "Planner/Grocery Shopping.md",
-    "Planner/New Item 2.md",
-    "notes/questions.md",
-    "Planner/Calendar.base.tmp.990.1767142112477",
-    "Planner/Tasks.base.tmp.990.1767141817852",
-    "Planner/Website Redesign.md",
-    "Planner/Fix Login Bug.md",
-    "notes/Notes.md",
-    "Full Calendar/2025-12-28 Full Calendar Example Task.md",
-    "media/gantt_view_mockup_example.png",
-    "Planner/Items/test3.md",
-    "Planner/Items/time task.md",
-    "Planner/Items/test2.md",
-    "Planner/Items/test1.md",
-    "TaskNotes/Tasks/TaskNotes Example Dependency.md",
-    "TaskNotes/Tasks/groceries.md"
+    "media/gantt_view_mockup_example.png"
   ]
 }

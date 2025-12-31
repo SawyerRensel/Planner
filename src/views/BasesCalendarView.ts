@@ -186,6 +186,8 @@ export class BasesCalendarView extends BasesView {
       editable: true,
       eventStartEditable: true,
       eventDurationEditable: true,
+      navLinks: true, // Make day numbers clickable
+      navLinkDayClick: (date) => this.openDailyNote(date), // Click on day number opens daily note
       events: events,
       eventClick: (info) => this.handleEventClick(info),
       eventDrop: (info) => this.handleEventDrop(info),
@@ -385,9 +387,9 @@ export class BasesCalendarView extends BasesView {
 
   private getContrastColor(hexColor: string): string {
     const hex = hexColor.replace('#', '');
-    const r = parseInt(hex.substr(0, 2), 16);
-    const g = parseInt(hex.substr(2, 2), 16);
-    const b = parseInt(hex.substr(4, 2), 16);
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
     const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
     return luminance > 0.5 ? '#000000' : '#ffffff';
   }
@@ -442,6 +444,123 @@ export class BasesCalendarView extends BasesView {
   private handleDateSelect(info: DateSelectArg): void {
     // Create new item on the selected date
     this.createNewItem(info.startStr, info.endStr, info.allDay);
+  }
+
+  private async openDailyNote(date: Date): Promise<void> {
+    // Format date as YYYY-MM-DD for daily note filename (fallback)
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
+
+    // Try to use the daily-notes core plugin settings
+    const internalPlugins = (this.app as any).internalPlugins;
+    const dailyNotesPlugin = internalPlugins?.getPluginById?.('daily-notes');
+
+    let path: string;
+    let templatePath: string | undefined;
+    let folder: string | undefined;
+
+    if (dailyNotesPlugin?.enabled && dailyNotesPlugin?.instance?.options) {
+      const options = dailyNotesPlugin.instance.options;
+      const format = options.format || 'YYYY-MM-DD';
+      folder = options.folder || '';
+      templatePath = options.template || undefined;
+
+      // Format the date according to the daily notes format
+      const filename = this.formatDate(date, format);
+      path = folder ? `${folder}/${filename}.md` : `${filename}.md`;
+    } else {
+      // Fallback: just use YYYY-MM-DD format
+      path = `${dateStr}.md`;
+    }
+
+    // Check if the file already exists
+    const existingFile = this.app.vault.getAbstractFileByPath(path);
+
+    if (!existingFile) {
+      // File doesn't exist - create it with template if specified
+      let content = '';
+
+      if (templatePath) {
+        // Try to load the template
+        const templateFile = this.app.vault.getAbstractFileByPath(templatePath) ||
+                             this.app.vault.getAbstractFileByPath(`${templatePath}.md`);
+        if (templateFile && 'path' in templateFile) {
+          try {
+            content = await this.app.vault.read(templateFile as any);
+            // Process template variables
+            content = this.processTemplateVariables(content, date);
+          } catch {
+            // Template couldn't be read, use empty content
+            content = '';
+          }
+        }
+      }
+
+      // Ensure folder exists
+      if (folder) {
+        const folderExists = this.app.vault.getAbstractFileByPath(folder);
+        if (!folderExists) {
+          await this.app.vault.createFolder(folder);
+        }
+      }
+
+      // Create the daily note
+      await this.app.vault.create(path, content);
+    }
+
+    // Open the file
+    await this.app.workspace.openLinkText(path, '', false);
+  }
+
+  private processTemplateVariables(content: string, date: Date): string {
+    // Replace common template variables
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'];
+
+    return content
+      // Date patterns
+      .replace(/\{\{date\}\}/g, `${year}-${month}-${day}`)
+      .replace(/\{\{date:([^}]+)\}\}/g, (_, format) => this.formatDate(date, format))
+      // Title patterns
+      .replace(/\{\{title\}\}/g, `${year}-${month}-${day}`)
+      // Time patterns
+      .replace(/\{\{time\}\}/g, date.toLocaleTimeString())
+      // Day/week patterns
+      .replace(/\{\{weekday\}\}/g, weekdays[date.getDay()])
+      .replace(/\{\{month\}\}/g, months[date.getMonth()]);
+  }
+
+  private formatDate(date: Date, format: string): string {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const weekdaysShort = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'];
+    const monthsShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    // Replace format tokens (order matters - longer tokens first)
+    return format
+      .replace(/YYYY/g, String(year))
+      .replace(/YY/g, String(year).slice(-2))
+      .replace(/MMMM/g, months[month - 1])
+      .replace(/MMM/g, monthsShort[month - 1])
+      .replace(/MM/g, String(month).padStart(2, '0'))
+      .replace(/M/g, String(month))
+      .replace(/DDDD/g, weekdays[date.getDay()])
+      .replace(/DDD/g, weekdaysShort[date.getDay()])
+      .replace(/DD/g, String(day).padStart(2, '0'))
+      .replace(/D/g, String(day))
+      .replace(/dddd/g, weekdays[date.getDay()])
+      .replace(/ddd/g, weekdaysShort[date.getDay()]);
   }
 
   private async createNewItem(startDate?: string, endDate?: string, allDay?: boolean): Promise<void> {
