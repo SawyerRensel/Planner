@@ -8,30 +8,17 @@
         "type": "tabs",
         "children": [
           {
-            "id": "17d10671f0f6c09a",
-            "type": "leaf",
-            "state": {
-              "type": "bases",
-              "state": {
-                "file": "TaskNotes/Views/calendar-default.base",
-                "viewName": "Calendar"
-              },
-              "icon": "lucide-layout-list",
-              "title": "calendar-default"
-            }
-          },
-          {
             "id": "dbdbc63a1614a29b",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "notes/questions.md",
+                "file": "notes/feedback.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "questions"
+              "title": "feedback"
             }
           },
           {
@@ -46,6 +33,16 @@
               },
               "icon": "lucide-file",
               "title": "obsidian-planner-prd"
+            }
+          },
+          {
+            "id": "7e17c27072ccc6fb",
+            "type": "leaf",
+            "state": {
+              "type": "planner-calendar",
+              "state": {},
+              "icon": "calendar",
+              "title": "Planner: Calendar"
             }
           }
         ],
@@ -106,7 +103,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 229.5
   },
   "right": {
     "id": "ed9ed6ed0a6d4bf8",
@@ -207,10 +204,11 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 318.5
   },
   "left-ribbon": {
     "hiddenItems": {
+      "planner:Open Planner Calendar": false,
       "switcher:Open quick switcher": false,
       "graph:Open graph view": false,
       "canvas:Create new canvas": false,
@@ -221,28 +219,33 @@
       "planner:Open Planner Task List": false
     }
   },
-  "active": "0e150094a8ca80ef",
+  "active": "a95a79f411ac4c1f",
   "lastOpenFiles": [
-    "Planner/Team Meeting.md",
+    "Planner/New Item.md",
+    "Planner/Hike next.md",
+    "notes/feedback.md",
+    "notes/obsidian-planner-prd.md",
+    "Full Calendar/2025-12-27 Full Calendar Example Event.md",
     "Planner/Grocery Shopping.md",
+    "Planner/Team Meeting.md",
+    "Planner/Calendar.base",
     "Planner/Implement Frontend.md",
+    "Planner/test.md",
+    "Planner/New Item 2.md",
+    "notes/questions.md",
+    "Planner/Tasks.base",
+    "TaskNotes/Views/calendar-default.base",
+    "Planner/Calendar.base.tmp.990.1767142112477",
+    "Planner/Tasks.base.tmp.990.1767141817852",
     "Planner/Website Redesign.md",
     "Planner/Fix Login Bug.md",
     "Planner/Fix Login Bug.md.tmp.990.1767141135781",
     "Planner/Team Meeting.md.tmp.990.1767141123402",
-    "notes/obsidian-planner-prd.md",
     "Planner/Design Mockups.md",
     "Planner/Website Redesign.md.tmp.990.1767141077917",
     "Planner",
     "notes/obsidian-planner-prd.md.tmp.1141.1767138953570",
-    "notes/obsidian-planner-prd.md.tmp.1141.1767138825990",
-    "notes/questions.md",
-    "notes/obsidian-planner-prd.md.tmp.1141.1767137943535",
-    "TaskNotes/Views/calendar-default.base",
-    "notes/questions.md.tmp.1141.1767128804617",
-    "Full Calendar/2025-12-27 Full Calendar Example Event.md",
     "notes/Notes.md",
-    "notes",
     "Full Calendar/2025-12-28 Full Calendar Example Task.md",
     "media/gantt_view_mockup_example.png",
     "Planner/Items/test3.md",
@@ -254,11 +257,6 @@
     "2025-12-29.md",
     "2025-12-30.md",
     "TaskNotes/Tasks/TaskNotes Example Recurring Task.md",
-    "TaskNotes/Tasks/TaskNotes Example Task with Specific Time.md",
-    "TaskNotes/Tasks/TaskNotes Example Task.md",
-    "Planner/test.md",
-    "Notes.md",
-    "TaskNotes/Tasks/vacation.md",
-    "TaskNotes/Tasks/test.md"
+    "TaskNotes/Tasks/TaskNotes Example Task with Specific Time.md"
   ]
 }

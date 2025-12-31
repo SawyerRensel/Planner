@@ -1,0 +1,20 @@
+---
+source: Planner/
+filters: note.tags contains "task"
+properties:
+  note.title:
+    width: 200
+  note.status:
+    width: 100
+  note.priority:
+    width: 100
+  note.date_due:
+    width: 120
+  note.calendar:
+    width: 120
+views:
+  - type: planner-task-list
+    name: Task List
+  - type: table
+    name: Table
+---

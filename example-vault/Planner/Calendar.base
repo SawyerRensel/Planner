@@ -1,0 +1,20 @@
+---
+source: Planner/
+properties:
+  note.title:
+    width: 200
+  note.date_start:
+    width: 150
+  note.date_due:
+    width: 150
+  note.calendar:
+    width: 120
+  note.status:
+    width: 100
+views:
+  - type: planner-calendar
+    name: Calendar
+    colorBy: note.calendar
+  - type: table
+    name: Table
+---

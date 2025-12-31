@@ -3,7 +3,8 @@
     "allow": [
       "Bash(cat:*)",
       "Bash(export PATH=\"/home/sawyer/.nvm/versions/node/v24.12.0/bin:$PATH\")",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(npm install:*)"
     ]
   }
 }

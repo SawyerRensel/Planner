@@ -5,13 +5,14 @@
     "tags": "tags",
     "date_end": "datetime",
     "date_started": "datetime",
-    "date_due": "date",
+    "date_due": "datetime",
     "date_eta": "datetime",
     "date_finished": "datetime",
-    "repeat_frequency": "datetime",
+    "repeat_frequency": "text",
     "date_scheduled": "date",
     "date_created": "datetime",
     "date_modified": "datetime",
-    "date_start": "datetime"
+    "date_start": "datetime",
+    "date_completed": "datetime"
   }
 }
