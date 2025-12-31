@@ -210,10 +210,64 @@ export class BasesCalendarView extends BasesView {
 
     this.calendar.render();
 
+    // Inject color-by dropdown into the left toolbar section
+    this.injectColorByDropdown();
+
     // Set initial year toggle visibility
     const isYearView = (initialView || this.currentView) === 'multiMonthYear' ||
                        (initialView || this.currentView) === 'dayGridYear';
     this.updateYearToggleVisibility(isYearView);
+  }
+
+  private injectColorByDropdown(): void {
+    if (!this.calendarEl) return;
+
+    // Find the left toolbar chunk (contains prev, next, today)
+    const leftToolbar = this.calendarEl.querySelector('.fc-toolbar-chunk:first-child');
+    if (!leftToolbar) return;
+
+    // Create the color-by container
+    const colorByContainer = document.createElement('div');
+    colorByContainer.className = 'planner-color-by-container';
+
+    // Create label
+    const label = document.createElement('span');
+    label.className = 'planner-color-by-label';
+    label.textContent = 'Color:';
+    colorByContainer.appendChild(label);
+
+    // Create select dropdown
+    const select = document.createElement('select');
+    select.className = 'planner-color-by-select';
+
+    const options = [
+      { value: 'note.calendar', label: 'Calendar' },
+      { value: 'note.priority', label: 'Priority' },
+      { value: 'note.status', label: 'Status' },
+    ];
+
+    for (const opt of options) {
+      const option = document.createElement('option');
+      option.value = opt.value;
+      option.textContent = opt.label;
+      if (opt.value === this.colorByField) {
+        option.selected = true;
+      }
+      select.appendChild(option);
+    }
+
+    select.addEventListener('change', () => {
+      this.colorByField = select.value as typeof this.colorByField;
+      // Re-render calendar with new colors
+      if (this.calendar) {
+        const events = this.getEventsFromData();
+        this.calendar.removeAllEvents();
+        this.calendar.addEventSource(events);
+      }
+    });
+
+    colorByContainer.appendChild(select);
+    leftToolbar.appendChild(colorByContainer);
   }
 
   private toggleYearViewMode(): void {
