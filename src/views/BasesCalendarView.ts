@@ -326,14 +326,12 @@ export class BasesCalendarView extends BasesView {
 
   private entryToEvent(entry: BasesEntry, colorByProp: string): EventInput | null {
     // Get date fields
-    const dateStart = entry.getValue('note.date_start' as any);
-    const dateDue = entry.getValue('note.date_due' as any);
-    const dateEnd = entry.getValue('note.date_end' as any);
+    const dateStartScheduled = entry.getValue('note.date_start_scheduled' as any);
+    const dateEndScheduled = entry.getValue('note.date_end_scheduled' as any);
     const allDay = entry.getValue('note.all_day' as any);
 
-    // Must have at least one date
-    const startDate = dateStart || dateDue;
-    if (!startDate) return null;
+    // Must have a start date
+    if (!dateStartScheduled) return null;
 
     // Get title
     const title = entry.getValue('note.title' as any) ||
@@ -346,9 +344,9 @@ export class BasesCalendarView extends BasesView {
     return {
       id: entry.file.path,
       title: String(title),
-      start: String(startDate),
-      end: dateEnd ? String(dateEnd) : undefined,
-      allDay: Boolean(allDay) || !this.hasTime(String(startDate)),
+      start: String(dateStartScheduled),
+      end: dateEndScheduled ? String(dateEndScheduled) : undefined,
+      allDay: Boolean(allDay) || !this.hasTime(String(dateStartScheduled)),
       backgroundColor: color,
       borderColor: color,
       textColor: this.getContrastColor(color),
@@ -447,19 +445,9 @@ export class BasesCalendarView extends BasesView {
 
     // Update the file's frontmatter - preserve duration by updating both start and end
     await this.app.fileManager.processFrontMatter(entry.file, (fm) => {
-      // Check if this item uses date_start or date_due as the primary date
-      const hasDateStart = fm.date_start !== undefined;
-      const hasDateDue = fm.date_due !== undefined && !hasDateStart;
-
-      if (hasDateDue) {
-        // Item uses date_due as primary, update it
-        fm.date_due = newStart.toISOString();
-      } else {
-        // Item uses date_start, update both start and end
-        fm.date_start = newStart.toISOString();
-        if (newEnd) {
-          fm.date_end = newEnd.toISOString();
-        }
+      fm.date_start_scheduled = newStart.toISOString();
+      if (newEnd) {
+        fm.date_end_scheduled = newEnd.toISOString();
       }
       fm.date_modified = new Date().toISOString();
     });
@@ -473,10 +461,10 @@ export class BasesCalendarView extends BasesView {
     // Update the file's frontmatter with new start/end times
     await this.app.fileManager.processFrontMatter(entry.file, (fm) => {
       if (newStart) {
-        fm.date_start = newStart.toISOString();
+        fm.date_start_scheduled = newStart.toISOString();
       }
       if (newEnd) {
-        fm.date_end = newEnd.toISOString();
+        fm.date_end_scheduled = newEnd.toISOString();
       }
       fm.date_modified = new Date().toISOString();
     });
@@ -611,8 +599,8 @@ export class BasesCalendarView extends BasesView {
     const item = await this.plugin.itemService.createItem(title, {
       title,
       tags: ['event'],
-      date_start: startDate || now,
-      date_end: endDate || undefined,
+      date_start_scheduled: startDate || now,
+      date_end_scheduled: endDate || undefined,
       all_day: allDay ?? false,
     });
 

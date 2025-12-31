@@ -5,8 +5,8 @@ import { ItemFrontmatter } from '../types/item';
 
 interface ParsedInput {
   title: string;
-  date_start?: string;
-  date_end?: string;
+  date_start_scheduled?: string;
+  date_end_scheduled?: string;
   all_day?: boolean;
   context?: string[];
   tags?: string[];
@@ -174,7 +174,7 @@ export class QuickCaptureModal extends Modal {
 
       // Get start date
       const startDate = dateResult.start.date();
-      parsed.date_start = startDate.toISOString();
+      parsed.date_start_scheduled = startDate.toISOString();
 
       // Check if time was specified
       const hasTime = dateResult.start.isCertain('hour');
@@ -183,7 +183,7 @@ export class QuickCaptureModal extends Modal {
       // If there's an end date
       if (dateResult.end) {
         const endDate = dateResult.end.date();
-        parsed.date_end = endDate.toISOString();
+        parsed.date_end_scheduled = endDate.toISOString();
       }
 
       // Remove the date text from remaining
@@ -217,8 +217,8 @@ export class QuickCaptureModal extends Modal {
     const previewDetails = this.previewEl.createDiv({ cls: 'planner-preview-details' });
 
     // Date
-    if (parsedInput.date_start) {
-      const date = new Date(parsedInput.date_start);
+    if (parsedInput.date_start_scheduled) {
+      const date = new Date(parsedInput.date_start_scheduled);
       const dateStr = parsedInput.all_day
         ? date.toLocaleDateString()
         : date.toLocaleString();
@@ -324,11 +324,11 @@ export class QuickCaptureModal extends Modal {
       frontmatter.tags = ['task'];
     }
 
-    if (parsedInput.date_start) {
-      frontmatter.date_start = parsedInput.date_start;
+    if (parsedInput.date_start_scheduled) {
+      frontmatter.date_start_scheduled = parsedInput.date_start_scheduled;
     }
-    if (parsedInput.date_end) {
-      frontmatter.date_end = parsedInput.date_end;
+    if (parsedInput.date_end_scheduled) {
+      frontmatter.date_end_scheduled = parsedInput.date_end_scheduled;
     }
     if (parsedInput.all_day !== undefined) {
       frontmatter.all_day = parsedInput.all_day;

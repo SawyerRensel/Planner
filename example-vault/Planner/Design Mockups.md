@@ -15,11 +15,11 @@ priority: High
 progress: 100
 date_created: 2025-01-10T09:00:00
 date_modified: 2025-01-14T16:00:00
-date_start: 2025-01-10T09:00:00
-date_end:
-date_due: 2025-01-14T17:00:00
-date_completed: 2025-01-14T16:00:00
-all_day: false
+date_start_scheduled: 2025-01-10T09:00:00
+date_start_actual: 2025-01-10T10:43:00
+date_end_scheduled: 2025-01-10T17:00:00
+date_end_actual: 2025-01-10T16:00:00
+all_day: true
 repeat_frequency:
 repeat_interval:
 repeat_until:

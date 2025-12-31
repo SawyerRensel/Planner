@@ -22,10 +22,10 @@ progress: 35
 # Dates
 date_created: 2025-01-10T09:00:00
 date_modified: 2025-01-15T14:30:00
-date_start: 2025-01-15T09:00:00
-date_end:
-date_due: 2025-01-31T17:00:00
-date_completed:
+date_start_scheduled: 2025-01-15T09:00:00
+date_start_actual:
+date_end_scheduled: 2025-01-31T17:00:00
+date_end_actual:
 all_day: false
 
 # Recurrence

@@ -28,10 +28,10 @@ export interface PlannerItem {
   // Dates (ISO 8601 format)
   date_created?: string;
   date_modified?: string;
-  date_start?: string;
-  date_end?: string;
-  date_due?: string;
-  date_completed?: string;
+  date_start_scheduled?: string;  // When you intend to perform the action
+  date_start_actual?: string;     // When you actually started the action
+  date_end_scheduled?: string;    // When you intend to complete the action
+  date_end_actual?: string;       // When you actually finished the action
   all_day?: boolean;
 
   // Recurrence (iCal RRULE compatible)
@@ -76,8 +76,8 @@ export type DayOfWeek = 'MO' | 'TU' | 'WE' | 'TH' | 'FR' | 'SA' | 'SU';
  */
 export interface ComputedItemFields {
   blocking: string[];           // Items that have this item in their blocked_by
-  duration: number | null;      // date_end - date_start in milliseconds
-  is_overdue: boolean;          // date_due < now AND status NOT IN completed_statuses
+  duration: number | null;      // date_end_scheduled - date_start_scheduled in milliseconds
+  is_overdue: boolean;          // date_end_scheduled < now AND status NOT IN completed_statuses
   next_occurrence: string | null; // Next date from RRULE after today
 }
 
@@ -107,10 +107,10 @@ export const FRONTMATTER_FIELD_ORDER: (keyof ItemFrontmatter)[] = [
   // Dates
   'date_created',
   'date_modified',
-  'date_start',
-  'date_end',
-  'date_due',
-  'date_completed',
+  'date_start_scheduled',
+  'date_start_actual',
+  'date_end_scheduled',
+  'date_end_actual',
   'all_day',
   // Recurrence
   'repeat_frequency',

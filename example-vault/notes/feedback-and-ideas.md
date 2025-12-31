@@ -6,15 +6,25 @@
 - [x] Calendar View's Bases' Configure View menu also has "Color by" dropdown, but this doesn't actually change the color of items.  Let's fix that and keep both "Color by" dropdown menus in sync with each other.  
 - [ ] Need to fix/update date frontmatter fields (Due? Started? Scheduled? etc.)
 
-| Field                  | Description                                        |
-| ---------------------- | -------------------------------------------------- |
-| `date_created`         | System timestamp.                                  |
-| `date_modified`        | System timestamp.                                  |
-| `date_start_scheduled` | When you intend to perform the action (Scheduled). |
-| `date_start_actual`    |                                                    |
-| `date_end_scheduled`   |                                                    |
-| `date_end_actual`      |                                                    |
+| Field                  | Type     | Description                             |
+| ---------------------- | -------- | --------------------------------------- |
+| `date_created`         | datetime | System timestamp.                       |
+| `date_modified`        | datetime | System timestamp.                       |
+| `date_start_scheduled` | datetime | When you intend to perform the action.  |
+| `date_start_actual`    | datetime | When you actually started the action.   |
+| `date_end_scheduled`   | datetime | When you intend to complete the action. |
+| `date_end_actual`      | datetime | When you actually finished the action.  |
+| `all_day`              | boolean  | Whether this is an all-day item.        |
 
+| Field            | Type     | Description                          |
+| ---------------- | -------- | ------------------------------------ |
+| `date_created`   | datetime | When created (auto-set)              |
+| `date_modified`  | datetime | Last modified (auto-set)             |
+| `date_start`     | datetime | When item starts / is scheduled      |
+| `date_end`       | datetime | When item ends (for multi-day items) |
+| `date_due`       | datetime | External deadline                    |
+| `date_completed` | datetime | When marked complete (auto-set)      |
+| `all_day`        | boolean  | Whether this is an all-day item      |
 
 - [ ] Let's add some features to Calendar View's Bases' Configure View menu.  First let's select a default "View Mode" menu that allows the user to set the default view mode (Year, Month, Day, etc.).  Next let's add two menus, "Date Start Field" and "Date End Field", which allow the user to select among  frontmatter field properties to define how items are displayed on the Calender view.  Lastly, let's also create a "Title Field" that allows the user to select what text is shown on items in Calendar view.  (See ***screenshots*** for reference)
 - [ ] Modal input popup

@@ -15,9 +15,10 @@ priority:
 progress:
 date_created: 2025-01-05T09:00:00
 date_modified: 2025-01-05T09:00:00
-date_start: 2025-01-15T14:00:00
-date_end: 2025-01-15T15:00:00
-date_completed:
+date_start_scheduled: 2025-01-15T14:00:00
+date_start_actual:
+date_end_scheduled: 2025-01-15T15:00:00
+date_end_actual:
 all_day: false
 repeat_frequency: weekly
 repeat_interval: 1

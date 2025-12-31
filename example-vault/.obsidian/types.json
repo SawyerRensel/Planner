@@ -13,6 +13,10 @@
     "date_created": "datetime",
     "date_modified": "datetime",
     "date_start": "datetime",
-    "date_completed": "datetime"
+    "date_completed": "datetime",
+    "date_start_scheduled": "datetime",
+    "date_start_actual": "datetime",
+    "date_end_scheduled": "datetime",
+    "date_end_actual": "datetime"
   }
 }

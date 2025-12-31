@@ -48,7 +48,8 @@
               "title": "Calendar"
             }
           }
-        ]
+        ],
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -230,17 +231,24 @@
       "tasknotes:Create new task": false
     }
   },
-  "active": "657d18c0aae1861a",
+  "active": "fbef3d5d247c6d9d",
   "lastOpenFiles": [
-    "Planner/Calendar.base",
+    "Planner/Design Mockups.md",
     "Planner/New Item.md",
+    "Planner/Calendar.base",
+    "Planner/Design Mockups.md.tmp.990.1767217348902",
+    "Planner/Website Redesign.md",
+    "Planner/Grocery Shopping.md.tmp.990.1767217268258",
+    "Planner/Fix Login Bug.md.tmp.990.1767217260082",
+    "Planner/Team Meeting.md.tmp.990.1767217249858",
+    "Planner/Website Redesign.md.tmp.990.1767217241454",
+    "notes/obsidian-planner-prd.md",
     "notes/feedback-and-ideas.md",
     "DailyNotes/2025-12-31.md",
     "Planner/New Item 2.md",
     "Planner/New Item 1.md",
     "DailyNotes/2025-12-05.md",
     "DailyNotes/2025-12-04.md",
-    "Planner/Design Mockups.md",
     "TaskNotes/Views/calendar-default.base",
     "DailyNotes/2025-12-24.md",
     "DailyNotes/2025-12-15.md",
@@ -255,18 +263,11 @@
     "2025-12-12.md",
     "Planner/New Item 3.md",
     "DailyNotes",
-    "notes/obsidian-planner-prd.md",
     "Planner/Team Meeting.md",
     "Planner/test.md",
     "News/Russia Doubles Down on Allegations Ukraine Targeted Putin Residence.md",
     "News",
     "Planner/Sleep in.md",
-    "Planner/Tasks.base",
-    "Planner/Implement Frontend.md",
-    "Untitled.base",
-    "Planner/Untitled",
-    "Planner/Calendar.base.tmp.990.1767179093609",
-    "Planner/Tasks.base.tmp.990.1767179092572",
     "media/gantt_view_mockup_example.png"
   ]
 }

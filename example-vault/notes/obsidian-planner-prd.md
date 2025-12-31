@@ -186,6 +186,8 @@ All fields use `snake_case`. All date fields use ISO 8601 format (`YYYY-MM-DDTHH
 
 #### Date Fields
 
+##### Old Date Fields
+
 | Field            | Type     | Description                          |
 | ---------------- | -------- | ------------------------------------ |
 | `date_created`   | datetime | When created (auto-set)              |
@@ -195,6 +197,18 @@ All fields use `snake_case`. All date fields use ISO 8601 format (`YYYY-MM-DDTHH
 | `date_due`       | datetime | External deadline                    |
 | `date_completed` | datetime | When marked complete (auto-set)      |
 | `all_day`        | boolean  | Whether this is an all-day item      |
+
+##### New Date Fields
+
+| New Field              | Type     | Description                             |
+| ---------------------- | -------- | --------------------------------------- |
+| `date_created`         | datetime | System timestamp.                       |
+| `date_modified`        | datetime | System timestamp.                       |
+| `date_start_scheduled` | datetime | When you intend to perform the action.  |
+| `date_start_actual`    | datetime | When you actually started the action.   |
+| `date_end_scheduled`   | datetime | When you intend to complete the action. |
+| `date_end_actual`      | datetime | When you actually finished the action.  |
+| `all_day`              | boolean  | Whether this is an all-day item.        |
 
 #### Recurrence Fields (iCal RRULE)
 

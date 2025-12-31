@@ -103,10 +103,10 @@ export class ItemService {
       // Dates
       date_created: frontmatter.date_created,
       date_modified: frontmatter.date_modified,
-      date_start: frontmatter.date_start,
-      date_end: frontmatter.date_end,
-      date_due: frontmatter.date_due,
-      date_completed: frontmatter.date_completed,
+      date_start_scheduled: frontmatter.date_start_scheduled,
+      date_start_actual: frontmatter.date_start_actual,
+      date_end_scheduled: frontmatter.date_end_scheduled,
+      date_end_actual: frontmatter.date_end_actual,
       all_day: frontmatter.all_day,
       // Recurrence
       repeat_frequency: frontmatter.repeat_frequency,
@@ -197,9 +197,9 @@ export class ItemService {
       date_modified: new Date().toISOString(),
     };
 
-    // Auto-set date_completed when status changes to completed
-    if (updates.status && isCompletedStatus(settings, updates.status) && !frontmatter.date_completed) {
-      updatedFrontmatter.date_completed = new Date().toISOString();
+    // Auto-set date_end_actual when status changes to completed
+    if (updates.status && isCompletedStatus(settings, updates.status) && !frontmatter.date_end_actual) {
+      updatedFrontmatter.date_end_actual = new Date().toISOString();
     }
 
     // Build new file content
@@ -249,13 +249,13 @@ export class ItemService {
 
       // Calculate duration
       let duration: number | null = null;
-      if (item.date_start && item.date_end) {
-        duration = new Date(item.date_end).getTime() - new Date(item.date_start).getTime();
+      if (item.date_start_scheduled && item.date_end_scheduled) {
+        duration = new Date(item.date_end_scheduled).getTime() - new Date(item.date_start_scheduled).getTime();
       }
 
-      // Check if overdue
-      const isOverdue = item.date_due
-        ? new Date(item.date_due) < new Date() && !isCompletedStatus(settings, item.status ?? '')
+      // Check if overdue (date_end_scheduled is past and not completed)
+      const isOverdue = item.date_end_scheduled
+        ? new Date(item.date_end_scheduled) < new Date() && !isCompletedStatus(settings, item.status ?? '')
         : false;
 
       return {
