@@ -1,0 +1,487 @@
+/* Planner Plugin Styles */
+
+/* Task List View */
+.planner-task-list-view {
+  padding: 16px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Toolbar */
+.planner-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.planner-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.planner-toggle input[type="checkbox"] {
+  margin: 0;
+}
+
+.planner-toggle label {
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.planner-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-secondary);
+  color: var(--text-normal);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.planner-btn:hover {
+  background: var(--background-modifier-hover);
+}
+
+.planner-btn-primary {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border-color: var(--interactive-accent);
+}
+
+.planner-btn-primary:hover {
+  background: var(--interactive-accent-hover);
+}
+
+/* Table */
+.planner-table-container {
+  flex: 1;
+  overflow: auto;
+}
+
+.planner-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.planner-table th {
+  text-align: left;
+  padding: 8px 12px;
+  background: var(--background-secondary);
+  border-bottom: 2px solid var(--background-modifier-border);
+  cursor: pointer;
+  user-select: none;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.planner-table th:hover {
+  background: var(--background-modifier-hover);
+}
+
+.planner-th-content {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.planner-sort-icon {
+  display: flex;
+  opacity: 0.7;
+}
+
+.planner-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--background-modifier-border);
+  vertical-align: middle;
+}
+
+.planner-row {
+  cursor: pointer;
+}
+
+.planner-row:hover {
+  background: var(--background-modifier-hover);
+}
+
+/* Cells */
+.planner-cell-title {
+  font-weight: 500;
+}
+
+.planner-title-content {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.planner-icon {
+  display: flex;
+  opacity: 0.6;
+}
+
+.planner-icon.planner-blocked {
+  color: var(--text-error);
+  opacity: 1;
+}
+
+.planner-cell-date {
+  font-family: var(--font-monospace);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.planner-overdue {
+  color: var(--text-error) !important;
+  font-weight: 500;
+}
+
+/* Badges */
+.planner-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Empty state */
+.planner-empty {
+  text-align: center;
+  padding: 40px !important;
+  color: var(--text-muted);
+}
+
+/* Progress bar */
+.planner-progress-bar {
+  display: inline-block;
+  width: 60px;
+  height: 6px;
+  background: var(--background-modifier-border);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.planner-progress-fill {
+  height: 100%;
+  background: var(--interactive-accent);
+  border-radius: 3px;
+}
+
+.planner-progress-text {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Bases Task List View */
+.planner-bases-task-list {
+  padding: 8px;
+  height: 100%;
+  overflow: auto;
+}
+
+.planner-group-row {
+  background: var(--background-secondary);
+}
+
+.planner-group-label {
+  font-weight: 600;
+  padding: 4px 0;
+}
+
+/* Calendar View */
+.planner-calendar-view,
+.planner-bases-calendar {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 8px;
+}
+
+.planner-calendar-container {
+  flex: 1;
+  min-height: 0;
+}
+
+/* FullCalendar overrides */
+.planner-calendar-view .fc,
+.planner-bases-calendar .fc {
+  --fc-border-color: var(--background-modifier-border);
+  --fc-button-bg-color: var(--background-secondary);
+  --fc-button-border-color: var(--background-modifier-border);
+  --fc-button-text-color: var(--text-normal);
+  --fc-button-hover-bg-color: var(--background-modifier-hover);
+  --fc-button-hover-border-color: var(--background-modifier-border);
+  --fc-button-active-bg-color: var(--interactive-accent);
+  --fc-button-active-border-color: var(--interactive-accent);
+  --fc-today-bg-color: var(--background-primary-alt);
+  --fc-page-bg-color: var(--background-primary);
+  --fc-neutral-bg-color: var(--background-secondary);
+  --fc-list-event-hover-bg-color: var(--background-modifier-hover);
+  --fc-event-border-color: transparent;
+  --fc-small-font-size: 0.85em;
+  font-family: var(--font-text);
+  height: 100%;
+}
+
+/* Compact toolbar */
+.planner-bases-calendar .fc .fc-toolbar {
+  margin-bottom: 0.75em;
+  gap: 0.5em;
+  flex-wrap: wrap;
+}
+
+/* Color-by dropdown in toolbar */
+.planner-color-by-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  margin-left: 0.75em;
+}
+
+.planner-color-by-label {
+  font-size: 0.85em;
+  color: var(--text-muted);
+}
+
+.planner-color-by-select {
+  padding: 0.25em 0.5em;
+  font-size: 0.85em;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background-color: var(--background-secondary);
+  color: var(--text-normal);
+  cursor: pointer;
+  /* Ensure dropdown options inherit theme colors */
+  color-scheme: inherit;
+}
+
+.planner-color-by-select:hover {
+  background-color: var(--background-modifier-hover);
+}
+
+.planner-color-by-select:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+}
+
+.planner-color-by-select option {
+  background-color: var(--background-primary);
+  color: var(--text-normal);
+}
+
+.planner-bases-calendar .fc .fc-toolbar-chunk {
+  display: flex;
+  align-items: center;
+  gap: 0.25em;
+}
+
+/* Smaller buttons */
+.planner-bases-calendar .fc .fc-button {
+  padding: 0.3em 0.6em;
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+/* Single-letter view buttons - compact width */
+.planner-bases-calendar .fc .fc-yearButton-button,
+.planner-bases-calendar .fc .fc-monthButton-button,
+.planner-bases-calendar .fc .fc-weekButton-button,
+.planner-bases-calendar .fc .fc-dayButton-button,
+.planner-bases-calendar .fc .fc-listButton-button {
+  min-width: 2em;
+  padding: 0.3em 0.5em;
+}
+
+/* Year toggle button styling */
+.planner-bases-calendar .fc .fc-yearToggleButton-button {
+  min-width: 2em;
+  padding: 0.3em 0.5em;
+  font-size: 1em;
+  opacity: 0.8;
+  margin-right: 0.5em;
+}
+
+.planner-bases-calendar .fc .fc-yearToggleButton-button:hover {
+  opacity: 1;
+}
+
+/* Custom new item button styling */
+.planner-bases-calendar .fc .fc-newItemButton-button {
+  background: var(--interactive-accent) !important;
+  border-color: var(--interactive-accent) !important;
+  color: var(--text-on-accent) !important;
+  min-width: 2em;
+  padding: 0.3em 0.5em;
+  font-size: 1em;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.planner-bases-calendar .fc .fc-newItemButton-button:hover {
+  background: var(--interactive-accent-hover) !important;
+  border-color: var(--interactive-accent-hover) !important;
+}
+
+/* Responsive header for smaller screens */
+@media (max-width: 768px) {
+  .planner-bases-calendar .fc .fc-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .planner-bases-calendar .fc .fc-toolbar-chunk {
+    justify-content: center;
+    margin-bottom: 0.5em;
+  }
+}
+
+.planner-calendar-view .fc .fc-toolbar-title,
+.planner-bases-calendar .fc .fc-toolbar-title {
+  font-size: 1.2em;
+  font-weight: 600;
+}
+
+.planner-calendar-view .fc .fc-event,
+.planner-bases-calendar .fc .fc-event {
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 2px 4px;
+  font-size: 12px;
+}
+
+.planner-calendar-view .fc .fc-event:hover,
+.planner-bases-calendar .fc .fc-event:hover {
+  opacity: 0.9;
+}
+
+.planner-event-completed {
+  opacity: 0.6;
+  text-decoration: line-through;
+}
+
+/* Quick Capture Modal */
+.planner-quick-capture {
+  padding: 20px;
+}
+
+.planner-quick-capture h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.planner-quick-capture-input {
+  margin-bottom: 16px;
+}
+
+.planner-quick-capture-field {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border: 2px solid var(--background-modifier-border);
+  border-radius: 8px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+}
+
+.planner-quick-capture-field:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+}
+
+.planner-quick-capture-preview {
+  background: var(--background-secondary);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+  min-height: 60px;
+}
+
+.planner-preview-title {
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.planner-preview-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.planner-preview-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  background: var(--background-modifier-border);
+}
+
+.planner-preview-date {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.planner-preview-context {
+  background: #8b5cf6;
+  color: white;
+}
+
+.planner-preview-tag {
+  background: #6366f1;
+  color: white;
+}
+
+.planner-preview-parent {
+  background: #0ea5e9;
+  color: white;
+}
+
+.planner-quick-capture-help {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.planner-quick-capture-help h4 {
+  margin: 0 0 8px 0;
+  font-size: 12px;
+}
+
+.planner-quick-capture-help ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.planner-quick-capture-help li {
+  margin-bottom: 4px;
+}
+
+.planner-quick-capture-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Settings */
+.planner-status-list,
+.planner-priority-list {
+  margin-bottom: 8px;
+}
+
+.planner-status-item .setting-item-control {
+  flex-wrap: nowrap;
+}

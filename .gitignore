@@ -18,6 +18,7 @@ main.js
 # Don't include the generated styles.css file in the repo.
 # It's built from source files in styles/ directory during CI/build process.
 styles.css
+!/styles.css
 
 # Don't include the auto-generated release notes import file
 src/releaseNotes.ts
