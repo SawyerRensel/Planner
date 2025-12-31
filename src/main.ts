@@ -4,7 +4,6 @@ import { PlannerSettingTab } from './settings/SettingsTab';
 import { ItemService } from './services/ItemService';
 import { BaseGeneratorService } from './services/BaseGeneratorService';
 import { TaskListView, TASK_LIST_VIEW_TYPE } from './views/TaskListView';
-import { CalendarView, CALENDAR_VIEW_TYPE } from './views/CalendarView';
 import { QuickCaptureModal } from './components/QuickCapture';
 import {
   BASES_TASK_LIST_VIEW_ID,
@@ -30,15 +29,10 @@ export default class PlannerPlugin extends Plugin {
     this.itemService = new ItemService(this.app, () => this.settings);
     this.baseGeneratorService = new BaseGeneratorService(this.app, () => this.settings);
 
-    // Register standalone views (for use outside Bases)
+    // Register standalone Task List view (for use outside Bases)
     this.registerView(
       TASK_LIST_VIEW_TYPE,
       (leaf) => new TaskListView(leaf, this)
-    );
-
-    this.registerView(
-      CALENDAR_VIEW_TYPE,
-      (leaf) => new CalendarView(leaf, this)
     );
 
     // Register Bases views

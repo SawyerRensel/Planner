@@ -26,6 +26,7 @@ export class BasesCalendarView extends BasesView {
   private calendar: Calendar | null = null;
   private currentView: CalendarViewType = 'dayGridMonth';
   private colorByField: 'note.calendar' | 'note.priority' | 'note.status' = 'note.calendar';
+  private resizeObserver: ResizeObserver | null = null;
 
   constructor(
     controller: QueryController,
@@ -35,6 +36,16 @@ export class BasesCalendarView extends BasesView {
     super(controller);
     this.plugin = plugin;
     this.containerEl = containerEl;
+    this.setupResizeObserver();
+  }
+
+  private setupResizeObserver(): void {
+    this.resizeObserver = new ResizeObserver(() => {
+      if (this.calendar) {
+        this.calendar.updateSize();
+      }
+    });
+    this.resizeObserver.observe(this.containerEl);
   }
 
   /**
@@ -45,6 +56,10 @@ export class BasesCalendarView extends BasesView {
   }
 
   onunload(): void {
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+      this.resizeObserver = null;
+    }
     if (this.calendar) {
       this.calendar.destroy();
       this.calendar = null;
