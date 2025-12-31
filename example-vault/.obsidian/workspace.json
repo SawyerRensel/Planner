@@ -207,19 +207,13 @@
       "daily-notes:Open today's daily note": false,
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
-      "bases:Create new base": false,
-      "tasknotes:Open mini calendar": false,
-      "tasknotes:Open advanced calendar": false,
-      "tasknotes:Open task list": false,
-      "tasknotes:Open agenda": false,
-      "tasknotes:Open kanban board": false,
-      "tasknotes:Open pomodoro": false,
-      "tasknotes:Open pomodoro stats": false,
-      "tasknotes:Create new task": false
+      "bases:Create new base": false
     }
   },
   "active": "0e150094a8ca80ef",
   "lastOpenFiles": [
+    "notes/obsidian-planner-prd.md.tmp.1141.1767138953570",
+    "notes/obsidian-planner-prd.md.tmp.1141.1767138825990",
     "notes/questions.md",
     "notes/obsidian-planner-prd.md.tmp.1141.1767137943535",
     "notes/obsidian-planner-prd.md",
@@ -243,7 +237,6 @@
     "Planner/Items/test.md.tmp.32868.1767075941227",
     "2025-12-29.md",
     "2025-12-30.md",
-    "Planner/Items",
     "TaskNotes/Tasks/TaskNotes Example Recurring Task.md",
     "TaskNotes/Tasks/TaskNotes Example Task with Specific Time.md",
     "TaskNotes/Tasks/TaskNotes Example Task.md",

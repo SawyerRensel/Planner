@@ -94,12 +94,13 @@ An **Item** is the fundamental unit in Planner. Every item is a Markdown note wi
 
 Instead of a boolean `task` field, items use standard Obsidian tags:
 
-| Tag        | Typical Behavior                                        |
-| ---------- | ------------------------------------------------------- |
-| `#event`   | Shows on calendar, no completion tracking               |
-| `#task`    | Shows on calendar and task lists, has status/completion |
-| `#project` | Parent item containing subtasks                         |
-| (no tag)   | Treated as generic item, shows everywhere               |
+| Tag      | Typical Behavior                                        |
+| -------- | ------------------------------------------------------- |
+| `#event` | Shows on calendar, no completion tracking               |
+| `#task`  | Shows on calendar and task lists, has status/completion |
+| (no tag) | Treated as generic item, shows everywhere               |
+
+A "project" is simply a task with subtasks—no separate tag needed.
 
 Views can filter by tags using Bases queries. This is convention, not enforcement—users have full flexibility.
 
@@ -142,12 +143,12 @@ The `calendar` field categorizes items:
 
 Items can recur using iCal RRULE-compatible fields (powered by `rrule` library):
 
-- `rrule_frequency`: daily, weekly, monthly, yearly
-- `rrule_interval`: repeat every N frequency units
-- `rrule_until` / `rrule_count`: end conditions
-- `rrule_byday`, `rrule_bymonth`, etc.: complex patterns
+- `repeat_frequency`: daily, weekly, monthly, yearly
+- `repeat_interval`: repeat every N frequency units
+- `repeat_until` / `repeat_count`: end conditions
+- `repeat_byday`, `repeat_bymonth`, etc.: complex patterns
 
-When a recurring instance is completed, the date is added to `rrule_completed_dates`.
+When a recurring instance is completed, the date is added to `repeat_completed_dates`.
 
 ---
 
@@ -185,29 +186,29 @@ All fields use `snake_case`. All date fields use ISO 8601 format (`YYYY-MM-DDTHH
 
 #### Date Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `date_created` | datetime | When created (auto-set) |
-| `date_modified` | datetime | Last modified (auto-set) |
-| `date_start` | datetime | When item starts / is scheduled |
-| `date_end` | datetime | When item ends (for multi-day items) |
-| `date_due` | datetime | External deadline |
-| `date_completed` | datetime | When marked complete (auto-set) |
-| `all_day` | boolean | Whether this is an all-day item |
+| Field            | Type     | Description                          |
+| ---------------- | -------- | ------------------------------------ |
+| `date_created`   | datetime | When created (auto-set)              |
+| `date_modified`  | datetime | Last modified (auto-set)             |
+| `date_start`     | datetime | When item starts / is scheduled      |
+| `date_end`       | datetime | When item ends (for multi-day items) |
+| `date_due`       | datetime | External deadline                    |
+| `date_completed` | datetime | When marked complete (auto-set)      |
+| `all_day`        | boolean  | Whether this is an all-day item      |
 
 #### Recurrence Fields (iCal RRULE)
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `rrule_frequency` | text | `daily`, `weekly`, `monthly`, `yearly` |
-| `rrule_interval` | number | Every N frequency units (default: 1) |
-| `rrule_until` | datetime | Recurrence end date |
-| `rrule_count` | number | Total occurrences |
-| `rrule_byday` | list | Days of week: `MO`, `TU`, `WE`, `TH`, `FR`, `SA`, `SU` |
-| `rrule_bymonth` | list | Months (1-12) |
-| `rrule_bymonthday` | list | Days of month (1-31, or -1 for last) |
-| `rrule_bysetpos` | number | Position selector (e.g., -1 for last) |
-| `rrule_completed_dates` | list | Dates of completed instances |
+| Field                   | Type     | Description                                            |
+| ----------------------- | -------- | ------------------------------------------------------ |
+| `repeat_frequency`       | text     | `daily`, `weekly`, `monthly`, `yearly`                 |
+| `repeat_interval`        | number   | Every N frequency units (default: 1)                   |
+| `repeat_until`           | datetime | Recurrence end date                                    |
+| `repeat_count`           | number   | Total occurrences                                      |
+| `repeat_byday`           | list     | Days of week: `MO`, `TU`, `WE`, `TH`, `FR`, `SA`, `SU` |
+| `repeat_bymonth`         | list     | Months (1-12)                                          |
+| `repeat_bymonthday`      | list     | Days of month (1-31, or -1 for last)                   |
+| `repeat_bysetpos`        | number   | Position selector (e.g., -1 for last)                  |
+| `repeat_completed_dates` | list     | Dates of completed instances                           |
 
 #### Hierarchy & Dependencies
 
@@ -229,22 +230,49 @@ All fields use `snake_case`. All date fields use ISO 8601 format (`YYYY-MM-DDTHH
 
 ```yaml
 ---
+# Identity
 title: Website Redesign
 summary: Complete overhaul of company website
 tags:
   - task
-  - project
+
+# Categorization
 calendar:
   - Work
 context:
   - "@office"
 people:
   - "[[John Smith]]"
+location:
+related:
+  - "[[Brand Guidelines]]"
+
+# Status
 status: In-Progress
 priority: High
 progress: 35
+
+# Dates
+date_created: 2025-01-10T09:00:00
+date_modified: 2025-01-15T14:30:00
 date_start: 2025-01-15T09:00:00
+date_end:
 date_due: 2025-01-31T17:00:00
+date_completed:
+all_day: false
+
+# Recurrence (iCal RRULE)
+repeat_frequency:
+repeat_interval:
+repeat_until:
+repeat_count:
+repeat_byday:
+repeat_bymonth:
+repeat_bymonthday:
+repeat_bysetpos:
+repeat_completed_dates:
+
+# Hierarchy & Dependencies
 parent: "[[Q1 Initiatives]]"
 children:
   - "[[Design mockups]]"
@@ -252,6 +280,10 @@ children:
   - "[[Backend API]]"
 blocked_by:
   - "[[Brand guidelines approval]]"
+
+# Display
+cover:
+color:
 ---
 
 ## Description
@@ -392,30 +424,30 @@ iCal RRULE-compatible recurrence.
 
 Daily standup:
 ```yaml
-rrule_frequency: daily
-rrule_interval: 1
+repeat_frequency: daily
+repeat_interval: 1
 date_start: 2025-01-01T09:00:00
 ```
 
 Every 2 weeks on Tuesday and Thursday:
 ```yaml
-rrule_frequency: weekly
-rrule_interval: 2
-rrule_byday:
+repeat_frequency: weekly
+repeat_interval: 2
+repeat_byday:
   - TU
   - TH
 ```
 
 Last Friday of every month:
 ```yaml
-rrule_frequency: monthly
-rrule_byday:
+repeat_frequency: monthly
+repeat_byday:
   - FR
-rrule_bysetpos: -1
+repeat_bysetpos: -1
 ```
 
 **Instance Completion:**
-- Completing an instance adds date to `rrule_completed_dates`
+- Completing an instance adds date to `repeat_completed_dates`
 - Next instance auto-calculated and displayed
 - Original item remains (no duplication)
 
