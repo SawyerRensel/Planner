@@ -8,30 +8,17 @@
         "type": "tabs",
         "children": [
           {
-            "id": "fbef3d5d247c6d9d",
-            "type": "leaf",
-            "state": {
-              "type": "bases",
-              "state": {
-                "file": "Planner/Calendar.base",
-                "viewName": "Calendar"
-              },
-              "icon": "calendar",
-              "title": "Calendar"
-            }
-          },
-          {
             "id": "657d18c0aae1861a",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "notes/feedback.md",
+                "file": "notes/feedback-and-ideas.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "feedback"
+              "title": "feedback-and-ideas"
             }
           },
           {
@@ -49,6 +36,19 @@
             }
           },
           {
+            "id": "fbef3d5d247c6d9d",
+            "type": "leaf",
+            "state": {
+              "type": "bases",
+              "state": {
+                "file": "Planner/Calendar.base",
+                "viewName": "Calendar"
+              },
+              "icon": "calendar",
+              "title": "Calendar"
+            }
+          },
+          {
             "id": "2923157ad9b77eb2",
             "type": "leaf",
             "state": {
@@ -60,9 +60,22 @@
               "icon": "lucide-layout-list",
               "title": "calendar-default"
             }
+          },
+          {
+            "id": "59825f58289e43ea",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Planner/Design Mockups.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Design Mockups"
+            }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -246,14 +259,19 @@
   },
   "active": "657d18c0aae1861a",
   "lastOpenFiles": [
-    "TaskNotes/Views/calendar-default.base",
-    "notes/feedback.md",
+    "Planner/Team Meeting.md",
     "Planner/Calendar.base",
-    "Planner/New Item.md",
-    "Planner/New Item 1.md",
     "notes/obsidian-planner-prd.md",
-    "Planner/Tasks.base",
+    "Planner/test.md",
+    "notes/feedback-and-ideas.md",
     "Planner/Design Mockups.md",
+    "News/Russia Doubles Down on Allegations Ukraine Targeted Putin Residence.md",
+    "News",
+    "TaskNotes/Views/calendar-default.base",
+    "Planner/New Item 1.md",
+    "Planner/New Item.md",
+    "Planner/Sleep in.md",
+    "Planner/Tasks.base",
     "Planner/Implement Frontend.md",
     "Untitled.base",
     "Planner/Untitled",
@@ -262,15 +280,12 @@
     "Planner/Hike next.md",
     "Full Calendar/2025-12-27 Full Calendar Example Event.md",
     "Planner/Grocery Shopping.md",
-    "Planner/Team Meeting.md",
-    "Planner/test.md",
     "Planner/New Item 2.md",
     "notes/questions.md",
     "Planner/Calendar.base.tmp.990.1767142112477",
     "Planner/Tasks.base.tmp.990.1767141817852",
     "Planner/Website Redesign.md",
     "Planner/Fix Login Bug.md",
-    "Planner/Fix Login Bug.md.tmp.990.1767141135781",
     "notes/Notes.md",
     "Full Calendar/2025-12-28 Full Calendar Example Task.md",
     "media/gantt_view_mockup_example.png",
@@ -279,8 +294,6 @@
     "Planner/Items/test2.md",
     "Planner/Items/test1.md",
     "TaskNotes/Tasks/TaskNotes Example Dependency.md",
-    "TaskNotes/Tasks/groceries.md",
-    "2025-12-29.md",
-    "2025-12-30.md"
+    "TaskNotes/Tasks/groceries.md"
   ]
 }

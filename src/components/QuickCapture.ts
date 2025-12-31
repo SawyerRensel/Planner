@@ -114,7 +114,7 @@ export class QuickCaptureModal extends Modal {
     // Extract @context
     const contextMatches = remaining.match(/@(\w+)/g);
     if (contextMatches) {
-      parsed.context = contextMatches.map(m => m); // Keep the @ prefix
+      parsed.context = contextMatches.map(m => m.slice(1)); // Remove the @ prefix
       remaining = remaining.replace(/@(\w+)/g, '').trim();
     }
 
@@ -228,7 +228,7 @@ export class QuickCaptureModal extends Modal {
     // Context
     if (parsedInput.context?.length) {
       for (const ctx of parsedInput.context) {
-        this.addPreviewBadge(previewDetails, ctx, 'context');
+        this.addPreviewBadge(previewDetails, `@${ctx}`, 'context');
       }
     }
 
