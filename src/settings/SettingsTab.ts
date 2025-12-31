@@ -1,6 +1,51 @@
-import { App, PluginSettingTab, Setting } from 'obsidian';
+import { App, PluginSettingTab, Setting, Modal, Notice } from 'obsidian';
 import type PlannerPlugin from '../main';
 import { PlannerSettings, StatusConfig, PriorityConfig, DEFAULT_SETTINGS } from '../types/settings';
+import { BaseGeneratorService } from '../services/BaseGeneratorService';
+
+/**
+ * Confirmation modal for regenerating Base files
+ */
+class RegenerateBasesModal extends Modal {
+  private onConfirm: () => void;
+
+  constructor(app: App, onConfirm: () => void) {
+    super(app);
+    this.onConfirm = onConfirm;
+  }
+
+  onOpen(): void {
+    const { contentEl } = this;
+
+    contentEl.createEl('h2', { text: 'Regenerate Base Files' });
+    contentEl.createEl('p', {
+      text: 'This will overwrite your existing Tasks.base and Calendar.base files. Any customizations you have made to these files will be lost.',
+      cls: 'planner-modal-warning'
+    });
+    contentEl.createEl('p', {
+      text: 'Are you sure you want to continue?'
+    });
+
+    const buttonContainer = contentEl.createDiv({ cls: 'planner-modal-buttons' });
+
+    const cancelBtn = buttonContainer.createEl('button', { text: 'Cancel' });
+    cancelBtn.addEventListener('click', () => this.close());
+
+    const confirmBtn = buttonContainer.createEl('button', {
+      text: 'Regenerate',
+      cls: 'mod-warning'
+    });
+    confirmBtn.addEventListener('click', () => {
+      this.onConfirm();
+      this.close();
+    });
+  }
+
+  onClose(): void {
+    const { contentEl } = this;
+    contentEl.empty();
+  }
+}
 
 export class PlannerSettingTab extends PluginSettingTab {
   plugin: PlannerPlugin;
@@ -91,6 +136,41 @@ export class PlannerSettingTab extends PluginSettingTab {
         .onChange(async (value: PlannerSettings['weekStartsOn']) => {
           this.plugin.settings.weekStartsOn = value;
           await this.plugin.saveSettings();
+        }));
+
+    // Bases Views
+    containerEl.createEl('h2', { text: 'Bases Views' });
+
+    new Setting(containerEl)
+      .setName('Bases folder')
+      .setDesc('Where to save the Tasks.base and Calendar.base files')
+      .addText(text => text
+        .setPlaceholder('Planner/')
+        .setValue(this.plugin.settings.basesFolder)
+        .onChange(async (value) => {
+          this.plugin.settings.basesFolder = value || DEFAULT_SETTINGS.basesFolder;
+          await this.plugin.saveSettings();
+        }));
+
+    new Setting(containerEl)
+      .setName('Generate Base files')
+      .setDesc('Create or regenerate Tasks.base and Calendar.base files')
+      .addButton(button => button
+        .setButtonText('Generate')
+        .onClick(async () => {
+          const baseGenerator = new BaseGeneratorService(this.app, () => this.plugin.settings);
+          const tasksExists = await baseGenerator.tasksBaseExists();
+          const calendarExists = await baseGenerator.calendarBaseExists();
+
+          if (tasksExists || calendarExists) {
+            // Show confirmation modal
+            new RegenerateBasesModal(this.app, async () => {
+              await this.regenerateBases(baseGenerator);
+            }).open();
+          } else {
+            // No existing files, just create them
+            await this.regenerateBases(baseGenerator);
+          }
         }));
 
     // Item Identification
@@ -338,5 +418,24 @@ export class PlannerSettingTab extends PluginSettingTab {
             this.display();
           }
         }));
+  }
+
+  private async regenerateBases(baseGenerator: BaseGeneratorService): Promise<void> {
+    try {
+      const result = await baseGenerator.generateAllBases(true);
+
+      if (result.tasks && result.calendar) {
+        new Notice('Tasks.base and Calendar.base files have been generated.');
+      } else if (result.tasks) {
+        new Notice('Tasks.base file has been generated.');
+      } else if (result.calendar) {
+        new Notice('Calendar.base file has been generated.');
+      } else {
+        new Notice('Base files were already up to date.');
+      }
+    } catch (error) {
+      console.error('Failed to generate base files:', error);
+      new Notice(`Failed to generate base files: ${error.message}`);
+    }
   }
 }

@@ -1,7 +1,8 @@
-import { Plugin, WorkspaceLeaf } from 'obsidian';
+import { Plugin, TFile, Notice } from 'obsidian';
 import { PlannerSettings, DEFAULT_SETTINGS } from './types/settings';
 import { PlannerSettingTab } from './settings/SettingsTab';
 import { ItemService } from './services/ItemService';
+import { BaseGeneratorService } from './services/BaseGeneratorService';
 import { TaskListView, TASK_LIST_VIEW_TYPE } from './views/TaskListView';
 import { CalendarView, CALENDAR_VIEW_TYPE } from './views/CalendarView';
 import { QuickCaptureModal } from './components/QuickCapture';
@@ -17,6 +18,7 @@ import {
 export default class PlannerPlugin extends Plugin {
   settings: PlannerSettings;
   itemService: ItemService;
+  baseGeneratorService: BaseGeneratorService;
 
   async onload() {
     console.log('Loading Planner plugin');
@@ -26,6 +28,7 @@ export default class PlannerPlugin extends Plugin {
 
     // Initialize services
     this.itemService = new ItemService(this.app, () => this.settings);
+    this.baseGeneratorService = new BaseGeneratorService(this.app, () => this.settings);
 
     // Register standalone views (for use outside Bases)
     this.registerView(
@@ -143,52 +146,36 @@ export default class PlannerPlugin extends Plugin {
   }
 
   async activateTaskListView() {
-    const { workspace } = this.app;
-
-    let leaf: WorkspaceLeaf | null = null;
-    const leaves = workspace.getLeavesOfType(TASK_LIST_VIEW_TYPE);
-
-    if (leaves.length > 0) {
-      // View already open, focus it
-      leaf = leaves[0];
-    } else {
-      // Create new leaf in right sidebar
-      leaf = workspace.getRightLeaf(false);
-      if (leaf) {
-        await leaf.setViewState({
-          type: TASK_LIST_VIEW_TYPE,
-          active: true,
-        });
-      }
-    }
-
-    if (leaf) {
-      workspace.revealLeaf(leaf);
-    }
+    const basePath = this.baseGeneratorService.getTasksBasePath();
+    await this.openBaseFile(basePath, 'Tasks');
   }
 
   async activateCalendarView() {
-    const { workspace } = this.app;
+    const basePath = this.baseGeneratorService.getCalendarBasePath();
+    await this.openBaseFile(basePath, 'Calendar');
+  }
 
-    let leaf: WorkspaceLeaf | null = null;
-    const leaves = workspace.getLeavesOfType(CALENDAR_VIEW_TYPE);
+  /**
+   * Open a .base file, creating it if it doesn't exist
+   */
+  private async openBaseFile(path: string, name: string): Promise<void> {
+    const file = this.app.vault.getAbstractFileByPath(path);
 
-    if (leaves.length > 0) {
-      // View already open, focus it
-      leaf = leaves[0];
+    if (file instanceof TFile) {
+      // File exists, open it
+      await this.app.workspace.openLinkText(path, '', false);
     } else {
-      // Create new leaf in main area
-      leaf = workspace.getLeaf('tab');
-      if (leaf) {
-        await leaf.setViewState({
-          type: CALENDAR_VIEW_TYPE,
-          active: true,
-        });
-      }
-    }
+      // File doesn't exist, create it first
+      const created = name === 'Tasks'
+        ? await this.baseGeneratorService.generateTasksBase(false)
+        : await this.baseGeneratorService.generateCalendarBase(false);
 
-    if (leaf) {
-      workspace.revealLeaf(leaf);
+      if (created) {
+        new Notice(`Created ${name}.base file`);
+      }
+
+      // Now open it
+      await this.app.workspace.openLinkText(path, '', false);
     }
   }
 

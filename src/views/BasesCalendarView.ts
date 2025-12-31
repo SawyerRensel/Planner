@@ -4,7 +4,7 @@ import {
   BasesEntry,
   QueryController,
 } from 'obsidian';
-import { Calendar, EventInput, EventClickArg } from '@fullcalendar/core';
+import { Calendar, EventInput, EventClickArg, DateSelectArg } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
@@ -25,6 +25,7 @@ export class BasesCalendarView extends BasesView {
   private containerEl: HTMLElement;
   private calendar: Calendar | null = null;
   private currentView: CalendarViewType = 'dayGridMonth';
+  private colorByField: 'note.calendar' | 'note.priority' | 'note.status' = 'note.calendar';
 
   constructor(
     controller: QueryController,
@@ -99,6 +100,37 @@ export class BasesCalendarView extends BasesView {
         btn.addClass('active');
       });
     }
+
+    // Color by selector
+    const colorByContainer = toolbar.createDiv({ cls: 'planner-color-by' });
+    colorByContainer.createSpan({ text: 'Color by: ' });
+    const colorBySelect = colorByContainer.createEl('select');
+
+    const colorOptions = [
+      { value: 'note.calendar', label: 'Calendar' },
+      { value: 'note.priority', label: 'Priority' },
+      { value: 'note.status', label: 'Status' },
+    ];
+
+    for (const opt of colorOptions) {
+      const option = colorBySelect.createEl('option', {
+        value: opt.value,
+        text: opt.label
+      });
+      if (opt.value === this.colorByField) {
+        option.selected = true;
+      }
+    }
+
+    colorBySelect.addEventListener('change', () => {
+      this.colorByField = colorBySelect.value as typeof this.colorByField;
+      this.render();
+    });
+
+    // New item button
+    const newBtn = toolbar.createEl('button', { cls: 'planner-btn planner-btn-primary' });
+    newBtn.createSpan({ text: '+ New' });
+    newBtn.addEventListener('click', () => this.createNewItem());
   }
 
   private initCalendar(containerEl: HTMLElement, initialDate?: Date): void {
@@ -120,6 +152,7 @@ export class BasesCalendarView extends BasesView {
       events: events,
       eventClick: (info) => this.handleEventClick(info),
       eventDrop: (info) => this.handleEventDrop(info),
+      select: (info) => this.handleDateSelect(info),
       height: '100%',
       nowIndicator: true,
       dayMaxEvents: true,
@@ -130,11 +163,10 @@ export class BasesCalendarView extends BasesView {
 
   private getEventsFromData(): EventInput[] {
     const events: EventInput[] = [];
-    const colorByProp = this.config.get('colorBy') as string || 'note.calendar';
 
     for (const group of this.data.groupedData) {
       for (const entry of group.entries) {
-        const event = this.entryToEvent(entry, colorByProp);
+        const event = this.entryToEvent(entry, this.colorByField);
         if (event) {
           events.push(event);
         }
@@ -244,6 +276,28 @@ export class BasesCalendarView extends BasesView {
       fm.date_modified = new Date().toISOString();
     });
   }
+
+  private handleDateSelect(info: DateSelectArg): void {
+    // Create new item on the selected date
+    this.createNewItem(info.startStr, info.endStr, info.allDay);
+  }
+
+  private async createNewItem(startDate?: string, endDate?: string, allDay?: boolean): Promise<void> {
+    const title = 'New Item';
+    const now = new Date().toISOString();
+
+    const item = await this.plugin.itemService.createItem(title, {
+      title,
+      tags: ['event'],
+      date_start: startDate || now,
+      date_end: endDate || undefined,
+      all_day: allDay ?? false,
+    });
+
+    if (item) {
+      await this.app.workspace.openLinkText(item.path, '', false);
+    }
+  }
 }
 
 /**
@@ -259,15 +313,14 @@ export function createCalendarViewRegistration(plugin: PlannerPlugin): BasesView
     options: () => [
       {
         type: 'dropdown',
-        id: 'colorBy',
-        name: 'Color by',
-        description: 'Which property to use for event colors',
-        defaultValue: 'note.calendar',
-        options: [
-          { value: 'note.calendar', label: 'Calendar' },
-          { value: 'note.priority', label: 'Priority' },
-          { value: 'note.status', label: 'Status' },
-        ],
+        key: 'colorBy',
+        displayName: 'Color by',
+        default: 'note.calendar',
+        options: {
+          'note.calendar': 'Calendar',
+          'note.priority': 'Priority',
+          'note.status': 'Status',
+        },
       },
     ],
   };

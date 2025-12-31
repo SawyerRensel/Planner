@@ -4,6 +4,7 @@
 export interface PlannerSettings {
   // General
   itemsFolder: string;
+  basesFolder: string;
   itemTemplate: string;
   defaultCalendar: string;
   dateFormat: string;
@@ -60,6 +61,7 @@ export type WeekDay = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday'
 export const DEFAULT_SETTINGS: PlannerSettings = {
   // General
   itemsFolder: 'Planner/',
+  basesFolder: 'Planner/',
   itemTemplate: '',
   defaultCalendar: 'Personal',
   dateFormat: 'YYYY-MM-DD',
