@@ -5,6 +5,17 @@
 - [ ] Clicking on day number should open the Daily Note for that date.
 - [ ] Calendar View's Bases' Configure View menu also has "Color by" dropdown, but this doesn't actually change the color of items.  Let's fix that and keep both "Color by" dropdown menus in sync with each other.  
 - [ ] Need to fix/update date frontmatter fields (Due? Started? Scheduled? etc.)
+
+| Field                  | Description                                        |
+| ---------------------- | -------------------------------------------------- |
+| `date_created`         | System timestamp.                                  |
+| `date_modified`        | System timestamp.                                  |
+| `date_start_scheduled` | When you intend to perform the action (Scheduled). |
+| `date_start_actual`    |                                                    |
+| `date_end_scheduled`   |                                                    |
+| `date_end_actual`      |                                                    |
+
+
 - [ ] Let's add some features to Calendar View's Bases' Configure View menu.  First let's select a default "View Mode" menu that allows the user to set the default view mode (Year, Month, Day, etc.).  Next let's add two menus, "Date Start Field" and "Date End Field", which allow the user to select among  frontmatter field properties to define how items are displayed on the Calender view.  Lastly, let's also create a "Title Field" that allows the user to select what text is shown on items in Calendar view.  (See ***screenshots*** for reference)
 - [ ] Modal input popup
 - [ ] Model edit popup with option to open note and also to Delete event and also to Save Edits.

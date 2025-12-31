@@ -193,6 +193,17 @@ export class BasesCalendarView extends BasesView {
       eventDrop: (info) => this.handleEventDrop(info),
       eventResize: (info) => this.handleEventResize(info),
       select: (info) => this.handleDateSelect(info),
+      dayHeaderDidMount: (arg) => {
+        // Make day header clickable in day/week views to open daily note
+        const el = arg.el;
+        el.style.cursor = 'pointer';
+        el.addEventListener('click', (e) => {
+          // Prevent if clicking on an actual nav link (already handled)
+          if ((e.target as HTMLElement).closest('.fc-col-header-cell-cushion')) {
+            this.openDailyNote(arg.date);
+          }
+        });
+      },
       viewDidMount: (arg) => {
         // Track view type changes
         const newViewType = arg.view.type as CalendarViewType;
