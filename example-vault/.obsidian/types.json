@@ -9,6 +9,9 @@
     "date_eta": "datetime",
     "date_finished": "datetime",
     "repeat_frequency": "datetime",
-    "date_scheduled": "date"
+    "date_scheduled": "date",
+    "date_created": "datetime",
+    "date_modified": "datetime",
+    "date_start": "datetime"
   }
 }
