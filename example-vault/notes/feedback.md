@@ -1,7 +1,10 @@
 - [ ] clicking on day number should open the Daily Note for that date.
 - [x] Improve Calendar view UI.  Conserve "real-estate".  Match the look, sizing and feel of Task Notes "Advanced Calendar" view.
 - [x] Abbreviate Calendar view mode buttons to single letters.  Let's also shorten the "+ New" button to a single plus "+".  Secondly, let's add an option to to split Year view mode by month or have a continuous scroll like before.  (only shown as a toggle in Calendar view when Year view mode is selected)
-- [ ] "Color by" menu is missing
+- [x] "Color by" menu is missing
+- [ ] Calendar View's Bases' Configure View menu also has "Color by" dropdown, but this doesn't actually change the color of items.  Let's fix that and keep both "Color by" dropdown menus in sync with each other.  
+- [ ] Need to fix/update date frontmatter fields (Due? Started? Scheduled? etc.)
+- [ ] Let's add some features to Calendar View's Bases' Configure View menu.  First let's select a default "View Mode" menu that allows the user to set the default view mode (Year, Month, Day, etc.).  Next let's add two menus, "Date Start Field" and "Date End Field", which allow the user to select among  frontmatter field properties to define how items are displayed on the Calender view.  Lastly, let's also create a "Title Field" that allows the user to select what text is shown on items in Calendar view
 - [ ] Modal input popup
 - [ ] Model edit popup with option to open note and also to Delete event and also to Save Edits.
 - [ ] When clicking the calendar to add an event, don't automatically open the new event note.  Instead, let's 

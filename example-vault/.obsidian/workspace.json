@@ -61,7 +61,8 @@
               "title": "calendar-default"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -243,13 +244,13 @@
       "tasknotes:Create new task": false
     }
   },
-  "active": "fbef3d5d247c6d9d",
+  "active": "657d18c0aae1861a",
   "lastOpenFiles": [
-    "Planner/New Item.md",
-    "Planner/Calendar.base",
-    "notes/feedback.md",
-    "Planner/New Item 1.md",
     "TaskNotes/Views/calendar-default.base",
+    "notes/feedback.md",
+    "Planner/Calendar.base",
+    "Planner/New Item.md",
+    "Planner/New Item 1.md",
     "notes/obsidian-planner-prd.md",
     "Planner/Tasks.base",
     "Planner/Design Mockups.md",
