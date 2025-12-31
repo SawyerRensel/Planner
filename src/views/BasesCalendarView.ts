@@ -14,7 +14,7 @@ import type PlannerPlugin from '../main';
 
 export const BASES_CALENDAR_VIEW_ID = 'planner-calendar';
 
-type CalendarViewType = 'multiMonthYear' | 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek';
+type CalendarViewType = 'multiMonthYear' | 'dayGridYear' | 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek';
 
 /**
  * Calendar view for Obsidian Bases
@@ -29,6 +29,7 @@ export class BasesCalendarView extends BasesView {
   private currentView: CalendarViewType = 'dayGridMonth';
   private colorByField: 'note.calendar' | 'note.priority' | 'note.status' = 'note.calendar';
   private resizeObserver: ResizeObserver | null = null;
+  private yearViewSplit: boolean = true; // true = multiMonthYear (split), false = dayGridYear (continuous)
 
   constructor(
     controller: QueryController,
@@ -115,19 +116,67 @@ export class BasesCalendarView extends BasesView {
       headerToolbar: {
         left: 'prev,next today',
         center: 'title',
-        right: 'multiMonthYear,dayGridMonth,timeGridWeek,timeGridDay,listWeek,newItemButton',
-      },
-      buttonText: {
-        today: 'Today',
-        month: 'Month',
-        week: 'Week',
-        day: 'Day',
-        year: 'Year',
-        list: 'List',
+        right: 'yearToggleButton,yearButton,monthButton,weekButton,dayButton,listButton,newItemButton',
       },
       customButtons: {
+        yearButton: {
+          text: 'Y',
+          hint: 'Year view',
+          click: () => {
+            if (this.calendar) {
+              const view = this.yearViewSplit ? 'multiMonthYear' : 'dayGridYear';
+              this.calendar.changeView(view);
+              this.updateYearToggleVisibility(true);
+            }
+          },
+        },
+        monthButton: {
+          text: 'M',
+          hint: 'Month view',
+          click: () => {
+            if (this.calendar) {
+              this.calendar.changeView('dayGridMonth');
+              this.updateYearToggleVisibility(false);
+            }
+          },
+        },
+        weekButton: {
+          text: 'W',
+          hint: 'Week view',
+          click: () => {
+            if (this.calendar) {
+              this.calendar.changeView('timeGridWeek');
+              this.updateYearToggleVisibility(false);
+            }
+          },
+        },
+        dayButton: {
+          text: 'D',
+          hint: 'Day view',
+          click: () => {
+            if (this.calendar) {
+              this.calendar.changeView('timeGridDay');
+              this.updateYearToggleVisibility(false);
+            }
+          },
+        },
+        listButton: {
+          text: 'L',
+          hint: 'List view',
+          click: () => {
+            if (this.calendar) {
+              this.calendar.changeView('listWeek');
+              this.updateYearToggleVisibility(false);
+            }
+          },
+        },
+        yearToggleButton: {
+          text: this.yearViewSplit ? '⧉' : '☰',
+          hint: this.yearViewSplit ? 'Switch to continuous scroll' : 'Switch to split by month',
+          click: () => this.toggleYearViewMode(),
+        },
         newItemButton: {
-          text: '+ New',
+          text: '+',
           hint: 'Create new item',
           click: () => this.createNewItem(),
         },
@@ -148,6 +197,9 @@ export class BasesCalendarView extends BasesView {
         if (newViewType) {
           this.currentView = newViewType;
         }
+        // Update year toggle visibility based on current view
+        const isYearView = newViewType === 'multiMonthYear' || newViewType === 'dayGridYear';
+        this.updateYearToggleVisibility(isYearView);
       },
       height: '100%',
       expandRows: true,
@@ -157,6 +209,33 @@ export class BasesCalendarView extends BasesView {
     });
 
     this.calendar.render();
+
+    // Set initial year toggle visibility
+    const isYearView = (initialView || this.currentView) === 'multiMonthYear' ||
+                       (initialView || this.currentView) === 'dayGridYear';
+    this.updateYearToggleVisibility(isYearView);
+  }
+
+  private toggleYearViewMode(): void {
+    if (!this.calendar) return;
+
+    this.yearViewSplit = !this.yearViewSplit;
+    const newView = this.yearViewSplit ? 'multiMonthYear' : 'dayGridYear';
+    this.calendar.changeView(newView);
+
+    // Update button text/icon
+    const toggleBtn = this.calendarEl?.querySelector('.fc-yearToggleButton-button');
+    if (toggleBtn) {
+      toggleBtn.textContent = this.yearViewSplit ? '▦' : '☰';
+      toggleBtn.setAttribute('title', this.yearViewSplit ? 'Switch to continuous scroll' : 'Switch to split by month');
+    }
+  }
+
+  private updateYearToggleVisibility(show: boolean): void {
+    const toggleBtn = this.calendarEl?.querySelector('.fc-yearToggleButton-button') as HTMLElement;
+    if (toggleBtn) {
+      toggleBtn.style.display = show ? '' : 'none';
+    }
   }
 
   private getEventsFromData(): EventInput[] {
