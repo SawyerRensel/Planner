@@ -257,6 +257,8 @@ export class BasesCalendarView extends BasesView {
       handleWindowResize: true,
       nowIndicator: true,
       dayMaxEvents: true,
+      // Fix drag offset caused by CSS transforms on Obsidian's workspace containers
+      fixedMirrorParent: document.body,
     });
 
     this.calendar.render();
