@@ -18,5 +18,9 @@ views:
     sort: []
     colorBy: note.calendar
     undefined: "0"
+    titleField: note.title
+    defaultView: dayGridMonth
+    dateStartField: note.date_start_scheduled
+    dateEndField: note.date_end_scheduled
   - type: table
     name: Table

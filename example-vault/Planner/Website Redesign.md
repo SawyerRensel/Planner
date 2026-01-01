@@ -1,11 +1,8 @@
 ---
-# Identity
 title: Website Redesign
 summary: Complete overhaul of company website
 tags:
   - task
-
-# Categorization
 calendar:
   - Work
 context:
@@ -13,22 +10,16 @@ context:
 people:
 location:
 related:
-
-# Status
 status: In-Progress
 priority: High
 progress: 35
-
-# Dates
-date_created: 2025-01-10T09:00:00
-date_modified: 2025-01-15T14:30:00
-date_start_scheduled: 2025-01-15T09:00:00
+date_created: 2026-01-10T09:00:00
+date_modified: 2026-01-01T12:32:52.386Z
+date_start_scheduled: 2026-01-15T14:00:00.000Z
 date_start_actual:
-date_end_scheduled: 2025-01-31T17:00:00
+date_end_scheduled: 2026-01-15T22:00:00.000Z
 date_end_actual:
 all_day: false
-
-# Recurrence
 repeat_frequency:
 repeat_interval:
 repeat_until:
@@ -38,19 +29,15 @@ repeat_bymonth:
 repeat_bymonthday:
 repeat_bysetpos:
 repeat_completed_dates:
-
-# Hierarchy & Dependencies
 parent:
 children:
   - "[[Design Mockups]]"
   - "[[Implement Frontend]]"
 blocked_by:
-
-# Display
 cover:
 color:
 ---
-
+``
 ## Description
 
 Full redesign incorporating new brand identity and modern UX patterns.

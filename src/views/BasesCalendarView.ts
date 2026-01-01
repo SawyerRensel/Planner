@@ -27,7 +27,7 @@ export class BasesCalendarView extends BasesView {
   private containerEl: HTMLElement;
   private calendarEl: HTMLElement | null = null;
   private calendar: Calendar | null = null;
-  private currentView: CalendarViewType = 'dayGridMonth';
+  private currentView: CalendarViewType | null = null; // null means use config default
   private resizeObserver: ResizeObserver | null = null;
   private yearViewSplit: boolean = true; // true = multiMonthYear (split), false = dayGridYear (continuous)
 
@@ -37,6 +37,30 @@ export class BasesCalendarView extends BasesView {
       return value;
     }
     return 'note.calendar'; // default
+  }
+
+  private getDefaultView(): CalendarViewType {
+    const value = this.config.get('defaultView') as string | undefined;
+    const validViews: CalendarViewType[] = ['multiMonthYear', 'dayGridYear', 'dayGridMonth', 'timeGridWeek', 'timeGridDay', 'listWeek'];
+    if (value && validViews.includes(value as CalendarViewType)) {
+      return value as CalendarViewType;
+    }
+    return 'dayGridMonth'; // default
+  }
+
+  private getTitleField(): string {
+    const value = this.config.get('titleField') as string | undefined;
+    return value || 'note.title';
+  }
+
+  private getDateStartField(): string {
+    const value = this.config.get('dateStartField') as string | undefined;
+    return value || 'note.date_start_scheduled';
+  }
+
+  private getDateEndField(): string {
+    const value = this.config.get('dateEndField') as string | undefined;
+    return value || 'note.date_end_scheduled';
   }
 
   constructor(
@@ -117,9 +141,12 @@ export class BasesCalendarView extends BasesView {
     const weekStartsOn = this.getWeekStartDay();
     const events = this.getEventsFromData();
 
+    // Use provided view, or current view if re-rendering, or config default for first render
+    const viewToUse = initialView || this.currentView || this.getDefaultView();
+
     this.calendar = new Calendar(this.calendarEl, {
       plugins: [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin, multiMonthPlugin],
-      initialView: initialView || this.currentView,
+      initialView: viewToUse,
       initialDate: initialDate,
       headerToolbar: {
         left: 'prev,next today',
@@ -325,25 +352,33 @@ export class BasesCalendarView extends BasesView {
   }
 
   private entryToEvent(entry: BasesEntry, colorByProp: string): EventInput | null {
-    // Get date fields
-    const dateStartScheduled = entry.getValue('note.date_start_scheduled' as any);
-    const dateEndScheduled = entry.getValue('note.date_end_scheduled' as any);
+    // Get date fields using configured field names
+    const dateStartField = this.getDateStartField();
+    const dateEndField = this.getDateEndField();
+    const titleField = this.getTitleField();
+
+    const dateStart = entry.getValue(dateStartField as any);
+    const dateEnd = entry.getValue(dateEndField as any);
     const allDayValue = entry.getValue('note.all_day' as any);
 
     // Must have a start date
-    if (!dateStartScheduled) return null;
+    if (!dateStart) return null;
 
-    // Get title
-    const title = entry.getValue('note.title' as any) ||
-                  entry.file.basename ||
-                  'Untitled';
+    // Get title using configured field, with fallbacks
+    let title: string;
+    if (titleField === 'file.basename') {
+      title = entry.file.basename;
+    } else {
+      const titleValue = entry.getValue(titleField as any);
+      title = titleValue ? String(titleValue) : entry.file.basename || 'Untitled';
+    }
 
     // Get color
     const color = this.getEntryColor(entry, colorByProp);
 
     // Convert dates to ISO strings (handles both Date objects and strings)
-    const startStr = this.toISOString(dateStartScheduled);
-    const endStr = dateEndScheduled ? this.toISOString(dateEndScheduled) : undefined;
+    const startStr = this.toISOString(dateStart);
+    const endStr = dateEnd ? this.toISOString(dateEnd) : undefined;
 
     // Determine if all-day event:
     // - Explicitly set to true in frontmatter
@@ -667,6 +702,19 @@ export function createCalendarViewRegistration(plugin: PlannerPlugin): BasesView
     options: () => [
       {
         type: 'dropdown',
+        key: 'defaultView',
+        displayName: 'Default view',
+        default: 'dayGridMonth',
+        options: {
+          'multiMonthYear': 'Year',
+          'dayGridMonth': 'Month',
+          'timeGridWeek': 'Week',
+          'timeGridDay': 'Day',
+          'listWeek': 'List',
+        },
+      },
+      {
+        type: 'dropdown',
         key: 'colorBy',
         displayName: 'Color by',
         default: 'note.calendar',
@@ -674,6 +722,39 @@ export function createCalendarViewRegistration(plugin: PlannerPlugin): BasesView
           'note.calendar': 'Calendar',
           'note.priority': 'Priority',
           'note.status': 'Status',
+        },
+      },
+      {
+        type: 'dropdown',
+        key: 'titleField',
+        displayName: 'Title field',
+        default: 'note.title',
+        options: {
+          'note.title': 'Title',
+          'note.summary': 'Summary',
+          'file.basename': 'File name',
+        },
+      },
+      {
+        type: 'dropdown',
+        key: 'dateStartField',
+        displayName: 'Date start field',
+        default: 'note.date_start_scheduled',
+        options: {
+          'note.date_start_scheduled': 'Start Scheduled',
+          'note.date_start_actual': 'Start Actual',
+          'note.date_created': 'Date Created',
+        },
+      },
+      {
+        type: 'dropdown',
+        key: 'dateEndField',
+        displayName: 'Date end field',
+        default: 'note.date_end_scheduled',
+        options: {
+          'note.date_end_scheduled': 'End Scheduled',
+          'note.date_end_actual': 'End Actual',
+          'note.date_modified': 'Date Modified',
         },
       },
     ],

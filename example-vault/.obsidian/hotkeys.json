@@ -28,5 +28,13 @@
       ],
       "key": "ArrowRight"
     }
+  ],
+  "editor:toggle-source": [
+    {
+      "modifiers": [
+        "Alt"
+      ],
+      "key": "Z"
+    }
   ]
 }

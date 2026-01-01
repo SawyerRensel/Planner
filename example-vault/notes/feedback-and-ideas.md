@@ -4,7 +4,9 @@
 - [x] "Color by" menu is missing
 - [x] Clicking on day number should open the Daily Note for that date.
 - [x] Calendar View's Bases' Configure View menu also has "Color by" dropdown, but this doesn't actually change the color of items.  Let's fix that and keep both "Color by" dropdown menus in sync with each other.  
-- [ ] Need to fix/update date frontmatter fields (Due? Started? Scheduled? etc.)
+- [x] Need to fix/update date frontmatter fields (Due? Started? Scheduled? etc.)
+
+New
 
 | Field                  | Type     | Description                             |
 | ---------------------- | -------- | --------------------------------------- |
@@ -15,6 +17,8 @@
 | `date_end_scheduled`   | datetime | When you intend to complete the action. |
 | `date_end_actual`      | datetime | When you actually finished the action.  |
 | `all_day`              | boolean  | Whether this is an all-day item.        |
+
+Old
 
 | Field            | Type     | Description                          |
 | ---------------- | -------- | ------------------------------------ |
