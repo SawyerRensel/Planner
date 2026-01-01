@@ -1,6 +1,6 @@
 ---
 title: Grocery Shopping
-summary: Weekly grocery run
+summary: Bi-weekly grocery run
 tags:
   - task
 calendar:
@@ -21,11 +21,11 @@ date_end_scheduled: 2026-01-13T18:00:00
 date_end_actual:
 all_day: false
 repeat_frequency: weekly
-repeat_interval: 1
-repeat_until:
-repeat_count: "3"
+repeat_interval: 2
+repeat_until: 2026-03-13T23:59:59
+repeat_count:
 repeat_byday:
-  - SA
+  - TU
 repeat_bymonth:
 repeat_bymonthday:
 repeat_bysetpos:

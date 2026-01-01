@@ -1,4 +1,4 @@
-import { RRule, Frequency, Weekday } from 'rrule';
+import { RRule, Frequency } from 'rrule';
 import { PlannerItem, RepeatFrequency, DayOfWeek } from '../types/item';
 
 /**
@@ -13,63 +13,175 @@ export class RecurrenceService {
   }
 
   /**
-   * Get the RRule object for an item
+   * Parse a date string or Date object into a valid Date
    */
-  getRRule(item: PlannerItem): RRule | null {
-    if (!item.repeat_frequency || !item.date_start) {
+  private parseDate(value: unknown): Date | null {
+    if (!value) return null;
+
+    let date: Date;
+    if (value instanceof Date) {
+      date = new Date(value.getTime());
+    } else if (typeof value === 'string') {
+      date = new Date(value);
+    } else if (typeof value === 'number') {
+      date = new Date(value);
+    } else {
       return null;
     }
 
-    const freq = this.mapFrequency(item.repeat_frequency);
-    const dtstart = new Date(item.date_start);
+    return isNaN(date.getTime()) ? null : date;
+  }
 
-    const options: Partial<ConstructorParameters<typeof RRule>[0]> = {
-      freq,
-      dtstart,
-      interval: item.repeat_interval ?? 1,
+  /**
+   * Build an RRULE string from item frontmatter fields
+   */
+  private buildRRuleString(item: PlannerItem): string {
+    const parts: string[] = [];
+
+    // Frequency (required)
+    const freqMap: Record<RepeatFrequency, string> = {
+      daily: 'DAILY',
+      weekly: 'WEEKLY',
+      monthly: 'MONTHLY',
+      yearly: 'YEARLY',
     };
+    parts.push(`FREQ=${freqMap[item.repeat_frequency!]}`);
 
-    // Until or count
-    if (item.repeat_until) {
-      options.until = new Date(item.repeat_until);
-    }
-    if (item.repeat_count) {
-      options.count = item.repeat_count;
+    // Interval
+    if (item.repeat_interval && item.repeat_interval > 1) {
+      parts.push(`INTERVAL=${item.repeat_interval}`);
     }
 
-    // By day of week
+    // BYDAY (days of week)
     if (item.repeat_byday?.length) {
-      options.byweekday = item.repeat_byday.map(d => this.mapWeekday(d));
+      parts.push(`BYDAY=${item.repeat_byday.join(',')}`);
     }
 
-    // By month
+    // BYMONTH
     if (item.repeat_bymonth?.length) {
-      options.bymonth = item.repeat_bymonth;
+      parts.push(`BYMONTH=${item.repeat_bymonth.join(',')}`);
     }
 
-    // By month day
+    // BYMONTHDAY
     if (item.repeat_bymonthday?.length) {
-      options.bymonthday = item.repeat_bymonthday;
+      parts.push(`BYMONTHDAY=${item.repeat_bymonthday.join(',')}`);
     }
 
-    // By set position
-    if (item.repeat_bysetpos !== undefined) {
-      options.bysetpos = item.repeat_bysetpos;
+    // BYSETPOS - must be non-zero and within valid range
+    if (item.repeat_bysetpos !== undefined && item.repeat_bysetpos !== 0 &&
+        item.repeat_bysetpos >= -366 && item.repeat_bysetpos <= 366) {
+      parts.push(`BYSETPOS=${item.repeat_bysetpos}`);
     }
 
-    return new RRule(options as ConstructorParameters<typeof RRule>[0]);
+    // COUNT
+    if (item.repeat_count) {
+      parts.push(`COUNT=${item.repeat_count}`);
+    }
+
+    // UNTIL
+    if (item.repeat_until) {
+      const until = this.parseDate(item.repeat_until);
+      if (until) {
+        // Format as YYYYMMDD or YYYYMMDDTHHMMSSZ
+        const year = until.getUTCFullYear();
+        const month = String(until.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(until.getUTCDate()).padStart(2, '0');
+        parts.push(`UNTIL=${year}${month}${day}`);
+      }
+    }
+
+    return parts.join(';');
+  }
+
+  /**
+   * Parse a date string into a UTC Date for RRule
+   */
+  private createUTCDateForRRule(dateStr: string): Date {
+    const date = new Date(dateStr);
+    // Create a UTC date at midnight for consistency
+    return new Date(Date.UTC(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      date.getHours(),
+      date.getMinutes(),
+      date.getSeconds(),
+      0
+    ));
+  }
+
+  /**
+   * Get the RRule object for an item
+   * Uses the same approach as TaskNotes: build RRULE string, parse it, set dtstart manually
+   */
+  getRRule(item: PlannerItem): RRule | null {
+    if (!item.repeat_frequency || !item.date_start_scheduled) {
+      return null;
+    }
+
+    try {
+      // Parse the start date as UTC for consistency (like TaskNotes does)
+      const dtstart = this.createUTCDateForRRule(item.date_start_scheduled);
+
+      if (isNaN(dtstart.getTime())) {
+        console.warn('RecurrenceService: Invalid dtstart date', item.date_start_scheduled);
+        return null;
+      }
+
+      // Build RRULE string from frontmatter fields
+      const rruleString = this.buildRRuleString(item);
+
+      console.log('RecurrenceService: Building RRule', {
+        path: item.path,
+        rruleString,
+        dtstart: dtstart.toISOString(),
+      });
+
+      // Parse the RRULE string (like TaskNotes does)
+      const rruleOptions = RRule.parseString(rruleString);
+
+      // Set dtstart manually (critical - this is what TaskNotes does)
+      rruleOptions.dtstart = dtstart;
+
+      // Create and return the RRule
+      return new RRule(rruleOptions);
+    } catch (error) {
+      console.error('RecurrenceService: Failed to create RRule', error, {
+        path: item.path,
+        repeat_frequency: item.repeat_frequency,
+        date_start_scheduled: item.date_start_scheduled,
+        repeat_byday: item.repeat_byday,
+      });
+      return null;
+    }
   }
 
   /**
    * Get all occurrences within a date range
+   * Uses UTC dates for consistency with RRule (like TaskNotes does)
    */
   getOccurrences(item: PlannerItem, start: Date, end: Date): Date[] {
     const rule = this.getRRule(item);
     if (!rule) {
-      return item.date_start ? [new Date(item.date_start)] : [];
+      const fallbackDate = this.parseDate(item.date_start_scheduled);
+      return fallbackDate ? [fallbackDate] : [];
     }
 
-    return rule.between(start, end, true);
+    // Convert start and end to UTC to match dtstart (like TaskNotes does)
+    const utcStart = new Date(Date.UTC(
+      start.getFullYear(),
+      start.getMonth(),
+      start.getDate(),
+      0, 0, 0, 0
+    ));
+    const utcEnd = new Date(Date.UTC(
+      end.getFullYear(),
+      end.getMonth(),
+      end.getDate(),
+      23, 59, 59, 999
+    ));
+
+    return rule.between(utcStart, utcEnd, true);
   }
 
   /**
@@ -158,11 +270,14 @@ export class RecurrenceService {
    * Get the duration of an event in milliseconds
    */
   private getEventDuration(item: PlannerItem): number | null {
-    if (!item.date_start || !item.date_end) {
+    const start = this.parseDate(item.date_start_scheduled);
+    const end = this.parseDate(item.date_end_scheduled);
+
+    if (!start || !end) {
       return null;
     }
 
-    return new Date(item.date_end).getTime() - new Date(item.date_start).getTime();
+    return end.getTime() - start.getTime();
   }
 
   /**

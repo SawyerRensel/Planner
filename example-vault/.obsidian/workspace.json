@@ -22,7 +22,7 @@
             }
           },
           {
-            "id": "9f5a6b3071114c6e",
+            "id": "f974a2bdb7766e40",
             "type": "leaf",
             "state": {
               "type": "bases",
@@ -35,21 +35,21 @@
             }
           },
           {
-            "id": "3636ac8f67b27fd4",
+            "id": "3cf40097c013be94",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Planner/Vacation.md",
+                "file": "Planner/Grocery Shopping.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Vacation"
+              "title": "Grocery Shopping"
             }
           }
         ],
-        "currentTab": 2
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -183,13 +183,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "notes/obsidian-planner-prd.md",
+                "file": "Planner/Calendar.base",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of obsidian-planner-prd"
+              "title": "Outline of Calendar"
             }
           },
           {
@@ -203,12 +203,11 @@
             }
           }
         ],
-        "currentTab": 5
+        "currentTab": 4
       }
     ],
     "direction": "horizontal",
-    "width": 318.5,
-    "collapsed": true
+    "width": 318.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -231,19 +230,23 @@
       "tasknotes:Create new task": false
     }
   },
-  "active": "3636ac8f67b27fd4",
+  "active": "f974a2bdb7766e40",
   "lastOpenFiles": [
+    "Planner/Grocery Shopping.md",
     "Planner/Calendar.base",
-    "Planner/Vacation.md",
+    "Planner/Tasks.base",
     "notes/obsidian-planner-prd.md",
+    "Planner/Vacation.md",
+    "Planner/Grocery Shopping.md.tmp.990.1767271752122",
+    "notes/feedback-and-ideas.md",
+    "Planner/Grocery Shopping.md.tmp.990.1767271180713",
+    "Planner/Grocery Shopping.md.tmp.990.1767271172014",
     "Planner/New Item 1.md",
     "Planner/Design Mockups.md",
     "Planner/Fix Login Bug.md",
-    "Planner/Grocery Shopping.md",
     "Planner/Implement Frontend.md",
     "Planner/Website Redesign.md",
     "Planner/Team Meeting.md",
-    "notes/feedback-and-ideas.md",
     "notes/Notes.md",
     "Planner/New Item 2.md",
     "Planner/Design Mockups.md.tmp.990.1767217348902",
@@ -254,7 +257,6 @@
     "DailyNotes/2025-12-31.md",
     "DailyNotes/2025-12-05.md",
     "DailyNotes/2025-12-04.md",
-    "TaskNotes/Views/calendar-default.base",
     "DailyNotes/2025-12-24.md",
     "DailyNotes/2025-12-15.md",
     "DailyNotes/2025-12-18.md",
@@ -262,12 +264,9 @@
     "DailyNotes/2025-12-10.md",
     "DailyNotes/2025-12-11.md",
     "Templates/Daily Note Template.md",
-    "Templates",
     "2025-12-03.md",
     "2025-12-31.md",
     "2025-12-12.md",
-    "DailyNotes",
-    "News",
     "media/gantt_view_mockup_example.png"
   ]
 }

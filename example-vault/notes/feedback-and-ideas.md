@@ -30,7 +30,7 @@ Old
 | `date_completed` | datetime | When marked complete (auto-set)      |
 | `all_day`        | boolean  | Whether this is an all-day item      |
 
-- [ ] Let's add some features to Calendar View's Bases' Configure View menu.  First let's select a default "View Mode" menu that allows the user to set the default view mode (Year, Month, Day, etc.).  Next let's add two menus, "Date Start Field" and "Date End Field", which allow the user to select among  frontmatter field properties to define how items are displayed on the Calender view.  Lastly, let's also create a "Title Field" that allows the user to select what text is shown on items in Calendar view.  (See ***screenshots*** for reference)
+- [x] Let's add some features to Calendar View's Bases' Configure View menu.  First let's select a default "View Mode" menu that allows the user to set the default view mode (Year, Month, Day, etc.).  Next let's add two menus, "Date Start Field" and "Date End Field", which allow the user to select among  frontmatter field properties to define how items are displayed on the Calender view.  Lastly, let's also create a "Title Field" that allows the user to select what text is shown on items in Calendar view.  (See ***screenshots*** for reference)
 - [ ] Modal input popup
 - [ ] Model edit popup with option to open note and also to Delete event and also to Save Edits.
 - [ ] When clicking the calendar to add an event, don't automatically open the new event note.  Instead, let's open the modal edit popup
