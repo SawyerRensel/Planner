@@ -14,6 +14,7 @@ import { RRule } from 'rrule';
 import type PlannerPlugin from '../main';
 import type { OpenBehavior } from '../types/settings';
 import type { PlannerItem, DayOfWeek } from '../types/item';
+import { openItemModal } from '../components/ItemModal';
 
 export const BASES_CALENDAR_VIEW_ID = 'planner-calendar';
 
@@ -826,7 +827,15 @@ export class BasesCalendarView extends BasesView {
 
   private async handleEventClick(info: EventClickArg): Promise<void> {
     const entry = info.event.extendedProps.entry as BasesEntry;
-    await this.openFileWithBehavior(entry.file.path);
+
+    // Load the full item data for editing
+    const item = await this.plugin.itemService.getItem(entry.file.path);
+    if (item) {
+      openItemModal(this.plugin, { mode: 'edit', item });
+    } else {
+      // Fallback to opening the file if item can't be loaded
+      await this.openFileWithBehavior(entry.file.path);
+    }
   }
 
   private async handleEventDrop(info: any): Promise<void> {
@@ -984,20 +993,16 @@ export class BasesCalendarView extends BasesView {
   }
 
   private async createNewItem(startDate?: string, endDate?: string, allDay?: boolean): Promise<void> {
-    const title = 'New Item';
-    const now = new Date().toISOString();
-
-    const item = await this.plugin.itemService.createItem(title, {
-      title,
-      tags: ['event'],
-      date_start_scheduled: startDate || now,
-      date_end_scheduled: endDate || undefined,
-      all_day: allDay ?? false,
+    // Open ItemModal with pre-populated date from calendar click
+    openItemModal(this.plugin, {
+      mode: 'create',
+      prePopulate: {
+        date_start_scheduled: startDate || new Date().toISOString(),
+        date_end_scheduled: endDate || undefined,
+        all_day: allDay ?? true,
+        tags: ['event'],
+      },
     });
-
-    if (item) {
-      await this.openFileWithBehavior(item.path);
-    }
   }
 }
 

@@ -13,12 +13,26 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "notes/questions.md",
+                "file": "notes/feedback-and-ideas.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "questions"
+              "title": "feedback-and-ideas"
+            }
+          },
+          {
+            "id": "af2c2d03469c8e4d",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "notes/obsidian-planner-prd.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "obsidian-planner-prd"
             }
           },
           {
@@ -38,13 +52,14 @@
             "id": "c137c6adf8c21447",
             "type": "leaf",
             "state": {
-              "type": "bases",
+              "type": "markdown",
               "state": {
-                "file": "Planner/Calendar.base",
-                "viewName": "Calendar"
+                "file": "Planner/Meeting.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "calendar",
-              "title": "Calendar"
+              "icon": "lucide-file",
+              "title": "Meeting"
             }
           },
           {
@@ -61,8 +76,7 @@
               "title": "Notes"
             }
           }
-        ],
-        "currentTab": 2
+        ]
       }
     ],
     "direction": "vertical"
@@ -196,13 +210,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Planner/Calendar.base",
+                "file": "notes/feedback-and-ideas.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Calendar"
+              "title": "Outline of feedback-and-ideas"
             }
           },
           {
@@ -243,8 +257,13 @@
       "tasknotes:Create new task": false
     }
   },
-  "active": "a95a79f411ac4c1f",
+  "active": "657d18c0aae1861a",
   "lastOpenFiles": [
+    "notes/obsidian-planner-prd.md",
+    "notes/feedback-and-ideas.md",
+    "Planner/Meeting.md",
+    "Planner/Calendar.base",
+    "notes/questions.md",
     "notes/obsidian-planner-prd.md.tmp.21121.1767278295010",
     "notes/obsidian-planner-prd.md.tmp.21121.1767278286982",
     "notes/obsidian-planner-prd.md.tmp.21121.1767278272930",
@@ -253,20 +272,15 @@
     "notes/obsidian-planner-prd.md.tmp.21121.1767278237605",
     "notes/obsidian-planner-prd.md.tmp.21121.1767278205264",
     "Planner/Tasks.base",
-    "Planner/Calendar.base",
     "Planner/New Item.md",
     "Planner/Grocery Shopping.md",
-    "notes/obsidian-planner-prd.md",
     "TaskNotes/Tasks/TaskNotes Example Recurring Task.md",
     "notes/Notes.md",
     "TaskNotes/Views/calendar-default.base",
-    "notes/questions.md",
     "notes/Pasted image 20260101091932.png",
     "notes/Pasted image 20260101091842.png",
-    "notes/feedback-and-ideas.md",
     "Planner/Team Meeting.md",
     "Planner/Vacation.md",
-    "Planner/Grocery Shopping.md.tmp.990.1767271752122",
     "Planner/New Item 1.md",
     "Planner/Design Mockups.md",
     "Planner/Fix Login Bug.md",
@@ -282,7 +296,6 @@
     "DailyNotes/2025-12-16.md",
     "DailyNotes/2025-12-10.md",
     "DailyNotes/2025-12-11.md",
-    "Templates/Daily Note Template.md",
     "media/gantt_view_mockup_example.png"
   ]
 }

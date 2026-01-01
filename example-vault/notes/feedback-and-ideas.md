@@ -32,9 +32,14 @@ Old
 
 - [x] Let's add some features to Calendar View's Bases' Configure View menu.  First let's select a default "View Mode" menu that allows the user to set the default view mode (Year, Month, Day, etc.).  Next let's add two menus, "Date Start Field" and "Date End Field", which allow the user to select among  frontmatter field properties to define how items are displayed on the Calender view.  Lastly, let's also create a "Title Field" that allows the user to select what text is shown on items in Calendar view.  (See ***screenshots*** for reference)
 - [x] Fix recurrence not working
-- [ ] Modal input popup
-- [ ] Model edit popup with option to open note and also to Delete event and also to Save Edits.
-- [ ] When clicking the calendar to add an event, don't automatically open the new event note.  Instead, let's open the modal edit popup
+- [x] Modal input popup
+- [x] Model edit popup with option to open note and also to Delete event and also to Save Edits.
+- [x] When clicking the calendar to add an event, don't automatically open the new event note.  Instead, let's open the modal edit popup
+- [ ] The parsed NLP bar should update anytime a dropdown is changed
+- [ ] Let's have a collapsible legend for all options with examples for the NLP bar.   
+- [ ] Let's move the NLP bar and collapsible below the icon row
+- [ ] The Details input in the Item Modal should pull and render any existing content in the Item Note.  I like the current height of the box.  Let's let the user scroll content.
+- [ ] In the Item Modal, for the inputs for People, Parent, and Blocked by, I try typing in double-open brackets to prompt Obsidian to find a file to link, but no menu appears to select a file from like it does when I do in an Obsidian note.  Let's generally make Context, Parent, People, Blocked by, and Tags behave like they would if I were editing their frontmatter in the Item Note. 
 - [ ] Let's add some space between the "New Item" ("+") button in Calendar view and the view mode buttons.  Also, the current view mode button selection is not being/staying highlighted when clicked.
 - [x] Quick capture needs to put quotations around context items in list like `"@home"` instead of `@home`
 - [ ] Whenever I move an event, the event is offset down and to the right by a large margin from my actual mouse position while I'm clicking and dragging it.  It still does successfully reposition to where I place my mouse, but the visual difference is jarring.

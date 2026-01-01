@@ -8,6 +8,7 @@ import {
   Menu,
 } from 'obsidian';
 import type PlannerPlugin from '../main';
+import { openItemModal } from '../components/ItemModal';
 
 export const BASES_TASK_LIST_VIEW_ID = 'planner-task-list';
 
@@ -107,9 +108,15 @@ export class BasesTaskListView extends BasesView {
   private renderEntryRow(tbody: HTMLElement, entry: BasesEntry): void {
     const row = tbody.createEl('tr', { cls: 'planner-row' });
 
-    // Click to open file
-    row.addEventListener('click', () => {
-      this.app.workspace.openLinkText(entry.file.path, '', false);
+    // Click to open ItemModal for editing
+    row.addEventListener('click', async () => {
+      const item = await this.plugin.itemService.getItem(entry.file.path);
+      if (item) {
+        openItemModal(this.plugin, { mode: 'edit', item });
+      } else {
+        // Fallback to opening the file
+        this.app.workspace.openLinkText(entry.file.path, '', false);
+      }
     });
 
     // Context menu

@@ -1,0 +1,865 @@
+import { Modal, Notice, setIcon, setTooltip } from 'obsidian';
+import * as chrono from 'chrono-node';
+import type PlannerPlugin from '../main';
+import type { ItemFrontmatter, PlannerItem, RepeatFrequency, DayOfWeek } from '../types/item';
+import {
+  DateContextMenu,
+  StatusContextMenu,
+  PriorityContextMenu,
+  CalendarContextMenu,
+  RecurrenceContextMenu,
+  type RecurrenceData,
+} from './menus';
+import { CustomRecurrenceModal } from './CustomRecurrenceModal';
+
+interface ItemModalOptions {
+  mode: 'create' | 'edit';
+  item?: PlannerItem;
+  prePopulate?: Partial<ItemFrontmatter>;
+}
+
+interface ParsedNLP {
+  title: string;
+  date_start_scheduled?: string;
+  date_end_scheduled?: string;
+  all_day?: boolean;
+  context?: string[];
+  tags?: string[];
+  priority?: string;
+  status?: string;
+  parent?: string;
+  calendar?: string[];
+}
+
+export class ItemModal extends Modal {
+  private plugin: PlannerPlugin;
+  private options: ItemModalOptions;
+
+  // Form state
+  private title = '';
+  private dateStart: string | null = null;
+  private dateEnd: string | null = null;
+  private allDay = true;
+  private status: string | null = null;
+  private priority: string | null = null;
+  private recurrence: RecurrenceData | null = null;
+  private calendars: string[] = [];
+  private context: string[] = [];
+  private people: string[] = [];
+  private parent: string | null = null;
+  private blockedBy: string[] = [];
+  private details = '';
+  private tags: string[] = [];
+
+  // UI elements
+  private titleInput: HTMLInputElement | null = null;
+  private nlpPreviewEl: HTMLElement | null = null;
+  private actionBar: HTMLElement | null = null;
+  private detailsTextarea: HTMLTextAreaElement | null = null;
+  private detailsSection: HTMLElement | null = null;
+  private detailsExpanded = false;
+
+  constructor(plugin: PlannerPlugin, options: ItemModalOptions) {
+    super(plugin.app);
+    this.plugin = plugin;
+    this.options = options;
+    this.detailsExpanded = plugin.settings.quickCaptureOpenAfterCreate || false;
+    this.initializeFromOptions();
+  }
+
+  private initializeFromOptions(): void {
+    const { mode, item, prePopulate } = this.options;
+
+    if (mode === 'edit' && item) {
+      // Load from existing item
+      this.title = item.title || '';
+      this.dateStart = item.date_start_scheduled || null;
+      this.dateEnd = item.date_end_scheduled || null;
+      this.allDay = item.all_day ?? true;
+      this.status = item.status || null;
+      this.priority = item.priority || null;
+      this.calendars = item.calendar || [];
+      this.context = item.context || [];
+      this.people = item.people || [];
+      this.parent = item.parent || null;
+      this.blockedBy = item.blocked_by || [];
+      this.tags = item.tags || [];
+
+      // Load recurrence data
+      if (item.repeat_frequency) {
+        this.recurrence = {
+          repeat_frequency: item.repeat_frequency,
+          repeat_interval: item.repeat_interval,
+          repeat_byday: item.repeat_byday,
+          repeat_bymonthday: item.repeat_bymonthday,
+          repeat_bysetpos: item.repeat_bysetpos,
+          repeat_until: item.repeat_until,
+          repeat_count: item.repeat_count,
+        };
+      }
+    }
+
+    // Apply pre-population (overrides loaded values)
+    if (prePopulate) {
+      if (prePopulate.title) this.title = prePopulate.title;
+      if (prePopulate.date_start_scheduled) this.dateStart = prePopulate.date_start_scheduled;
+      if (prePopulate.date_end_scheduled) this.dateEnd = prePopulate.date_end_scheduled;
+      if (prePopulate.all_day !== undefined) this.allDay = prePopulate.all_day;
+      if (prePopulate.status) this.status = prePopulate.status;
+      if (prePopulate.priority) this.priority = prePopulate.priority;
+      if (prePopulate.calendar) this.calendars = prePopulate.calendar;
+      if (prePopulate.context) this.context = prePopulate.context;
+      if (prePopulate.tags) this.tags = prePopulate.tags;
+    }
+
+    // Apply defaults for create mode
+    if (mode === 'create') {
+      if (!this.status) {
+        this.status = this.plugin.settings.quickCaptureDefaultStatus;
+      }
+      if (this.calendars.length === 0 && this.plugin.settings.defaultCalendar) {
+        this.calendars = [this.plugin.settings.defaultCalendar];
+      }
+    }
+  }
+
+  onOpen(): void {
+    const { contentEl } = this;
+    contentEl.empty();
+    contentEl.addClass('planner-item-modal');
+
+    // Modal title
+    const modalTitle = this.options.mode === 'edit' ? 'Edit Item' : 'New Item';
+    contentEl.createEl('h2', { text: modalTitle });
+
+    // Title input
+    this.createTitleInput(contentEl);
+
+    // NLP preview (only in create mode with NLP enabled)
+    if (this.options.mode === 'create') {
+      this.nlpPreviewEl = contentEl.createDiv({ cls: 'planner-nlp-preview' });
+    }
+
+    // Icon action bar
+    this.createActionBar(contentEl);
+
+    // Details section (collapsible)
+    this.createDetailsSection(contentEl);
+
+    // Additional fields
+    this.createFieldInputs(contentEl);
+
+    // Action buttons
+    this.createButtons(contentEl);
+
+    // Focus title input
+    setTimeout(() => this.titleInput?.focus(), 50);
+  }
+
+  private createTitleInput(container: HTMLElement): void {
+    const inputContainer = container.createDiv({ cls: 'planner-title-container' });
+    inputContainer.createEl('label', { text: 'Title', cls: 'planner-label' });
+
+    this.titleInput = inputContainer.createEl('input', {
+      type: 'text',
+      placeholder: 'Enter title or use NLP: "Meeting tomorrow at 2pm @work #task"',
+      cls: 'planner-title-input',
+      value: this.title,
+    });
+
+    this.titleInput.addEventListener('input', () => {
+      const value = this.titleInput?.value || '';
+      if (this.options.mode === 'create') {
+        this.parseNLPInput(value);
+        this.updateNLPPreview();
+      } else {
+        this.title = value;
+      }
+      this.updateIconStates();
+    });
+
+    this.titleInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        this.handleSave();
+      }
+    });
+  }
+
+  private createActionBar(container: HTMLElement): void {
+    this.actionBar = container.createDiv({ cls: 'planner-action-bar' });
+
+    // Date Start icon
+    this.createActionIcon(
+      this.actionBar,
+      'calendar',
+      'Start date',
+      (el, event) => this.showDateContextMenu(event, 'start'),
+      'date-start'
+    );
+
+    // Date End icon
+    this.createActionIcon(
+      this.actionBar,
+      'calendar-check',
+      'End date',
+      (el, event) => this.showDateContextMenu(event, 'end'),
+      'date-end'
+    );
+
+    // Priority icon
+    this.createActionIcon(
+      this.actionBar,
+      'star',
+      'Priority',
+      (el, event) => this.showPriorityContextMenu(event),
+      'priority'
+    );
+
+    // Status icon
+    this.createActionIcon(
+      this.actionBar,
+      'circle',
+      'Status',
+      (el, event) => this.showStatusContextMenu(event),
+      'status'
+    );
+
+    // Recurrence icon
+    this.createActionIcon(
+      this.actionBar,
+      'repeat',
+      'Recurrence',
+      (el, event) => this.showRecurrenceContextMenu(event),
+      'recurrence'
+    );
+
+    // Calendar dropdown
+    this.createCalendarDropdown(this.actionBar);
+
+    // Update initial states
+    this.updateIconStates();
+  }
+
+  private createActionIcon(
+    container: HTMLElement,
+    iconName: string,
+    tooltip: string,
+    onClick: (el: HTMLElement, event: MouseEvent | KeyboardEvent) => void,
+    dataType: string
+  ): HTMLElement {
+    const iconContainer = container.createDiv({ cls: 'planner-action-icon' });
+    iconContainer.setAttribute('data-type', dataType);
+    iconContainer.setAttribute('tabindex', '0');
+    iconContainer.setAttribute('role', 'button');
+
+    const icon = iconContainer.createSpan({ cls: 'planner-icon' });
+    setIcon(icon, iconName);
+    setTooltip(iconContainer, tooltip, { placement: 'top' });
+
+    iconContainer.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      onClick(iconContainer, e);
+    });
+
+    iconContainer.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        e.stopPropagation();
+        onClick(iconContainer, e);
+      }
+    });
+
+    return iconContainer;
+  }
+
+  private createCalendarDropdown(container: HTMLElement): void {
+    const wrapper = container.createDiv({ cls: 'planner-calendar-dropdown' });
+
+    const btn = wrapper.createEl('button', {
+      cls: 'planner-calendar-btn',
+      text: this.calendars[0] || this.plugin.settings.defaultCalendar || 'Calendar',
+    });
+
+    const icon = btn.createSpan({ cls: 'planner-dropdown-icon' });
+    setIcon(icon, 'chevron-down');
+
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const menu = new CalendarContextMenu({
+        currentValue: this.calendars,
+        onSelect: (value) => {
+          this.calendars = value;
+          btn.textContent = value[0] || 'Calendar';
+          btn.appendChild(icon);
+          this.updateIconStates();
+        },
+        plugin: this.plugin,
+      });
+      menu.showAtElement(btn);
+    });
+  }
+
+  private updateIconStates(): void {
+    if (!this.actionBar) return;
+
+    // Date start
+    const dateStartIcon = this.actionBar.querySelector('[data-type="date-start"]');
+    if (dateStartIcon) {
+      this.updateIconState(dateStartIcon as HTMLElement, !!this.dateStart, this.formatDateForTooltip(this.dateStart));
+    }
+
+    // Date end
+    const dateEndIcon = this.actionBar.querySelector('[data-type="date-end"]');
+    if (dateEndIcon) {
+      this.updateIconState(dateEndIcon as HTMLElement, !!this.dateEnd, this.formatDateForTooltip(this.dateEnd));
+    }
+
+    // Priority
+    const priorityIcon = this.actionBar.querySelector('[data-type="priority"]');
+    if (priorityIcon) {
+      this.updateIconState(priorityIcon as HTMLElement, !!this.priority, this.priority || 'Priority');
+      // Apply priority color
+      if (this.priority) {
+        const config = this.plugin.settings.priorities.find(p => p.name === this.priority);
+        if (config) {
+          (priorityIcon.querySelector('.planner-icon') as HTMLElement)?.style.setProperty('color', config.color);
+        }
+      } else {
+        (priorityIcon.querySelector('.planner-icon') as HTMLElement)?.style.removeProperty('color');
+      }
+    }
+
+    // Status
+    const statusIcon = this.actionBar.querySelector('[data-type="status"]');
+    if (statusIcon) {
+      this.updateIconState(statusIcon as HTMLElement, !!this.status, this.status || 'Status');
+      // Apply status color
+      if (this.status) {
+        const config = this.plugin.settings.statuses.find(s => s.name === this.status);
+        if (config) {
+          (statusIcon.querySelector('.planner-icon') as HTMLElement)?.style.setProperty('color', config.color);
+        }
+      } else {
+        (statusIcon.querySelector('.planner-icon') as HTMLElement)?.style.removeProperty('color');
+      }
+    }
+
+    // Recurrence
+    const recurrenceIcon = this.actionBar.querySelector('[data-type="recurrence"]');
+    if (recurrenceIcon) {
+      const hasRecurrence = !!this.recurrence?.repeat_frequency;
+      this.updateIconState(recurrenceIcon as HTMLElement, hasRecurrence, hasRecurrence ? 'Recurring' : 'Recurrence');
+    }
+  }
+
+  private updateIconState(el: HTMLElement, hasValue: boolean, tooltip: string): void {
+    if (hasValue) {
+      el.classList.add('has-value');
+    } else {
+      el.classList.remove('has-value');
+    }
+    setTooltip(el, tooltip, { placement: 'top' });
+  }
+
+  private formatDateForTooltip(dateStr: string | null): string {
+    if (!dateStr) return 'Not set';
+    const date = new Date(dateStr);
+    return date.toLocaleString();
+  }
+
+  private showDateContextMenu(event: MouseEvent | KeyboardEvent, type: 'start' | 'end'): void {
+    const currentValue = type === 'start' ? this.dateStart : this.dateEnd;
+    const menu = new DateContextMenu({
+      currentValue,
+      onSelect: (value) => {
+        if (type === 'start') {
+          this.dateStart = value;
+          if (value) this.allDay = !value.includes('T') || value.endsWith('T00:00:00');
+        } else {
+          this.dateEnd = value;
+        }
+        this.updateIconStates();
+      },
+      plugin: this.plugin,
+      title: type === 'start' ? 'Start Date' : 'End Date',
+    });
+    menu.show(event);
+  }
+
+  private showStatusContextMenu(event: MouseEvent | KeyboardEvent): void {
+    const menu = new StatusContextMenu({
+      currentValue: this.status,
+      onSelect: (value) => {
+        this.status = value;
+        this.updateIconStates();
+      },
+      plugin: this.plugin,
+    });
+    menu.show(event);
+  }
+
+  private showPriorityContextMenu(event: MouseEvent | KeyboardEvent): void {
+    const menu = new PriorityContextMenu({
+      currentValue: this.priority,
+      onSelect: (value) => {
+        this.priority = value;
+        this.updateIconStates();
+      },
+      plugin: this.plugin,
+    });
+    menu.show(event);
+  }
+
+  private showRecurrenceContextMenu(event: MouseEvent | KeyboardEvent): void {
+    const referenceDate = this.dateStart ? new Date(this.dateStart) : new Date();
+    const menu = new RecurrenceContextMenu({
+      currentValue: this.recurrence,
+      onSelect: (value) => {
+        this.recurrence = value;
+        this.updateIconStates();
+      },
+      onCustom: () => {
+        const modal = new CustomRecurrenceModal(this.plugin, this.recurrence, (result) => {
+          this.recurrence = result;
+          this.updateIconStates();
+        });
+        modal.open();
+      },
+      plugin: this.plugin,
+      referenceDate,
+    });
+    menu.show(event);
+  }
+
+  private createDetailsSection(container: HTMLElement): void {
+    this.detailsSection = container.createDiv({ cls: 'planner-details-section' });
+
+    const toggle = this.detailsSection.createDiv({ cls: 'planner-details-toggle' });
+    const toggleIcon = toggle.createSpan({ cls: 'planner-toggle-icon' });
+    setIcon(toggleIcon, this.detailsExpanded ? 'chevron-down' : 'chevron-right');
+    toggle.createSpan({ text: 'Details' });
+
+    const content = this.detailsSection.createDiv({
+      cls: `planner-details-content ${this.detailsExpanded ? '' : 'collapsed'}`,
+    });
+
+    this.detailsTextarea = content.createEl('textarea', {
+      cls: 'planner-details-textarea',
+      placeholder: 'Add description or notes...',
+    });
+    this.detailsTextarea.value = this.details;
+    this.detailsTextarea.addEventListener('input', () => {
+      this.details = this.detailsTextarea?.value || '';
+    });
+
+    toggle.addEventListener('click', () => {
+      this.detailsExpanded = !this.detailsExpanded;
+      setIcon(toggleIcon, this.detailsExpanded ? 'chevron-down' : 'chevron-right');
+      content.classList.toggle('collapsed', !this.detailsExpanded);
+    });
+  }
+
+  private createFieldInputs(container: HTMLElement): void {
+    const fieldsContainer = container.createDiv({ cls: 'planner-fields' });
+
+    // Context
+    this.createTextListInput(fieldsContainer, 'Context', this.context, (value) => {
+      this.context = value;
+    }, '@work, @home, @errands');
+
+    // People
+    this.createTextListInput(fieldsContainer, 'People', this.people, (value) => {
+      this.people = value;
+    }, '[[Person 1]], [[Person 2]]');
+
+    // Parent
+    this.createTextInput(fieldsContainer, 'Parent', this.parent || '', (value) => {
+      this.parent = value || null;
+    }, '[[Parent Item]]');
+
+    // Blocked by
+    this.createTextListInput(fieldsContainer, 'Blocked by', this.blockedBy, (value) => {
+      this.blockedBy = value;
+    }, '[[Task 1]], [[Task 2]]');
+
+    // Tags
+    this.createTextListInput(fieldsContainer, 'Tags', this.tags, (value) => {
+      this.tags = value;
+    }, 'task, event, project');
+  }
+
+  private createTextInput(
+    container: HTMLElement,
+    label: string,
+    value: string,
+    onChange: (value: string) => void,
+    placeholder: string
+  ): void {
+    const field = container.createDiv({ cls: 'planner-field' });
+    field.createEl('label', { text: label, cls: 'planner-label' });
+    const input = field.createEl('input', {
+      type: 'text',
+      value,
+      placeholder,
+      cls: 'planner-field-input',
+    });
+    input.addEventListener('input', () => onChange(input.value));
+  }
+
+  private createTextListInput(
+    container: HTMLElement,
+    label: string,
+    values: string[],
+    onChange: (value: string[]) => void,
+    placeholder: string
+  ): void {
+    const field = container.createDiv({ cls: 'planner-field' });
+    field.createEl('label', { text: label, cls: 'planner-label' });
+    const input = field.createEl('input', {
+      type: 'text',
+      value: values.join(', '),
+      placeholder,
+      cls: 'planner-field-input',
+    });
+    input.addEventListener('input', () => {
+      const newValues = input.value
+        .split(',')
+        .map(s => s.trim())
+        .filter(s => s.length > 0);
+      onChange(newValues);
+    });
+  }
+
+  private createButtons(container: HTMLElement): void {
+    const buttonContainer = container.createDiv({ cls: 'planner-modal-buttons' });
+
+    // Edit mode buttons
+    if (this.options.mode === 'edit' && this.options.item) {
+      // Open Note button
+      const openBtn = buttonContainer.createEl('button', {
+        text: 'Open Note',
+        cls: 'planner-btn',
+      });
+      openBtn.addEventListener('click', () => this.handleOpenNote());
+
+      // Delete button
+      const deleteBtn = buttonContainer.createEl('button', {
+        text: 'Delete',
+        cls: 'planner-btn planner-btn-danger',
+      });
+      deleteBtn.addEventListener('click', () => this.handleDelete());
+    }
+
+    // Spacer
+    buttonContainer.createDiv({ cls: 'planner-btn-spacer' });
+
+    // Cancel button
+    const cancelBtn = buttonContainer.createEl('button', {
+      text: 'Cancel',
+      cls: 'planner-btn',
+    });
+    cancelBtn.addEventListener('click', () => this.close());
+
+    // Save button
+    const saveBtn = buttonContainer.createEl('button', {
+      text: 'Save',
+      cls: 'planner-btn planner-btn-primary',
+    });
+    saveBtn.addEventListener('click', () => this.handleSave());
+  }
+
+  // NLP Parsing (reused from QuickCapture)
+  private parseNLPInput(input: string): void {
+    let remaining = input.trim();
+    const parsed: ParsedNLP = { title: '' };
+
+    // Extract @context
+    const contextMatches = remaining.match(/@(\w+)/g);
+    if (contextMatches) {
+      parsed.context = contextMatches.map(m => m.slice(1));
+      remaining = remaining.replace(/@(\w+)/g, '').trim();
+    }
+
+    // Extract #tags
+    const tagMatches = remaining.match(/#(\w+)/g);
+    if (tagMatches) {
+      parsed.tags = tagMatches.map(m => m.slice(1));
+      remaining = remaining.replace(/#(\w+)/g, '').trim();
+    }
+
+    // Extract !priority
+    const priorityMatch = remaining.match(/!(\w+)/);
+    if (priorityMatch) {
+      const priorityName = priorityMatch[1];
+      const matchedPriority = this.plugin.settings.priorities.find(
+        p => p.name.toLowerCase() === priorityName.toLowerCase()
+      );
+      if (matchedPriority) {
+        parsed.priority = matchedPriority.name;
+      }
+      remaining = remaining.replace(/!(\w+)/, '').trim();
+    }
+
+    // Extract >status
+    const statusMatch = remaining.match(/>(\S+)/);
+    if (statusMatch) {
+      const statusName = statusMatch[1].replace(/-/g, ' ');
+      const matchedStatus = this.plugin.settings.statuses.find(
+        s => s.name.toLowerCase() === statusName.toLowerCase()
+      );
+      if (matchedStatus) {
+        parsed.status = matchedStatus.name;
+      }
+      remaining = remaining.replace(/>(\S+)/, '').trim();
+    }
+
+    // Extract +[[Parent]]
+    const parentMatch = remaining.match(/\+\[\[([^\]]+)\]\]/);
+    if (parentMatch) {
+      parsed.parent = `[[${parentMatch[1]}]]`;
+      remaining = remaining.replace(/\+\[\[([^\]]+)\]\]/, '').trim();
+    }
+
+    // Extract ~calendar
+    const calendarMatch = remaining.match(/~(\w+)/);
+    if (calendarMatch) {
+      parsed.calendar = [calendarMatch[1]];
+      remaining = remaining.replace(/~(\w+)/, '').trim();
+    }
+
+    // Parse dates with chrono
+    const chronoResult = chrono.parse(remaining, new Date(), { forwardDate: true });
+    if (chronoResult.length > 0) {
+      const dateResult = chronoResult[0];
+      const startDate = dateResult.start.date();
+      parsed.date_start_scheduled = startDate.toISOString();
+      parsed.all_day = !dateResult.start.isCertain('hour');
+
+      if (dateResult.end) {
+        parsed.date_end_scheduled = dateResult.end.date().toISOString();
+      }
+
+      remaining = remaining.replace(dateResult.text, '').trim();
+    }
+
+    // Clean up and set title
+    parsed.title = remaining.replace(/\s+/g, ' ').trim();
+
+    // Apply parsed values to form state
+    this.title = parsed.title;
+    if (parsed.date_start_scheduled) this.dateStart = parsed.date_start_scheduled;
+    if (parsed.date_end_scheduled) this.dateEnd = parsed.date_end_scheduled;
+    if (parsed.all_day !== undefined) this.allDay = parsed.all_day;
+    if (parsed.context) this.context = parsed.context;
+    if (parsed.tags) this.tags = parsed.tags;
+    if (parsed.priority) this.priority = parsed.priority;
+    if (parsed.status) this.status = parsed.status;
+    if (parsed.parent) this.parent = parsed.parent;
+    if (parsed.calendar) this.calendars = parsed.calendar;
+  }
+
+  private updateNLPPreview(): void {
+    if (!this.nlpPreviewEl) return;
+    this.nlpPreviewEl.empty();
+
+    if (!this.titleInput?.value.trim()) {
+      return;
+    }
+
+    const preview = this.nlpPreviewEl.createDiv({ cls: 'planner-nlp-preview-content' });
+
+    // Date
+    if (this.dateStart) {
+      const date = new Date(this.dateStart);
+      const dateStr = this.allDay ? date.toLocaleDateString() : date.toLocaleString();
+      this.addPreviewBadge(preview, `📅 ${dateStr}`, 'date');
+    }
+
+    // Context
+    this.context.forEach(ctx => {
+      this.addPreviewBadge(preview, `@${ctx}`, 'context');
+    });
+
+    // Tags
+    this.tags.forEach(tag => {
+      this.addPreviewBadge(preview, `#${tag}`, 'tag');
+    });
+
+    // Priority
+    if (this.priority) {
+      const config = this.plugin.settings.priorities.find(p => p.name === this.priority);
+      this.addPreviewBadge(preview, `!${this.priority}`, 'priority', config?.color);
+    }
+
+    // Status
+    if (this.status) {
+      const config = this.plugin.settings.statuses.find(s => s.name === this.status);
+      this.addPreviewBadge(preview, this.status, 'status', config?.color);
+    }
+
+    // Calendar
+    if (this.calendars.length > 0) {
+      const color = this.plugin.settings.calendarColors[this.calendars[0]];
+      this.addPreviewBadge(preview, `~${this.calendars[0]}`, 'calendar', color);
+    }
+  }
+
+  private addPreviewBadge(container: HTMLElement, text: string, type: string, color?: string): void {
+    const badge = container.createSpan({
+      text,
+      cls: `planner-preview-badge planner-preview-${type}`,
+    });
+    if (color) {
+      badge.style.backgroundColor = color;
+      badge.style.color = this.getContrastColor(color);
+    }
+  }
+
+  private getContrastColor(hexColor: string): string {
+    const hex = hexColor.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.5 ? '#000000' : '#ffffff';
+  }
+
+  // Action handlers
+  private async handleSave(): Promise<void> {
+    const title = this.title.trim() || this.titleInput?.value.trim() || '';
+
+    if (!title) {
+      new Notice('Please enter a title');
+      return;
+    }
+
+    const frontmatter: Partial<ItemFrontmatter> = {
+      title,
+      tags: this.tags.length > 0 ? this.tags : ['task'],
+      status: this.status || this.plugin.settings.quickCaptureDefaultStatus,
+      calendar: this.calendars.length > 0 ? this.calendars : undefined,
+    };
+
+    if (this.dateStart) frontmatter.date_start_scheduled = this.dateStart;
+    if (this.dateEnd) frontmatter.date_end_scheduled = this.dateEnd;
+    frontmatter.all_day = this.allDay;
+    if (this.priority) frontmatter.priority = this.priority;
+    if (this.context.length > 0) frontmatter.context = this.context;
+    if (this.people.length > 0) frontmatter.people = this.people;
+    if (this.parent) frontmatter.parent = this.parent;
+    if (this.blockedBy.length > 0) frontmatter.blocked_by = this.blockedBy;
+
+    // Recurrence fields
+    if (this.recurrence?.repeat_frequency) {
+      frontmatter.repeat_frequency = this.recurrence.repeat_frequency;
+      if (this.recurrence.repeat_interval) frontmatter.repeat_interval = this.recurrence.repeat_interval;
+      if (this.recurrence.repeat_byday) frontmatter.repeat_byday = this.recurrence.repeat_byday;
+      if (this.recurrence.repeat_bymonthday) frontmatter.repeat_bymonthday = this.recurrence.repeat_bymonthday;
+      if (this.recurrence.repeat_bysetpos) frontmatter.repeat_bysetpos = this.recurrence.repeat_bysetpos;
+      if (this.recurrence.repeat_until) frontmatter.repeat_until = this.recurrence.repeat_until;
+      if (this.recurrence.repeat_count) frontmatter.repeat_count = this.recurrence.repeat_count;
+    }
+
+    try {
+      if (this.options.mode === 'edit' && this.options.item) {
+        // Update existing item
+        await this.plugin.itemService.updateItem(this.options.item.path, frontmatter);
+        new Notice(`Updated: ${title}`);
+      } else {
+        // Create new item
+        const item = await this.plugin.itemService.createItem(title, frontmatter, this.details);
+        new Notice(`Created: ${title}`);
+
+        if (this.plugin.settings.quickCaptureOpenAfterCreate && item) {
+          await this.app.workspace.openLinkText(item.path, '', false);
+        }
+      }
+
+      this.close();
+    } catch (error) {
+      console.error('Failed to save item:', error);
+      new Notice('Failed to save item');
+    }
+  }
+
+  private async handleDelete(): Promise<void> {
+    if (!this.options.item) return;
+
+    // Show confirmation dialog
+    const confirmed = await this.showConfirmDialog(
+      'Delete Item',
+      `Are you sure you want to delete "${this.options.item.title}"? This action cannot be undone.`
+    );
+
+    if (confirmed) {
+      try {
+        await this.plugin.itemService.deleteItem(this.options.item.path);
+        new Notice(`Deleted: ${this.options.item.title}`);
+        this.close();
+      } catch (error) {
+        console.error('Failed to delete item:', error);
+        new Notice('Failed to delete item');
+      }
+    }
+  }
+
+  private async handleOpenNote(): Promise<void> {
+    if (!this.options.item) return;
+
+    this.close();
+    await this.app.workspace.openLinkText(this.options.item.path, '', false);
+  }
+
+  private showConfirmDialog(title: string, message: string): Promise<boolean> {
+    return new Promise((resolve) => {
+      const modal = document.createElement('div');
+      modal.className = 'planner-confirm-overlay';
+      modal.innerHTML = `
+        <div class="planner-confirm-dialog">
+          <h3>${title}</h3>
+          <p>${message}</p>
+          <div class="planner-confirm-buttons">
+            <button class="planner-btn" data-action="cancel">Cancel</button>
+            <button class="planner-btn planner-btn-danger" data-action="confirm">Delete</button>
+          </div>
+        </div>
+      `;
+
+      modal.querySelector('[data-action="cancel"]')?.addEventListener('click', () => {
+        modal.remove();
+        resolve(false);
+      });
+
+      modal.querySelector('[data-action="confirm"]')?.addEventListener('click', () => {
+        modal.remove();
+        resolve(true);
+      });
+
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.remove();
+          resolve(false);
+        }
+      });
+
+      document.body.appendChild(modal);
+    });
+  }
+
+  onClose(): void {
+    const { contentEl } = this;
+    contentEl.empty();
+  }
+}
+
+// Helper function to open the modal from other parts of the plugin
+export function openItemModal(
+  plugin: PlannerPlugin,
+  options: Omit<ItemModalOptions, 'mode'> & { mode?: 'create' | 'edit' }
+): void {
+  const mode = options.item ? 'edit' : (options.mode || 'create');
+  const modal = new ItemModal(plugin, { ...options, mode });
+  modal.open();
+}

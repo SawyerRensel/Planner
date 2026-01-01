@@ -4,7 +4,7 @@ import { PlannerSettingTab } from './settings/SettingsTab';
 import { ItemService } from './services/ItemService';
 import { BaseGeneratorService } from './services/BaseGeneratorService';
 import { TaskListView, TASK_LIST_VIEW_TYPE } from './views/TaskListView';
-import { QuickCaptureModal } from './components/QuickCapture';
+import { openItemModal } from './components/ItemModal';
 import {
   BASES_TASK_LIST_VIEW_ID,
   createTaskListViewRegistration,
@@ -110,21 +110,21 @@ export default class PlannerPlugin extends Plugin {
       },
     });
 
-    // Create new item command
+    // Create new item command (opens Item Modal)
     this.addCommand({
       id: 'create-item',
       name: 'Create new item',
-      callback: async () => {
-        await this.createNewItem();
+      callback: () => {
+        openItemModal(this, { mode: 'create' });
       },
     });
 
-    // Quick capture command
+    // Quick capture command (now opens Item Modal with NLP support)
     this.addCommand({
       id: 'quick-capture',
       name: 'Quick capture',
       callback: () => {
-        new QuickCaptureModal(this).open();
+        openItemModal(this, { mode: 'create' });
       },
     });
 
@@ -173,19 +173,4 @@ export default class PlannerPlugin extends Plugin {
     }
   }
 
-  private async createNewItem() {
-    const title = `New Item ${Date.now()}`;
-    const item = await this.itemService.createItem(title, {
-      title,
-      tags: ['task'],
-      status: this.settings.quickCaptureDefaultStatus,
-    });
-
-    if (item && this.settings.quickCaptureOpenAfterCreate) {
-      const file = this.app.vault.getAbstractFileByPath(item.path);
-      if (file) {
-        await this.app.workspace.openLinkText(item.path, '', false);
-      }
-    }
-  }
 }

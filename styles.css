@@ -485,3 +485,432 @@
 .planner-status-item .setting-item-control {
   flex-wrap: nowrap;
 }
+
+/* ============================================
+   Item Modal Styles
+   ============================================ */
+
+.planner-item-modal {
+  padding: 20px;
+  min-width: 500px;
+  max-width: 600px;
+}
+
+.planner-item-modal h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+/* Title Input */
+.planner-title-container {
+  margin-bottom: 16px;
+}
+
+.planner-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.planner-title-input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 16px;
+  border: 2px solid var(--background-modifier-border);
+  border-radius: 8px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+}
+
+.planner-title-input:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+}
+
+/* NLP Preview */
+.planner-nlp-preview {
+  margin-bottom: 16px;
+  min-height: 24px;
+}
+
+.planner-nlp-preview-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px;
+  background: var(--background-secondary);
+  border-radius: 6px;
+}
+
+/* Action Bar */
+.planner-action-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  margin-bottom: 16px;
+  border-top: 1px solid var(--background-modifier-border);
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.planner-action-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.planner-action-icon:hover {
+  background: var(--background-modifier-hover);
+}
+
+.planner-action-icon .planner-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.planner-action-icon .planner-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Has-value indicator dot */
+.planner-action-icon.has-value::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  background: var(--interactive-accent);
+  border: 2px solid var(--background-primary);
+  border-radius: 50%;
+}
+
+.planner-action-icon.has-value .planner-icon {
+  color: var(--text-normal);
+}
+
+/* Calendar Dropdown */
+.planner-calendar-dropdown {
+  margin-left: auto;
+}
+
+.planner-calendar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  font-size: 13px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-secondary);
+  color: var(--text-normal);
+  cursor: pointer;
+}
+
+.planner-calendar-btn:hover {
+  background: var(--background-modifier-hover);
+}
+
+.planner-dropdown-icon {
+  display: flex;
+  opacity: 0.6;
+}
+
+.planner-dropdown-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Details Section */
+.planner-details-section {
+  margin-bottom: 16px;
+}
+
+.planner-details-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 0;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.planner-details-toggle:hover {
+  color: var(--text-normal);
+}
+
+.planner-toggle-icon {
+  display: flex;
+}
+
+.planner-toggle-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.planner-details-content {
+  padding-top: 8px;
+}
+
+.planner-details-content.collapsed {
+  display: none;
+}
+
+.planner-details-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 10px;
+  font-size: 14px;
+  font-family: var(--font-text);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  resize: vertical;
+}
+
+.planner-details-textarea:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+}
+
+/* Field Inputs */
+.planner-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.planner-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.planner-field-input {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 13px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+}
+
+.planner-field-input:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+}
+
+/* Modal Buttons */
+.planner-modal-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--background-modifier-border);
+}
+
+.planner-btn-spacer {
+  flex: 1;
+}
+
+.planner-btn-danger {
+  color: var(--text-error);
+  border-color: var(--text-error);
+}
+
+.planner-btn-danger:hover {
+  background: var(--text-error);
+  color: white;
+}
+
+/* Date/Time Picker Overlay */
+.planner-datetime-picker-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.planner-datetime-picker {
+  background: var(--background-primary);
+  border-radius: 12px;
+  padding: 20px;
+  min-width: 300px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.planner-datetime-picker h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.planner-datetime-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.planner-datetime-inputs label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.planner-datetime-inputs input {
+  padding: 8px 10px;
+  font-size: 14px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+}
+
+.planner-datetime-inputs input:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+}
+
+.planner-datetime-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Confirm Dialog */
+.planner-confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+}
+
+.planner-confirm-dialog {
+  background: var(--background-primary);
+  border-radius: 12px;
+  padding: 20px;
+  min-width: 350px;
+  max-width: 450px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.planner-confirm-dialog h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: var(--text-error);
+}
+
+.planner-confirm-dialog p {
+  margin-bottom: 20px;
+  color: var(--text-muted);
+}
+
+.planner-confirm-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Custom Recurrence Modal */
+.planner-custom-recurrence-modal {
+  padding: 20px;
+  min-width: 400px;
+}
+
+.planner-custom-recurrence-modal h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+.planner-custom-recurrence-modal h3 {
+  margin-top: 20px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.planner-days-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.planner-day-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.planner-day-checkbox:hover {
+  background: var(--background-modifier-hover);
+}
+
+.planner-day-checkbox input {
+  margin: 0;
+}
+
+.planner-monthday-input {
+  width: 100%;
+  padding: 8px;
+  font-size: 13px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+}
+
+.planner-interval-unit {
+  font-size: 13px;
+  color: var(--text-muted);
+  padding-left: 8px;
+}
+
+.planner-recurrence-preview {
+  margin-top: 16px;
+  padding: 12px;
+  background: var(--background-secondary);
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.planner-recurrence-preview-text {
+  color: var(--text-muted);
+}

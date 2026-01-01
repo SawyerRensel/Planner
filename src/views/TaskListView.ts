@@ -2,6 +2,7 @@ import { ItemView, WorkspaceLeaf, Menu, setIcon } from 'obsidian';
 import type PlannerPlugin from '../main';
 import { PlannerItem, isTask, isParent } from '../types/item';
 import { getStatusConfig, getPriorityConfig, getCalendarColor } from '../types/settings';
+import { openItemModal } from '../components/ItemModal';
 
 export const TASK_LIST_VIEW_TYPE = 'planner-task-list';
 
@@ -349,7 +350,8 @@ export class TaskListView extends ItemView {
   }
 
   private async openItem(item: PlannerItem) {
-    await this.app.workspace.openLinkText(item.path, '', false);
+    // Open ItemModal for editing
+    openItemModal(this.plugin, { mode: 'edit', item });
   }
 
   private showContextMenu(event: MouseEvent, item: PlannerItem) {
@@ -409,16 +411,12 @@ export class TaskListView extends ItemView {
   }
 
   private async createNewItem() {
-    const title = `New Task`;
-    const item = await this.plugin.itemService.createItem(title, {
-      title,
-      tags: ['task'],
-      status: this.plugin.settings.quickCaptureDefaultStatus,
+    // Open ItemModal for creating new task
+    openItemModal(this.plugin, {
+      mode: 'create',
+      prePopulate: {
+        tags: ['task'],
+      },
     });
-
-    if (item) {
-      await this.refresh();
-      await this.openItem(item);
-    }
   }
 }
