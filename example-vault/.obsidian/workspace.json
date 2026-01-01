@@ -25,14 +25,13 @@
             "id": "af2c2d03469c8e4d",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "bases",
               "state": {
-                "file": "notes/obsidian-planner-prd.md",
-                "mode": "source",
-                "source": false
+                "file": "Planner/Calendar.base",
+                "viewName": "Calendar"
               },
-              "icon": "lucide-file",
-              "title": "obsidian-planner-prd"
+              "icon": "calendar",
+              "title": "Calendar"
             }
           },
           {
@@ -76,7 +75,8 @@
               "title": "Notes"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -210,13 +210,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "notes/feedback-and-ideas.md",
+                "file": "Planner/Calendar.base",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of feedback-and-ideas"
+              "title": "Outline of Calendar"
             }
           },
           {
@@ -246,23 +246,16 @@
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
       "bases:Create new base": false,
-      "planner:Open Planner Task List": false,
-      "tasknotes:Open mini calendar": false,
-      "tasknotes:Open advanced calendar": false,
-      "tasknotes:Open task list": false,
-      "tasknotes:Open agenda": false,
-      "tasknotes:Open kanban board": false,
-      "tasknotes:Open pomodoro": false,
-      "tasknotes:Open pomodoro stats": false,
-      "tasknotes:Create new task": false
+      "planner:Open Planner Task List": false
     }
   },
-  "active": "657d18c0aae1861a",
+  "active": "af2c2d03469c8e4d",
   "lastOpenFiles": [
+    "Planner/Test item.md",
+    "Planner/Calendar.base",
     "notes/obsidian-planner-prd.md",
     "notes/feedback-and-ideas.md",
     "Planner/Meeting.md",
-    "Planner/Calendar.base",
     "notes/questions.md",
     "notes/obsidian-planner-prd.md.tmp.21121.1767278295010",
     "notes/obsidian-planner-prd.md.tmp.21121.1767278286982",
@@ -295,7 +288,6 @@
     "DailyNotes/2025-12-18.md",
     "DailyNotes/2025-12-16.md",
     "DailyNotes/2025-12-10.md",
-    "DailyNotes/2025-12-11.md",
     "media/gantt_view_mockup_example.png"
   ]
 }

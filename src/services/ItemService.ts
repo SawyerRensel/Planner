@@ -225,6 +225,40 @@ export class ItemService {
   }
 
   /**
+   * Get the body content (markdown below frontmatter) of an item
+   */
+  async getItemBody(path: string): Promise<string> {
+    const file = this.app.vault.getAbstractFileByPath(path);
+    if (!(file instanceof TFile)) {
+      return '';
+    }
+
+    const content = await this.app.vault.read(file);
+    const { body } = this.parseFrontmatter(content);
+    return body.trim();
+  }
+
+  /**
+   * Update an item's body content
+   */
+  async updateItemBody(path: string, newBody: string): Promise<boolean> {
+    const file = this.app.vault.getAbstractFileByPath(path);
+    if (!(file instanceof TFile)) {
+      return false;
+    }
+
+    const content = await this.app.vault.read(file);
+    const match = content.match(/^---\n[\s\S]*?\n---\n?/);
+    if (!match) {
+      return false;
+    }
+
+    const newContent = match[0] + '\n' + newBody;
+    await this.app.vault.modify(file, newContent);
+    return true;
+  }
+
+  /**
    * Get items with computed fields
    */
   async getItemsWithComputed(): Promise<PlannerItemWithComputed[]> {

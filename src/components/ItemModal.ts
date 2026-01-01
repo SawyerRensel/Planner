@@ -11,6 +11,7 @@ import {
   type RecurrenceData,
 } from './menus';
 import { CustomRecurrenceModal } from './CustomRecurrenceModal';
+import { FileLinkSuggest, TagSuggest, ContextSuggest } from './suggests';
 
 interface ItemModalOptions {
   mode: 'create' | 'edit';
@@ -37,6 +38,7 @@ export class ItemModal extends Modal {
 
   // Form state
   private title = '';
+  private summary = '';
   private dateStart: string | null = null;
   private dateEnd: string | null = null;
   private allDay = true;
@@ -53,11 +55,21 @@ export class ItemModal extends Modal {
 
   // UI elements
   private titleInput: HTMLInputElement | null = null;
+  private summaryTextarea: HTMLTextAreaElement | null = null;
   private nlpPreviewEl: HTMLElement | null = null;
+  private nlpLegendEl: HTMLElement | null = null;
+  private nlpLegendExpanded = false;
   private actionBar: HTMLElement | null = null;
   private detailsTextarea: HTMLTextAreaElement | null = null;
   private detailsSection: HTMLElement | null = null;
   private detailsExpanded = false;
+
+  // Input references for updating
+  private contextInput: HTMLInputElement | null = null;
+  private peopleInput: HTMLInputElement | null = null;
+  private parentInput: HTMLInputElement | null = null;
+  private blockedByInput: HTMLInputElement | null = null;
+  private tagsInput: HTMLInputElement | null = null;
 
   constructor(plugin: PlannerPlugin, options: ItemModalOptions) {
     super(plugin.app);
@@ -73,6 +85,7 @@ export class ItemModal extends Modal {
     if (mode === 'edit' && item) {
       // Load from existing item
       this.title = item.title || '';
+      this.summary = item.summary || '';
       this.dateStart = item.date_start_scheduled || null;
       this.dateEnd = item.date_end_scheduled || null;
       this.allDay = item.all_day ?? true;
@@ -102,6 +115,7 @@ export class ItemModal extends Modal {
     // Apply pre-population (overrides loaded values)
     if (prePopulate) {
       if (prePopulate.title) this.title = prePopulate.title;
+      if (prePopulate.summary) this.summary = prePopulate.summary;
       if (prePopulate.date_start_scheduled) this.dateStart = prePopulate.date_start_scheduled;
       if (prePopulate.date_end_scheduled) this.dateEnd = prePopulate.date_end_scheduled;
       if (prePopulate.all_day !== undefined) this.allDay = prePopulate.all_day;
@@ -123,7 +137,7 @@ export class ItemModal extends Modal {
     }
   }
 
-  onOpen(): void {
+  async onOpen(): Promise<void> {
     const { contentEl } = this;
     contentEl.empty();
     contentEl.addClass('planner-item-modal');
@@ -135,16 +149,20 @@ export class ItemModal extends Modal {
     // Title input
     this.createTitleInput(contentEl);
 
-    // NLP preview (only in create mode with NLP enabled)
-    if (this.options.mode === 'create') {
-      this.nlpPreviewEl = contentEl.createDiv({ cls: 'planner-nlp-preview' });
-    }
-
     // Icon action bar
     this.createActionBar(contentEl);
 
-    // Details section (collapsible)
-    this.createDetailsSection(contentEl);
+    // NLP preview and legend (only in create mode) - now below icon bar
+    if (this.options.mode === 'create') {
+      this.nlpPreviewEl = contentEl.createDiv({ cls: 'planner-nlp-preview' });
+      this.createNLPLegend(contentEl);
+    }
+
+    // Summary field (resizable)
+    this.createSummaryInput(contentEl);
+
+    // Details section (collapsible) - load existing content
+    await this.createDetailsSection(contentEl);
 
     // Additional fields
     this.createFieldInputs(contentEl);
@@ -183,6 +201,60 @@ export class ItemModal extends Modal {
         e.preventDefault();
         this.handleSave();
       }
+    });
+  }
+
+  private createSummaryInput(container: HTMLElement): void {
+    const summaryContainer = container.createDiv({ cls: 'planner-summary-container' });
+    summaryContainer.createEl('label', { text: 'Summary', cls: 'planner-label' });
+
+    this.summaryTextarea = summaryContainer.createEl('textarea', {
+      cls: 'planner-summary-textarea',
+      placeholder: 'Brief summary of the item...',
+    });
+    this.summaryTextarea.value = this.summary;
+    this.summaryTextarea.addEventListener('input', () => {
+      this.summary = this.summaryTextarea?.value || '';
+    });
+  }
+
+  private createNLPLegend(container: HTMLElement): void {
+    this.nlpLegendEl = container.createDiv({ cls: 'planner-nlp-legend' });
+
+    const toggle = this.nlpLegendEl.createDiv({ cls: 'planner-nlp-legend-toggle' });
+    const toggleIcon = toggle.createSpan({ cls: 'planner-toggle-icon' });
+    setIcon(toggleIcon, 'help-circle');
+    toggle.createSpan({ text: 'NLP Syntax Help' });
+
+    const content = this.nlpLegendEl.createDiv({
+      cls: `planner-nlp-legend-content ${this.nlpLegendExpanded ? '' : 'collapsed'}`,
+    });
+
+    const examples = [
+      { syntax: 'tomorrow at 2pm', desc: 'Natural language dates' },
+      { syntax: 'next Friday', desc: 'Relative dates' },
+      { syntax: '@work', desc: 'Context (e.g., @home, @errands)' },
+      { syntax: '#task', desc: 'Tags (e.g., #event, #project)' },
+      { syntax: '!high', desc: 'Priority (e.g., !urgent, !low)' },
+      { syntax: '>In-Progress', desc: 'Status (use hyphens for spaces)' },
+      { syntax: '+[[Parent Note]]', desc: 'Parent item link' },
+      { syntax: '~Work', desc: 'Calendar assignment' },
+    ];
+
+    const table = content.createEl('table', { cls: 'planner-nlp-legend-table' });
+    for (const { syntax, desc } of examples) {
+      const row = table.createEl('tr');
+      row.createEl('td', { text: syntax, cls: 'planner-nlp-syntax' });
+      row.createEl('td', { text: desc, cls: 'planner-nlp-desc' });
+    }
+
+    const exampleText = content.createEl('p', { cls: 'planner-nlp-example' });
+    exampleText.createEl('strong', { text: 'Example: ' });
+    exampleText.createSpan({ text: '"Team meeting tomorrow at 2pm @work #event !high ~Work"' });
+
+    toggle.addEventListener('click', () => {
+      this.nlpLegendExpanded = !this.nlpLegendExpanded;
+      content.classList.toggle('collapsed', !this.nlpLegendExpanded);
     });
   }
 
@@ -294,6 +366,7 @@ export class ItemModal extends Modal {
           btn.textContent = value[0] || 'Calendar';
           btn.appendChild(icon);
           this.updateIconStates();
+          this.updateNLPPreview();
         },
         plugin: this.plugin,
       });
@@ -381,6 +454,7 @@ export class ItemModal extends Modal {
           this.dateEnd = value;
         }
         this.updateIconStates();
+        this.updateNLPPreview();
       },
       plugin: this.plugin,
       title: type === 'start' ? 'Start Date' : 'End Date',
@@ -394,6 +468,7 @@ export class ItemModal extends Modal {
       onSelect: (value) => {
         this.status = value;
         this.updateIconStates();
+        this.updateNLPPreview();
       },
       plugin: this.plugin,
     });
@@ -406,6 +481,7 @@ export class ItemModal extends Modal {
       onSelect: (value) => {
         this.priority = value;
         this.updateIconStates();
+        this.updateNLPPreview();
       },
       plugin: this.plugin,
     });
@@ -419,11 +495,13 @@ export class ItemModal extends Modal {
       onSelect: (value) => {
         this.recurrence = value;
         this.updateIconStates();
+        this.updateNLPPreview();
       },
       onCustom: () => {
         const modal = new CustomRecurrenceModal(this.plugin, this.recurrence, (result) => {
           this.recurrence = result;
           this.updateIconStates();
+          this.updateNLPPreview();
         });
         modal.open();
       },
@@ -433,7 +511,7 @@ export class ItemModal extends Modal {
     menu.show(event);
   }
 
-  private createDetailsSection(container: HTMLElement): void {
+  private async createDetailsSection(container: HTMLElement): Promise<void> {
     this.detailsSection = container.createDiv({ cls: 'planner-details-section' });
 
     const toggle = this.detailsSection.createDiv({ cls: 'planner-details-toggle' });
@@ -449,7 +527,16 @@ export class ItemModal extends Modal {
       cls: 'planner-details-textarea',
       placeholder: 'Add description or notes...',
     });
-    this.detailsTextarea.value = this.details;
+
+    // Load existing content from item body in edit mode
+    if (this.options.mode === 'edit' && this.options.item) {
+      const body = await this.plugin.itemService.getItemBody(this.options.item.path);
+      this.details = body;
+      this.detailsTextarea.value = body;
+    } else {
+      this.detailsTextarea.value = this.details;
+    }
+
     this.detailsTextarea.addEventListener('input', () => {
       this.details = this.detailsTextarea?.value || '';
     });
@@ -464,39 +551,65 @@ export class ItemModal extends Modal {
   private createFieldInputs(container: HTMLElement): void {
     const fieldsContainer = container.createDiv({ cls: 'planner-fields' });
 
-    // Context
-    this.createTextListInput(fieldsContainer, 'Context', this.context, (value) => {
-      this.context = value;
-    }, '@work, @home, @errands');
+    // Context (with autocomplete)
+    this.contextInput = this.createTextListInputWithSuggest(
+      fieldsContainer,
+      'Context',
+      this.context,
+      (value) => { this.context = value; },
+      '@work, @home, @errands',
+      'context'
+    );
 
-    // People
-    this.createTextListInput(fieldsContainer, 'People', this.people, (value) => {
-      this.people = value;
-    }, '[[Person 1]], [[Person 2]]');
+    // People (with file link suggest)
+    this.peopleInput = this.createTextListInputWithSuggest(
+      fieldsContainer,
+      'People',
+      this.people,
+      (value) => { this.people = value; },
+      '[[Person 1]], [[Person 2]]',
+      'file'
+    );
 
-    // Parent
-    this.createTextInput(fieldsContainer, 'Parent', this.parent || '', (value) => {
-      this.parent = value || null;
-    }, '[[Parent Item]]');
+    // Parent (with file link suggest)
+    this.parentInput = this.createTextInputWithSuggest(
+      fieldsContainer,
+      'Parent',
+      this.parent || '',
+      (value) => { this.parent = value || null; },
+      '[[Parent Item]]',
+      'file'
+    );
 
-    // Blocked by
-    this.createTextListInput(fieldsContainer, 'Blocked by', this.blockedBy, (value) => {
-      this.blockedBy = value;
-    }, '[[Task 1]], [[Task 2]]');
+    // Blocked by (with file link suggest)
+    this.blockedByInput = this.createTextListInputWithSuggest(
+      fieldsContainer,
+      'Blocked by',
+      this.blockedBy,
+      (value) => { this.blockedBy = value; },
+      '[[Task 1]], [[Task 2]]',
+      'file'
+    );
 
-    // Tags
-    this.createTextListInput(fieldsContainer, 'Tags', this.tags, (value) => {
-      this.tags = value;
-    }, 'task, event, project');
+    // Tags (with tag suggest)
+    this.tagsInput = this.createTextListInputWithSuggest(
+      fieldsContainer,
+      'Tags',
+      this.tags,
+      (value) => { this.tags = value; },
+      'task, event, project',
+      'tag'
+    );
   }
 
-  private createTextInput(
+  private createTextInputWithSuggest(
     container: HTMLElement,
     label: string,
     value: string,
     onChange: (value: string) => void,
-    placeholder: string
-  ): void {
+    placeholder: string,
+    suggestType: 'file' | 'tag' | 'context'
+  ): HTMLInputElement {
     const field = container.createDiv({ cls: 'planner-field' });
     field.createEl('label', { text: label, cls: 'planner-label' });
     const input = field.createEl('input', {
@@ -506,15 +619,27 @@ export class ItemModal extends Modal {
       cls: 'planner-field-input',
     });
     input.addEventListener('input', () => onChange(input.value));
+
+    // Attach suggest
+    if (suggestType === 'file') {
+      new FileLinkSuggest(this.app, input);
+    } else if (suggestType === 'tag') {
+      new TagSuggest(this.app, input);
+    } else if (suggestType === 'context') {
+      new ContextSuggest(this.app, input);
+    }
+
+    return input;
   }
 
-  private createTextListInput(
+  private createTextListInputWithSuggest(
     container: HTMLElement,
     label: string,
     values: string[],
     onChange: (value: string[]) => void,
-    placeholder: string
-  ): void {
+    placeholder: string,
+    suggestType: 'file' | 'tag' | 'context'
+  ): HTMLInputElement {
     const field = container.createDiv({ cls: 'planner-field' });
     field.createEl('label', { text: label, cls: 'planner-label' });
     const input = field.createEl('input', {
@@ -530,6 +655,17 @@ export class ItemModal extends Modal {
         .filter(s => s.length > 0);
       onChange(newValues);
     });
+
+    // Attach suggest
+    if (suggestType === 'file') {
+      new FileLinkSuggest(this.app, input);
+    } else if (suggestType === 'tag') {
+      new TagSuggest(this.app, input);
+    } else if (suggestType === 'context') {
+      new ContextSuggest(this.app, input);
+    }
+
+    return input;
   }
 
   private createButtons(container: HTMLElement): void {
@@ -658,23 +794,46 @@ export class ItemModal extends Modal {
     if (parsed.status) this.status = parsed.status;
     if (parsed.parent) this.parent = parsed.parent;
     if (parsed.calendar) this.calendars = parsed.calendar;
+
+    // Update field inputs to reflect parsed values
+    if (this.contextInput && parsed.context) {
+      this.contextInput.value = parsed.context.join(', ');
+    }
+    if (this.tagsInput && parsed.tags) {
+      this.tagsInput.value = parsed.tags.join(', ');
+    }
+    if (this.parentInput && parsed.parent) {
+      this.parentInput.value = parsed.parent;
+    }
   }
 
   private updateNLPPreview(): void {
     if (!this.nlpPreviewEl) return;
     this.nlpPreviewEl.empty();
 
-    if (!this.titleInput?.value.trim()) {
+    // Show preview if we have any data to display
+    const hasData = this.dateStart || this.dateEnd || this.context.length > 0 ||
+      this.tags.length > 0 || this.priority || this.status ||
+      this.calendars.length > 0 || this.recurrence?.repeat_frequency;
+
+    if (!hasData) {
       return;
     }
 
     const preview = this.nlpPreviewEl.createDiv({ cls: 'planner-nlp-preview-content' });
 
-    // Date
+    // Date Start
     if (this.dateStart) {
       const date = new Date(this.dateStart);
       const dateStr = this.allDay ? date.toLocaleDateString() : date.toLocaleString();
       this.addPreviewBadge(preview, `📅 ${dateStr}`, 'date');
+    }
+
+    // Date End
+    if (this.dateEnd) {
+      const date = new Date(this.dateEnd);
+      const dateStr = this.allDay ? date.toLocaleDateString() : date.toLocaleString();
+      this.addPreviewBadge(preview, `🏁 ${dateStr}`, 'date');
     }
 
     // Context
@@ -703,6 +862,11 @@ export class ItemModal extends Modal {
     if (this.calendars.length > 0) {
       const color = this.plugin.settings.calendarColors[this.calendars[0]];
       this.addPreviewBadge(preview, `~${this.calendars[0]}`, 'calendar', color);
+    }
+
+    // Recurrence
+    if (this.recurrence?.repeat_frequency) {
+      this.addPreviewBadge(preview, `🔄 ${this.recurrence.repeat_frequency}`, 'recurrence');
     }
   }
 
@@ -737,6 +901,7 @@ export class ItemModal extends Modal {
 
     const frontmatter: Partial<ItemFrontmatter> = {
       title,
+      summary: this.summary || undefined,
       tags: this.tags.length > 0 ? this.tags : ['task'],
       status: this.status || this.plugin.settings.quickCaptureDefaultStatus,
       calendar: this.calendars.length > 0 ? this.calendars : undefined,
@@ -766,6 +931,10 @@ export class ItemModal extends Modal {
       if (this.options.mode === 'edit' && this.options.item) {
         // Update existing item
         await this.plugin.itemService.updateItem(this.options.item.path, frontmatter);
+        // Also update the body if changed
+        if (this.details !== '') {
+          await this.plugin.itemService.updateItemBody(this.options.item.path, this.details);
+        }
         new Notice(`Updated: ${title}`);
       } else {
         // Create new item

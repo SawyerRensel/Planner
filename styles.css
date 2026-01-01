@@ -914,3 +914,118 @@
 .planner-recurrence-preview-text {
   color: var(--text-muted);
 }
+
+/* Summary Input */
+.planner-summary-container {
+  margin-bottom: 16px;
+}
+
+.planner-summary-textarea {
+  width: 100%;
+  min-height: 60px;
+  max-height: 200px;
+  padding: 10px;
+  font-size: 13px;
+  font-family: var(--font-text);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  resize: vertical;
+}
+
+.planner-summary-textarea:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+}
+
+/* NLP Syntax Legend */
+.planner-nlp-legend {
+  margin-bottom: 16px;
+}
+
+.planner-nlp-legend-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 0;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.planner-nlp-legend-toggle:hover {
+  color: var(--text-normal);
+}
+
+.planner-nlp-legend-toggle .planner-toggle-icon {
+  display: flex;
+}
+
+.planner-nlp-legend-toggle .planner-toggle-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.planner-nlp-legend-content {
+  padding: 12px;
+  background: var(--background-secondary);
+  border-radius: 6px;
+  margin-top: 8px;
+}
+
+.planner-nlp-legend-content.collapsed {
+  display: none;
+}
+
+.planner-nlp-legend-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 12px;
+}
+
+.planner-nlp-legend-table tr {
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.planner-nlp-legend-table tr:last-child {
+  border-bottom: none;
+}
+
+.planner-nlp-legend-table td {
+  padding: 6px 8px;
+  font-size: 12px;
+}
+
+.planner-nlp-syntax {
+  font-family: var(--font-monospace);
+  color: var(--text-accent);
+  white-space: nowrap;
+}
+
+.planner-nlp-desc {
+  color: var(--text-muted);
+}
+
+.planner-nlp-example {
+  font-size: 12px;
+  margin: 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--background-modifier-border);
+}
+
+.planner-nlp-example span {
+  font-family: var(--font-monospace);
+  color: var(--text-accent);
+}
+
+/* File Link Suggest Styles */
+.suggestion-title {
+  font-weight: 500;
+}
+
+.suggestion-path {
+  display: block;
+  color: var(--text-muted);
+  font-size: 11px;
+}
