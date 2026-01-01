@@ -52,6 +52,7 @@ export interface PriorityConfig {
   name: string;
   color: string;
   weight: number;
+  icon?: string; // Lucide icon name (e.g., 'alert-triangle', 'arrow-up', 'minus')
 }
 
 /**
@@ -84,21 +85,21 @@ export const DEFAULT_SETTINGS: PlannerSettings = {
 
   // Status Configuration
   statuses: [
-    { name: 'Idea', color: '#a855f7', isCompleted: false, icon: 'lightbulb' },
-    { name: 'To-Do', color: '#6b7280', isCompleted: false, icon: 'circle' },
-    { name: 'In-Progress', color: '#3b82f6', isCompleted: false, icon: 'loader' },
+    { name: 'Idea', color: '#f7e955', isCompleted: false, icon: 'circle-dashed' },
+    { name: 'To-Do', color: '#9c5ee8', isCompleted: false, icon: 'circle-dot-dashed' },
+    { name: 'In-Progress', color: '#3b82f6', isCompleted: false, icon: 'circle-dot' },
     { name: 'In-Review', color: '#f97316', isCompleted: false, icon: 'eye' },
-    { name: 'Done', color: '#22c55e', isCompleted: true, icon: 'check-circle' },
-    { name: 'Cancelled', color: '#ef4444', isCompleted: true, icon: 'x-circle' },
+    { name: 'Done', color: '#22c55e', isCompleted: true, icon: 'circle-check-big' },
+    { name: 'Cancelled', color: '#ef4444', isCompleted: true, icon: 'ban' },
   ],
 
   // Priority Configuration
   priorities: [
-    { name: 'Urgent', color: '#ef4444', weight: 4 },
-    { name: 'High', color: '#f97316', weight: 3 },
-    { name: 'Medium', color: '#eab308', weight: 2 },
-    { name: 'Low', color: '#3b82f6', weight: 1 },
-    { name: 'None', color: '#6b7280', weight: 0 },
+    { name: 'Urgent', color: '#ef4444', weight: 4, icon: 'alert-triangle' },
+    { name: 'High', color: '#f97316', weight: 3, icon: 'chevrons-up' },
+    { name: 'Medium', color: '#eab308', weight: 2, icon: 'chevron-up' },
+    { name: 'Low', color: '#3b82f6', weight: 1, icon: 'chevron-down' },
+    { name: 'None', color: '#6b7280', weight: 0, icon: 'minus' },
   ],
 
   // Calendar Colors

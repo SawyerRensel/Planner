@@ -247,6 +247,10 @@ export class PlannerSettingTab extends PluginSettingTab {
 
     // Priority Configuration
     containerEl.createEl('h2', { text: 'Priority Configuration' });
+    containerEl.createEl('p', {
+      text: 'Define priorities for tasks. Use Lucide icon names (e.g., alert-triangle, chevrons-up, minus).',
+      cls: 'setting-item-description'
+    });
     this.renderPriorityList(containerEl);
 
     // Calendar Colors
@@ -364,6 +368,7 @@ export class PlannerSettingTab extends PluginSettingTab {
             name: 'New Priority',
             color: '#6b7280',
             weight: 0,
+            icon: 'star',
           });
           await this.plugin.saveSettings();
           this.display();
@@ -371,11 +376,19 @@ export class PlannerSettingTab extends PluginSettingTab {
   }
 
   private renderPriorityItem(containerEl: HTMLElement, priority: PriorityConfig, index: number): void {
-    new Setting(containerEl)
+    const setting = new Setting(containerEl)
       .addText(text => text
         .setValue(priority.name)
+        .setPlaceholder('Priority name')
         .onChange(async (value) => {
           this.plugin.settings.priorities[index].name = value;
+          await this.plugin.saveSettings();
+        }))
+      .addText(text => text
+        .setValue(priority.icon || '')
+        .setPlaceholder('Icon (e.g., star)')
+        .onChange(async (value) => {
+          this.plugin.settings.priorities[index].icon = value || undefined;
           await this.plugin.saveSettings();
         }))
       .addColorPicker(picker => picker
@@ -399,6 +412,8 @@ export class PlannerSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
           this.display();
         }));
+
+    setting.settingEl.addClass('planner-priority-item');
   }
 
   private renderCalendarColors(containerEl: HTMLElement): void {

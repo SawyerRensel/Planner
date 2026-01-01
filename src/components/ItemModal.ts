@@ -455,14 +455,20 @@ export class ItemModal extends Modal {
     const priorityIcon = this.actionBar.querySelector('[data-type="priority"]');
     if (priorityIcon) {
       this.updateIconState(priorityIcon as HTMLElement, !!this.priority, this.priority || 'Priority');
-      // Apply priority color
+      const iconEl = priorityIcon.querySelector('.planner-icon') as HTMLElement;
+      // Apply priority icon and color
       if (this.priority) {
         const config = this.plugin.settings.priorities.find(p => p.name === this.priority);
         if (config) {
-          (priorityIcon.querySelector('.planner-icon') as HTMLElement)?.style.setProperty('color', config.color);
+          // Update icon to match priority's custom icon
+          const priorityIconName = config.icon || 'star';
+          setIcon(iconEl, priorityIconName);
+          iconEl?.style.setProperty('color', config.color);
         }
       } else {
-        (priorityIcon.querySelector('.planner-icon') as HTMLElement)?.style.removeProperty('color');
+        // Reset to default icon and color
+        setIcon(iconEl, 'star');
+        iconEl?.style.removeProperty('color');
       }
     }
 
@@ -470,14 +476,20 @@ export class ItemModal extends Modal {
     const statusIcon = this.actionBar.querySelector('[data-type="status"]');
     if (statusIcon) {
       this.updateIconState(statusIcon as HTMLElement, !!this.status, this.status || 'Status');
-      // Apply status color
+      const iconEl = statusIcon.querySelector('.planner-icon') as HTMLElement;
+      // Apply status icon and color
       if (this.status) {
         const config = this.plugin.settings.statuses.find(s => s.name === this.status);
         if (config) {
-          (statusIcon.querySelector('.planner-icon') as HTMLElement)?.style.setProperty('color', config.color);
+          // Update icon to match status's custom icon
+          const statusIconName = config.icon || (config.isCompleted ? 'check-circle' : 'circle');
+          setIcon(iconEl, statusIconName);
+          iconEl?.style.setProperty('color', config.color);
         }
       } else {
-        (statusIcon.querySelector('.planner-icon') as HTMLElement)?.style.removeProperty('color');
+        // Reset to default icon and color
+        setIcon(iconEl, 'circle');
+        iconEl?.style.removeProperty('color');
       }
     }
 
@@ -691,7 +703,7 @@ export class ItemModal extends Modal {
       'Context',
       this.context,
       (value) => { this.context = value; },
-      '@work, @home, @errands',
+      'work, home, errands',
       'context'
     );
 
