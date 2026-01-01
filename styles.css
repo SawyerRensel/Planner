@@ -498,7 +498,28 @@
 
 .planner-item-modal h2 {
   margin-top: 0;
-  margin-bottom: 20px;
+  margin-bottom: 0;
+}
+
+/* Modal Header */
+.planner-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.planner-open-note-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.planner-open-note-btn svg {
+  width: 14px;
+  height: 14px;
 }
 
 /* Title Input */
@@ -529,10 +550,14 @@
   border-color: var(--interactive-accent);
 }
 
+/* Hidden utility class */
+.planner-item-modal .hidden {
+  display: none !important;
+}
+
 /* NLP Preview */
 .planner-nlp-preview {
   margin-bottom: 16px;
-  min-height: 24px;
 }
 
 .planner-nlp-preview-content {
@@ -605,6 +630,48 @@
 /* Calendar Dropdown */
 .planner-calendar-dropdown {
   margin-left: auto;
+}
+
+/* Detailed Options Toggle */
+.planner-detailed-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px;
+  margin: 8px 0;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 12px;
+  transition: all 0.15s ease;
+}
+
+.planner-detailed-toggle:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.planner-detailed-toggle .planner-icon {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.planner-detailed-toggle .planner-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Detailed Options Container */
+.planner-detailed-options {
+  transition: all 0.2s ease;
+}
+
+.planner-detailed-options.collapsed {
+  display: none;
 }
 
 .planner-calendar-btn {
@@ -687,6 +754,100 @@
 .planner-details-textarea:focus {
   outline: none;
   border-color: var(--interactive-accent);
+}
+
+.planner-details-textarea.hidden {
+  display: none;
+}
+
+/* Markdown Preview */
+.planner-details-markdown-preview {
+  width: 100%;
+  min-height: 80px;
+  padding: 10px;
+  font-size: 14px;
+  font-family: var(--font-text);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  cursor: text;
+  overflow: auto;
+  max-height: 300px;
+}
+
+.planner-details-markdown-preview:hover {
+  border-color: var(--background-modifier-border-hover);
+  background: var(--background-primary-alt);
+}
+
+.planner-details-markdown-preview.hidden {
+  display: none;
+}
+
+.planner-details-placeholder {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Markdown content styling within preview */
+.planner-details-markdown-preview p {
+  margin: 0 0 0.5em 0;
+}
+
+.planner-details-markdown-preview p:last-child {
+  margin-bottom: 0;
+}
+
+.planner-details-markdown-preview ul,
+.planner-details-markdown-preview ol {
+  margin: 0 0 0.5em 0;
+  padding-left: 1.5em;
+}
+
+.planner-details-markdown-preview h1,
+.planner-details-markdown-preview h2,
+.planner-details-markdown-preview h3,
+.planner-details-markdown-preview h4,
+.planner-details-markdown-preview h5,
+.planner-details-markdown-preview h6 {
+  margin: 0.5em 0 0.25em 0;
+}
+
+.planner-details-markdown-preview code {
+  background: var(--background-secondary);
+  padding: 0.1em 0.3em;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+.planner-details-markdown-preview pre {
+  background: var(--background-secondary);
+  padding: 0.5em;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin: 0.5em 0;
+}
+
+.planner-details-markdown-preview pre code {
+  background: none;
+  padding: 0;
+}
+
+.planner-details-markdown-preview blockquote {
+  margin: 0.5em 0;
+  padding-left: 1em;
+  border-left: 3px solid var(--interactive-accent);
+  color: var(--text-muted);
+}
+
+.planner-details-markdown-preview a {
+  color: var(--text-accent);
+  text-decoration: none;
+}
+
+.planner-details-markdown-preview a:hover {
+  text-decoration: underline;
 }
 
 /* Field Inputs */

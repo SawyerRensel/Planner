@@ -42,6 +42,7 @@ export interface StatusConfig {
   name: string;
   color: string;
   isCompleted: boolean;
+  icon?: string; // Lucide icon name (e.g., 'lightbulb', 'circle', 'check-circle')
 }
 
 /**
@@ -83,12 +84,12 @@ export const DEFAULT_SETTINGS: PlannerSettings = {
 
   // Status Configuration
   statuses: [
-    { name: 'Idea', color: '#a855f7', isCompleted: false },
-    { name: 'To-Do', color: '#6b7280', isCompleted: false },
-    { name: 'In-Progress', color: '#3b82f6', isCompleted: false },
-    { name: 'In-Review', color: '#f97316', isCompleted: false },
-    { name: 'Done', color: '#22c55e', isCompleted: true },
-    { name: 'Cancelled', color: '#ef4444', isCompleted: true },
+    { name: 'Idea', color: '#a855f7', isCompleted: false, icon: 'lightbulb' },
+    { name: 'To-Do', color: '#6b7280', isCompleted: false, icon: 'circle' },
+    { name: 'In-Progress', color: '#3b82f6', isCompleted: false, icon: 'loader' },
+    { name: 'In-Review', color: '#f97316', isCompleted: false, icon: 'eye' },
+    { name: 'Done', color: '#22c55e', isCompleted: true, icon: 'check-circle' },
+    { name: 'Cancelled', color: '#ef4444', isCompleted: true, icon: 'x-circle' },
   ],
 
   // Priority Configuration

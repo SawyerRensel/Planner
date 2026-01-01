@@ -85,7 +85,8 @@
               "title": "Notes"
             }
           }
-        ]
+        ],
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -219,13 +220,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "notes/feedback-and-ideas.md",
+                "file": "Planner/Calendar.base",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of feedback-and-ideas"
+              "title": "Outline of Calendar"
             }
           },
           {
@@ -267,10 +268,14 @@
       "obsidian-full-calendar:Open Full Calendar": false
     }
   },
-  "active": "657d18c0aae1861a",
+  "active": "af2c2d03469c8e4d",
   "lastOpenFiles": [
+    "TaskNotes/Views/calendar-default.base",
+    "Planner/Test item.md",
     "Planner/Calendar.base",
     "notes/feedback-and-ideas.md",
+    "Planner/test.md",
+    "Planner/Testing.md",
     "Planner/Website Redesign.md",
     "Planner/Vacation.md",
     "Planner/Team Meeting.md",
@@ -279,7 +284,6 @@
     "Planner/Grocery Shopping.md",
     "Planner/Fix Login Bug.md",
     "Planner/Design Mockups.md",
-    "Planner/Test item.md",
     "notes/obsidian-planner-prd.md",
     "notes/questions.md",
     "notes/obsidian-planner-prd.md.tmp.21121.1767278295010",
@@ -293,7 +297,6 @@
     "Planner/New Item.md",
     "TaskNotes/Tasks/TaskNotes Example Recurring Task.md",
     "notes/Notes.md",
-    "TaskNotes/Views/calendar-default.base",
     "notes/Pasted image 20260101091932.png",
     "notes/Pasted image 20260101091842.png",
     "Planner/New Item 1.md",
@@ -304,8 +307,6 @@
     "DailyNotes/2025-12-24.md",
     "DailyNotes/2025-12-15.md",
     "DailyNotes/2025-12-18.md",
-    "DailyNotes/2025-12-16.md",
-    "DailyNotes/2025-12-10.md",
     "media/gantt_view_mockup_example.png"
   ]
 }

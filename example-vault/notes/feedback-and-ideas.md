@@ -37,13 +37,22 @@ Old
 - [x] When clicking the calendar to add an event, don't automatically open the new event note.  Instead, let's open the modal edit popup
 - [x] The parsed NLP bar should update anytime a dropdown is changed
 - [x] Let's have a collapsible legend for all options with examples for the NLP bar.   
-- [ ] Let's move the icon row above the NLP/title input
-- [ ] Let's add a "Show Detailed Options" icon (down carrot) to hide Context, Parent, People, Blocked by, and Tags inputs behind.
-- [ ] Let's have the Details input (showing Note Content) render the Markdown like it does in an Obsidian Note.  Right now it's only showing the Source View Markdown content.  Refer to TaskNotes' implementation of this if it's helpful.
-- [ ] Let's move the `Open Note` button to the top left of the Item Modal  
+- [x] Let's move the icon row above the NLP/title input
+- [x] Let's add a "Show Detailed Options" icon (down carrot) to the icon row to hide Summary, Details (Note content), Context, Parent, People, Blocked by, and Tags inputs behind.
+- [x] Let's have the Details input (showing Note Content) render the Markdown like it does in an Obsidian Note.  Refer to TaskNotes' implementation of this if it's helpful. (/home/sawyer/tasknotes)
+- [x] Let's move the `Open Note` button to the top right of the Item Modal  popup.
 - [x] The Details input in the Item Modal should pull and render any existing content in the Item Note.  I like the current height of the box.  Let's let the user scroll content.
 - [x] In the Item Modal, for the inputs for People, Parent, and Blocked by, I try typing in double-open brackets to prompt Obsidian to find a file to link, but no menu appears to select a file from like it does when I do in an Obsidian note.  Let's generally make Context, Parent, People, Blocked by, and Tags behave like they would if I were editing their frontmatter in the Item Note. 
 - [x] Let's add a resizable input box for the `summary` frontmatter field in the Input Modal
+- [ ] Let's make sure the Open Note button is respecting the "Open behavior" setting in Planner settings.
+- [ ] Let's move the icon row to the bottom
+- [ ] Right now there's a placeholder blank margin for the interpreted results of the NLP/title input.  Let's remove this extra space until the NLP detects and recognizes tokens to render
+- [ ] Rename "Details (Note Content)" to "Note Content" and make it no longer collapsible
+- [ ] In the Context input box, right now it's showing "@" symbol as suggest inputs.  Let's remove the "@" symbol and make sure 
+- [ ] Convert Wikilinks to Markdown links if User has "Use [[Wikilinks]]" setting turned off in "Files and Links" Settings.
+- [ ] In Planner settings, let's allow the user to also pick a lucide icon for each status.  Let's use that icon in the Item Modal dropown menu for Status selection
+
+
 - [ ] Let's add some space between the "New Item" ("+") button in Calendar view and the view mode buttons.  Also, the current view mode button selection is not being/staying highlighted when clicked.
 - [x] Quick capture needs to put quotations around context items in list like `"@home"` instead of `@home`
 - [ ] Whenever I move an event, the event is offset down and to the right by a large margin from my actual mouse position while I'm clicking and dragging it.  It still does successfully reposition to where I place my mouse, but the visual difference is jarring.

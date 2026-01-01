@@ -1,4 +1,4 @@
-import { Modal, Notice, setIcon, setTooltip } from 'obsidian';
+import { Modal, Notice, setIcon, setTooltip, MarkdownRenderer, Component } from 'obsidian';
 import * as chrono from 'chrono-node';
 import type PlannerPlugin from '../main';
 import type { ItemFrontmatter, PlannerItem, RepeatFrequency, DayOfWeek } from '../types/item';
@@ -63,6 +63,11 @@ export class ItemModal extends Modal {
   private detailsTextarea: HTMLTextAreaElement | null = null;
   private detailsSection: HTMLElement | null = null;
   private detailsExpanded = false;
+  private detailedOptionsExpanded = false;
+  private detailedOptionsContainer: HTMLElement | null = null;
+  private markdownPreviewEl: HTMLElement | null = null;
+  private markdownComponent: Component | null = null;
+  private isEditingDetails = false;
 
   // Input references for updating
   private contextInput: HTMLInputElement | null = null;
@@ -142,30 +147,54 @@ export class ItemModal extends Modal {
     contentEl.empty();
     contentEl.addClass('planner-item-modal');
 
-    // Modal title
+    // Initialize markdown component for rendering
+    this.markdownComponent = new Component();
+    this.markdownComponent.load();
+
+    // Modal header with title and Open Note button (edit mode only)
+    const header = contentEl.createDiv({ cls: 'planner-modal-header' });
     const modalTitle = this.options.mode === 'edit' ? 'Edit Item' : 'New Item';
-    contentEl.createEl('h2', { text: modalTitle });
+    header.createEl('h2', { text: modalTitle });
+
+    // Open Note button in header (edit mode only)
+    if (this.options.mode === 'edit' && this.options.item) {
+      const openNoteBtn = header.createEl('button', {
+        cls: 'planner-btn planner-open-note-btn',
+      });
+      setIcon(openNoteBtn, 'external-link');
+      openNoteBtn.createSpan({ text: 'Open Note' });
+      openNoteBtn.addEventListener('click', () => this.handleOpenNote());
+    }
 
     // Title input
     this.createTitleInput(contentEl);
 
-    // Icon action bar
-    this.createActionBar(contentEl);
-
-    // NLP preview and legend (only in create mode) - now below icon bar
+    // NLP preview and legend (only in create mode) - now below title
     if (this.options.mode === 'create') {
-      this.nlpPreviewEl = contentEl.createDiv({ cls: 'planner-nlp-preview' });
+      // NLP preview - hidden until tokens are detected
+      this.nlpPreviewEl = contentEl.createDiv({ cls: 'planner-nlp-preview hidden' });
       this.createNLPLegend(contentEl);
     }
 
-    // Summary field (resizable)
-    this.createSummaryInput(contentEl);
+    // Icon action bar
+    this.createActionBar(contentEl);
 
-    // Details section (collapsible) - load existing content
-    await this.createDetailsSection(contentEl);
+    // Show Detailed Options toggle (below icon row)
+    this.createDetailedOptionsToggle(contentEl);
 
-    // Additional fields
-    this.createFieldInputs(contentEl);
+    // Detailed options container (hidden by default) - now BELOW the icon row
+    this.detailedOptionsContainer = contentEl.createDiv({
+      cls: `planner-detailed-options ${this.detailedOptionsExpanded ? '' : 'collapsed'}`
+    });
+
+    // Summary field (resizable) - inside detailed options
+    this.createSummaryInput(this.detailedOptionsContainer);
+
+    // Note Content section - inside detailed options
+    await this.createDetailsSection(this.detailedOptionsContainer);
+
+    // Additional fields - inside detailed options
+    this.createFieldInputs(this.detailedOptionsContainer);
 
     // Action buttons
     this.createButtons(contentEl);
@@ -311,6 +340,39 @@ export class ItemModal extends Modal {
 
     // Update initial states
     this.updateIconStates();
+  }
+
+  private createDetailedOptionsToggle(container: HTMLElement): void {
+    const toggleContainer = container.createDiv({ cls: 'planner-detailed-toggle' });
+    toggleContainer.setAttribute('tabindex', '0');
+    toggleContainer.setAttribute('role', 'button');
+
+    const icon = toggleContainer.createSpan({ cls: 'planner-icon' });
+    setIcon(icon, this.detailedOptionsExpanded ? 'chevron-up' : 'chevron-down');
+
+    const label = toggleContainer.createSpan({ cls: 'planner-toggle-label' });
+    label.textContent = this.detailedOptionsExpanded ? 'Hide detailed options' : 'Show detailed options';
+
+    const updateToggle = () => {
+      this.detailedOptionsExpanded = !this.detailedOptionsExpanded;
+      setIcon(icon, this.detailedOptionsExpanded ? 'chevron-up' : 'chevron-down');
+      label.textContent = this.detailedOptionsExpanded ? 'Hide detailed options' : 'Show detailed options';
+      this.detailedOptionsContainer?.classList.toggle('collapsed', !this.detailedOptionsExpanded);
+    };
+
+    toggleContainer.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      updateToggle();
+    });
+
+    toggleContainer.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        e.stopPropagation();
+        updateToggle();
+      }
+    });
   }
 
   private createActionIcon(
@@ -514,18 +576,20 @@ export class ItemModal extends Modal {
   private async createDetailsSection(container: HTMLElement): Promise<void> {
     this.detailsSection = container.createDiv({ cls: 'planner-details-section' });
 
-    const toggle = this.detailsSection.createDiv({ cls: 'planner-details-toggle' });
-    const toggleIcon = toggle.createSpan({ cls: 'planner-toggle-icon' });
-    setIcon(toggleIcon, this.detailsExpanded ? 'chevron-down' : 'chevron-right');
-    toggle.createSpan({ text: 'Details' });
+    // Label (no longer collapsible)
+    this.detailsSection.createEl('label', { text: 'Note Content', cls: 'planner-label' });
 
-    const content = this.detailsSection.createDiv({
-      cls: `planner-details-content ${this.detailsExpanded ? '' : 'collapsed'}`,
+    const content = this.detailsSection.createDiv({ cls: 'planner-details-content' });
+
+    // Create markdown preview container
+    this.markdownPreviewEl = content.createDiv({
+      cls: 'planner-details-markdown-preview',
     });
 
+    // Create textarea for editing (hidden by default)
     this.detailsTextarea = content.createEl('textarea', {
-      cls: 'planner-details-textarea',
-      placeholder: 'Add description or notes...',
+      cls: 'planner-details-textarea hidden',
+      placeholder: 'Add description or notes... (Markdown supported)',
     });
 
     // Load existing content from item body in edit mode
@@ -537,15 +601,85 @@ export class ItemModal extends Modal {
       this.detailsTextarea.value = this.details;
     }
 
+    // Render initial markdown preview
+    await this.renderDetailsMarkdown();
+
+    // Handle textarea input
     this.detailsTextarea.addEventListener('input', () => {
       this.details = this.detailsTextarea?.value || '';
     });
 
-    toggle.addEventListener('click', () => {
-      this.detailsExpanded = !this.detailsExpanded;
-      setIcon(toggleIcon, this.detailsExpanded ? 'chevron-down' : 'chevron-right');
-      content.classList.toggle('collapsed', !this.detailsExpanded);
+    // Click on preview to edit
+    this.markdownPreviewEl.addEventListener('click', (e) => {
+      // Don't switch to edit mode if clicking on a link
+      if ((e.target as HTMLElement).closest('a')) {
+        return;
+      }
+      this.switchToEditMode();
     });
+
+    // Blur textarea to show preview
+    this.detailsTextarea.addEventListener('blur', async () => {
+      await this.switchToPreviewMode();
+    });
+
+    // Handle Escape key to exit edit mode
+    this.detailsTextarea.addEventListener('keydown', async (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        await this.switchToPreviewMode();
+      }
+    });
+  }
+
+  private async renderDetailsMarkdown(): Promise<void> {
+    if (!this.markdownPreviewEl || !this.markdownComponent) return;
+
+    this.markdownPreviewEl.empty();
+
+    if (!this.details || this.details.trim() === '') {
+      // Show placeholder when empty
+      this.markdownPreviewEl.createSpan({
+        text: 'Click to add notes... (Markdown supported)',
+        cls: 'planner-details-placeholder',
+      });
+      return;
+    }
+
+    // Render markdown content
+    await MarkdownRenderer.render(
+      this.app,
+      this.details,
+      this.markdownPreviewEl,
+      this.options.item?.path || '',
+      this.markdownComponent
+    );
+  }
+
+  private switchToEditMode(): void {
+    if (this.isEditingDetails) return;
+    this.isEditingDetails = true;
+
+    this.markdownPreviewEl?.classList.add('hidden');
+    this.detailsTextarea?.classList.remove('hidden');
+    this.detailsTextarea?.focus();
+
+    // Place cursor at end
+    if (this.detailsTextarea) {
+      const len = this.detailsTextarea.value.length;
+      this.detailsTextarea.setSelectionRange(len, len);
+    }
+  }
+
+  private async switchToPreviewMode(): Promise<void> {
+    if (!this.isEditingDetails) return;
+    this.isEditingDetails = false;
+
+    this.detailsTextarea?.classList.add('hidden');
+    this.markdownPreviewEl?.classList.remove('hidden');
+
+    // Re-render markdown
+    await this.renderDetailsMarkdown();
   }
 
   private createFieldInputs(container: HTMLElement): void {
@@ -671,16 +805,8 @@ export class ItemModal extends Modal {
   private createButtons(container: HTMLElement): void {
     const buttonContainer = container.createDiv({ cls: 'planner-modal-buttons' });
 
-    // Edit mode buttons
+    // Delete button (edit mode only) - left side
     if (this.options.mode === 'edit' && this.options.item) {
-      // Open Note button
-      const openBtn = buttonContainer.createEl('button', {
-        text: 'Open Note',
-        cls: 'planner-btn',
-      });
-      openBtn.addEventListener('click', () => this.handleOpenNote());
-
-      // Delete button
       const deleteBtn = buttonContainer.createEl('button', {
         text: 'Delete',
         cls: 'planner-btn planner-btn-danger',
@@ -816,10 +942,13 @@ export class ItemModal extends Modal {
       this.tags.length > 0 || this.priority || this.status ||
       this.calendars.length > 0 || this.recurrence?.repeat_frequency;
 
+    // Toggle visibility based on whether there's data
     if (!hasData) {
+      this.nlpPreviewEl.classList.add('hidden');
       return;
     }
 
+    this.nlpPreviewEl.classList.remove('hidden');
     const preview = this.nlpPreviewEl.createDiv({ cls: 'planner-nlp-preview-content' });
 
     // Date Start
@@ -978,7 +1107,26 @@ export class ItemModal extends Modal {
     if (!this.options.item) return;
 
     this.close();
-    await this.app.workspace.openLinkText(this.options.item.path, '', false);
+
+    const openBehavior = this.plugin.settings.openBehavior;
+    const leaf = (() => {
+      switch (openBehavior) {
+        case 'same-tab':
+          return this.app.workspace.getLeaf(false);
+        case 'new-tab':
+          return this.app.workspace.getLeaf('tab');
+        case 'split-right':
+          return this.app.workspace.getLeaf('split', 'vertical');
+        case 'split-down':
+          return this.app.workspace.getLeaf('split', 'horizontal');
+        default:
+          return this.app.workspace.getLeaf('tab');
+      }
+    })();
+
+    await leaf.openFile(
+      this.app.vault.getAbstractFileByPath(this.options.item.path) as any
+    );
   }
 
   private showConfirmDialog(title: string, message: string): Promise<boolean> {
@@ -1018,6 +1166,12 @@ export class ItemModal extends Modal {
   }
 
   onClose(): void {
+    // Unload the markdown component
+    if (this.markdownComponent) {
+      this.markdownComponent.unload();
+      this.markdownComponent = null;
+    }
+
     const { contentEl } = this;
     contentEl.empty();
   }

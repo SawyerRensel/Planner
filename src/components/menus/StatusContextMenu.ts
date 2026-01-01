@@ -25,7 +25,9 @@ export class StatusContextMenu {
 
       this.menu.addItem((item) => {
         item.setTitle(isSelected ? `✓ ${status.name}` : status.name);
-        item.setIcon(status.isCompleted ? 'check-circle' : 'circle');
+        // Use custom icon if set, otherwise fall back to default
+        const icon = status.icon || (status.isCompleted ? 'check-circle' : 'circle');
+        item.setIcon(icon);
         item.onClick(() => {
           this.options.onSelect(status.name);
         });

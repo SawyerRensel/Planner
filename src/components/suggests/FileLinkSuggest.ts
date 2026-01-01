@@ -51,19 +51,27 @@ export class FileLinkSuggest extends AbstractInputSuggest<TFile> {
     const segments = currentValue.split(',');
     const lastSegment = segments[segments.length - 1];
 
+    // Check if user prefers markdown links over wikilinks
+    // @ts-ignore - getConfig exists but isn't in the type definitions
+    const useMarkdownLinks = this.app.vault.getConfig('useMarkdownLinks') === true;
+
+    // Format the link based on user preference
+    const linkText = useMarkdownLinks
+      ? `[${file.basename}](${file.path})`
+      : `[[${file.basename}]]`;
+
     // Check if we're completing a [[ bracket
     const bracketMatch = lastSegment.match(/^(.*?)\[\[[^\]]*$/);
 
-    let newValue: string;
     if (bracketMatch) {
-      // Replace the incomplete [[... with [[filename]]
-      segments[segments.length - 1] = bracketMatch[1] + `[[${file.basename}]]`;
+      // Replace the incomplete [[... with the formatted link
+      segments[segments.length - 1] = bracketMatch[1] + linkText;
     } else {
-      // Replace the last segment with [[filename]]
-      segments[segments.length - 1] = ` [[${file.basename}]]`;
+      // Replace the last segment with the formatted link
+      segments[segments.length - 1] = ` ${linkText}`;
     }
 
-    newValue = segments.join(',').replace(/^,\s*/, '').trim();
+    const newValue = segments.join(',').replace(/^,\s*/, '').trim();
     this.inputEl.value = newValue;
     this.inputEl.dispatchEvent(new Event('input', { bubbles: true }));
     this.onSelect(file);
@@ -183,7 +191,7 @@ export class ContextSuggest extends AbstractInputSuggest<string> {
   }
 
   renderSuggestion(context: string, el: HTMLElement): void {
-    el.createEl('div', { text: `@${context}`, cls: 'suggestion-title' });
+    el.createEl('div', { text: context, cls: 'suggestion-title' });
   }
 
   selectSuggestion(context: string): void {

@@ -239,7 +239,7 @@ export class PlannerSettingTab extends PluginSettingTab {
     // Status Configuration
     containerEl.createEl('h2', { text: 'Status Configuration' });
     containerEl.createEl('p', {
-      text: 'Define statuses for tasks. Drag to reorder. Completed statuses auto-set date_completed.',
+      text: 'Define statuses for tasks. Use Lucide icon names (e.g., circle, check-circle, lightbulb). Completed statuses auto-set date_completed.',
       cls: 'setting-item-description'
     });
 
@@ -299,6 +299,7 @@ export class PlannerSettingTab extends PluginSettingTab {
             name: 'New Status',
             color: '#6b7280',
             isCompleted: false,
+            icon: 'circle',
           });
           await this.plugin.saveSettings();
           this.display();
@@ -309,8 +310,16 @@ export class PlannerSettingTab extends PluginSettingTab {
     const setting = new Setting(containerEl)
       .addText(text => text
         .setValue(status.name)
+        .setPlaceholder('Status name')
         .onChange(async (value) => {
           this.plugin.settings.statuses[index].name = value;
+          await this.plugin.saveSettings();
+        }))
+      .addText(text => text
+        .setValue(status.icon || '')
+        .setPlaceholder('Icon (e.g., circle)')
+        .onChange(async (value) => {
+          this.plugin.settings.statuses[index].icon = value || undefined;
           await this.plugin.saveSettings();
         }))
       .addColorPicker(picker => picker
