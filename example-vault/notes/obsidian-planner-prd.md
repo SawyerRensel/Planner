@@ -1,7 +1,7 @@
 # Planner - Product Requirements Document
 
-> **Version:** 2.0.0
-> **Last Updated:** 2025-12-30
+> **Version:** 2.1.0
+> **Last Updated:** 2026-01-01
 > **Author:** Claude and Sawyer Rensel
 > **Status:** Active
 
@@ -39,7 +39,7 @@
 ### 1.3 Success Criteria
 
 The plugin is successful when a user can:
-1. Quickly create items via NLP quick capture
+1. Quickly create and edit items via unified Item Modal with icon-based inputs
 2. Have frontmatter auto-populated from a template
 3. View all items on Calendar (year/month/week/3-day/day/list layouts)
 4. Filter items using Obsidian Bases query system
@@ -401,18 +401,27 @@ Table/list view with sortable columns.
 
 ## 6. Features
 
-### 6.1 Quick Capture
+### 6.1 Item Modal (Create & Edit)
 
-Keyboard-driven quick entry with NLP parsing.
+Unified modal for creating and editing items, combining quick capture with full editing capabilities.
 
-**Trigger:** Global hotkey (default: `Ctrl+Shift+N`)
+**Triggers:**
+- Global hotkey (default: `Ctrl+Shift+N`) — opens blank modal for new item
+- Click on empty date in Calendar View — opens modal with date pre-populated
+- Click on existing item in any view — opens modal with item data loaded
+- `+ New` button in any view
 
-**Syntax Example:**
-```
-Team meeting tomorrow at 2pm @work +[[Q1 Planning]] #event !high
-```
+**Input Modes:**
 
-**Parsing:**
+1. **NLP Mode** (optional, toggle in settings): Type natural language in title field
+   ```
+   Team meeting tomorrow at 2pm @work #event !high
+   ```
+   Parsed tokens auto-populate the corresponding fields.
+
+2. **Form Mode**: Use icon action bar and form fields directly
+
+**NLP Parsing Tokens:**
 
 | Token | Maps To |
 |-------|---------|
@@ -424,11 +433,60 @@ Team meeting tomorrow at 2pm @work +[[Q1 Planning]] #event !high
 | `!high` or `*high` | `priority` |
 | `>In-Progress` | `status` |
 
-**Behavior:**
-1. Creates new note from template
-2. Populates frontmatter from parsed input
-3. Shows confirmation toast with "Edit" link
-4. Optional: Open in editor after creation
+**Icon Action Bar:**
+
+| Icon | Field | Interaction |
+|------|-------|-------------|
+| 📅 Calendar | `date_start` | Context menu: relative dates, quick picks, custom picker |
+| 🏁 Calendar-check | `date_end` | Same as date_start |
+| ⭐ Star | `priority` | Context menu: Urgent, High, Medium, Low, None |
+| ○ Circle | `status` | Context menu: configured statuses |
+| 🔄 Refresh | Recurrence | Context menu: presets + Custom recurrence... |
+| 🗂️ Folder | `calendar` | Dropdown of configured calendars |
+
+**Visual Feedback:**
+- Icons show colored dot indicator when field has a value
+- Tooltips display current value on hover
+
+**Context Menus — Date Picker:**
+- **Relative**: +1 day, -1 day, +1 week, -1 week
+- **Quick picks**: Today, Tomorrow, This weekend, Next week, Next month
+- **Submenu**: Weekdays
+- **Custom**: Pick date & time...
+- **Clear**: Clear date
+
+**Context Menus — Recurrence:**
+- **Standard**: Daily, Weekly on [day], Every 2 weeks on [day], Monthly on [date], Yearly on [date], Weekdays only
+- **After completion**: Daily, Every 3 days, Weekly, Monthly (after completion)
+- **Custom**: Opens Custom Recurrence dialog
+
+**Custom Recurrence Dialog:**
+Secondary modal for complex RRULE patterns:
+- Frequency (daily/weekly/monthly/yearly)
+- Interval (every N units)
+- Days of week (for weekly)
+- Day of month / position (for monthly)
+- End condition (never, after N occurrences, on date)
+
+**Additional Fields (below action bar):**
+- Title (text input, required)
+- Details/Description (collapsible textarea for note body content)
+- Context (text with autocomplete)
+- People (text with autocomplete)
+- Parent (note link picker)
+- Dependencies (blocked_by — task selector)
+
+**Action Buttons:**
+- **Open Note**: Close modal, open markdown file in editor (edit mode only)
+- **Delete**: Confirmation dialog, then delete from vault (edit mode only)
+- **Cancel**: Discard changes, close modal
+- **Save**: Save changes, close modal (keyboard: `Ctrl/Cmd+Enter`)
+
+**Context-Aware Pre-population:**
+- Clicking a date in Calendar → `date_start` set to that date
+- Clicking a time slot → `date_start` set to that datetime, `all_day` = false
+- Clicking "+ Add" in Kanban column → `status` set to that column's value
+- New items get default calendar from settings
 
 ### 6.2 Recurring Items
 
@@ -555,49 +613,145 @@ Drag to reorder. Mark statuses as "completed" to auto-set `date_completed`.
 | Work | Green |
 | (new calendars) | Gray (until configured) |
 
-### 7.6 Quick Capture
+### 7.6 Item Modal
 
 | Setting | Type | Default | Description |
 |---------|------|---------|-------------|
-| Hotkey | hotkey | `Ctrl+Shift+N` | Trigger quick capture |
+| Hotkey | hotkey | `Ctrl+Shift+N` | Open Item Modal for new item |
+| Enable NLP Parsing | bool | `true` | Parse natural language in title field |
 | Default Tags | list | `[]` | Auto-added to new items |
 | Default Status | select | `To-Do` | For items with `#task` |
-| Open After Create | bool | `false` | Open note in editor |
+| Default Calendar | select | `Personal` | Pre-selected calendar for new items |
+| Open Note After Save | bool | `false` | Open markdown file after saving |
+| Details Expanded | bool | `false` | Start with Details section expanded |
 
 ---
 
 ## 8. User Interface
 
-### 8.1 Quick Capture Modal
+### 8.1 Item Modal
 
-Floating input with real-time NLP preview.
+Unified modal for creating and editing items with icon-based action bar.
 
+**Create Mode:**
 ```
 ┌─────────────────────────────────────────────────────────────┐
+│                                                        [×]  │
 │                                                             │
-│  ┌───────────────────────────────────────────────────────┐  │
-│  │ Team meeting tomorrow 2pm @work #event               │  │
-│  └───────────────────────────────────────────────────────┘  │
+│  Title  [ Team meeting tomorrow 2pm @work #event       ]    │
 │                                                             │
 │  ┌─────────────────────────────────────────────────────┐    │
 │  │ 📅 Tomorrow, 2:00 PM   @work   #event               │    │
 │  └─────────────────────────────────────────────────────┘    │
 │                                                             │
-│  [Enter] Create  •  [Tab] Open Modal  •  [Esc] Cancel       │
+│  ╭─────────────────────────────────────────────────────╮    │
+│  │ 📅  🏁  ⭐  ○  🔄  🗂️ Personal ▼                    │    │
+│  ╰─────────────────────────────────────────────────────╯    │
 │                                                             │
+│  ▶ Details                                                  │
+│                                                             │
+│  Context    [ @work                                    ]    │
+│  People     [                                          ]    │
+│  Parent     [                                          ]    │
+│                                                             │
+│                                     [Cancel]     [Save]     │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 8.2 Item Edit Modal
+**Edit Mode:**
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Edit Item                                             [×]  │
+│                                                             │
+│  Title  [ Website Redesign                             ]    │
+│                                                             │
+│  ╭─────────────────────────────────────────────────────╮    │
+│  │ 📅• 🏁• ⭐• ○• 🔄  🗂️ Work ▼                        │    │
+│  ╰─────────────────────────────────────────────────────╯    │
+│  Jan 15, 2pm    Jan 31    High   In-Progress                │
+│                                                             │
+│  ▼ Details                                                  │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │ Full redesign incorporating new brand identity...   │    │
+│  │                                                     │    │
+│  └─────────────────────────────────────────────────────┘    │
+│                                                             │
+│  Context    [ @office                                  ]    │
+│  People     [ [[John Smith]]                           ]    │
+│  Parent     [ [[Q1 Initiatives]]                       ]    │
+│  Blocked by [ [[Brand guidelines approval]]            ]    │
+│                                                             │
+│  [Open Note]  [Delete]               [Cancel]    [Save]     │
+└─────────────────────────────────────────────────────────────┘
 
-Full form for creating/editing items with all fields accessible.
+• = dot indicator showing field has value
+```
 
-Sections (collapsible):
-- **Core**: Title, Summary, Tags, Status, Priority
-- **Dates**: Start, End, Due, All-day toggle
-- **Recurrence**: Frequency, Interval, Days, Until/Count
-- **Organization**: Calendar, Context, People, Parent
-- **Advanced**: Location, Related, Cover image
+### 8.2 Item Modal Context Menus
+
+**Date Context Menu (on 📅 or 🏁 click):**
+```
+┌──────────────────────────┐
+│  + 1 day                 │
+│  − 1 day                 │
+│  + 1 week                │
+│  − 1 week                │
+├──────────────────────────┤
+│  ✓ Today                 │
+│    Tomorrow              │
+│    This weekend          │
+│    Next week             │
+│    Next month            │
+├──────────────────────────┤
+│    Weekdays            ▶ │
+├──────────────────────────┤
+│  📅 Pick date & time...  │
+│  ✕  Clear date           │
+└──────────────────────────┘
+```
+
+**Recurrence Context Menu (on 🔄 click):**
+```
+┌────────────────────────────────┐
+│    Daily                       │
+│    Weekly on Thursday          │
+│    Every 2 weeks on Thursday   │
+│    Monthly on the 15th         │
+│    Every 3 months on the 15th  │
+│    Yearly on January 15th      │
+│    Weekdays only               │
+├────────────────────────────────┤
+│    Daily (after completion)    │
+│    Every 3 days (after compl.) │
+│    Weekly (after completion)   │
+│    Monthly (after completion)  │
+├────────────────────────────────┤
+│  ⚙️ Custom recurrence...       │
+└────────────────────────────────┘
+```
+
+**Priority Context Menu (on ⭐ click):**
+```
+┌──────────────────┐
+│  🔴 Urgent       │
+│  🟠 High         │
+│  🟡 Medium       │
+│  🔵 Low          │
+│  ⚪ None         │
+└──────────────────┘
+```
+
+**Status Context Menu (on ○ click):**
+```
+┌──────────────────┐
+│  💡 Idea         │
+│  📋 To-Do        │
+│  🔄 In-Progress  │
+│  👀 In-Review    │
+│  ✅ Done         │
+│  ❌ Cancelled    │
+└──────────────────┘
+```
 
 ### 8.3 Calendar View
 
@@ -803,17 +957,24 @@ Views consume Bases:
 
 **Deliverable:** Fully functional calendar that can replace Google Calendar for basic use.
 
-### Phase 3: Quick Capture
+### Phase 3: Item Modal
 
-**Goal:** Rapid item creation with NLP
+**Goal:** Unified modal for creating and editing items
 
-- [ ] Quick capture modal (floating input)
-- [ ] NLP date parsing
+- [ ] Item Modal component with icon action bar
+- [ ] Date context menus (relative dates, quick picks, custom picker)
+- [ ] Status and Priority context menus
+- [ ] Recurrence context menu with presets
+- [ ] Custom Recurrence dialog for complex RRULE patterns
+- [ ] NLP parsing in title field (optional)
 - [ ] Token parsing (@context, #tags, !priority, etc.)
+- [ ] Collapsible Details/Description section
+- [ ] Action buttons (Open Note, Delete, Cancel, Save)
+- [ ] Context-aware pre-population from views
 - [ ] Template-based item creation
 - [ ] Hotkey configuration
 
-**Deliverable:** Can create items in <5 seconds via keyboard.
+**Deliverable:** Can create and edit items via unified modal with icon-based quick inputs.
 
 ### Phase 4: Recurrence
 
@@ -928,6 +1089,7 @@ Common patterns:
 |---------|------|--------|---------|
 | 1.0.x | 2025-12-28/29 | Claude & Sawyer | Original PRD (deprecated) |
 | 2.0.0 | 2025-12-30 | Claude & Sawyer | Complete rewrite for ground-up build. Removed task boolean (use tags). Simplified architecture. Clear phased roadmap. Deferred calendar sync, HTTP API, time tracking to v1.1+. |
+| 2.1.0 | 2026-01-01 | Claude & Sawyer | Unified Item Modal feature: merged Quick Capture with Item Edit Modal. Added icon-based action bar, context menus for dates/recurrence/priority/status, collapsible Details section, and action buttons (Open Note, Delete, Cancel, Save). Inspired by TaskNotes UI patterns. |
 
 ---
 
