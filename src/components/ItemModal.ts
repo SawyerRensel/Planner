@@ -563,7 +563,13 @@ export class ItemModal extends Modal {
   }
 
   private showRecurrenceContextMenu(event: MouseEvent | KeyboardEvent): void {
-    const referenceDate = this.dateStart ? new Date(this.dateStart) : new Date();
+    // Parse date without timezone conversion to avoid off-by-one errors
+    let referenceDate = new Date();
+    if (this.dateStart) {
+      const dateStr = this.dateStart.split('T')[0];
+      const [year, month, day] = dateStr.split('-').map(Number);
+      referenceDate = new Date(year, month - 1, day);
+    }
     const menu = new RecurrenceContextMenu({
       currentValue: this.recurrence,
       onSelect: (value) => {

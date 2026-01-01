@@ -44,11 +44,11 @@ Old
 - [x] The Details input in the Item Modal should pull and render any existing content in the Item Note.  I like the current height of the box.  Let's let the user scroll content.
 - [x] In the Item Modal, for the inputs for People, Parent, and Blocked by, I try typing in double-open brackets to prompt Obsidian to find a file to link, but no menu appears to select a file from like it does when I do in an Obsidian note.  Let's generally make Context, Parent, People, Blocked by, and Tags behave like they would if I were editing their frontmatter in the Item Note. 
 - [x] Let's add a resizable input box for the `summary` frontmatter field in the Input Modal
-- [ ] Let's make sure the Open Note button is respecting the "Open behavior" setting in Planner settings.
-- [ ] Let's move the icon row to the bottom
-- [ ] Right now there's a placeholder blank margin for the interpreted results of the NLP/title input.  Let's remove this extra space until the NLP detects and recognizes tokens to render
-- [ ] Rename "Details (Note Content)" to "Note Content" and make it no longer collapsible
-- [ ] In the Context input box, right now it's showing "@" symbol as suggest inputs.  Let's remove the "@" symbol and make sure 
+- [x] Let's make sure the Open Note button is respecting the "Open behavior" setting in Planner settings.
+- [x] Let's move the icon row to the bottom
+- [x] Right now there's a placeholder blank margin for the interpreted results of the NLP/title input.  Let's remove this extra space until the NLP detects and recognizes tokens to render
+- [x] Rename "Details (Note Content)" to "Note Content" and make it no longer collapsible
+- [x] In the Context input box, right now it's showing "@" symbol as suggest inputs.  Let's remove the "@" symbol and make sure 
 - [ ] Convert Wikilinks to Markdown links if User has "Use [[Wikilinks]]" setting turned off in "Files and Links" Settings.
 - [ ] In Planner settings, let's allow the user to also pick a lucide icon for each status.  Let's use that icon in the Item Modal dropown menu for Status selection
 
