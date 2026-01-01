@@ -10,9 +10,9 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import multiMonthPlugin from '@fullcalendar/multimonth';
+import { RRule } from 'rrule';
 import type PlannerPlugin from '../main';
 import type { OpenBehavior } from '../types/settings';
-import { RecurrenceService } from '../services/RecurrenceService';
 import type { PlannerItem, DayOfWeek } from '../types/item';
 
 export const BASES_CALENDAR_VIEW_ID = 'planner-calendar';
@@ -32,7 +32,6 @@ export class BasesCalendarView extends BasesView {
   private currentView: CalendarViewType | null = null; // null means use config default
   private resizeObserver: ResizeObserver | null = null;
   private yearViewSplit: boolean = true; // true = multiMonthYear (split), false = dayGridYear (continuous)
-  private recurrenceService: RecurrenceService;
 
   private getColorByField(): 'note.calendar' | 'note.priority' | 'note.status' {
     const value = this.config.get('colorBy') as string | undefined;
@@ -74,7 +73,6 @@ export class BasesCalendarView extends BasesView {
     super(controller);
     this.plugin = plugin;
     this.containerEl = containerEl;
-    this.recurrenceService = new RecurrenceService();
     this.setupContainer();
     this.setupResizeObserver();
   }
@@ -102,6 +100,7 @@ export class BasesCalendarView extends BasesView {
    * Called when data changes - re-render the calendar
    */
   onDataUpdated(): void {
+    console.log('Planner Calendar: onDataUpdated called');
     this.render();
   }
 
@@ -117,6 +116,7 @@ export class BasesCalendarView extends BasesView {
   }
 
   private render(): void {
+    console.log('Planner Calendar: render called');
     // Preserve current view and date if calendar exists
     let currentDate: Date | undefined;
     let currentViewType: CalendarViewType | undefined;
@@ -140,10 +140,12 @@ export class BasesCalendarView extends BasesView {
   }
 
   private initCalendar(initialDate?: Date, initialView?: CalendarViewType): void {
+    console.log('Planner Calendar: initCalendar called');
     if (!this.calendarEl) return;
 
     const weekStartsOn = this.getWeekStartDay();
     const events = this.getEventsFromData();
+    console.log('Planner Calendar: got', events.length, 'events');
 
     // Use provided view, or current view if re-rendering, or config default for first render
     const viewToUse = initialView || this.currentView || this.getDefaultView();
@@ -340,7 +342,19 @@ export class BasesCalendarView extends BasesView {
     }
   }
 
+  /**
+   * Get frontmatter directly from Obsidian's metadata cache (bypasses Bases getValue)
+   */
+  private getFrontmatter(entry: BasesEntry): Record<string, unknown> | undefined {
+    const file = entry.file;
+    const cache = this.app.metadataCache.getFileCache(file);
+    return cache?.frontmatter;
+  }
+
   private getEventsFromData(): EventInput[] {
+    console.log('Planner Calendar: getEventsFromData called');
+    console.log('Planner Calendar: data.groupedData has', this.data?.groupedData?.length || 0, 'groups');
+
     const events: EventInput[] = [];
 
     // Get a reasonable date range for recurrence expansion
@@ -354,15 +368,20 @@ export class BasesCalendarView extends BasesView {
     const validFrequencies = ['daily', 'weekly', 'monthly', 'yearly'];
 
     for (const group of this.data.groupedData) {
+      console.log('Planner Calendar: processing group with', group.entries?.length || 0, 'entries');
       for (const entry of group.entries) {
-        // Check if this is a recurring item with a valid frequency
-        const repeatFrequencyRaw = entry.getValue('note.repeat_frequency' as any);
+        // Get frontmatter directly from Obsidian's metadata cache
+        const frontmatter = this.getFrontmatter(entry);
+        const repeatFrequency = frontmatter?.repeat_frequency;
 
-        // Validate that it's actually a valid frequency string, not a placeholder object
-        const isValidRecurrence = typeof repeatFrequencyRaw === 'string' &&
-                                  validFrequencies.includes(repeatFrequencyRaw);
+        console.log('Planner Calendar: entry', entry.file.path, 'repeat_frequency:', repeatFrequency, 'type:', typeof repeatFrequency);
+
+        // Validate that it's actually a valid frequency string
+        const isValidRecurrence = typeof repeatFrequency === 'string' &&
+                                  validFrequencies.includes(repeatFrequency);
 
         if (isValidRecurrence) {
+          console.log('Planner Calendar: expanding recurring item', entry.file.path);
           // Expand recurring item into multiple events
           const recurringEvents = this.expandRecurringEntry(entry, rangeStart, rangeEnd);
           events.push(...recurringEvents);
@@ -376,6 +395,7 @@ export class BasesCalendarView extends BasesView {
       }
     }
 
+    console.log('Planner Calendar: returning', events.length, 'total events');
     return events;
   }
 
@@ -392,85 +412,200 @@ export class BasesCalendarView extends BasesView {
   }
 
   /**
-   * Safely extract a string value from Bases
-   */
-  private getStringValue(value: unknown): string | undefined {
-    if (!this.isValidBasesValue(value)) return undefined;
-    if (typeof value === 'string') return value;
-    return undefined;
-  }
-
-  /**
-   * Safely extract a number value from Bases
-   */
-  private getNumberValue(value: unknown): number | undefined {
-    if (!this.isValidBasesValue(value)) return undefined;
-    if (typeof value === 'number') return value;
-    if (typeof value === 'string') {
-      const num = parseFloat(value);
-      return isNaN(num) ? undefined : num;
-    }
-    return undefined;
-  }
-
-  /**
-   * Safely extract an array value from Bases
-   */
-  private getArrayValue<T>(value: unknown): T[] | undefined {
-    if (!this.isValidBasesValue(value)) return undefined;
-    if (Array.isArray(value) && value.length > 0) return value as T[];
-    return undefined;
-  }
-
-  /**
-   * Extract a PlannerItem-like object from a BasesEntry for use with RecurrenceService
+   * Extract a PlannerItem-like object from a BasesEntry using Obsidian's metadata cache
    */
   private extractRecurrenceData(entry: BasesEntry): Partial<PlannerItem> {
+    // Get frontmatter directly from Obsidian's metadata cache
+    const fm = this.getFrontmatter(entry) || {};
+
+    // Extract dates - try frontmatter first, fall back to Bases getValue for configured fields
     const dateStartField = this.getDateStartField();
     const dateEndField = this.getDateEndField();
 
-    const dateStart = entry.getValue(dateStartField as any);
-    const dateEnd = entry.getValue(dateEndField as any);
+    let dateStart = fm.date_start_scheduled;
+    let dateEnd = fm.date_end_scheduled;
 
-    // Extract recurrence fields with proper validation
-    const repeatFrequencyRaw = entry.getValue('note.repeat_frequency' as any);
-    const repeatIntervalRaw = entry.getValue('note.repeat_interval' as any);
-    const repeatUntilRaw = entry.getValue('note.repeat_until' as any);
-    const repeatCountRaw = entry.getValue('note.repeat_count' as any);
-    const repeatBydayRaw = entry.getValue('note.repeat_byday' as any);
-    const repeatBymonthRaw = entry.getValue('note.repeat_bymonth' as any);
-    const repeatBymonthdayRaw = entry.getValue('note.repeat_bymonthday' as any);
-    const repeatBysetposRaw = entry.getValue('note.repeat_bysetpos' as any);
-    const repeatCompletedDatesRaw = entry.getValue('note.repeat_completed_dates' as any);
+    // If using non-default date fields, try Bases getValue as fallback
+    if (!dateStart && dateStartField !== 'note.date_start_scheduled') {
+      const basesValue = entry.getValue(dateStartField as any);
+      if (this.isValidBasesValue(basesValue)) {
+        dateStart = basesValue;
+      }
+    }
+    if (!dateEnd && dateEndField !== 'note.date_end_scheduled') {
+      const basesValue = entry.getValue(dateEndField as any);
+      if (this.isValidBasesValue(basesValue)) {
+        dateEnd = basesValue;
+      }
+    }
 
-    // Validate repeat_frequency - must be a valid frequency string
-    const repeatFrequency = this.getStringValue(repeatFrequencyRaw);
+    // Extract recurrence fields directly from frontmatter
+    const repeatFrequency = fm.repeat_frequency as string | undefined;
+    const repeatInterval = fm.repeat_interval as number | undefined;
+    const repeatUntil = fm.repeat_until as string | undefined;
+    const repeatCount = fm.repeat_count as number | undefined;
+    const repeatByday = fm.repeat_byday as DayOfWeek[] | undefined;
+    const repeatBymonth = fm.repeat_bymonth as number[] | undefined;
+    const repeatBymonthday = fm.repeat_bymonthday as number[] | undefined;
+    const repeatBysetpos = fm.repeat_bysetpos as number | undefined;
+    const repeatCompletedDates = fm.repeat_completed_dates as string[] | undefined;
+
+    // Validate repeat_frequency
     const validFrequencies = ['daily', 'weekly', 'monthly', 'yearly'];
-    const validatedFrequency = repeatFrequency && validFrequencies.includes(repeatFrequency)
+    const validatedFrequency = typeof repeatFrequency === 'string' && validFrequencies.includes(repeatFrequency)
       ? repeatFrequency as PlannerItem['repeat_frequency']
       : undefined;
 
-    // Get numeric bysetpos, ensure it's valid (non-zero, between -366 and 366)
-    const bysetposNum = this.getNumberValue(repeatBysetposRaw);
-    const validatedBysetpos = bysetposNum !== undefined && bysetposNum !== 0 &&
-                              bysetposNum >= -366 && bysetposNum <= 366
-      ? bysetposNum
+    // Validate bysetpos
+    const validatedBysetpos = typeof repeatBysetpos === 'number' && repeatBysetpos !== 0 &&
+                              repeatBysetpos >= -366 && repeatBysetpos <= 366
+      ? repeatBysetpos
       : undefined;
 
     return {
       path: entry.file.path,
-      date_start_scheduled: this.isValidBasesValue(dateStart) ? this.toISOString(dateStart) : undefined,
-      date_end_scheduled: this.isValidBasesValue(dateEnd) ? this.toISOString(dateEnd) : undefined,
+      date_start_scheduled: dateStart ? this.toISOString(dateStart) : undefined,
+      date_end_scheduled: dateEnd ? this.toISOString(dateEnd) : undefined,
       repeat_frequency: validatedFrequency,
-      repeat_interval: this.getNumberValue(repeatIntervalRaw),
-      repeat_until: this.isValidBasesValue(repeatUntilRaw) ? this.toISOString(repeatUntilRaw) : undefined,
-      repeat_count: this.getNumberValue(repeatCountRaw),
-      repeat_byday: this.getArrayValue<DayOfWeek>(repeatBydayRaw),
-      repeat_bymonth: this.getArrayValue<number>(repeatBymonthRaw),
-      repeat_bymonthday: this.getArrayValue<number>(repeatBymonthdayRaw),
+      repeat_interval: typeof repeatInterval === 'number' ? repeatInterval : undefined,
+      repeat_until: repeatUntil ? this.toISOString(repeatUntil) : undefined,
+      repeat_count: typeof repeatCount === 'number' ? repeatCount : undefined,
+      repeat_byday: Array.isArray(repeatByday) && repeatByday.length > 0 ? repeatByday : undefined,
+      repeat_bymonth: Array.isArray(repeatBymonth) && repeatBymonth.length > 0 ? repeatBymonth : undefined,
+      repeat_bymonthday: Array.isArray(repeatBymonthday) && repeatBymonthday.length > 0 ? repeatBymonthday : undefined,
       repeat_bysetpos: validatedBysetpos,
-      repeat_completed_dates: this.getArrayValue<string>(repeatCompletedDatesRaw),
+      repeat_completed_dates: Array.isArray(repeatCompletedDates) ? repeatCompletedDates : undefined,
     };
+  }
+
+  /**
+   * Build an RRULE string from item data
+   */
+  private buildRRuleString(item: Partial<PlannerItem>): string {
+    const parts: string[] = [];
+
+    // Frequency map
+    const freqMap: Record<string, string> = {
+      daily: 'DAILY',
+      weekly: 'WEEKLY',
+      monthly: 'MONTHLY',
+      yearly: 'YEARLY',
+    };
+
+    if (item.repeat_frequency) {
+      parts.push(`FREQ=${freqMap[item.repeat_frequency]}`);
+    }
+
+    if (item.repeat_interval && item.repeat_interval > 1) {
+      parts.push(`INTERVAL=${item.repeat_interval}`);
+    }
+
+    if (item.repeat_byday?.length) {
+      parts.push(`BYDAY=${item.repeat_byday.join(',')}`);
+    }
+
+    if (item.repeat_bymonth?.length) {
+      parts.push(`BYMONTH=${item.repeat_bymonth.join(',')}`);
+    }
+
+    if (item.repeat_bymonthday?.length) {
+      parts.push(`BYMONTHDAY=${item.repeat_bymonthday.join(',')}`);
+    }
+
+    if (item.repeat_bysetpos !== undefined && item.repeat_bysetpos !== 0) {
+      parts.push(`BYSETPOS=${item.repeat_bysetpos}`);
+    }
+
+    if (item.repeat_count) {
+      parts.push(`COUNT=${item.repeat_count}`);
+    }
+
+    if (item.repeat_until) {
+      const until = new Date(item.repeat_until);
+      if (!isNaN(until.getTime())) {
+        const year = until.getUTCFullYear();
+        const month = String(until.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(until.getUTCDate()).padStart(2, '0');
+        parts.push(`UNTIL=${year}${month}${day}`);
+      }
+    }
+
+    return parts.join(';');
+  }
+
+  /**
+   * Generate recurring occurrences using RRule directly (TaskNotes approach)
+   */
+  private generateOccurrences(item: Partial<PlannerItem>, rangeStart: Date, rangeEnd: Date): Date[] {
+    if (!item.repeat_frequency || !item.date_start_scheduled) {
+      console.log('Planner: Missing frequency or start date', item.path);
+      return [];
+    }
+
+    try {
+      // Parse the start date
+      const startDate = new Date(item.date_start_scheduled);
+      if (isNaN(startDate.getTime())) {
+        console.warn('Planner: Invalid start date', item.date_start_scheduled);
+        return [];
+      }
+
+      // Create UTC date for RRule (TaskNotes approach)
+      const dtstart = new Date(Date.UTC(
+        startDate.getFullYear(),
+        startDate.getMonth(),
+        startDate.getDate(),
+        startDate.getHours(),
+        startDate.getMinutes(),
+        startDate.getSeconds(),
+        0
+      ));
+
+      // Build RRULE string
+      const rruleString = this.buildRRuleString(item);
+      console.log('Planner: RRULE string:', rruleString, 'dtstart:', dtstart.toISOString());
+
+      // Parse the RRULE string (TaskNotes approach)
+      const rruleOptions = RRule.parseString(rruleString);
+
+      // Set dtstart manually (critical - this is what TaskNotes does)
+      rruleOptions.dtstart = dtstart;
+
+      // Create the RRule
+      const rule = new RRule(rruleOptions);
+
+      // Convert range to UTC (TaskNotes approach)
+      const utcStart = new Date(Date.UTC(
+        rangeStart.getFullYear(),
+        rangeStart.getMonth(),
+        rangeStart.getDate(),
+        0, 0, 0, 0
+      ));
+      const utcEnd = new Date(Date.UTC(
+        rangeEnd.getFullYear(),
+        rangeEnd.getMonth(),
+        rangeEnd.getDate(),
+        23, 59, 59, 999
+      ));
+
+      // Generate occurrences
+      const occurrences = rule.between(utcStart, utcEnd, true);
+      console.log('Planner: Generated', occurrences.length, 'occurrences for', item.path);
+
+      return occurrences;
+    } catch (error) {
+      console.error('Planner: RRule error for', item.path, error);
+      return [];
+    }
+  }
+
+  /**
+   * Check if a date is in the completed dates list
+   */
+  private isDateCompleted(completedDates: string[] | undefined, date: Date): boolean {
+    if (!completedDates?.length) return false;
+    const dateStr = date.toISOString().split('T')[0];
+    return completedDates.some(d => d.split('T')[0] === dateStr);
   }
 
   /**
@@ -496,59 +631,58 @@ export class BasesCalendarView extends BasesView {
     // Extract recurrence data
     const itemData = this.extractRecurrenceData(entry);
 
-    // Debug: log what we're working with
-    console.log('Planner: Expanding recurring item', entry.file.path, {
-      date_start_scheduled: itemData.date_start_scheduled,
-      date_end_scheduled: itemData.date_end_scheduled,
-      repeat_frequency: itemData.repeat_frequency,
-      repeat_interval: itemData.repeat_interval,
-      repeat_until: itemData.repeat_until,
-      repeat_byday: itemData.repeat_byday,
-    });
+    console.log('Planner: Expanding recurring item', entry.file.path, itemData);
 
-    // Use RecurrenceService to generate occurrences
-    let occurrences: Array<{ id: string; start: Date; end?: Date; isCompleted: boolean }>;
-    try {
-      occurrences = this.recurrenceService.generateCalendarEvents(
-        itemData as PlannerItem,
-        rangeStart,
-        rangeEnd
-      );
-    } catch (error) {
-      console.error('Planner: Failed to expand recurring item', entry.file.path, error);
-      // Fall back to single event
+    // Generate occurrences using RRule directly
+    const occurrences = this.generateOccurrences(itemData, rangeStart, rangeEnd);
+
+    if (occurrences.length === 0) {
+      // Fall back to single event if no occurrences generated
+      console.log('Planner: No occurrences, falling back to single event');
       const event = this.entryToEvent(entry, colorByProp);
       return event ? [event] : [];
+    }
+
+    // Calculate event duration
+    let duration = 0;
+    if (itemData.date_start_scheduled && itemData.date_end_scheduled) {
+      const start = new Date(itemData.date_start_scheduled);
+      const end = new Date(itemData.date_end_scheduled);
+      duration = end.getTime() - start.getTime();
     }
 
     const events: EventInput[] = [];
 
     // Convert each occurrence to an EventInput
-    for (const occurrence of occurrences) {
-      const startStr = occurrence.start.toISOString();
-      const endStr = occurrence.end?.toISOString();
+    for (let i = 0; i < occurrences.length; i++) {
+      const occurrenceStart = occurrences[i];
+      const occurrenceEnd = duration > 0
+        ? new Date(occurrenceStart.getTime() + duration)
+        : undefined;
 
-      // Determine if all-day event
+      const isCompleted = this.isDateCompleted(itemData.repeat_completed_dates, occurrenceStart);
+      const startStr = occurrenceStart.toISOString();
       const isAllDay = this.isAllDayValue(allDayValue) || !this.hasTime(startStr);
 
       events.push({
-        id: occurrence.id,
+        id: `${entry.file.path}::${i}`,
         title: String(title),
         start: startStr,
-        end: endStr,
+        end: occurrenceEnd?.toISOString(),
         allDay: isAllDay,
-        backgroundColor: occurrence.isCompleted ? '#9ca3af' : color, // Gray out completed occurrences
-        borderColor: occurrence.isCompleted ? '#9ca3af' : color,
-        textColor: this.getContrastColor(occurrence.isCompleted ? '#9ca3af' : color),
+        backgroundColor: isCompleted ? '#9ca3af' : color,
+        borderColor: isCompleted ? '#9ca3af' : color,
+        textColor: this.getContrastColor(isCompleted ? '#9ca3af' : color),
         extendedProps: {
           entry,
-          occurrenceDate: occurrence.start.toISOString(),
+          occurrenceDate: startStr,
           isRecurring: true,
-          isCompleted: occurrence.isCompleted,
+          isCompleted,
         },
       });
     }
 
+    console.log('Planner: Created', events.length, 'events for', entry.file.path);
     return events;
   }
 
