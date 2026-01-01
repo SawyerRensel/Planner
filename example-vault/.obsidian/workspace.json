@@ -22,6 +22,16 @@
             }
           },
           {
+            "id": "a656333bacd5f8b4",
+            "type": "leaf",
+            "state": {
+              "type": "full-calendar-view",
+              "state": {},
+              "icon": "calendar-glyph",
+              "title": "Calendar"
+            }
+          },
+          {
             "id": "af2c2d03469c8e4d",
             "type": "leaf",
             "state": {
@@ -75,8 +85,7 @@
               "title": "Notes"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -210,13 +219,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Planner/Calendar.base",
+                "file": "notes/feedback-and-ideas.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Calendar"
+              "title": "Outline of feedback-and-ideas"
             }
           },
           {
@@ -246,16 +255,32 @@
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
       "bases:Create new base": false,
-      "planner:Open Planner Task List": false
+      "planner:Open Planner Task List": false,
+      "tasknotes:Open mini calendar": false,
+      "tasknotes:Open advanced calendar": false,
+      "tasknotes:Open task list": false,
+      "tasknotes:Open agenda": false,
+      "tasknotes:Open kanban board": false,
+      "tasknotes:Open pomodoro": false,
+      "tasknotes:Open pomodoro stats": false,
+      "tasknotes:Create new task": false,
+      "obsidian-full-calendar:Open Full Calendar": false
     }
   },
-  "active": "af2c2d03469c8e4d",
+  "active": "657d18c0aae1861a",
   "lastOpenFiles": [
-    "Planner/Test item.md",
     "Planner/Calendar.base",
-    "notes/obsidian-planner-prd.md",
     "notes/feedback-and-ideas.md",
+    "Planner/Website Redesign.md",
+    "Planner/Vacation.md",
+    "Planner/Team Meeting.md",
     "Planner/Meeting.md",
+    "Planner/Implement Frontend.md",
+    "Planner/Grocery Shopping.md",
+    "Planner/Fix Login Bug.md",
+    "Planner/Design Mockups.md",
+    "Planner/Test item.md",
+    "notes/obsidian-planner-prd.md",
     "notes/questions.md",
     "notes/obsidian-planner-prd.md.tmp.21121.1767278295010",
     "notes/obsidian-planner-prd.md.tmp.21121.1767278286982",
@@ -266,19 +291,12 @@
     "notes/obsidian-planner-prd.md.tmp.21121.1767278205264",
     "Planner/Tasks.base",
     "Planner/New Item.md",
-    "Planner/Grocery Shopping.md",
     "TaskNotes/Tasks/TaskNotes Example Recurring Task.md",
     "notes/Notes.md",
     "TaskNotes/Views/calendar-default.base",
     "notes/Pasted image 20260101091932.png",
     "notes/Pasted image 20260101091842.png",
-    "Planner/Team Meeting.md",
-    "Planner/Vacation.md",
     "Planner/New Item 1.md",
-    "Planner/Design Mockups.md",
-    "Planner/Fix Login Bug.md",
-    "Planner/Implement Frontend.md",
-    "Planner/Website Redesign.md",
     "Planner/New Item 2.md",
     "DailyNotes/2025-12-31.md",
     "DailyNotes/2025-12-05.md",

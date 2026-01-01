@@ -6,7 +6,7 @@ tags:
 calendar:
   - Personal
 context:
-  - "@errands"
+  - errands
 people:
 location:
 related:

@@ -6,7 +6,7 @@ tags:
 calendar:
   - Work
 context:
-  - "@office"
+  - office
 people:
 location: Conference Room A
 related:
