@@ -131,12 +131,6 @@ export class RecurrenceService {
       // Build RRULE string from frontmatter fields
       const rruleString = this.buildRRuleString(item);
 
-      console.log('RecurrenceService: Building RRule', {
-        path: item.path,
-        rruleString,
-        dtstart: dtstart.toISOString(),
-      });
-
       // Parse the RRULE string (like TaskNotes does)
       const rruleOptions = RRule.parseString(rruleString);
 

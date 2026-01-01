@@ -100,7 +100,6 @@ export class BasesCalendarView extends BasesView {
    * Called when data changes - re-render the calendar
    */
   onDataUpdated(): void {
-    console.log('Planner Calendar: onDataUpdated called');
     this.render();
   }
 
@@ -116,7 +115,6 @@ export class BasesCalendarView extends BasesView {
   }
 
   private render(): void {
-    console.log('Planner Calendar: render called');
     // Preserve current view and date if calendar exists
     let currentDate: Date | undefined;
     let currentViewType: CalendarViewType | undefined;
@@ -140,12 +138,10 @@ export class BasesCalendarView extends BasesView {
   }
 
   private initCalendar(initialDate?: Date, initialView?: CalendarViewType): void {
-    console.log('Planner Calendar: initCalendar called');
     if (!this.calendarEl) return;
 
     const weekStartsOn = this.getWeekStartDay();
     const events = this.getEventsFromData();
-    console.log('Planner Calendar: got', events.length, 'events');
 
     // Use provided view, or current view if re-rendering, or config default for first render
     const viewToUse = initialView || this.currentView || this.getDefaultView();
@@ -352,9 +348,6 @@ export class BasesCalendarView extends BasesView {
   }
 
   private getEventsFromData(): EventInput[] {
-    console.log('Planner Calendar: getEventsFromData called');
-    console.log('Planner Calendar: data.groupedData has', this.data?.groupedData?.length || 0, 'groups');
-
     const events: EventInput[] = [];
 
     // Get a reasonable date range for recurrence expansion
@@ -368,20 +361,16 @@ export class BasesCalendarView extends BasesView {
     const validFrequencies = ['daily', 'weekly', 'monthly', 'yearly'];
 
     for (const group of this.data.groupedData) {
-      console.log('Planner Calendar: processing group with', group.entries?.length || 0, 'entries');
       for (const entry of group.entries) {
         // Get frontmatter directly from Obsidian's metadata cache
         const frontmatter = this.getFrontmatter(entry);
         const repeatFrequency = frontmatter?.repeat_frequency;
-
-        console.log('Planner Calendar: entry', entry.file.path, 'repeat_frequency:', repeatFrequency, 'type:', typeof repeatFrequency);
 
         // Validate that it's actually a valid frequency string
         const isValidRecurrence = typeof repeatFrequency === 'string' &&
                                   validFrequencies.includes(repeatFrequency);
 
         if (isValidRecurrence) {
-          console.log('Planner Calendar: expanding recurring item', entry.file.path);
           // Expand recurring item into multiple events
           const recurringEvents = this.expandRecurringEntry(entry, rangeStart, rangeEnd);
           events.push(...recurringEvents);
@@ -395,7 +384,6 @@ export class BasesCalendarView extends BasesView {
       }
     }
 
-    console.log('Planner Calendar: returning', events.length, 'total events');
     return events;
   }
 
@@ -538,7 +526,6 @@ export class BasesCalendarView extends BasesView {
    */
   private generateOccurrences(item: Partial<PlannerItem>, rangeStart: Date, rangeEnd: Date): Date[] {
     if (!item.repeat_frequency || !item.date_start_scheduled) {
-      console.log('Planner: Missing frequency or start date', item.path);
       return [];
     }
 
@@ -546,7 +533,6 @@ export class BasesCalendarView extends BasesView {
       // Parse the start date
       const startDate = new Date(item.date_start_scheduled);
       if (isNaN(startDate.getTime())) {
-        console.warn('Planner: Invalid start date', item.date_start_scheduled);
         return [];
       }
 
@@ -563,7 +549,6 @@ export class BasesCalendarView extends BasesView {
 
       // Build RRULE string
       const rruleString = this.buildRRuleString(item);
-      console.log('Planner: RRULE string:', rruleString, 'dtstart:', dtstart.toISOString());
 
       // Parse the RRULE string (TaskNotes approach)
       const rruleOptions = RRule.parseString(rruleString);
@@ -589,12 +574,8 @@ export class BasesCalendarView extends BasesView {
       ));
 
       // Generate occurrences
-      const occurrences = rule.between(utcStart, utcEnd, true);
-      console.log('Planner: Generated', occurrences.length, 'occurrences for', item.path);
-
-      return occurrences;
-    } catch (error) {
-      console.error('Planner: RRule error for', item.path, error);
+      return rule.between(utcStart, utcEnd, true);
+    } catch {
       return [];
     }
   }
@@ -631,14 +612,11 @@ export class BasesCalendarView extends BasesView {
     // Extract recurrence data
     const itemData = this.extractRecurrenceData(entry);
 
-    console.log('Planner: Expanding recurring item', entry.file.path, itemData);
-
     // Generate occurrences using RRule directly
     const occurrences = this.generateOccurrences(itemData, rangeStart, rangeEnd);
 
     if (occurrences.length === 0) {
       // Fall back to single event if no occurrences generated
-      console.log('Planner: No occurrences, falling back to single event');
       const event = this.entryToEvent(entry, colorByProp);
       return event ? [event] : [];
     }
@@ -682,7 +660,6 @@ export class BasesCalendarView extends BasesView {
       });
     }
 
-    console.log('Planner: Created', events.length, 'events for', entry.file.path);
     return events;
   }
 

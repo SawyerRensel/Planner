@@ -62,8 +62,7 @@
               "title": "Grocery Shopping"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -197,13 +196,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Planner/Calendar.base",
+                "file": "notes/feedback-and-ideas.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Calendar"
+              "title": "Outline of feedback-and-ideas"
             }
           },
           {
@@ -236,11 +235,11 @@
       "planner:Open Planner Task List": false
     }
   },
-  "active": "f974a2bdb7766e40",
+  "active": "657d18c0aae1861a",
   "lastOpenFiles": [
+    "Planner/Calendar.base",
     "Planner/Grocery Shopping.md",
     "Planner/Team Meeting.md",
-    "Planner/Calendar.base",
     "Planner/Tasks.base",
     "notes/obsidian-planner-prd.md",
     "Planner/Vacation.md",
