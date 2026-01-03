@@ -1,4 +1,87 @@
-import { App, AbstractInputSuggest, TFile } from 'obsidian';
+import { App, AbstractInputSuggest, TFile, parseLinktext } from 'obsidian';
+
+/**
+ * Convert simple wikilinks to relative path wikilinks if user has disabled wikilinks in Obsidian settings
+ * @param app The Obsidian app instance
+ * @param value The value containing wikilinks like [[Note]] or comma-separated [[Note1]], [[Note2]]
+ * @param itemsFolder The folder where items are stored (to calculate relative paths)
+ * @returns The converted value with relative path wikilinks or original if wikilinks are preferred
+ */
+export function convertWikilinksToRelativePaths(
+  app: App,
+  value: string | string[] | null,
+  itemsFolder: string
+): string | string[] | null {
+  if (!value) return value;
+
+  // @ts-ignore - getConfig exists but isn't in the type definitions
+  const useMarkdownLinks = app.vault.getConfig('useMarkdownLinks') === true;
+  if (!useMarkdownLinks) {
+    return value; // Keep simple wikilinks as-is
+  }
+
+  // Normalize items folder path (remove trailing slash)
+  const normalizedItemsFolder = itemsFolder.replace(/\/$/, '');
+
+  const convertSingleValue = (val: string): string => {
+    // Match wikilinks like [[Note Name]] or [[Note Name|Display Text]]
+    return val.replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (match, linkPath, displayText) => {
+      const display = displayText || linkPath;
+      // Try to resolve the file path
+      const linkInfo = parseLinktext(linkPath);
+      const file = app.metadataCache.getFirstLinkpathDest(linkInfo.path, '');
+
+      if (file) {
+        // Calculate relative path from items folder to the file
+        const filePath = file.path.replace(/\.md$/, ''); // Remove .md extension
+        const relativePath = calculateRelativePath(normalizedItemsFolder, filePath);
+        return `[[${relativePath}|${display}]]`;
+      } else {
+        // File not found, keep as-is
+        return match;
+      }
+    });
+  };
+
+  if (Array.isArray(value)) {
+    return value.map(convertSingleValue);
+  }
+
+  return convertSingleValue(value);
+}
+
+/**
+ * Calculate relative path from source folder to target path
+ */
+function calculateRelativePath(fromFolder: string, toPath: string): string {
+  const fromParts = fromFolder.split('/').filter(p => p);
+  const toParts = toPath.split('/').filter(p => p);
+
+  // Find common prefix length
+  let commonLength = 0;
+  while (
+    commonLength < fromParts.length &&
+    commonLength < toParts.length &&
+    fromParts[commonLength] === toParts[commonLength]
+  ) {
+    commonLength++;
+  }
+
+  // Build relative path: go up for remaining fromParts, then down to toParts
+  const upCount = fromParts.length - commonLength;
+  const upPath = Array(upCount).fill('..').join('/');
+  const downPath = toParts.slice(commonLength).join('/');
+
+  if (upPath && downPath) {
+    return `${upPath}/${downPath}`;
+  } else if (upPath) {
+    return upPath;
+  } else if (downPath) {
+    return downPath;
+  } else {
+    return toParts[toParts.length - 1]; // Same folder, just return filename
+  }
+}
 
 /**
  * Autocomplete suggest for file links (wiki-link style [[Note]])
@@ -51,27 +134,29 @@ export class FileLinkSuggest extends AbstractInputSuggest<TFile> {
     const segments = currentValue.split(',');
     const lastSegment = segments[segments.length - 1];
 
-    // Check if user prefers markdown links over wikilinks
-    // @ts-ignore - getConfig exists but isn't in the type definitions
-    const useMarkdownLinks = this.app.vault.getConfig('useMarkdownLinks') === true;
-
-    // Format the link based on user preference
-    const linkText = useMarkdownLinks
-      ? `[${file.basename}](${file.path})`
-      : `[[${file.basename}]]`;
+    // Always display as wikilinks during editing
+    // Conversion to markdown links happens on save if user has disabled wikilinks
+    const linkText = `[[${file.basename}]]`;
 
     // Check if we're completing a [[ bracket
     const bracketMatch = lastSegment.match(/^(.*?)\[\[[^\]]*$/);
 
     if (bracketMatch) {
-      // Replace the incomplete [[... with the formatted link
-      segments[segments.length - 1] = bracketMatch[1] + linkText;
+      const prefix = bracketMatch[1];
+      // If there's already a complete wikilink before this one, add a comma separator
+      if (prefix.includes(']]')) {
+        segments[segments.length - 1] = prefix.replace(/\]\]\s*$/, ']]') + ', ' + linkText;
+      } else {
+        segments[segments.length - 1] = prefix + linkText;
+      }
     } else {
       // Replace the last segment with the formatted link
       segments[segments.length - 1] = ` ${linkText}`;
     }
 
-    const newValue = segments.join(',').replace(/^,\s*/, '').trim();
+    let newValue = segments.join(',').replace(/^,\s*/, '').trim();
+    // Ensure any remaining space-separated wikilinks are comma-separated
+    newValue = newValue.replace(/\]\]\s+\[\[/g, ']], [[');
     this.inputEl.value = newValue;
     this.inputEl.dispatchEvent(new Event('input', { bubbles: true }));
     this.onSelect(file);

@@ -11,7 +11,7 @@ import {
   type RecurrenceData,
 } from './menus';
 import { CustomRecurrenceModal } from './CustomRecurrenceModal';
-import { FileLinkSuggest, TagSuggest, ContextSuggest } from './suggests';
+import { FileLinkSuggest, TagSuggest, ContextSuggest, convertWikilinksToRelativePaths } from './suggests';
 
 interface ItemModalOptions {
   mode: 'create' | 'edit';
@@ -138,6 +138,14 @@ export class ItemModal extends Modal {
       }
       if (this.calendars.length === 0 && this.plugin.settings.defaultCalendar) {
         this.calendars = [this.plugin.settings.defaultCalendar];
+      }
+      // Prepopulate default tag for new items
+      if (this.tags.length === 0) {
+        if (this.plugin.settings.quickCaptureDefaultTags.length > 0) {
+          this.tags = [...this.plugin.settings.quickCaptureDefaultTags];
+        } else {
+          this.tags = ['event'];
+        }
       }
     }
   }
@@ -1046,10 +1054,16 @@ export class ItemModal extends Modal {
       return;
     }
 
+    // Convert wikilinks to relative path wikilinks if user has disabled wikilinks in Obsidian settings
+    const itemsFolder = this.plugin.settings.itemsFolder;
+    const convertedPeople = convertWikilinksToRelativePaths(this.app, this.people, itemsFolder) as string[];
+    const convertedParent = convertWikilinksToRelativePaths(this.app, this.parent, itemsFolder) as string | null;
+    const convertedBlockedBy = convertWikilinksToRelativePaths(this.app, this.blockedBy, itemsFolder) as string[];
+
     const frontmatter: Partial<ItemFrontmatter> = {
       title,
       summary: this.summary || undefined,
-      tags: this.tags.length > 0 ? this.tags : ['task'],
+      tags: this.tags.length > 0 ? this.tags : ['event'],
       status: this.status || this.plugin.settings.quickCaptureDefaultStatus,
       calendar: this.calendars.length > 0 ? this.calendars : undefined,
     };
@@ -1059,9 +1073,9 @@ export class ItemModal extends Modal {
     frontmatter.all_day = this.allDay;
     if (this.priority) frontmatter.priority = this.priority;
     if (this.context.length > 0) frontmatter.context = this.context;
-    if (this.people.length > 0) frontmatter.people = this.people;
-    if (this.parent) frontmatter.parent = this.parent;
-    if (this.blockedBy.length > 0) frontmatter.blocked_by = this.blockedBy;
+    if (convertedPeople && convertedPeople.length > 0) frontmatter.people = convertedPeople;
+    if (convertedParent) frontmatter.parent = convertedParent;
+    if (convertedBlockedBy && convertedBlockedBy.length > 0) frontmatter.blocked_by = convertedBlockedBy;
 
     // Recurrence fields
     if (this.recurrence?.repeat_frequency) {

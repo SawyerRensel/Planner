@@ -1,4 +1,6 @@
 
+## Calendar View
+
 - [x] Improve Calendar view UI.  Conserve "real-estate".  Match the look, sizing and feel of Task Notes "Advanced Calendar" view.
 - [x] Abbreviate Calendar view mode buttons to single letters.  Let's also shorten the "+ New" button to a single plus "+".  Secondly, let's add an option to to split Year view mode by month or have a continuous scroll like before.  (only shown as a toggle in Calendar view when Year view mode is selected)
 - [x] "Color by" menu is missing
@@ -24,26 +26,29 @@
 - [x] Right now there's a placeholder blank margin for the interpreted results of the NLP/title input.  Let's remove this extra space until the NLP detects and recognizes tokens to render
 - [x] Rename "Details (Note Content)" to "Note Content" and make it no longer collapsible
 - [x] In the Context input box, right now it's showing "@" symbol as suggest inputs.  Let's remove the "@" symbol and make sure 
-- [ ] Convert Wikilinks to Markdown links if User has "Use [[Wikilinks]]" setting turned off in "Files and Links" Settings.
+- [x] Convert Wikilinks to Markdown links if User has "Use [[Wikilinks]]" setting turned off in "Files and Links" Settings.
 - [x] In Planner settings, let's allow the user to also pick a lucide icon for each status.  Let's use that icon in the Item Modal dropown menu for Status selection
 
 
-- [ ] Let's add some space between the "New Item" ("+") button in Calendar view and the view mode buttons.  Also, the current view mode button selection is not being/staying highlighted when clicked.
 - [x] Quick capture needs to put quotations around context items in list like `"@home"` instead of `@home`
 - [x] Whenever I move an event, the event is offset down and to the right by a large margin from my actual mouse position while I'm clicking and dragging it.  It still does successfully reposition to where I place my mouse, but the visual difference is jarring.
 
-- [ ] Set a Default Calendar in Planner Settings by using a dropdown that gets the lists of current calendars instead of manually typing one in.
-- [ ] Planner settings make slider to make the font smaller in Calendar View.  Right now the font is a comfortable size, but could be considered too big.  Let's make the default Calendar View font size just a bit smaller.
-- [ ] On Mobile, the Item Modal width extends beyond screen width.  Let's make sure it fits within screen width. 
-- [ ] Optimize the area above the Calendar container.  Let's remove the dropdown menu for "Color:" in Calendar View action bar but keep the identical dropdown in the Calendar View Bases Configuration menu.  Let's move the Calendar View modes (Y, M, D, etc.) over the left and move the forward and back arrows to the right side.   Let's also reduce the size of the view mode buttons a little and have no top or bottom margin for the action row.  Let's convert the "today" button into the lucide icon `square-split-horizontal`.   Ideally on non-mobile views, the view mode buttons are on the left, the calendar title (e.g. "January 2026") is in the center, and the forward/back buttons and today icons are on the right.  On mobile, all Calendar view action buttons are together on a row above the calendar title (right now there are three rows, which smushes the calendar container quite a bit and takes up a lot of real estate.)
-
-- [ ] Planner Gantt
-- [ ] Planner wait to create Markdown links from Item Modal (display as wikilinks) until user clicks create or save, then convert to relative path Markdown links in quotation marks
+- [x] Set a Default Calendar in Planner Settings by using a dropdown that gets the lists of current calendars instead of manually typing one in.
+- [x] Planner settings make slider to make the font smaller in Calendar View.  Right now the font is a comfortable size, but could be considered too big.  Let's make the default Calendar View font size just a bit smaller.
+- [x] On Mobile, the Item Modal width extends beyond screen width.  Let's make sure it fits within screen width. 
+- [x] Optimize the area above the Calendar container.  Let's remove the dropdown menu for "Color:" in Calendar View action bar but keep the identical dropdown in the Calendar View Bases Configuration menu.  Let's move the Calendar View modes (Y, M, D, etc.) over the left and move the forward and back arrows to the right side.   Let's also reduce the size of the view mode buttons a little and have no top or bottom margin for the action row.  Let's convert the "today" button into the lucide icon `square-split-horizontal`.   Ideally on non-mobile views, the view mode buttons are on the left, the calendar title (e.g. "January 2026") is in the center, and the forward/back buttons and today icons are on the right.  On mobile, all Calendar view action buttons are together on a row above the calendar title (right now there are three rows, which smushes the calendar container quite a bit and takes up a lot of real estate.)
+- [x] Move TaskNotes, Obsidian Maps and other repo references into a ref folder in Planner’s repo to give easier access to [Claude](../../Topics/LLMs/Claude.md) for contextual studying.
+- [ ] If user disabled "Use WikiLinks" in Obsidian "Files and Links" settings, wait to create Markdown links from Item Modal (display as wikilinks) until user clicks create or save, then convert to relative path Markdown links in quotation marks.
+- [ ] Pull existing field values and add to Item Modal when editing an item. 
 - [ ] Default tag for new Items - right now it's event.  Prepopulate the tag in the Item Modal.
-- [ ] Pull existing field values and add to Item Modal when editing an Would be nice to have a Day Planner-style sidebar for Planner, especially on mobile.  Just a quick swipe right to see the day’s agenda.
-- [ ] Move TaskNotes, Obsidian Maps and other repo references into a ref folder in Planner’s repo to give easier access to [Claude](../../Topics/LLMs/Claude.md) for contextual studying.
-- [ ] 
-- [ ] 
+- [ ] ~~Would be nice to have a Day Planner-style sidebar for Planner, especially on mobile.  Just a quick swipe right to see the day’s agenda.~~
+
+## Gantt View
+
+- [ ] Section 5.5 | Core Features: Multiyear view for Gantt in addition to hour, half-day, day, month, year.  Ask me clarifying questions about this.
+- [ ] Section 5.5 | Bar Click Popup: Use the same Item Modal used for Calendar view for a unified Item creation and editing experience. 
+
+## Other
 
 - [ ] Map View integration in calendar item mobile popup.  
 - [ ] Embed Map View in Calendar template
