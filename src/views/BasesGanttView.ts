@@ -76,6 +76,16 @@ export class BasesGanttView extends BasesView {
     return value !== false;
   }
 
+  private getTruncateTitles(): boolean {
+    const value = this.config?.get('truncateTitles');
+    return value !== false; // Default to true
+  }
+
+  private getShowDateInBars(): boolean {
+    const value = this.config?.get('showDateInBars');
+    return value === true; // Default to false
+  }
+
   constructor(
     controller: QueryController,
     containerEl: HTMLElement,
@@ -92,6 +102,11 @@ export class BasesGanttView extends BasesView {
   private setupContainer(): void {
     this.containerEl.empty();
     this.containerEl.addClass('planner-bases-gantt');
+
+    // Add CSS classes based on settings
+    this.containerEl.toggleClass('gantt-truncate-titles', this.getTruncateTitles());
+    this.containerEl.toggleClass('gantt-show-dates', this.getShowDateInBars());
+
     this.containerEl.style.cssText = 'height: 100%; display: flex; flex-direction: column;';
 
     // Create toolbar for zoom controls
@@ -192,6 +207,10 @@ export class BasesGanttView extends BasesView {
     if (!this.ganttEl || !this.ganttEl.isConnected) {
       this.setupContainer();
     }
+
+    // Always update CSS classes based on current settings
+    this.containerEl.toggleClass('gantt-truncate-titles', this.getTruncateTitles());
+    this.containerEl.toggleClass('gantt-show-dates', this.getShowDateInBars());
 
     if (this.ganttEl) {
       // Clear and reinitialize
@@ -313,9 +332,15 @@ export class BasesGanttView extends BasesView {
       return `background-color: ${color}; border-color: ${color};`;
     };
 
-    // Task text template
+    // Task text template - optionally show dates
+    const showDates = this.getShowDateInBars();
     gantt.templates.task_text = (start: Date, end: Date, task: Task) => {
-      return task.text || '';
+      const title = task.text || '';
+      if (showDates && start) {
+        const dateStr = start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        return `${title} (${dateStr})`;
+      }
+      return title;
     };
 
     // Progress text
@@ -832,6 +857,18 @@ export function createGanttViewRegistration(plugin: PlannerPlugin): BasesViewReg
         key: 'autoScrollToday',
         displayName: 'Auto-scroll to today',
         default: true,
+      },
+      {
+        type: 'toggle',
+        key: 'truncateTitles',
+        displayName: 'Truncate titles in bars',
+        default: true,
+      },
+      {
+        type: 'toggle',
+        key: 'showDateInBars',
+        displayName: 'Show dates in bars',
+        default: false,
       },
     ],
   };

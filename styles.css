@@ -1308,6 +1308,15 @@
   --dhx-gantt-grid-body-background: var(--background-primary);
   --dhx-gantt-offtime-background: var(--background-secondary);
 
+  /* Scale/grid borders - ensure consistent colors */
+  --dhx-gantt-scale-border-vertical: 1px solid var(--background-modifier-border);
+  --dhx-gantt-scale-border-horizontal: 1px solid var(--background-modifier-border);
+  --dhx-gantt-grid-row-border: 1px solid var(--background-modifier-border);
+  --dhx-gantt-task-row-border: 1px solid var(--background-modifier-border);
+  --dhx-gantt-grid-cell-border: 1px solid var(--background-modifier-border);
+  --dhx-gantt-default-border: 1px solid var(--background-modifier-border);
+  --dhx-gantt-header-border: 1px solid var(--background-modifier-border);
+
   /* Link styling */
   --dhx-gantt-link-background: var(--text-muted);
   --dhx-gantt-link-background-hover: var(--interactive-accent);
@@ -1399,10 +1408,11 @@
   line-height: 56px !important;
 }
 
-/* Timeline scale - ensure text is visible */
+/* Timeline scale - ensure text is visible and fix border colors */
 .planner-bases-gantt .gantt_scale_line {
   height: 28px !important;
   overflow: visible !important;
+  border-bottom: 1px solid var(--background-modifier-border) !important;
 }
 
 .planner-bases-gantt .gantt_scale_cell {
@@ -1410,6 +1420,12 @@
   line-height: 28px !important;
   overflow: visible !important;
   padding: 0 4px !important;
+  border-right: 1px solid var(--background-modifier-border) !important;
+}
+
+/* Task timeline vertical lines (column separators) */
+.planner-bases-gantt .gantt_task_cell {
+  border-right-color: var(--background-modifier-border) !important;
 }
 
 /* Grid (left side) */
@@ -1493,6 +1509,26 @@
   font-size: 12px;
   font-weight: 500;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Truncate titles option - default behavior */
+.planner-bases-gantt.gantt-truncate-titles .gantt_task_content {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* When truncate is disabled, allow text to overflow the task bar */
+.planner-bases-gantt:not(.gantt-truncate-titles) .gantt_task_line {
+  overflow: visible;
+}
+
+.planner-bases-gantt:not(.gantt-truncate-titles) .gantt_task_content {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
+  width: max-content !important;
+  min-width: 100%;
 }
 
 /* Progress drag handle */

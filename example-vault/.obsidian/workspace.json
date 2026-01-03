@@ -4,24 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "5caf0105b28ea76e",
+        "id": "2f952e8520dec364",
         "type": "tabs",
         "children": [
           {
-            "id": "132e8527cb221cf9",
-            "type": "leaf",
-            "state": {
-              "type": "bases",
-              "state": {
-                "file": "Planner/Calendar.base",
-                "viewName": "Calendar"
-              },
-              "icon": "calendar",
-              "title": "Calendar"
-            }
-          },
-          {
-            "id": "11f5917702014ed7",
+            "id": "ca10b9a74f1a5612",
             "type": "leaf",
             "state": {
               "type": "bases",
@@ -33,8 +20,7 @@
               "title": "Gantt"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -210,12 +196,12 @@
       "obsidian-full-calendar:Open Full Calendar": false
     }
   },
-  "active": "11f5917702014ed7",
+  "active": "ca10b9a74f1a5612",
   "lastOpenFiles": [
-    "Planner/Calendar.base",
     "Planner/Gantt.base",
-    "Planner/Design Mockups.md",
+    "Planner/Calendar.base",
     "notes/questions.md",
+    "Planner/Design Mockups.md",
     "notes/obsidian-planner-prd.md.tmp.254.1767462990454",
     "notes/obsidian-planner-prd.md.tmp.254.1767462974714",
     "notes/obsidian-planner-prd.md.tmp.254.1767462973670",

@@ -32,5 +32,7 @@ views:
     autoScrollToday: true
     dateStartField: note.date_start_scheduled
     dateEndField: note.date_end_scheduled
+    truncateTitles: false
+    showDateInBars: false
   - type: table
     name: Table
