@@ -113,6 +113,11 @@ export class BasesGanttView extends BasesView {
     return value ?? 350; // Default to 350px
   }
 
+  private getGanttFontSize(): number {
+    const value = this.config?.get('ganttFontSize') as number | undefined;
+    return value ?? 12; // Default to 12px
+  }
+
   /**
    * Get the list of visible properties from the Bases configuration
    */
@@ -380,6 +385,9 @@ export class BasesGanttView extends BasesView {
 
   private initGantt(): void {
     if (!this.ganttEl) return;
+
+    // Apply font size CSS variable
+    this.ganttEl.style.setProperty('--planner-gantt-font-size', `${this.getGanttFontSize()}px`);
 
     // Configure gantt before init
     this.configureGantt();
@@ -1075,6 +1083,15 @@ export function createGanttViewRegistration(plugin: PlannerPlugin): BasesViewReg
         min: 150,
         max: 800,
         step: 10,
+      },
+      {
+        type: 'slider',
+        key: 'ganttFontSize',
+        displayName: 'Font size',
+        default: 12,
+        min: 8,
+        max: 18,
+        step: 1,
       },
     ],
   };

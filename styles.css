@@ -1437,7 +1437,7 @@
   color: var(--text-normal);
   border-color: var(--background-modifier-border);
   font-weight: 600;
-  font-size: 12px;
+  font-size: var(--planner-gantt-font-size, 12px);
   /* Enable text wrapping in column headers */
   white-space: normal !important;
   word-wrap: break-word;
@@ -1452,6 +1452,7 @@
   background: var(--background-primary);
   color: var(--text-normal);
   border-color: var(--background-modifier-border);
+  font-size: var(--planner-gantt-font-size, 12px);
   /* Left-align all cell content */
   text-align: left !important;
   white-space: nowrap;
@@ -1487,7 +1488,7 @@
   background: var(--background-secondary);
   color: var(--text-muted);
   border-color: var(--background-modifier-border);
-  font-size: 12px;
+  font-size: var(--planner-gantt-font-size, 12px);
 }
 
 .planner-bases-gantt .gantt_task_row {
@@ -1521,7 +1522,7 @@
 
 .planner-bases-gantt .gantt_task_content {
   color: #fff;
-  font-size: 12px;
+  font-size: var(--planner-gantt-font-size, 12px);
   font-weight: 500;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }

@@ -34,6 +34,7 @@ views:
     showDuration: false
     gridWidth: small
     showGanttTable: true
-    ganttTableWidth: 200
+    ganttTableWidth: 340
+    ganttFontSize: 12
   - type: table
     name: Table
