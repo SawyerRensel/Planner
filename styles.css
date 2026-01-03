@@ -1284,6 +1284,38 @@
   flex-direction: column;
   height: 100%;
   padding: 8px;
+
+  /* Override DHTMLX CSS variables for Obsidian theme integration */
+  --dhx-gantt-container-background: var(--background-primary);
+  --dhx-gantt-base-colors-background: var(--background-primary);
+  --dhx-gantt-base-colors-background-alt: var(--background-secondary);
+  --dhx-gantt-base-colors-border: var(--background-modifier-border);
+  --dhx-gantt-base-colors-border-light: var(--background-modifier-border);
+  --dhx-gantt-base-colors-text-base: var(--text-normal);
+  --dhx-gantt-base-colors-text-light: var(--text-muted);
+  --dhx-gantt-base-colors-select: var(--background-modifier-active-hover);
+  --dhx-gantt-base-colors-hover-color: var(--background-modifier-hover);
+  --dhx-gantt-scale-background: var(--background-secondary);
+  --dhx-gantt-scale-color: var(--text-muted);
+  --dhx-gantt-grid-scale-background: var(--background-secondary);
+  --dhx-gantt-grid-scale-color: var(--text-normal);
+  --dhx-gantt-timeline-scale-background: var(--background-secondary);
+  --dhx-gantt-timeline-scale-color: var(--text-muted);
+
+  /* Row backgrounds - CRITICAL: same for all rows to avoid alternating */
+  --dhx-gantt-task-row-background: var(--background-primary);
+  --dhx-gantt-task-row-background--odd: var(--background-primary);
+  --dhx-gantt-grid-body-background: var(--background-primary);
+  --dhx-gantt-offtime-background: var(--background-secondary);
+
+  /* Link styling */
+  --dhx-gantt-link-background: var(--text-muted);
+  --dhx-gantt-link-background-hover: var(--interactive-accent);
+
+  /* Popup styling */
+  --dhx-gantt-popup-background: var(--background-primary);
+  --dhx-gantt-popup-color: var(--text-normal);
+  --dhx-gantt-popup-border: 1px solid var(--background-modifier-border);
 }
 
 .planner-gantt-toolbar {
@@ -1346,7 +1378,38 @@
   background: var(--background-primary);
   border-color: var(--background-modifier-border);
   font-family: var(--font-text);
-  font-size: 13px;
+  font-size: 12px;
+}
+
+/* Reduce row and bar heights for compact appearance */
+.planner-bases-gantt .gantt_row,
+.planner-bases-gantt .gantt_task_row {
+  height: 28px !important;
+  line-height: 28px !important;
+}
+
+.planner-bases-gantt .gantt_task_line {
+  height: 18px !important;
+  margin-top: 5px !important;
+}
+
+/* Grid header cells */
+.planner-bases-gantt .gantt_grid_head_cell {
+  height: 56px !important;
+  line-height: 56px !important;
+}
+
+/* Timeline scale - ensure text is visible */
+.planner-bases-gantt .gantt_scale_line {
+  height: 28px !important;
+  overflow: visible !important;
+}
+
+.planner-bases-gantt .gantt_scale_cell {
+  height: 28px !important;
+  line-height: 28px !important;
+  overflow: visible !important;
+  padding: 0 4px !important;
 }
 
 /* Grid (left side) */
@@ -1438,35 +1501,58 @@
   border-radius: 50%;
 }
 
-/* Milestones */
+/* Milestones - smaller diamond shape */
 .planner-bases-gantt .gantt_task_line.gantt_milestone {
   background: transparent !important;
   border: none !important;
+  box-shadow: none !important;
+  width: 16px !important;
+  height: 16px !important;
 }
 
 .planner-bases-gantt .gantt_task_line.gantt_milestone .gantt_task_content {
-  background: var(--interactive-accent);
+  background: var(--interactive-accent) !important;
   transform: rotate(45deg);
-  width: 20px;
-  height: 20px;
-  border-radius: 3px;
+  width: 12px !important;
+  height: 12px !important;
+  border-radius: 2px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin-left: -6px;
+  margin-top: -6px;
+  overflow: hidden;
+  text-indent: -9999px;
 }
 
-/* Links (dependencies) */
-.planner-bases-gantt .gantt_task_link .gantt_line_wrapper {
-  background: var(--text-muted);
+/* Links (dependencies) - use CSS variables for styling, let DHTMLX handle dimensions */
+.planner-bases-gantt .gantt_task_link {
+  opacity: 0.7;
 }
 
-.planner-bases-gantt .gantt_task_link:hover .gantt_line_wrapper {
-  background: var(--interactive-accent);
+.planner-bases-gantt .gantt_task_link:hover {
+  opacity: 1;
 }
 
+/* Link arrow styling */
 .planner-bases-gantt .gantt_link_arrow {
-  border-color: var(--text-muted);
+  border-color: transparent;
 }
 
-.planner-bases-gantt .gantt_task_link:hover .gantt_link_arrow {
-  border-color: var(--interactive-accent);
+.planner-bases-gantt .gantt_link_arrow_right {
+  border-left-color: var(--text-muted);
+}
+
+.planner-bases-gantt .gantt_link_arrow_left {
+  border-right-color: var(--text-muted);
+}
+
+.planner-bases-gantt .gantt_task_link:hover .gantt_link_arrow_right {
+  border-left-color: var(--interactive-accent);
+}
+
+.planner-bases-gantt .gantt_task_link:hover .gantt_link_arrow_left {
+  border-right-color: var(--interactive-accent);
 }
 
 /* Today marker */
@@ -1508,10 +1594,41 @@
   background: rgba(255, 255, 255, 0.3);
 }
 
-/* Link creation hover */
+/* Link creation handles - hide by default, show subtle on hover */
 .planner-bases-gantt .gantt_link_control {
-  background: var(--interactive-accent);
+  display: none !important;
+}
+
+.planner-bases-gantt .gantt_task_line:hover .gantt_link_control {
+  display: block !important;
+  width: 10px !important;
+  height: 10px !important;
+  background: transparent !important;
+}
+
+.planner-bases-gantt .gantt_link_control div {
+  width: 6px !important;
+  height: 6px !important;
+  background: var(--interactive-accent) !important;
+  border: none !important;
   border-radius: 50%;
+  margin: 2px !important;
+}
+
+/* Hide side content labels that appear on bars */
+.planner-bases-gantt .gantt_side_content {
+  display: none !important;
+}
+
+/* Task drag handles - keep functional but style them */
+.planner-bases-gantt .gantt_task_drag {
+  background: transparent !important;
+  opacity: 0;
+}
+
+.planner-bases-gantt .gantt_task_line:hover .gantt_task_drag {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.2) !important;
 }
 
 /* Quick info popup */

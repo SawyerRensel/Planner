@@ -4,11 +4,24 @@
     "type": "split",
     "children": [
       {
-        "id": "03de4eaf1f27fda2",
+        "id": "5caf0105b28ea76e",
         "type": "tabs",
         "children": [
           {
-            "id": "a9f4fa99e694d01a",
+            "id": "132e8527cb221cf9",
+            "type": "leaf",
+            "state": {
+              "type": "bases",
+              "state": {
+                "file": "Planner/Calendar.base",
+                "viewName": "Calendar"
+              },
+              "icon": "calendar",
+              "title": "Calendar"
+            }
+          },
+          {
+            "id": "11f5917702014ed7",
             "type": "leaf",
             "state": {
               "type": "bases",
@@ -20,7 +33,8 @@
               "title": "Gantt"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -196,9 +210,11 @@
       "obsidian-full-calendar:Open Full Calendar": false
     }
   },
-  "active": "a9f4fa99e694d01a",
+  "active": "11f5917702014ed7",
   "lastOpenFiles": [
+    "Planner/Calendar.base",
     "Planner/Gantt.base",
+    "Planner/Design Mockups.md",
     "notes/questions.md",
     "notes/obsidian-planner-prd.md.tmp.254.1767462990454",
     "notes/obsidian-planner-prd.md.tmp.254.1767462974714",
@@ -207,7 +223,6 @@
     "notes/obsidian-planner-prd.md.tmp.254.1767462971599",
     "notes/obsidian-planner-prd.md.tmp.254.1767462960217",
     "notes/frappe-gantt-implementation-plan.md",
-    "Planner/Calendar.base",
     "notes/obsidian-planner-prd.md",
     "Planner/Fix Login Bug.md",
     "notes/feedback-and-ideas.md",
@@ -217,7 +232,6 @@
     "Planner/test.md",
     "Planner/test1.md",
     "Templates/test.md",
-    "Planner/Design Mockups.md",
     "Templates/Daily Note Template.md",
     "Planner/Website Redesign.md",
     "Planner/Vacation.md",

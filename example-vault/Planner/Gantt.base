@@ -30,5 +30,7 @@ views:
     showProgress: true
     showDependencies: true
     autoScrollToday: true
+    dateStartField: note.date_start_scheduled
+    dateEndField: note.date_end_scheduled
   - type: table
     name: Table

@@ -277,9 +277,10 @@ export class BasesGanttView extends BasesView {
     // Today marker
     gantt.config.show_markers = true;
 
-    // Row height
-    gantt.config.row_height = 36;
-    gantt.config.bar_height = 24;
+    // Row height - more compact
+    gantt.config.row_height = 28;
+    gantt.config.bar_height = 18;
+    gantt.config.scale_height = 56; // Height for two scale rows
 
     // Link types (matching PRD requirements)
     gantt.config.links = {
@@ -497,16 +498,26 @@ export class BasesGanttView extends BasesView {
     // Validate start date
     if (isNaN(startDate.getTime())) return null;
 
-    // Calculate duration in days
+    // Get all_day flag from frontmatter
+    const isAllDay = fm?.all_day !== false; // Default to true if not specified
+
+    // Calculate duration
     let duration = 1;
+    let durationHours = 0;
     if (endDate && !isNaN(endDate.getTime())) {
       const diffMs = endDate.getTime() - startDate.getTime();
+      durationHours = diffMs / (1000 * 60 * 60);
+      // For Gantt, use day-based duration (minimum 1 day for display purposes)
       duration = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
     }
 
-    // Determine if milestone (no end date or same day)
-    const isMilestone = !endDate ||
-      (startDate.toDateString() === endDate.toDateString() && duration <= 1);
+    // Determine if milestone:
+    // - No end date, OR
+    // - Same day AND all_day is true AND has no meaningful time span
+    // Timed items (all_day: false) with duration should NOT be milestones
+    const isSameDay = endDate && startDate.toDateString() === endDate.toDateString();
+    const hasTimeDuration = !isAllDay && durationHours > 0;
+    const isMilestone = !endDate || (isSameDay && !hasTimeDuration);
 
     // Get progress (0-100 in Planner, 0-1 in DHTMLX)
     const progressValue = fm?.progress;
