@@ -48,7 +48,8 @@
               "title": "Fix Login Bug"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -182,13 +183,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "notes/feedback-and-ideas.md",
+                "file": "Planner/Calendar.base",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of feedback-and-ideas"
+              "title": "Outline of Calendar"
             }
           },
           {
@@ -222,10 +223,10 @@
       "obsidian-full-calendar:Open Full Calendar": false
     }
   },
-  "active": "f32be1d994f54650",
+  "active": "1ef5e8fc8559af65",
   "lastOpenFiles": [
-    "Planner/Calendar.base",
     "Planner/Fix Login Bug.md",
+    "Planner/Calendar.base",
     "notes/feedback-and-ideas.md",
     "Templates/test.md",
     "Planner/Design Mockups.md",

@@ -1,6 +1,43 @@
 import { App, AbstractInputSuggest, TFile, parseLinktext } from 'obsidian';
 
 /**
+ * Convert any link format to simple wikilinks for display in the modal
+ * Handles: [[path|display]], [display]("path"), [display](path)
+ * Output: [[display]] (simple wikilink with just the display name)
+ */
+export function convertToSimpleWikilinks(value: string | string[] | null): string | string[] | null {
+  if (!value) return value;
+
+  const convertSingleValue = (val: string): string => {
+    // First, convert markdown links [text]("path") or [text](path) to simple wikilinks
+    let result = val.replace(/\[([^\]]+)\]\([^)]+\)/g, (match, displayText) => {
+      return `[[${displayText}]]`;
+    });
+
+    // Then, convert relative path wikilinks [[path|display]] to simple [[display]]
+    result = result.replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, (match, path, displayText) => {
+      return `[[${displayText}]]`;
+    });
+
+    // Convert [[path/to/file]] (no display text) to [[filename]]
+    result = result.replace(/\[\[([^\]|]+)\]\]/g, (match, path) => {
+      // Extract just the filename from the path
+      const parts = path.split('/');
+      const filename = parts[parts.length - 1].replace(/\.md$/, '');
+      return `[[${filename}]]`;
+    });
+
+    return result;
+  };
+
+  if (Array.isArray(value)) {
+    return value.map(convertSingleValue);
+  }
+
+  return convertSingleValue(value);
+}
+
+/**
  * Convert simple wikilinks to relative path wikilinks if user has disabled wikilinks in Obsidian settings
  * @param app The Obsidian app instance
  * @param value The value containing wikilinks like [[Note]] or comma-separated [[Note1]], [[Note2]]

@@ -1,1 +1,1 @@
-export { FileLinkSuggest, TagSuggest, ContextSuggest, convertWikilinksToRelativePaths } from './FileLinkSuggest';
+export { FileLinkSuggest, TagSuggest, ContextSuggest, convertToSimpleWikilinks, convertWikilinksToRelativePaths } from './FileLinkSuggest';

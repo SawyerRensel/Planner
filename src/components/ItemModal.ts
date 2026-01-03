@@ -11,7 +11,7 @@ import {
   type RecurrenceData,
 } from './menus';
 import { CustomRecurrenceModal } from './CustomRecurrenceModal';
-import { FileLinkSuggest, TagSuggest, ContextSuggest, convertWikilinksToRelativePaths } from './suggests';
+import { FileLinkSuggest, TagSuggest, ContextSuggest, convertToSimpleWikilinks, convertWikilinksToRelativePaths } from './suggests';
 
 interface ItemModalOptions {
   mode: 'create' | 'edit';
@@ -98,9 +98,10 @@ export class ItemModal extends Modal {
       this.priority = item.priority || null;
       this.calendars = item.calendar || [];
       this.context = item.context || [];
-      this.people = item.people || [];
-      this.parent = item.parent || null;
-      this.blockedBy = item.blocked_by || [];
+      // Convert link fields to simple wikilinks for display (will be converted back on save)
+      this.people = (convertToSimpleWikilinks(item.people || []) as string[]);
+      this.parent = (convertToSimpleWikilinks(item.parent || null) as string | null);
+      this.blockedBy = (convertToSimpleWikilinks(item.blocked_by || []) as string[]);
       this.tags = item.tags || [];
 
       // Load recurrence data
