@@ -19,9 +19,9 @@ views:
     name: Gantt
     order:
       - title
-      - file.tags
+      - priority
     sort:
-      - property: date_start_scheduled
+      - property: priority
         direction: DESC
     defaultZoom: month
     colorBy: note.calendar
@@ -35,6 +35,6 @@ views:
     showDuration: false
     gridWidth: small
     showGanttTable: true
-    ganttTableWidth: 160
+    ganttTableWidth: 530
   - type: table
     name: Table

@@ -113,19 +113,20 @@ export class BasesGanttView extends BasesView {
   }
 
   /**
-   * Get the list of visible properties from the Bases 'order' configuration
+   * Get the list of visible properties from the Bases configuration
    */
   private getVisibleProperties(): string[] {
     try {
-      // Access the order from the controller's properties
-      const order = this.controller.order;
-      if (Array.isArray(order) && order.length > 0) {
-        return order;
+      // Access properties from the data query result (Obsidian Bases API)
+      // BasesQueryResult.properties returns visible properties defined by the user
+      const visibleProps = this.data?.properties;
+      if (Array.isArray(visibleProps) && visibleProps.length > 0) {
+        return visibleProps;
       }
-    } catch {
-      // Fallback if order is not accessible
+    } catch (e) {
+      console.error('Planner Gantt: Error getting visible properties:', e);
     }
-    // Default properties if order is not available
+    // Default properties if not available
     return ['note.title'];
   }
 
@@ -149,7 +150,7 @@ export class BasesGanttView extends BasesView {
       const column: any = {
         name: propName,
         label: label,
-        align: isFirstColumn ? 'left' : 'center',
+        align: 'left', // Left-align all columns
         width: isFirstColumn ? Math.max(150, baseWidth) : baseWidth,
         resize: true,
       };
@@ -198,6 +199,9 @@ export class BasesGanttView extends BasesView {
 
       columns.push(column);
     }
+
+    console.log('Planner Gantt: Visible properties:', visibleProps);
+    console.log('Planner Gantt: Built columns:', JSON.stringify(columns.map(c => ({ name: c.name, label: c.label, width: c.width }))));
 
     // Ensure we have at least the title column
     if (columns.length === 0) {
