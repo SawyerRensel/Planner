@@ -19,7 +19,6 @@ views:
     name: Gantt
     order:
       - title
-      - priority
     sort:
       - property: priority
         direction: DESC
@@ -35,6 +34,6 @@ views:
     showDuration: false
     gridWidth: small
     showGanttTable: true
-    ganttTableWidth: 530
+    ganttTableWidth: 200
   - type: table
     name: Table

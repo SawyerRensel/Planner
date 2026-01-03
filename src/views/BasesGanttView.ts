@@ -33,6 +33,7 @@ function propertyToTitleCase(propertyName: string): string {
 
 interface GanttTaskExtended extends Task {
   $entry?: BasesEntry;
+  allDay?: boolean;
 }
 
 /**
@@ -454,6 +455,21 @@ export class BasesGanttView extends BasesView {
       start_to_finish: '3',
     };
 
+    // Define custom 2-hour time unit that aligns to even hours (00:00, 02:00, 04:00, etc.)
+    gantt.date.hour2_start = (date: Date): Date => {
+      const result = new Date(date);
+      result.setMinutes(0);
+      result.setSeconds(0);
+      result.setMilliseconds(0);
+      // Round down to nearest even hour
+      const hour = result.getHours();
+      result.setHours(hour - (hour % 2));
+      return result;
+    };
+    gantt.date.add_hour2 = (date: Date, inc: number): Date => {
+      return gantt.date.add(date, inc * 2, 'hour');
+    };
+
     // Set initial scales based on default zoom
     this.applyZoomScales(this.currentZoom);
 
@@ -494,13 +510,42 @@ export class BasesGanttView extends BasesView {
         return Math.round((task.progress || 0) * 100) + '%';
       };
     }
+
+    // Tooltip template - show times for non-all-day items
+    gantt.templates.tooltip_text = (start: Date, end: Date, task: GanttTaskExtended) => {
+      const title = task.text || 'Untitled';
+      const isAllDay = task.allDay !== false;
+
+      // Format dates
+      const dateOptions: Intl.DateTimeFormatOptions = { year: 'numeric', month: '2-digit', day: '2-digit' };
+      const timeOptions: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit' };
+
+      let startStr = start.toLocaleDateString(undefined, dateOptions);
+      let endStr = end ? end.toLocaleDateString(undefined, dateOptions) : startStr;
+
+      // Add times for non-all-day items
+      if (!isAllDay) {
+        startStr += ' ' + start.toLocaleTimeString(undefined, timeOptions);
+        if (end) {
+          endStr = end.toLocaleDateString(undefined, dateOptions) + ' ' + end.toLocaleTimeString(undefined, timeOptions);
+        }
+      }
+
+      return `<div class="planner-gantt-tooltip">
+        <div class="planner-gantt-tooltip-title">${title}</div>
+        <div class="planner-gantt-tooltip-props">
+          <div class="planner-gantt-tooltip-row"><span class="planner-gantt-tooltip-label">Start:</span> ${startStr}</div>
+          <div class="planner-gantt-tooltip-row"><span class="planner-gantt-tooltip-label">End:</span> ${endStr}</div>
+        </div>
+      </div>`;
+    };
   }
 
   private applyZoomScales(level: GanttZoomLevel): void {
     const scales: Record<GanttZoomLevel, any[]> = {
       day: [
         { unit: 'day', step: 1, format: '%d %M' },
-        { unit: 'hour', step: 4, format: '%H:%i' },
+        { unit: 'hour2', step: 1, format: '%H:%i' },
       ],
       week: [
         { unit: 'week', step: 1, format: 'Week %W' },
@@ -719,6 +764,7 @@ export class BasesGanttView extends BasesView {
       color: color,
       open: true,
       $entry: entry,
+      allDay: isAllDay,
     };
     console.log('Planner Gantt: Created task:', task.text, 'color:', color, 'start:', startDate, 'duration:', duration);
     return task;
