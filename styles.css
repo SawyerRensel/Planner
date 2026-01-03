@@ -282,8 +282,8 @@
 
 /* Today button with icon */
 .planner-bases-calendar .fc .fc-todayButton-button {
-  padding: 0.2em 1.0em !important;
-  min-width: unset !important;
+  min-width: 2em;
+  padding: 0.2em 0.5em;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -292,19 +292,18 @@
 /* Prev/Next navigation buttons - compact */
 .planner-bases-calendar .fc .fc-prev-button,
 .planner-bases-calendar .fc .fc-next-button {
-  padding: 0.2em 0.7em !important;
+  padding: 0.2em 0.3em !important;
   min-width: unset !important;
 }
 
 /* Refresh button with icon */
 .planner-bases-calendar .fc .fc-refreshButton-button {
-  padding: 0.2em 0.7em !important;
+  padding: 0.2em 0.45em !important;
   min-width: unset !important;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 4px !important;
-  margin-left: 0.6em;
 }
 
 .planner-bases-calendar .fc .fc-refreshButton-button svg {
@@ -319,8 +318,8 @@
 
 /* Year toggle button styling */
 .planner-bases-calendar .fc .fc-yearToggleButton-button {
-  padding: 0.2em 0.45em !important;
-  min-width: unset !important;
+  min-width: 2em;
+  padding: 0.2em 0.5em;
   opacity: 0.8;
   margin-right: 0.25em;
   border-radius: 4px !important;
