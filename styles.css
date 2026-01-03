@@ -292,13 +292,13 @@
 /* Prev/Next navigation buttons - compact */
 .planner-bases-calendar .fc .fc-prev-button,
 .planner-bases-calendar .fc .fc-next-button {
-  padding: 0.2em 0.3em !important;
+  padding: 0.2em 0.4em !important;
   min-width: unset !important;
 }
 
 /* Refresh button with icon */
 .planner-bases-calendar .fc .fc-refreshButton-button {
-  padding: 0.2em 0.45em !important;
+  padding: 0.2em 0.6em !important;
   min-width: unset !important;
   display: inline-flex;
   align-items: center;
@@ -318,8 +318,8 @@
 
 /* Year toggle button styling */
 .planner-bases-calendar .fc .fc-yearToggleButton-button {
-  min-width: 2em;
-  padding: 0.2em 0.5em;
+  padding: 0.2em 0.45em !important;
+  min-width: unset !important;
   opacity: 0.8;
   margin-right: 0.25em;
   border-radius: 4px !important;
@@ -360,7 +360,7 @@
   .planner-bases-calendar .fc .fc-toolbar {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: space-between;
     gap: 0.5em;
   }
 
@@ -368,7 +368,6 @@
   .planner-bases-calendar .fc .fc-toolbar-chunk {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
     gap: 0.25em;
     margin-bottom: 0;
   }
@@ -379,16 +378,18 @@
     order: 1;
   }
 
-  /* Title goes to second row, full width */
+  /* Title goes to second row, full width and centered */
   .planner-bases-calendar .fc .fc-toolbar-chunk:nth-child(2) {
     order: 2;
     width: 100%;
-    text-align: center;
+    display: flex;
+    justify-content: center;
   }
 
   /* Smaller title on mobile - still scales with font size setting */
   .planner-bases-calendar .fc .fc-toolbar-title {
     font-size: calc(var(--planner-calendar-font-size, 10px) * 1.4);
+    text-align: center;
   }
 }
 
