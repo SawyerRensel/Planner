@@ -39,8 +39,8 @@
 - [x] Optimize the area above the Calendar container.  Let's remove the dropdown menu for "Color:" in Calendar View action bar but keep the identical dropdown in the Calendar View Bases Configuration menu.  Let's move the Calendar View modes (Y, M, D, etc.) over the left and move the forward and back arrows to the right side.   Let's also reduce the size of the view mode buttons a little and have no top or bottom margin for the action row.  Let's convert the "today" button into the lucide icon `square-split-horizontal`.   Ideally on non-mobile views, the view mode buttons are on the left, the calendar title (e.g. "January 2026") is in the center, and the forward/back buttons and today icons are on the right.  On mobile, all Calendar view action buttons are together on a row above the calendar title (right now there are three rows, which smushes the calendar container quite a bit and takes up a lot of real estate.)
 - [x] Move TaskNotes, Obsidian Maps and other repo references into a ref folder in Planner’s repo to give easier access to [Claude](../../Topics/LLMs/Claude.md) for contextual studying.
 - [x] If user disabled "Use WikiLinks" in Obsidian "Files and Links" settings, wait to create Markdown links from Item Modal (display as wikilinks) until user clicks create or save, then convert to relative path Markdown links in quotation marks.
-- [ ] Pull existing field values and add to Item Modal when editing an item. 
-- [ ] Default tag for new Items - right now it's event.  Prepopulate the tag in the Item Modal.
+- [x] Pull existing field values and add to Item Modal when editing an item. 
+- [x] Default tag for new Items - right now it's event.  Prepopulate the tag in the Item Modal.
 - [ ] ~~Would be nice to have a Day Planner-style sidebar for Planner, especially on mobile.  Just a quick swipe right to see the day’s agenda.~~
 
 ## Gantt View

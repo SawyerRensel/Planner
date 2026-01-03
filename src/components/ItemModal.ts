@@ -97,8 +97,8 @@ export class ItemModal extends Modal {
       this.status = item.status || null;
       this.priority = item.priority || null;
       this.calendars = item.calendar || [];
-      this.context = item.context || [];
       // Convert link fields to simple wikilinks for display (will be converted back on save)
+      this.context = (convertToSimpleWikilinks(item.context || []) as string[]);
       this.people = (convertToSimpleWikilinks(item.people || []) as string[]);
       this.parent = (convertToSimpleWikilinks(item.parent || null) as string | null);
       this.blockedBy = (convertToSimpleWikilinks(item.blocked_by || []) as string[]);
@@ -712,14 +712,14 @@ export class ItemModal extends Modal {
   private createFieldInputs(container: HTMLElement): void {
     const fieldsContainer = container.createDiv({ cls: 'planner-fields' });
 
-    // Context (with autocomplete)
+    // Context (with file link suggest)
     this.contextInput = this.createTextListInputWithSuggest(
       fieldsContainer,
       'Context',
       this.context,
       (value) => { this.context = value; },
-      'work, home, errands',
-      'context'
+      'work, [[home]]',
+      'file'
     );
 
     // People (with file link suggest)
@@ -728,7 +728,7 @@ export class ItemModal extends Modal {
       'People',
       this.people,
       (value) => { this.people = value; },
-      '[[Person 1]], [[Person 2]]',
+      'Person 1, [[Person 2]]',
       'file'
     );
 
@@ -1055,8 +1055,9 @@ export class ItemModal extends Modal {
       return;
     }
 
-    // Convert wikilinks to relative path wikilinks if user has disabled wikilinks in Obsidian settings
+    // Convert wikilinks based on user's Obsidian link settings
     const itemsFolder = this.plugin.settings.itemsFolder;
+    const convertedContext = convertWikilinksToRelativePaths(this.app, this.context, itemsFolder) as string[];
     const convertedPeople = convertWikilinksToRelativePaths(this.app, this.people, itemsFolder) as string[];
     const convertedParent = convertWikilinksToRelativePaths(this.app, this.parent, itemsFolder) as string | null;
     const convertedBlockedBy = convertWikilinksToRelativePaths(this.app, this.blockedBy, itemsFolder) as string[];
@@ -1073,7 +1074,7 @@ export class ItemModal extends Modal {
     if (this.dateEnd) frontmatter.date_end_scheduled = this.dateEnd;
     frontmatter.all_day = this.allDay;
     if (this.priority) frontmatter.priority = this.priority;
-    if (this.context.length > 0) frontmatter.context = this.context;
+    if (convertedContext && convertedContext.length > 0) frontmatter.context = convertedContext;
     if (convertedPeople && convertedPeople.length > 0) frontmatter.people = convertedPeople;
     if (convertedParent) frontmatter.parent = convertedParent;
     if (convertedBlockedBy && convertedBlockedBy.length > 0) frontmatter.blocked_by = convertedBlockedBy;
