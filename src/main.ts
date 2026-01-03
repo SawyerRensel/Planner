@@ -13,6 +13,10 @@ import {
   BASES_CALENDAR_VIEW_ID,
   createCalendarViewRegistration,
 } from './views/BasesCalendarView';
+import {
+  BASES_GANTT_VIEW_ID,
+  createGanttViewRegistration,
+} from './views/BasesGanttView';
 
 export default class PlannerPlugin extends Plugin {
   settings: PlannerSettings;
@@ -53,6 +57,10 @@ export default class PlannerPlugin extends Plugin {
       this.activateCalendarView();
     });
 
+    this.addRibbonIcon('gantt-chart', 'Open Planner Gantt', () => {
+      this.activateGanttView();
+    });
+
     console.log('Planner plugin loaded');
   }
 
@@ -72,7 +80,13 @@ export default class PlannerPlugin extends Plugin {
       createCalendarViewRegistration(this)
     );
 
-    if (taskListRegistered || calendarRegistered) {
+    // Register Gantt view for Bases
+    const ganttRegistered = this.registerBasesView(
+      BASES_GANTT_VIEW_ID,
+      createGanttViewRegistration(this)
+    );
+
+    if (taskListRegistered || calendarRegistered || ganttRegistered) {
       console.log('Planner: Registered Bases views');
     } else {
       console.log('Planner: Bases not enabled, skipping Bases view registration');
@@ -107,6 +121,15 @@ export default class PlannerPlugin extends Plugin {
       name: 'Open calendar',
       callback: () => {
         this.activateCalendarView();
+      },
+    });
+
+    // Open Gantt view
+    this.addCommand({
+      id: 'open-gantt',
+      name: 'Open Gantt chart',
+      callback: () => {
+        this.activateGanttView();
       },
     });
 
@@ -149,6 +172,11 @@ export default class PlannerPlugin extends Plugin {
     await this.openBaseFile(basePath, 'Calendar');
   }
 
+  async activateGanttView() {
+    const basePath = this.baseGeneratorService.getGanttBasePath();
+    await this.openBaseFile(basePath, 'Gantt');
+  }
+
   /**
    * Open a .base file, creating it if it doesn't exist
    */
@@ -160,9 +188,14 @@ export default class PlannerPlugin extends Plugin {
       await this.app.workspace.openLinkText(path, '', false);
     } else {
       // File doesn't exist, create it first
-      const created = name === 'Tasks'
-        ? await this.baseGeneratorService.generateTasksBase(false)
-        : await this.baseGeneratorService.generateCalendarBase(false);
+      let created = false;
+      if (name === 'Tasks') {
+        created = await this.baseGeneratorService.generateTasksBase(false);
+      } else if (name === 'Calendar') {
+        created = await this.baseGeneratorService.generateCalendarBase(false);
+      } else if (name === 'Gantt') {
+        created = await this.baseGeneratorService.generateGanttBase(false);
+      }
 
       if (created) {
         new Notice(`Created ${name}.base file`);

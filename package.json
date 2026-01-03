@@ -34,6 +34,7 @@
     "@fullcalendar/multimonth": "^6.1.20",
     "@fullcalendar/timegrid": "^6.1.20",
     "chrono-node": "^2.9.0",
+    "dhtmlx-gantt": "^9.1.1",
     "rrule": "^2.8.1"
   }
 }

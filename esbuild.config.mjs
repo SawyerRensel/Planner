@@ -4,6 +4,40 @@ import builtins from "builtin-modules";
 import fs from "fs";
 import path from "path";
 
+// Plugin to extract and merge CSS into styles.css
+const cssPlugin = {
+  name: "css-merge",
+  setup(build) {
+    // Collect CSS from imports
+    const cssContents = [];
+
+    build.onLoad({ filter: /\.css$/ }, async (args) => {
+      const css = await fs.promises.readFile(args.path, "utf8");
+      cssContents.push(`/* From: ${path.basename(args.path)} */\n${css}`);
+      return { contents: "", loader: "js" };
+    });
+
+    build.onEnd(async () => {
+      if (cssContents.length > 0) {
+        // Read existing styles.css
+        let existingStyles = "";
+        const stylesPath = "./styles.css";
+        if (fs.existsSync(stylesPath)) {
+          existingStyles = await fs.promises.readFile(stylesPath, "utf8");
+        }
+
+        // Check if dhtmlx styles already added
+        if (!existingStyles.includes("/* From: dhtmlxgantt.css */")) {
+          // Append imported CSS to styles.css
+          const mergedCSS = existingStyles + "\n\n/* === BUNDLED CSS IMPORTS === */\n" + cssContents.join("\n\n");
+          await fs.promises.writeFile(stylesPath, mergedCSS);
+          console.log("Merged CSS imports into styles.css");
+        }
+      }
+    });
+  },
+};
+
 // Plugin to copy build files to example-vault
 const copyToExampleVault = {
   name: "copy-to-example-vault",
@@ -66,7 +100,7 @@ const context = await esbuild.context({
   treeShaking: true,
   outfile: "main.js",
   minify: prod,
-  plugins: [copyToExampleVault],
+  plugins: [cssPlugin, copyToExampleVault],
 });
 
 if (prod) {

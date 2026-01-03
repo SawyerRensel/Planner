@@ -359,7 +359,7 @@ Full calendar display using FullCalendar library.
 
 ### 5.2 Gantt View
 
-Timeline visualization using Frappe Gantt.
+Timeline visualization using DHTMLX Gantt.
 
 **Features:**
 - Configurable bar start/end fields (e.g., `date_start` → `date_due`)
@@ -881,7 +881,7 @@ Legend: ██ Done  ▓▓ In-Progress  ░░ To-Do  ◆ Milestone  ─► Dep
 | Platform | Obsidian Plugin API | Core integration |
 | Views | Obsidian Bases | View system, filtering, queries |
 | Calendar | FullCalendar | Calendar rendering |
-| Gantt | Frappe Gantt | Timeline visualization |
+| Gantt | DHTMLX Gantt | Timeline visualization |
 | Recurrence | rrule | iCal RRULE parsing |
 | NLP Dates | TBD (chrono-node or alternative) | Natural language parsing |
 
@@ -901,7 +901,7 @@ src/
 │   └── DependencyService.ts  # Dependency graph computation
 ├── views/
 │   ├── CalendarView.ts       # FullCalendar integration
-│   ├── GanttView.ts          # Frappe Gantt integration
+│   ├── GanttView.ts          # DHTMLX Gantt integration
 │   ├── KanbanView.ts         # Kanban board
 │   └── TaskListView.ts       # Table/list view
 ├── components/
@@ -1036,7 +1036,7 @@ Views consume Bases:
 
 **Goal:** Project timeline visualization
 
-- [ ] Frappe Gantt integration
+- [ ] DHTMLX Gantt integration
 - [ ] Configurable bar start/end fields
 - [ ] Swimlanes by field
 - [ ] Dependency arrows
@@ -1118,7 +1118,7 @@ Common patterns:
 
 - TaskNotes Plugin: UI/UX inspiration for Calendar and Kanban
 - FullCalendar: https://fullcalendar.io/
-- Frappe Gantt: https://frappe.io/gantt
+- DHTMLX Gantt: https://docs.dhtmlx.com/gantt/
 - GitHub Projects: Gantt and configurability inspiration
 
 ### 11.4 Related Files
@@ -1135,6 +1135,7 @@ Common patterns:
 | 2.0.0 | 2025-12-30 | Claude & Sawyer | Complete rewrite for ground-up build. Removed task boolean (use tags). Simplified architecture. Clear phased roadmap. Deferred calendar sync, HTTP API, time tracking to v1.1+. |
 | 2.1.0 | 2026-01-01 | Claude & Sawyer | Unified Item Modal feature: merged Quick Capture with Item Edit Modal. Added icon-based action bar, context menus for dates/recurrence/priority/status, collapsible Details section, and action buttons (Open Note, Delete, Cancel, Save). Inspired by TaskNotes UI patterns. |
 | 2.2.0 | 2026-01-03 | Claude & Sawyer | Item Modal enhancements: field autocomplete (Context, People, Parent, Tags, Blocked by), link format support (respects Wikilinks setting), pull existing values when editing, Summary field, Note Content field with markdown preview. Calendar View improvements: fixed drag-and-drop, mobile-optimized toolbar, configurable Bases options (Date Start/End fields, Title field, Default View Mode). Settings additions: Status and Priority icons (Lucide), calendar font size slider, Open Behavior setting. Phases 1-4 completed. |
+| 2.3.0 | 2026-01-03 | Claude & Sawyer | Gantt library decision: Replaced Frappe Gantt with DHTMLX Gantt (GPL v2.0) for better TypeScript support, mobile compatibility, and richer feature set (swimlanes, 4 link types, undo/redo, keyboard navigation). Plugin will be released under GPL license. |
 
 ---
 

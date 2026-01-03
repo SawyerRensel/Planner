@@ -1,3 +1,5 @@
+Let's begin Phase 5: Gantt View. Ask me any clarifying questions you may have before we implement. I have answered some of your existing questions in questions.md . Let's update the PRD to reflect these changes as well.
+
 I'd be happy to help with these Calendar View improvements! Let me ask a few clarifying questions to make sure I understand the requirements correctly:
 
 
