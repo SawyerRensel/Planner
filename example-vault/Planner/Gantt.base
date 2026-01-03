@@ -19,20 +19,22 @@ views:
     name: Gantt
     order:
       - title
-      - date_start_scheduled
-      - date_end_scheduled
-      - progress
+      - file.tags
     sort:
       - property: date_start_scheduled
-        direction: ASC
+        direction: DESC
     defaultZoom: month
     colorBy: note.calendar
-    showProgress: true
+    showProgress: false
     showDependencies: true
     autoScrollToday: true
     dateStartField: note.date_start_scheduled
     dateEndField: note.date_end_scheduled
     truncateTitles: false
     showDateInBars: false
+    showDuration: false
+    gridWidth: small
+    showGanttTable: true
+    ganttTableWidth: 160
   - type: table
     name: Table

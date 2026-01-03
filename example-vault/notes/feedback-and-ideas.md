@@ -45,8 +45,12 @@
 
 ## Gantt View
 
-- [ ] Section 5.5 | Core Features: Multiyear view for Gantt in addition to hour, half-day, day, month, year.  Ask me clarifying questions about this.
-- [ ] Section 5.5 | Bar Click Popup: Use the same Item Modal used for Calendar view for a unified Item creation and editing experience. 
+- [x] Section 5.5 | Bar Click Popup: Use the same Item Modal used for Calendar view for a unified Item creation and editing experience. 
+- [ ] Gantt Need forward and back arrows just like in Calendar View.  Let's also get rid of the Plus button.  
+- [ ] Gantt Zoom.  Need to have dynamic zoom Plus/Minus buttons to expand or condense Gantt timeline in window.  For instance, clicking the Minus button would zoom out.  I would want to be able to see a 100+ year timeline if that is possible. 
+- [ ] Ability to expand or collapse the Gantt table.  (especially for mobile, as the table takes up a lot of space)
+- [ ] Font size control for Gantt View (similar to Calendar View).  Add to Gantt View Configuration menu.
+- [ ] Gantt View Day mode should show two hours per column at a time.  Right now it shows 4 hour increments.  Make the increments even (right now they're odd).
 
 ## Other
 

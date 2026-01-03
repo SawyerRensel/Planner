@@ -170,6 +170,8 @@ views:
     showProgress: true
     showDependencies: true
     autoScrollToday: true
+    showGanttTable: true
+    ganttTableWidth: 350
   - type: table
     name: Table
 `;

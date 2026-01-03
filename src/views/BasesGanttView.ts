@@ -15,6 +15,22 @@ export const BASES_GANTT_VIEW_ID = 'planner-gantt';
 
 type GanttZoomLevel = 'day' | 'week' | 'month' | 'quarter' | 'year';
 
+/**
+ * Convert a property name to Title Case with proper word ordering
+ * e.g., "date_start_scheduled" -> "Date Start Scheduled"
+ * e.g., "note.date_start_scheduled" -> "Date Start Scheduled"
+ */
+function propertyToTitleCase(propertyName: string): string {
+  // Remove "note." prefix if present
+  const name = propertyName.replace(/^note\./, '');
+
+  // Split by underscores and convert each word to title case
+  return name
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}
+
 interface GanttTaskExtended extends Task {
   $entry?: BasesEntry;
 }
@@ -86,6 +102,117 @@ export class BasesGanttView extends BasesView {
     return value === true; // Default to false
   }
 
+  private getShowGanttTable(): boolean {
+    const value = this.config?.get('showGanttTable');
+    return value !== false; // Default to true
+  }
+
+  private getGanttTableWidth(): number {
+    const value = this.config?.get('ganttTableWidth') as number | undefined;
+    return value ?? 350; // Default to 350px
+  }
+
+  /**
+   * Get the list of visible properties from the Bases 'order' configuration
+   */
+  private getVisibleProperties(): string[] {
+    try {
+      // Access the order from the controller's properties
+      const order = this.controller.order;
+      if (Array.isArray(order) && order.length > 0) {
+        return order;
+      }
+    } catch {
+      // Fallback if order is not accessible
+    }
+    // Default properties if order is not available
+    return ['note.title'];
+  }
+
+  /**
+   * Build Gantt columns based on visible properties from Bases configuration
+   */
+  private buildColumnsFromProperties(): any[] {
+    const columns: any[] = [];
+    const visibleProps = this.getVisibleProperties();
+    const tableWidth = this.getGanttTableWidth();
+
+    // Calculate column width based on number of columns
+    const baseWidth = Math.max(80, Math.floor(tableWidth / Math.max(1, visibleProps.length)));
+
+    for (const prop of visibleProps) {
+      const propName = prop.replace(/^note\./, '');
+      const label = propertyToTitleCase(prop);
+
+      // Determine column configuration based on property type
+      const isFirstColumn = columns.length === 0;
+      const column: any = {
+        name: propName,
+        label: label,
+        align: isFirstColumn ? 'left' : 'center',
+        width: isFirstColumn ? Math.max(150, baseWidth) : baseWidth,
+        resize: true,
+      };
+
+      // First column gets tree functionality
+      if (isFirstColumn) {
+        column.tree = true;
+      }
+
+      // Add custom template for specific property types
+      if (propName === 'progress') {
+        column.template = (task: Task) => Math.round((task.progress || 0) * 100) + '%';
+        column.width = 60;
+      } else if (propName === 'duration') {
+        column.template = (task: Task) => {
+          const duration = task.duration ?? 0;
+          return String(Math.round(duration));
+        };
+        column.width = 60;
+      } else if (propName.includes('date')) {
+        column.template = (task: GanttTaskExtended) => {
+          if (!task.$entry) return '';
+          const value = task.$entry.getValue(prop as any);
+          if (!value) return '';
+          try {
+            const date = new Date(value as string);
+            return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: '2-digit' });
+          } catch {
+            return String(value);
+          }
+        };
+      } else if (propName === 'title' || propName === 'text') {
+        // Title uses the task's text property
+        column.name = 'text';
+        column.template = undefined; // Use default
+      } else {
+        // Generic template for other properties
+        column.template = (task: GanttTaskExtended) => {
+          if (!task.$entry) return '';
+          const value = task.$entry.getValue(prop as any);
+          if (value === null || value === undefined) return '';
+          if (Array.isArray(value)) return value.join(', ');
+          return String(value);
+        };
+      }
+
+      columns.push(column);
+    }
+
+    // Ensure we have at least the title column
+    if (columns.length === 0) {
+      columns.push({
+        name: 'text',
+        label: 'Title',
+        tree: true,
+        width: 200,
+        resize: true,
+      });
+    }
+
+    return columns;
+  }
+
   constructor(
     controller: QueryController,
     containerEl: HTMLElement,
@@ -146,6 +273,14 @@ export class BasesGanttView extends BasesView {
     // Spacer
     this.toolbarEl.createDiv({ cls: 'planner-gantt-toolbar-spacer' });
 
+    // Table toggle button
+    const tableToggleBtn = this.toolbarEl.createEl('button', {
+      cls: `planner-gantt-zoom-btn ${this.getShowGanttTable() ? 'active' : ''}`,
+      attr: { title: 'Toggle table view' },
+    });
+    setIcon(tableToggleBtn, 'table');
+    tableToggleBtn.addEventListener('click', () => this.toggleTableVisibility(tableToggleBtn));
+
     // Today button
     const todayBtn = this.toolbarEl.createEl('button', {
       cls: 'planner-gantt-zoom-btn',
@@ -161,6 +296,23 @@ export class BasesGanttView extends BasesView {
     });
     setIcon(addBtn, 'plus');
     addBtn.addEventListener('click', () => this.createNewItem());
+  }
+
+  private toggleTableVisibility(btn: HTMLElement): void {
+    const currentValue = this.getShowGanttTable();
+    const newValue = !currentValue;
+
+    // Update config
+    this.config?.set('showGanttTable', newValue);
+
+    // Update button state
+    btn.classList.toggle('active', newValue);
+
+    // Re-render the gantt
+    if (this.isInitialized) {
+      this.configureGantt();
+      gantt.render();
+    }
   }
 
   private setupResizeObserver(): void {
@@ -267,30 +419,19 @@ export class BasesGanttView extends BasesView {
     // Auto-expand all branches
     gantt.config.open_tree_initially = true;
 
-    // Grid columns (left side)
-    gantt.config.columns = [
-      { name: 'text', label: 'Task', tree: true, width: 200, resize: true },
-      { name: 'start_date', label: 'Start', align: 'center', width: 90 },
-      {
-        name: 'duration',
-        label: 'Days',
-        align: 'center',
-        width: 50,
-        template: (task: Task) => {
-          const duration = task.duration ?? 0;
-          return String(Math.round(duration));
-        },
-      },
-    ];
+    // Grid columns - built from Bases Properties configuration
+    gantt.config.columns = this.buildColumnsFromProperties();
 
-    if (this.getShowProgress()) {
-      gantt.config.columns.push({
-        name: 'progress',
-        label: '%',
-        align: 'center',
-        width: 45,
-        template: (task: Task) => Math.round((task.progress || 0) * 100) + '%',
-      });
+    // Grid (table) visibility and width
+    const showTable = this.getShowGanttTable();
+    const tableWidth = this.getGanttTableWidth();
+
+    if (showTable) {
+      gantt.config.grid_width = tableWidth;
+      gantt.config.show_grid = true;
+    } else {
+      gantt.config.grid_width = 0;
+      gantt.config.show_grid = false;
     }
 
     // Today marker
@@ -869,6 +1010,21 @@ export function createGanttViewRegistration(plugin: PlannerPlugin): BasesViewReg
         key: 'showDateInBars',
         displayName: 'Show dates in bars',
         default: false,
+      },
+      {
+        type: 'toggle',
+        key: 'showGanttTable',
+        displayName: 'Show table',
+        default: true,
+      },
+      {
+        type: 'slider',
+        key: 'ganttTableWidth',
+        displayName: 'Table width',
+        default: 350,
+        min: 150,
+        max: 800,
+        step: 10,
       },
     ],
   };
