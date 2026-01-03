@@ -22,8 +22,9 @@ export interface PlannerSettings {
   // Priority Configuration
   priorities: PriorityConfig[];
 
-  // Calendar Colors
+  // Calendar Configuration
   calendarColors: Record<string, string>;
+  calendarFontSize: number; // px value, range 6-18
 
   // Quick Capture
   quickCaptureHotkey: string;
@@ -102,11 +103,12 @@ export const DEFAULT_SETTINGS: PlannerSettings = {
     { name: 'None', color: '#6b7280', weight: 0, icon: 'minus' },
   ],
 
-  // Calendar Colors
+  // Calendar Configuration
   calendarColors: {
     'Personal': '#3b82f6',
     'Work': '#22c55e',
   },
+  calendarFontSize: 10, // 20% smaller than default 12px
 
   // Quick Capture
   quickCaptureHotkey: 'Ctrl+Shift+N',

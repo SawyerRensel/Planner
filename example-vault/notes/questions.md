@@ -1,39 +1,40 @@
-This is really helpful. TaskNotes has a clean approach with:
+I'd be happy to help with these Calendar View improvements! Let me ask a few clarifying questions to make sure I understand the requirements correctly:
 
-- **Icon-based action bar** - Calendar, clock, star, status icons that open context menus
-- **Visual indicators** - Colored dots on icons when they have values
-- **Progressive disclosure** - Expand/collapse for detailed options
-- **Context menus** - Quick selection without full modals
-- **Clean button row** - Open note, Archive, Cancel, Save
 
-Based on this research and your answers, I have a few more questions:
+**1. Font Size Slider:**
 
- 
+- What range would you like for the font size slider? For example, should it go from something like 10px to 18px, or a percentage-based scale like 80% to 120%?
 
-**UI Layout:**
+> Let's go from 6px to 18px. 
 
-1. Do you like the TaskNotes approach of an **icon action bar** at the top (calendar, priority, status, recurrence icons) rather than full form fields for those common inputs?
+- When you say "a bit smaller" for the new default, do you have a specific reduction in mind (e.g., reduce by 2px, or ~10-15% smaller)?
 
-> Yes, I like the icon action bar, and I especially like the `Custom Recurrence` secondary dialog for recurrence.  Perhaps we could merge the Quick Capture with this new popup we're creating like TaskNotes does?
+> 20% smaller. 
 
-2. For the **simple/advanced toggle** - should "simple mode" show just: Title, Date, Status, Priority (via icons), and Calendar? And "advanced mode" adds: Recurrence, Dependencies, Context, People, Location, etc.?
-    
-> Let's not use a simple/advanced mode.  Let's instead use icons like Task Notes and include as much relevant features as possible.  I like TaskNotes dropdown options for date start scheduled and date end scheduled as well as recurrence field inputs as well, by the way.  I've included screenshots showing some examples.
-> 
-> ![[Pasted image 20260101091842.png]] ![[Pasted image 20260101091932.png]]
+**2. Mobile Layout Clarification:**
 
-**Field-Specific:** 
+- For mobile, you want to go from 3 rows to 2 rows - so all action buttons (view modes, today icon, forward/back arrows) on row 1, and the calendar title (e.g., "January 2026") on row 2. Is that correct?
 
-3. Should the **Calendar field** be a dropdown of configured calendars, or a text input with autocomplete (allowing new calendars to be created on the fly)?
+> Correct.
 
-> Configured dropdown.
+- Should all the action buttons be centered on mobile, or aligned in a specific way?
 
-4. For **recurrence** - should clicking the recurrence icon open a context menu with presets (Daily, Weekly, Monthly, Yearly, Custom...), or go straight to a full recurrence configuration dialog?
+> Centered.
 
-> Context menu with presets.  I really like TaskNotes implementation of this.
+**3. Default Calendar Dropdown:**
 
-**Views Integration:** 
+- Where are the calendars currently defined in your settings? I want to make sure I pull from the correct source to populate the dropdown.
 
-5. Should the popup be accessible from **all views** (Calendar, Gantt, Kanban, Task List) with the same behavior - click item → open edit popup?
+> It's the setting that says "Calendar Colors".  Let's also rename that heading to "Calendar Configuration and move it near the top of Planner Settings.
 
-> Yes.
+**4. View Mode Button Sizing:**
+
+- When you say "reduce the size a little," do you have a target size in mind, or should I just make them proportionally smaller (e.g., ~80% of current size)?
+
+> 80% of current size.
+
+**5. Item Modal on Mobile:**
+
+- Is the Item Modal the same as the "Quick Capture Item Modal" I see in the recent commits, or is this a different modal that appears when clicking on calendar items?
+
+> Same one.

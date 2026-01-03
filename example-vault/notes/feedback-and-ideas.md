@@ -5,31 +5,6 @@
 - [x] Clicking on day number should open the Daily Note for that date.
 - [x] Calendar View's Bases' Configure View menu also has "Color by" dropdown, but this doesn't actually change the color of items.  Let's fix that and keep both "Color by" dropdown menus in sync with each other.  
 - [x] Need to fix/update date frontmatter fields (Due? Started? Scheduled? etc.)
-
-New
-
-| Field                  | Type     | Description                             |
-| ---------------------- | -------- | --------------------------------------- |
-| `date_created`         | datetime | System timestamp.                       |
-| `date_modified`        | datetime | System timestamp.                       |
-| `date_start_scheduled` | datetime | When you intend to perform the action.  |
-| `date_start_actual`    | datetime | When you actually started the action.   |
-| `date_end_scheduled`   | datetime | When you intend to complete the action. |
-| `date_end_actual`      | datetime | When you actually finished the action.  |
-| `all_day`              | boolean  | Whether this is an all-day item.        |
-
-Old
-
-| Field            | Type     | Description                          |
-| ---------------- | -------- | ------------------------------------ |
-| `date_created`   | datetime | When created (auto-set)              |
-| `date_modified`  | datetime | Last modified (auto-set)             |
-| `date_start`     | datetime | When item starts / is scheduled      |
-| `date_end`       | datetime | When item ends (for multi-day items) |
-| `date_due`       | datetime | External deadline                    |
-| `date_completed` | datetime | When marked complete (auto-set)      |
-| `all_day`        | boolean  | Whether this is an all-day item      |
-
 - [x] Let's add some features to Calendar View's Bases' Configure View menu.  First let's select a default "View Mode" menu that allows the user to set the default view mode (Year, Month, Day, etc.).  Next let's add two menus, "Date Start Field" and "Date End Field", which allow the user to select among  frontmatter field properties to define how items are displayed on the Calender view.  Lastly, let's also create a "Title Field" that allows the user to select what text is shown on items in Calendar view.  (See ***screenshots*** for reference)
 - [x] Fix recurrence not working
 - [x] Modal input popup
@@ -50,12 +25,26 @@ Old
 - [x] Rename "Details (Note Content)" to "Note Content" and make it no longer collapsible
 - [x] In the Context input box, right now it's showing "@" symbol as suggest inputs.  Let's remove the "@" symbol and make sure 
 - [ ] Convert Wikilinks to Markdown links if User has "Use [[Wikilinks]]" setting turned off in "Files and Links" Settings.
-- [ ] In Planner settings, let's allow the user to also pick a lucide icon for each status.  Let's use that icon in the Item Modal dropown menu for Status selection
+- [x] In Planner settings, let's allow the user to also pick a lucide icon for each status.  Let's use that icon in the Item Modal dropown menu for Status selection
 
 
 - [ ] Let's add some space between the "New Item" ("+") button in Calendar view and the view mode buttons.  Also, the current view mode button selection is not being/staying highlighted when clicked.
 - [x] Quick capture needs to put quotations around context items in list like `"@home"` instead of `@home`
-- [ ] Whenever I move an event, the event is offset down and to the right by a large margin from my actual mouse position while I'm clicking and dragging it.  It still does successfully reposition to where I place my mouse, but the visual difference is jarring.
+- [x] Whenever I move an event, the event is offset down and to the right by a large margin from my actual mouse position while I'm clicking and dragging it.  It still does successfully reposition to where I place my mouse, but the visual difference is jarring.
+
+- [ ] Set a Default Calendar in Planner Settings by using a dropdown that gets the lists of current calendars instead of manually typing one in.
+- [ ] Planner settings make slider to make the font smaller in Calendar View.  Right now the font is a comfortable size, but could be considered too big.  Let's make the default Calendar View font size just a bit smaller.
+- [ ] On Mobile, the Item Modal width extends beyond screen width.  Let's make sure it fits within screen width. 
+- [ ] Optimize the area above the Calendar container.  Let's remove the dropdown menu for "Color:" in Calendar View action bar but keep the identical dropdown in the Calendar View Bases Configuration menu.  Let's move the Calendar View modes (Y, M, D, etc.) over the left and move the forward and back arrows to the right side.   Let's also reduce the size of the view mode buttons a little and have no top or bottom margin for the action row.  Let's convert the "today" button into the lucide icon `square-split-horizontal`.   Ideally on non-mobile views, the view mode buttons are on the left, the calendar title (e.g. "January 2026") is in the center, and the forward/back buttons and today icons are on the right.  On mobile, all Calendar view action buttons are together on a row above the calendar title (right now there are three rows, which smushes the calendar container quite a bit and takes up a lot of real estate.)
+
+- [ ] Planner Gantt
+- [ ] Planner wait to create Markdown links from Item Modal (display as wikilinks) until user clicks create or save, then convert to relative path Markdown links in quotation marks
+- [ ] Default tag for new Items - right now it's event.  Prepopulate the tag in the Item Modal.
+- [ ] Pull existing field values and add to Item Modal when editing an Would be nice to have a Day Planner-style sidebar for Planner, especially on mobile.  Just a quick swipe right to see the day’s agenda.
+- [ ] Move TaskNotes, Obsidian Maps and other repo references into a ref folder in Planner’s repo to give easier access to [Claude](../../Topics/LLMs/Claude.md) for contextual studying.
+- [ ] 
+- [ ] 
+
 - [ ] Map View integration in calendar item mobile popup.  
 - [ ] Embed Map View in Calendar template
 - [ ] Embed the Day's agenda base view in Daily note template.

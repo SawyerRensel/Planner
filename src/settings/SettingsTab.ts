@@ -85,17 +85,6 @@ export class PlannerSettingTab extends PluginSettingTab {
         }));
 
     new Setting(containerEl)
-      .setName('Default calendar')
-      .setDesc('Auto-assigned to new items')
-      .addText(text => text
-        .setPlaceholder('Personal')
-        .setValue(this.plugin.settings.defaultCalendar)
-        .onChange(async (value) => {
-          this.plugin.settings.defaultCalendar = value || DEFAULT_SETTINGS.defaultCalendar;
-          await this.plugin.saveSettings();
-        }));
-
-    new Setting(containerEl)
       .setName('Date format')
       .setDesc('Display format for dates')
       .addDropdown(dropdown => dropdown
@@ -150,6 +139,39 @@ export class PlannerSettingTab extends PluginSettingTab {
         .onChange(async (value: OpenBehavior) => {
           this.plugin.settings.openBehavior = value;
           await this.plugin.saveSettings();
+        }));
+
+    // Calendar Configuration
+    containerEl.createEl('h2', { text: 'Calendar Configuration' });
+    this.renderCalendarColors(containerEl);
+
+    new Setting(containerEl)
+      .setName('Default calendar')
+      .setDesc('Auto-assigned to new items')
+      .addDropdown(dropdown => {
+        dropdown.addOption('', 'None');
+        for (const calendarName of Object.keys(this.plugin.settings.calendarColors)) {
+          dropdown.addOption(calendarName, calendarName);
+        }
+        return dropdown
+          .setValue(this.plugin.settings.defaultCalendar)
+          .onChange(async (value) => {
+            this.plugin.settings.defaultCalendar = value || DEFAULT_SETTINGS.defaultCalendar;
+            await this.plugin.saveSettings();
+          });
+      });
+
+    new Setting(containerEl)
+      .setName('Calendar view font size')
+      .setDesc(`Font size for calendar events (${this.plugin.settings.calendarFontSize}px)`)
+      .addSlider(slider => slider
+        .setLimits(6, 18, 1)
+        .setValue(this.plugin.settings.calendarFontSize)
+        .setDynamicTooltip()
+        .onChange(async (value) => {
+          this.plugin.settings.calendarFontSize = value;
+          await this.plugin.saveSettings();
+          this.display(); // Refresh to update description
         }));
 
     // Bases Views
@@ -252,10 +274,6 @@ export class PlannerSettingTab extends PluginSettingTab {
       cls: 'setting-item-description'
     });
     this.renderPriorityList(containerEl);
-
-    // Calendar Colors
-    containerEl.createEl('h2', { text: 'Calendar Colors' });
-    this.renderCalendarColors(containerEl);
 
     // Quick Capture
     containerEl.createEl('h2', { text: 'Quick Capture' });

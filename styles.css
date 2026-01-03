@@ -237,48 +237,10 @@
 
 /* Compact toolbar */
 .planner-bases-calendar .fc .fc-toolbar {
-  margin-bottom: 0.75em;
+  margin-top: 0;
+  margin-bottom: 0.5em;
   gap: 0.5em;
   flex-wrap: wrap;
-}
-
-/* Color-by dropdown in toolbar */
-.planner-color-by-container {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4em;
-  margin-left: 0.75em;
-}
-
-.planner-color-by-label {
-  font-size: 0.85em;
-  color: var(--text-muted);
-}
-
-.planner-color-by-select {
-  padding: 0.25em 0.5em;
-  font-size: 0.85em;
-  border: 1px solid var(--background-modifier-border);
-  border-radius: 4px;
-  background-color: var(--background-secondary);
-  color: var(--text-normal);
-  cursor: pointer;
-  /* Ensure dropdown options inherit theme colors */
-  color-scheme: inherit;
-}
-
-.planner-color-by-select:hover {
-  background-color: var(--background-modifier-hover);
-}
-
-.planner-color-by-select:focus {
-  outline: none;
-  border-color: var(--interactive-accent);
-}
-
-.planner-color-by-select option {
-  background-color: var(--background-primary);
-  color: var(--text-normal);
 }
 
 .planner-bases-calendar .fc .fc-toolbar-chunk {
@@ -289,70 +251,176 @@
 
 /* Smaller buttons */
 .planner-bases-calendar .fc .fc-button {
-  padding: 0.3em 0.6em;
+  padding: 0.2em 0.6em;
   font-size: 0.9em;
   font-weight: 500;
 }
 
-/* Single-letter view buttons - compact width */
+/* Single-letter view buttons - 80% size */
 .planner-bases-calendar .fc .fc-yearButton-button,
 .planner-bases-calendar .fc .fc-monthButton-button,
 .planner-bases-calendar .fc .fc-weekButton-button,
+.planner-bases-calendar .fc .fc-threeDayButton-button,
 .planner-bases-calendar .fc .fc-dayButton-button,
 .planner-bases-calendar .fc .fc-listButton-button {
-  min-width: 2em;
-  padding: 0.3em 0.5em;
+  min-width: 1.6em;
+  padding: 0.15em 0.4em;
+  font-size: 0.72em;
 }
 
-/* Year toggle button styling */
-.planner-bases-calendar .fc .fc-yearToggleButton-button {
-  min-width: 2em;
-  padding: 0.3em 0.5em;
-  font-size: 1em;
-  opacity: 0.8;
-  margin-right: 0.5em;
-}
-
-.planner-bases-calendar .fc .fc-yearToggleButton-button:hover {
-  opacity: 1;
-}
-
-/* Custom new item button styling */
-.planner-bases-calendar .fc .fc-newItemButton-button {
-  background: var(--interactive-accent) !important;
+/* Active state for view mode buttons */
+.planner-bases-calendar .fc .fc-yearButton-button.fc-button-active,
+.planner-bases-calendar .fc .fc-monthButton-button.fc-button-active,
+.planner-bases-calendar .fc .fc-weekButton-button.fc-button-active,
+.planner-bases-calendar .fc .fc-threeDayButton-button.fc-button-active,
+.planner-bases-calendar .fc .fc-dayButton-button.fc-button-active,
+.planner-bases-calendar .fc .fc-listButton-button.fc-button-active {
+  background-color: var(--interactive-accent) !important;
   border-color: var(--interactive-accent) !important;
   color: var(--text-on-accent) !important;
+}
+
+/* Today button with icon */
+.planner-bases-calendar .fc .fc-todayButton-button {
   min-width: 2em;
-  padding: 0.3em 0.5em;
-  font-size: 1em;
-  font-weight: 600;
+  padding: 0.2em 0.5em;
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
-.planner-bases-calendar .fc .fc-newItemButton-button:hover {
-  background: var(--interactive-accent-hover) !important;
-  border-color: var(--interactive-accent-hover) !important;
+/* Prev/Next navigation buttons - compact */
+.planner-bases-calendar .fc .fc-prev-button,
+.planner-bases-calendar .fc .fc-next-button {
+  padding: 0.2em 0.3em !important;
+  min-width: unset !important;
 }
 
-/* Responsive header for smaller screens */
+/* Refresh button with icon */
+.planner-bases-calendar .fc .fc-refreshButton-button {
+  padding: 0.2em 0.45em !important;
+  min-width: unset !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px !important;
+}
+
+.planner-bases-calendar .fc .fc-refreshButton-button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.planner-bases-calendar .fc .fc-todayButton-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Year toggle button styling */
+.planner-bases-calendar .fc .fc-yearToggleButton-button {
+  min-width: 2em;
+  padding: 0.2em 0.5em;
+  opacity: 0.8;
+  margin-right: 0.25em;
+  border-radius: 4px !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.planner-bases-calendar .fc .fc-yearToggleButton-button:hover:not(.fc-button-disabled) {
+  opacity: 1;
+}
+
+.planner-bases-calendar .fc .fc-yearToggleButton-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.planner-bases-calendar .fc .fc-yearToggleButton-button.fc-button-disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Round left corners on Y button (first in view button group) */
+.planner-bases-calendar .fc .fc-yearButton-button {
+  border-top-left-radius: 4px !important;
+  border-bottom-left-radius: 4px !important;
+}
+
+/* Round right corners on L button (last in view button group) */
+.planner-bases-calendar .fc .fc-listButton-button {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+/* Responsive header for smaller screens - 2 rows instead of 3 */
 @media (max-width: 768px) {
   .planner-bases-calendar .fc .fc-toolbar {
-    flex-direction: column;
-    align-items: stretch;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5em;
   }
 
+  /* All chunks become inline, buttons wrap naturally */
   .planner-bases-calendar .fc .fc-toolbar-chunk {
+    display: flex;
+    flex-wrap: wrap;
     justify-content: center;
-    margin-bottom: 0.5em;
+    gap: 0.25em;
+    margin-bottom: 0;
+  }
+
+  /* Left and right chunks share first row */
+  .planner-bases-calendar .fc .fc-toolbar-chunk:first-child,
+  .planner-bases-calendar .fc .fc-toolbar-chunk:last-child {
+    order: 1;
+  }
+
+  /* Title goes to second row, full width */
+  .planner-bases-calendar .fc .fc-toolbar-chunk:nth-child(2) {
+    order: 2;
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Smaller title on mobile - still scales with font size setting */
+  .planner-bases-calendar .fc .fc-toolbar-title {
+    font-size: calc(var(--planner-calendar-font-size, 10px) * 1.4);
   }
 }
 
+/* Calendar title scales with font size setting */
 .planner-calendar-view .fc .fc-toolbar-title,
 .planner-bases-calendar .fc .fc-toolbar-title {
-  font-size: 1.2em;
+  font-size: calc(var(--planner-calendar-font-size, 10px) * 1.6);
   font-weight: 600;
+}
+
+/* Day header names (Mon, Tue, etc.) scale with font size setting */
+.planner-calendar-view .fc .fc-col-header-cell,
+.planner-bases-calendar .fc .fc-col-header-cell {
+  font-size: calc(var(--planner-calendar-font-size, 10px) * 1.1);
+}
+
+/* Day numbers scale with font size setting */
+.planner-calendar-view .fc .fc-daygrid-day-number,
+.planner-bases-calendar .fc .fc-daygrid-day-number {
+  font-size: calc(var(--planner-calendar-font-size, 10px) * 1.2);
+}
+
+/* Week/day view time labels scale with font size setting */
+.planner-calendar-view .fc .fc-timegrid-slot-label,
+.planner-bases-calendar .fc .fc-timegrid-slot-label {
+  font-size: var(--planner-calendar-font-size, 10px);
+}
+
+/* List view text scales with font size setting */
+.planner-calendar-view .fc .fc-list-day-cushion,
+.planner-bases-calendar .fc .fc-list-day-cushion {
+  font-size: calc(var(--planner-calendar-font-size, 10px) * 1.2);
 }
 
 .planner-calendar-view .fc .fc-event,
@@ -360,7 +428,7 @@
   cursor: pointer;
   border-radius: 4px;
   padding: 2px 4px;
-  font-size: 12px;
+  font-size: var(--planner-calendar-font-size, 10px);
 }
 
 .planner-calendar-view .fc .fc-event:hover,
@@ -494,6 +562,21 @@
   padding: 20px;
   min-width: 500px;
   max-width: 600px;
+}
+
+/* Fix Item Modal width on mobile */
+@media (max-width: 768px) {
+  .planner-item-modal {
+    min-width: unset;
+    max-width: 100%;
+    width: 100%;
+    padding: 16px;
+  }
+
+  .modal-container .planner-item-modal {
+    width: calc(100vw - 32px);
+    max-width: calc(100vw - 32px);
+  }
 }
 
 .planner-item-modal h2 {

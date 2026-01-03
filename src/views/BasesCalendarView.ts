@@ -3,6 +3,7 @@ import {
   BasesViewRegistration,
   BasesEntry,
   QueryController,
+  setIcon,
 } from 'obsidian';
 import { Calendar, EventInput, EventClickArg, DateSelectArg } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -18,7 +19,7 @@ import { openItemModal } from '../components/ItemModal';
 
 export const BASES_CALENDAR_VIEW_ID = 'planner-calendar';
 
-type CalendarViewType = 'multiMonthYear' | 'dayGridYear' | 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek';
+type CalendarViewType = 'multiMonthYear' | 'dayGridYear' | 'dayGridMonth' | 'timeGridWeek' | 'timeGridThreeDay' | 'timeGridDay' | 'listWeek';
 
 /**
  * Calendar view for Obsidian Bases
@@ -44,7 +45,7 @@ export class BasesCalendarView extends BasesView {
 
   private getDefaultView(): CalendarViewType {
     const value = this.config.get('defaultView') as string | undefined;
-    const validViews: CalendarViewType[] = ['multiMonthYear', 'dayGridYear', 'dayGridMonth', 'timeGridWeek', 'timeGridDay', 'listWeek'];
+    const validViews: CalendarViewType[] = ['multiMonthYear', 'dayGridYear', 'dayGridMonth', 'timeGridWeek', 'timeGridThreeDay', 'timeGridDay', 'listWeek'];
     if (value && validViews.includes(value as CalendarViewType)) {
       return value as CalendarViewType;
     }
@@ -152,9 +153,16 @@ export class BasesCalendarView extends BasesView {
       initialView: viewToUse,
       initialDate: initialDate,
       headerToolbar: {
-        left: 'prev,next today',
+        left: 'yearToggleButton,yearButton,monthButton,weekButton,threeDayButton,dayButton,listButton',
         center: 'title',
-        right: 'yearToggleButton,yearButton,monthButton,weekButton,dayButton,listButton,newItemButton',
+        right: 'refreshButton prev,todayButton,next',
+      },
+      views: {
+        timeGridThreeDay: {
+          type: 'timeGrid',
+          duration: { days: 3 },
+          buttonText: '3',
+        },
       },
       customButtons: {
         yearButton: {
@@ -164,7 +172,8 @@ export class BasesCalendarView extends BasesView {
             if (this.calendar) {
               const view = this.yearViewSplit ? 'multiMonthYear' : 'dayGridYear';
               this.calendar.changeView(view);
-              this.updateYearToggleVisibility(true);
+              this.updateActiveViewButton(view);
+              this.updateYearToggleEnabled(true);
             }
           },
         },
@@ -174,7 +183,8 @@ export class BasesCalendarView extends BasesView {
           click: () => {
             if (this.calendar) {
               this.calendar.changeView('dayGridMonth');
-              this.updateYearToggleVisibility(false);
+              this.updateActiveViewButton('dayGridMonth');
+              this.updateYearToggleEnabled(false);
             }
           },
         },
@@ -184,7 +194,19 @@ export class BasesCalendarView extends BasesView {
           click: () => {
             if (this.calendar) {
               this.calendar.changeView('timeGridWeek');
-              this.updateYearToggleVisibility(false);
+              this.updateActiveViewButton('timeGridWeek');
+              this.updateYearToggleEnabled(false);
+            }
+          },
+        },
+        threeDayButton: {
+          text: '3',
+          hint: '3-day view',
+          click: () => {
+            if (this.calendar) {
+              this.calendar.changeView('timeGridThreeDay');
+              this.updateActiveViewButton('timeGridThreeDay');
+              this.updateYearToggleEnabled(false);
             }
           },
         },
@@ -194,7 +216,8 @@ export class BasesCalendarView extends BasesView {
           click: () => {
             if (this.calendar) {
               this.calendar.changeView('timeGridDay');
-              this.updateYearToggleVisibility(false);
+              this.updateActiveViewButton('timeGridDay');
+              this.updateYearToggleEnabled(false);
             }
           },
         },
@@ -204,19 +227,29 @@ export class BasesCalendarView extends BasesView {
           click: () => {
             if (this.calendar) {
               this.calendar.changeView('listWeek');
-              this.updateYearToggleVisibility(false);
+              this.updateActiveViewButton('listWeek');
+              this.updateYearToggleEnabled(false);
             }
           },
         },
         yearToggleButton: {
-          text: this.yearViewSplit ? '⧉' : '☰',
-          hint: this.yearViewSplit ? 'Switch to continuous scroll' : 'Switch to split by month',
+          text: '',
+          hint: 'Toggle year view mode',
           click: () => this.toggleYearViewMode(),
         },
-        newItemButton: {
-          text: '+',
-          hint: 'Create new item',
-          click: () => this.createNewItem(),
+        todayButton: {
+          text: '',
+          hint: 'Go to today',
+          click: () => {
+            if (this.calendar) {
+              this.calendar.today();
+            }
+          },
+        },
+        refreshButton: {
+          text: '',
+          hint: 'Refresh calendar',
+          click: () => this.refreshCalendar(),
         },
       },
       firstDay: weekStartsOn,
@@ -248,9 +281,12 @@ export class BasesCalendarView extends BasesView {
         if (newViewType) {
           this.currentView = newViewType;
         }
-        // Update year toggle visibility based on current view
+        // Update year toggle state based on current view
         const isYearView = newViewType === 'multiMonthYear' || newViewType === 'dayGridYear';
-        this.updateYearToggleVisibility(isYearView);
+        this.updateYearToggleEnabled(isYearView);
+        this.updateYearToggleButtonContent();
+        // Update active view button
+        this.updateActiveViewButton(newViewType);
       },
       height: '100%',
       expandRows: true,
@@ -263,60 +299,31 @@ export class BasesCalendarView extends BasesView {
 
     this.calendar.render();
 
-    // Inject color-by dropdown into the left toolbar section
-    this.injectColorByDropdown();
+    // Apply font size CSS variable
+    this.calendarEl.style.setProperty('--planner-calendar-font-size', `${this.plugin.settings.calendarFontSize}px`);
 
-    // Set initial year toggle visibility
-    const isYearView = (initialView || this.currentView) === 'multiMonthYear' ||
-                       (initialView || this.currentView) === 'dayGridYear';
-    this.updateYearToggleVisibility(isYearView);
-  }
-
-  private injectColorByDropdown(): void {
-    if (!this.calendarEl) return;
-
-    // Find the left toolbar chunk (contains prev, next, today)
-    const leftToolbar = this.calendarEl.querySelector('.fc-toolbar-chunk:first-child');
-    if (!leftToolbar) return;
-
-    // Create the color-by container
-    const colorByContainer = document.createElement('div');
-    colorByContainer.className = 'planner-color-by-container';
-
-    // Create label
-    const label = document.createElement('span');
-    label.className = 'planner-color-by-label';
-    label.textContent = 'Color:';
-    colorByContainer.appendChild(label);
-
-    // Create select dropdown
-    const select = document.createElement('select');
-    select.className = 'planner-color-by-select';
-
-    const options = [
-      { value: 'note.calendar', label: 'Calendar' },
-      { value: 'note.priority', label: 'Priority' },
-      { value: 'note.status', label: 'Status' },
-    ];
-
-    const currentColorBy = this.getColorByField();
-    for (const opt of options) {
-      const option = document.createElement('option');
-      option.value = opt.value;
-      option.textContent = opt.label;
-      if (opt.value === currentColorBy) {
-        option.selected = true;
-      }
-      select.appendChild(option);
+    // Set today button icon
+    const todayBtn = this.calendarEl?.querySelector('.fc-todayButton-button');
+    if (todayBtn) {
+      todayBtn.innerHTML = '';
+      setIcon(todayBtn as HTMLElement, 'square-split-horizontal');
     }
 
-    select.addEventListener('change', () => {
-      // Update Bases config - this will trigger onDataUpdated and re-render
-      this.config.set('colorBy', select.value);
-    });
+    // Set refresh button icon
+    const refreshBtn = this.calendarEl?.querySelector('.fc-refreshButton-button');
+    if (refreshBtn) {
+      refreshBtn.innerHTML = '';
+      setIcon(refreshBtn as HTMLElement, 'refresh-ccw');
+    }
 
-    colorByContainer.appendChild(select);
-    leftToolbar.appendChild(colorByContainer);
+    // Set initial active view button
+    this.updateActiveViewButton(viewToUse);
+
+    // Set initial year toggle state
+    const isYearView = (initialView || this.currentView) === 'multiMonthYear' ||
+                       (initialView || this.currentView) === 'dayGridYear';
+    this.updateYearToggleEnabled(isYearView);
+    this.updateYearToggleButtonContent();
   }
 
   private toggleYearViewMode(): void {
@@ -327,17 +334,63 @@ export class BasesCalendarView extends BasesView {
     this.calendar.changeView(newView);
 
     // Update button text/icon
-    const toggleBtn = this.calendarEl?.querySelector('.fc-yearToggleButton-button');
+    this.updateYearToggleButtonContent();
+  }
+
+  private refreshCalendar(): void {
+    // Re-render the calendar (like closing and reopening)
+    this.render();
+  }
+
+  private updateYearToggleEnabled(enabled: boolean): void {
+    const toggleBtn = this.calendarEl?.querySelector('.fc-yearToggleButton-button') as HTMLElement;
     if (toggleBtn) {
-      toggleBtn.textContent = this.yearViewSplit ? '▦' : '☰';
+      if (enabled) {
+        toggleBtn.removeAttribute('disabled');
+        toggleBtn.classList.remove('fc-button-disabled');
+      } else {
+        toggleBtn.setAttribute('disabled', 'true');
+        toggleBtn.classList.add('fc-button-disabled');
+      }
+    }
+  }
+
+  private updateYearToggleButtonContent(): void {
+    const toggleBtn = this.calendarEl?.querySelector('.fc-yearToggleButton-button') as HTMLElement;
+    if (toggleBtn) {
+      toggleBtn.innerHTML = '';
+      // Use different icons for split vs continuous mode
+      // layout-grid = split by month (⧉), align-justify = continuous scroll (☰)
+      setIcon(toggleBtn, this.yearViewSplit ? 'layout-grid' : 'align-justify');
       toggleBtn.setAttribute('title', this.yearViewSplit ? 'Switch to continuous scroll' : 'Switch to split by month');
     }
   }
 
-  private updateYearToggleVisibility(show: boolean): void {
-    const toggleBtn = this.calendarEl?.querySelector('.fc-yearToggleButton-button') as HTMLElement;
-    if (toggleBtn) {
-      toggleBtn.style.display = show ? '' : 'none';
+  private updateActiveViewButton(viewType: CalendarViewType): void {
+    if (!this.calendarEl) return;
+
+    // Map view types to button selectors
+    const viewButtonMap: Record<string, string> = {
+      'multiMonthYear': '.fc-yearButton-button',
+      'dayGridYear': '.fc-yearButton-button',
+      'dayGridMonth': '.fc-monthButton-button',
+      'timeGridWeek': '.fc-weekButton-button',
+      'timeGridThreeDay': '.fc-threeDayButton-button',
+      'timeGridDay': '.fc-dayButton-button',
+      'listWeek': '.fc-listButton-button',
+    };
+
+    // Remove active class from all view buttons
+    const allViewButtons = this.calendarEl.querySelectorAll(
+      '.fc-yearButton-button, .fc-monthButton-button, .fc-weekButton-button, .fc-threeDayButton-button, .fc-dayButton-button, .fc-listButton-button'
+    );
+    allViewButtons.forEach(btn => btn.classList.remove('fc-button-active'));
+
+    // Add active class to current view button
+    const activeSelector = viewButtonMap[viewType];
+    if (activeSelector) {
+      const activeBtn = this.calendarEl.querySelector(activeSelector);
+      activeBtn?.classList.add('fc-button-active');
     }
   }
 
