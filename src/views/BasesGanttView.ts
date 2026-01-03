@@ -296,7 +296,7 @@ export class BasesGanttView extends BasesView {
       cls: 'planner-gantt-zoom-btn',
       attr: { title: 'Go to today' },
     });
-    setIcon(todayBtn, 'calendar-check');
+    setIcon(todayBtn, 'square-split-horizontal');
     todayBtn.addEventListener('click', () => this.scrollToToday());
 
     // Add item button
@@ -478,6 +478,18 @@ export class BasesGanttView extends BasesView {
       return gantt.date.add(date, inc * 2, 'hour');
     };
 
+    // Define custom quarter unit (Q1, Q2, Q3, Q4)
+    gantt.date.quarter_start = (date: Date): Date => {
+      const result = new Date(date);
+      result.setMonth(Math.floor(result.getMonth() / 3) * 3);
+      result.setDate(1);
+      result.setHours(0, 0, 0, 0);
+      return result;
+    };
+    gantt.date.add_quarter = (date: Date, inc: number): Date => {
+      return gantt.date.add(date, inc * 3, 'month');
+    };
+
     // Set initial scales based on default zoom
     this.applyZoomScales(this.currentZoom);
 
@@ -565,11 +577,18 @@ export class BasesGanttView extends BasesView {
       ],
       quarter: [
         { unit: 'year', step: 1, format: '%Y' },
-        { unit: 'quarter', step: 1, format: 'Q%q' },
+        { unit: 'month', step: 1, format: '%M' },
       ],
       year: [
         { unit: 'year', step: 1, format: '%Y' },
-        { unit: 'month', step: 1, format: '%M' },
+        {
+          unit: 'quarter',
+          step: 1,
+          format: (date: Date) => {
+            const quarter = Math.floor(date.getMonth() / 3) + 1;
+            return `Q${quarter}`;
+          },
+        },
       ],
     };
 
@@ -577,7 +596,7 @@ export class BasesGanttView extends BasesView {
       day: 60,
       week: 100,
       month: 120,
-      quarter: 120,
+      quarter: 50,
       year: 80,
     };
 
