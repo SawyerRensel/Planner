@@ -52,6 +52,8 @@
 - [x] In Gantt View, the Quarter and Year Mode subdivisions are incorrect.  Year mode is only showing three months.  I don't know what Quarter mode is showing.
 - [ ] Gantt View needs forward and back arrows just like in Calendar View.  DHTMLX seems to put strict boundaries on whether we can track forward and backward beyond the currently Month, Quarter or, Year.  I think this should be a toggle.  I like having the bounds, but sometimes I'd like to scroll 2, 3, 5, 10 or more years ahead or behind.
 - [ ] Gantt Zoom Feature:  Need to have dynamic zoom Plus/Minus buttons in the toolbar to expand or condense Gantt timeline in window.  For instance, clicking the Minus button would zoom out.  I would want to be able to see a 100+ year timeline if that is possible. 
+- [ ] Enable in-line editing for properties show in the Gantt Table
+- [ ] Currently not possible to adjust Gantt Bars (start, end, position, progress, dependency arrows.  We need to make this functionality happen.
 
 ## Other
 
