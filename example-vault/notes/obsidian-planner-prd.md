@@ -1,7 +1,7 @@
 # Planner - Product Requirements Document
 
-> **Version:** 2.1.0
-> **Last Updated:** 2026-01-01
+> **Version:** 2.2.0
+> **Last Updated:** 2026-01-03
 > **Author:** Claude and Sawyer Rensel
 > **Status:** Active
 
@@ -336,16 +336,26 @@ Full calendar display using FullCalendar library.
 
 **Features:**
 - Color items by any field (calendar, priority, status, context, etc.)
-- Click date to create new item
-- Drag to reschedule
-- Click item to open/edit
-- Recurring items show all instances
+- Click date number to open/create Daily Note (respects Open Behavior setting)
+- Click empty date area to create new item via Item Modal
+- Drag to reschedule (smooth drag-and-drop with proper cursor positioning)
+- Click item to open Item Modal for editing
+- Recurring items show all instances (respects Week Starts On setting)
 - All-day items in dedicated section
+- Configurable font size for calendar items
+- Mobile-optimized toolbar (condensed layout, reduced real estate usage)
 
 **Bases Integration:**
 - Filter: `WHERE calendar = "Work" AND status != "Done"`
 - Sort: By `date_start`, `priority`, etc.
 - Group: By calendar, by day, etc.
+
+**Bases Configuration Menu Options:**
+- **Default View Mode**: Set initial layout (Year, Month, Week, 3-Day, Day, List)
+- **Date Start Field**: Select which frontmatter field defines item start (e.g., `date_start`, `date_due`)
+- **Date End Field**: Select which frontmatter field defines item end
+- **Title Field**: Select which field displays as item text on calendar
+- **Color By**: Select field to color items by (calendar, priority, status, etc.)
 
 ### 5.2 Gantt View
 
@@ -468,13 +478,15 @@ Secondary modal for complex RRULE patterns:
 - Day of month / position (for monthly)
 - End condition (never, after N occurrences, on date)
 
-**Additional Fields (below action bar):**
+**Additional Fields (above action bar):**
 - Title (text input, required)
-- Details/Description (collapsible textarea for note body content)
-- Context (text with autocomplete)
-- People (text with autocomplete)
-- Parent (note link picker)
-- Dependencies (blocked_by — task selector)
+- Summary (resizable textarea for `summary` field)
+- Note Content (textarea for note body content, renders Markdown preview, scrollable)
+- Context (text with autocomplete from existing context values)
+- People (text with autocomplete, supports `[[wikilinks]]` via file link suggest)
+- Parent (note link picker with autocomplete)
+- Tags (text with autocomplete from existing tags)
+- Blocked by (task selector with autocomplete)
 
 **Action Buttons:**
 - **Open Note**: Close modal, open markdown file in editor (edit mode only)
@@ -487,6 +499,12 @@ Secondary modal for complex RRULE patterns:
 - Clicking a time slot → `date_start` set to that datetime, `all_day` = false
 - Clicking "+ Add" in Kanban column → `status` set to that column's value
 - New items get default calendar from settings
+- Editing existing items pulls all field values from frontmatter
+
+**Link Format Support:**
+- Respects Obsidian's "Use [[Wikilinks]]" setting from Files and Links preferences
+- When wikilinks are disabled, creates relative path markdown links
+- Frontmatter links are temporarily converted to wikilinks for editing, then saved in the user's preferred format
 
 ### 6.2 Recurring Items
 
@@ -568,11 +586,13 @@ Multi-select actions in list views.
 | Setting | Type | Default | Description |
 |---------|------|---------|-------------|
 | Items Folder | path | `Planner/` | Where new items are created |
+| Bases Folder | path | `Planner/` | Where `.base` files are stored |
 | Item Template | path | (none) | Template for new items |
 | Default Calendar | text | `Personal` | Auto-assigned to new items |
 | Date Format | select | `YYYY-MM-DD` | Display format |
 | Time Format | select | `24h` | 12h or 24h |
-| Week Starts On | select | `Monday` | First day of week |
+| Week Starts On | select | `Monday` | First day of week (also affects recurrence) |
+| Open Behavior | select | `new-tab` | How to open items and daily notes: `new-tab`, `same-tab`, `split-right`, `split-down` |
 
 ### 7.2 Item Identification
 
@@ -584,34 +604,36 @@ Multi-select actions in list views.
 
 ### 7.3 Status Configuration
 
-Drag to reorder. Mark statuses as "completed" to auto-set `date_completed`.
+Drag to reorder. Mark statuses as "completed" to auto-set `date_completed`. Each status can have a Lucide icon.
 
-| Status | Color | Completed |
-|--------|-------|-----------|
-| Idea | Purple | No |
-| To-Do | Gray | No |
-| In-Progress | Blue | No |
-| In-Review | Orange | No |
-| Done | Green | Yes |
-| Cancelled | Red | Yes |
+| Status | Color | Icon | Completed |
+|--------|-------|------|-----------|
+| Idea | Yellow | `circle-dashed` | No |
+| To-Do | Purple | `circle-dot-dashed` | No |
+| In-Progress | Blue | `circle-dot` | No |
+| In-Review | Orange | `eye` | No |
+| Done | Green | `circle-check-big` | Yes |
+| Cancelled | Red | `ban` | Yes |
 
 ### 7.4 Priority Configuration
 
-| Priority | Color | Sort Weight |
-|----------|-------|-------------|
-| Urgent | Red | 4 |
-| High | Orange | 3 |
-| Medium | Yellow | 2 |
-| Low | Blue | 1 |
-| None | Gray | 0 |
+Each priority can have a Lucide icon displayed in the Item Modal context menu.
 
-### 7.5 Calendar Colors
+| Priority | Color | Icon | Sort Weight |
+|----------|-------|------|-------------|
+| Urgent | Red | `alert-triangle` | 4 |
+| High | Orange | `chevrons-up` | 3 |
+| Medium | Yellow | `chevron-up` | 2 |
+| Low | Blue | `chevron-down` | 1 |
+| None | Gray | `minus` | 0 |
 
-| Calendar | Color |
-|----------|-------|
-| Personal | Blue |
-| Work | Green |
-| (new calendars) | Gray (until configured) |
+### 7.5 Calendar Configuration
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| Calendar Colors | map | `Personal: Blue, Work: Green` | Color for each calendar name |
+| Font Size | slider | `10px` | Calendar item text size (6-18px range) |
+| Default Calendar | dropdown | `Personal` | Dropdown populated from existing calendars |
 
 ### 7.6 Item Modal
 
@@ -636,7 +658,7 @@ Unified modal for creating and editing items with icon-based action bar.
 **Create Mode:**
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                                                        [×]  │
+│  New Item                                              [×]  │
 │                                                             │
 │  Title  [ Team meeting tomorrow 2pm @work #event       ]    │
 │                                                             │
@@ -644,15 +666,22 @@ Unified modal for creating and editing items with icon-based action bar.
 │  │ 📅 Tomorrow, 2:00 PM   @work   #event               │    │
 │  └─────────────────────────────────────────────────────┘    │
 │                                                             │
-│  ╭─────────────────────────────────────────────────────╮    │
-│  │ 📅  🏁  ⭐  ○  🔄  🗂️ Personal ▼                    │    │
-│  ╰─────────────────────────────────────────────────────╯    │
+│  Summary  [                                            ]    │
 │                                                             │
-│  ▶ Details                                                  │
+│  Note Content                                               │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │ (Markdown preview, scrollable)                      │    │
+│  │                                                     │    │
+│  └─────────────────────────────────────────────────────┘    │
 │                                                             │
 │  Context    [ @work                                    ]    │
 │  People     [                                          ]    │
 │  Parent     [                                          ]    │
+│  Tags       [ #event                                   ]    │
+│                                                             │
+│  ╭─────────────────────────────────────────────────────╮    │
+│  │ 📅  🏁  ⭐  ○  🔄  🗂️ Personal ▼                    │    │
+│  ╰─────────────────────────────────────────────────────╯    │
 │                                                             │
 │                                     [Cancel]     [Save]     │
 └─────────────────────────────────────────────────────────────┘
@@ -661,27 +690,30 @@ Unified modal for creating and editing items with icon-based action bar.
 **Edit Mode:**
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  Edit Item                                             [×]  │
+│  Edit Item                           [Open Note]       [×]  │
 │                                                             │
 │  Title  [ Website Redesign                             ]    │
+│                                                             │
+│  Summary  [ Complete overhaul of company website       ]    │
+│                                                             │
+│  Note Content                                               │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │ Full redesign incorporating new brand identity...   │    │
+│  │ (Markdown preview, scrollable)                      │    │
+│  └─────────────────────────────────────────────────────┘    │
+│                                                             │
+│  Context    [ @office                                  ]    │
+│  People     [ [[John Smith]]                           ]    │
+│  Parent     [ [[Q1 Initiatives]]                       ]    │
+│  Tags       [ #task                                    ]    │
+│  Blocked by [ [[Brand guidelines approval]]            ]    │
 │                                                             │
 │  ╭─────────────────────────────────────────────────────╮    │
 │  │ 📅• 🏁• ⭐• ○• 🔄  🗂️ Work ▼                        │    │
 │  ╰─────────────────────────────────────────────────────╯    │
 │  Jan 15, 2pm    Jan 31    High   In-Progress                │
 │                                                             │
-│  ▼ Details                                                  │
-│  ┌─────────────────────────────────────────────────────┐    │
-│  │ Full redesign incorporating new brand identity...   │    │
-│  │                                                     │    │
-│  └─────────────────────────────────────────────────────┘    │
-│                                                             │
-│  Context    [ @office                                  ]    │
-│  People     [ [[John Smith]]                           ]    │
-│  Parent     [ [[Q1 Initiatives]]                       ]    │
-│  Blocked by [ [[Brand guidelines approval]]            ]    │
-│                                                             │
-│  [Open Note]  [Delete]               [Cancel]    [Save]     │
+│  [Delete]                            [Cancel]    [Save]     │
 └─────────────────────────────────────────────────────────────┘
 
 • = dot indicator showing field has value
@@ -755,15 +787,11 @@ Unified modal for creating and editing items with icon-based action bar.
 
 ### 8.3 Calendar View
 
+**Desktop Layout:**
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  Calendar                              [Month ▼]  [+ New]   │
+│  [Y][M][W][3D][D][L]    January 2026    [◀][▶][⊞]  [+]      │
 ├─────────────────────────────────────────────────────────────┤
-│  [Filter...]  [Color by: Calendar ▼]                        │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│       ◀  January 2025  ▶               [Y][M][W][3D][D][L]  │
-│                                                             │
 │  ┌──────┬──────┬──────┬──────┬──────┬──────┬──────┐         │
 │  │ Mon  │ Tue  │ Wed  │ Thu  │ Fri  │ Sat  │ Sun  │         │
 │  ├──────┼──────┼──────┼──────┼──────┼──────┼──────┤         │
@@ -775,9 +803,19 @@ Unified modal for creating and editing items with icon-based action bar.
 │  │      │      │ 🟢   │      │      │      │ 🔴   │         │
 │  │      │      │ Launch│     │      │      │ DUE  │         │
 │  └──────┴──────┴──────┴──────┴──────┴──────┴──────┘         │
-│                                                             │
-│  Legend: 🟢 Work  🔵 Personal  🟣 Family                    │
 └─────────────────────────────────────────────────────────────┘
+
+[⊞] = Today button (jumps to current date)
+```
+
+**Mobile Layout (condensed):**
+```
+┌─────────────────────────────────┐
+│ [Y][M][W][3D][D][L][◀][▶][⊞][+] │
+│         January 2026            │
+├─────────────────────────────────┤
+│ (Calendar grid)                 │
+└─────────────────────────────────┘
 ```
 
 ### 8.4 Gantt View
@@ -931,60 +969,66 @@ Views consume Bases:
 
 ## 10. Implementation Roadmap
 
-### Phase 1: Foundation
+### Phase 1: Foundation ✅
 
 **Goal:** Minimal working plugin with Task List view
 
-- [ ] Project setup (TypeScript, esbuild, Obsidian plugin template)
-- [ ] Define Item type and frontmatter schema
-- [ ] ItemService: Create, read, update, delete items
-- [ ] Settings tab with basic configuration
-- [ ] Task List view (table with sortable columns)
-- [ ] Bases integration for Task List
+- [x] Project setup (TypeScript, esbuild, Obsidian plugin template)
+- [x] Define Item type and frontmatter schema
+- [x] ItemService: Create, read, update, delete items
+- [x] Settings tab with basic configuration
+- [x] Task List view (table with sortable columns)
+- [x] Bases integration for Task List
 
 **Deliverable:** Can create items and view them in a list, filtered by Bases.
 
-### Phase 2: Calendar View
+### Phase 2: Calendar View ✅
 
 **Goal:** Full calendar visualization
 
-- [ ] FullCalendar integration
-- [ ] All 6 layouts (year, month, week, 3-day, day, list)
-- [ ] Color by field (calendar, priority, status, etc.)
-- [ ] Click to create, drag to reschedule
-- [ ] Recurring item display (using rrule)
-- [ ] Bases filtering for calendar
+- [x] FullCalendar integration
+- [x] All 6 layouts (year, month, week, 3-day, day, list)
+- [x] Color by field (calendar, priority, status, etc.)
+- [x] Click to create, drag to reschedule
+- [x] Recurring item display (using rrule)
+- [x] Bases filtering for calendar
+- [x] Configurable date start/end fields in Bases menu
+- [x] Click date number to open Daily Note
+- [x] Mobile-optimized toolbar
 
 **Deliverable:** Fully functional calendar that can replace Google Calendar for basic use.
 
-### Phase 3: Item Modal
+### Phase 3: Item Modal ✅
 
 **Goal:** Unified modal for creating and editing items
 
-- [ ] Item Modal component with icon action bar
-- [ ] Date context menus (relative dates, quick picks, custom picker)
-- [ ] Status and Priority context menus
-- [ ] Recurrence context menu with presets
-- [ ] Custom Recurrence dialog for complex RRULE patterns
-- [ ] NLP parsing in title field (optional)
-- [ ] Token parsing (@context, #tags, !priority, etc.)
-- [ ] Collapsible Details/Description section
-- [ ] Action buttons (Open Note, Delete, Cancel, Save)
-- [ ] Context-aware pre-population from views
-- [ ] Template-based item creation
-- [ ] Hotkey configuration
+- [x] Item Modal component with icon action bar
+- [x] Date context menus (relative dates, quick picks, custom picker)
+- [x] Status and Priority context menus (with Lucide icons)
+- [x] Recurrence context menu with presets
+- [x] Custom Recurrence dialog for complex RRULE patterns
+- [x] NLP parsing in title field (optional)
+- [x] Token parsing (@context, #tags, !priority, etc.)
+- [x] Summary and Note Content fields
+- [x] Action buttons (Open Note, Delete, Cancel, Save)
+- [x] Context-aware pre-population from views
+- [x] Field autocomplete (Context, People, Parent, Tags, Blocked by)
+- [x] Link format support (Wikilinks vs Markdown links)
+- [x] Pull existing field values when editing
+- [x] Hotkey configuration
 
 **Deliverable:** Can create and edit items via unified modal with icon-based quick inputs.
 
-### Phase 4: Recurrence
+### Phase 4: Recurrence ✅
 
 **Goal:** Full iCal RRULE support
 
-- [ ] RecurrenceService with rrule library
-- [ ] Recurrence UI in item modal
-- [ ] Instance completion tracking
-- [ ] Calendar view shows all instances
-- [ ] Common presets (daily, weekly, monthly, yearly)
+- [x] RecurrenceService with rrule library
+- [x] Recurrence UI in item modal
+- [x] Instance completion tracking
+- [x] Calendar view shows all instances
+- [x] Common presets (daily, weekly, monthly, yearly)
+- [x] Respects Week Starts On setting
 
 **Deliverable:** Can create and manage recurring items.
 
@@ -1019,7 +1063,7 @@ Views consume Bases:
 
 **Goal:** Production-ready quality
 
-- [ ] Mobile optimization
+- [x] Mobile optimization (Calendar toolbar, Item Modal responsive width)
 - [ ] Virtual scrolling for large datasets
 - [ ] Keyboard navigation
 - [ ] Error handling and edge cases
@@ -1090,6 +1134,7 @@ Common patterns:
 | 1.0.x | 2025-12-28/29 | Claude & Sawyer | Original PRD (deprecated) |
 | 2.0.0 | 2025-12-30 | Claude & Sawyer | Complete rewrite for ground-up build. Removed task boolean (use tags). Simplified architecture. Clear phased roadmap. Deferred calendar sync, HTTP API, time tracking to v1.1+. |
 | 2.1.0 | 2026-01-01 | Claude & Sawyer | Unified Item Modal feature: merged Quick Capture with Item Edit Modal. Added icon-based action bar, context menus for dates/recurrence/priority/status, collapsible Details section, and action buttons (Open Note, Delete, Cancel, Save). Inspired by TaskNotes UI patterns. |
+| 2.2.0 | 2026-01-03 | Claude & Sawyer | Item Modal enhancements: field autocomplete (Context, People, Parent, Tags, Blocked by), link format support (respects Wikilinks setting), pull existing values when editing, Summary field, Note Content field with markdown preview. Calendar View improvements: fixed drag-and-drop, mobile-optimized toolbar, configurable Bases options (Date Start/End fields, Title field, Default View Mode). Settings additions: Status and Priority icons (Lucide), calendar font size slider, Open Behavior setting. Phases 1-4 completed. |
 
 ---
 

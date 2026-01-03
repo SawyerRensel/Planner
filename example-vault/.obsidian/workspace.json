@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "notes/feedback-and-ideas.md",
+                "file": "notes/obsidian-planner-prd.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "feedback-and-ideas"
+              "title": "obsidian-planner-prd"
             }
           },
           {
@@ -48,8 +48,7 @@
               "title": "Fix Login Bug"
             }
           }
-        ],
-        "currentTab": 2
+        ]
       }
     ],
     "direction": "vertical"
@@ -183,13 +182,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Planner/Fix Login Bug.md",
+                "file": "notes/obsidian-planner-prd.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Fix Login Bug"
+              "title": "Outline of obsidian-planner-prd"
             }
           },
           {
@@ -223,11 +222,20 @@
       "obsidian-full-calendar:Open Full Calendar": false
     }
   },
-  "active": "6fcf55efb29ce38b",
+  "active": "f32be1d994f54650",
   "lastOpenFiles": [
-    "Planner/Calendar.base",
-    "Planner/Fix Login Bug.md",
     "notes/feedback-and-ideas.md",
+    "notes/obsidian-planner-prd.md.tmp.12523.1767451233398",
+    "notes/obsidian-planner-prd.md.tmp.12523.1767451205111",
+    "notes/obsidian-planner-prd.md.tmp.12523.1767451189108",
+    "notes/obsidian-planner-prd.md.tmp.12523.1767451180389",
+    "notes/obsidian-planner-prd.md.tmp.12523.1767451164538",
+    "notes/obsidian-planner-prd.md.tmp.12523.1767451154302",
+    "notes/obsidian-planner-prd.md.tmp.12523.1767451131946",
+    "notes/obsidian-planner-prd.md.tmp.12523.1767451115516",
+    "notes/obsidian-planner-prd.md.tmp.12523.1767451107362",
+    "notes/obsidian-planner-prd.md.tmp.12523.1767451094160",
+    "Planner/Fix Login Bug.md",
     "Planner/Test.md",
     "Planner/test.md",
     "Planner/test1.md",
@@ -237,15 +245,6 @@
     "Planner/Website Redesign.md",
     "Planner/Vacation.md",
     "notes/questions.md",
-    "TaskNotes/Views/calendar-default.base",
-    "ref/tasknotes/tests/unit/utils/userField.settings.test.ts",
-    "ref/tasknotes/tests/unit/utils/userField.operators.test.ts",
-    "ref/tasknotes/tests/unit/utils/triggerDetection.test.ts",
-    "ref/tasknotes/tests/unit/utils/templateProcessor.test.ts",
-    "ref/tasknotes/tests/unit/utils/stringSplit.test.ts",
-    "ref/tasknotes/tests/unit/utils/projectFilterUtils.test.ts",
-    "ref/tasknotes/tests/unit/utils/linkUtils.test.ts",
-    "ref/tasknotes/tests/unit/utils/helpers.test.ts",
     "ref/tasknotes/tests/coverage-report.md",
     "ref/tasknotes/tasknotes-e2e-vault/TaskNotes/Write documentation.md",
     "ref/tasknotes/tasknotes-e2e-vault/TaskNotes/Weekly team meeting.md",
