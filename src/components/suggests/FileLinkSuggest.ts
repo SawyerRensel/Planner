@@ -38,11 +38,12 @@ export function convertToSimpleWikilinks(value: string | string[] | null): strin
 }
 
 /**
- * Convert simple wikilinks to relative path wikilinks if user has disabled wikilinks in Obsidian settings
+ * Convert simple wikilinks based on user's Obsidian link settings
+ * Respects both "Use WikiLinks" and "New Link Format" settings
  * @param app The Obsidian app instance
  * @param value The value containing wikilinks like [[Note]] or comma-separated [[Note1]], [[Note2]]
  * @param itemsFolder The folder where items are stored (to calculate relative paths)
- * @returns The converted value with relative path wikilinks or original if wikilinks are preferred
+ * @returns The converted value based on user's link format preferences
  */
 export function convertWikilinksToRelativePaths(
   app: App,
@@ -57,6 +58,10 @@ export function convertWikilinksToRelativePaths(
     return value; // Keep simple wikilinks as-is
   }
 
+  // Get the new link format setting: 'shortest', 'relative', or 'absolute'
+  // @ts-ignore - getConfig exists but isn't in the type definitions
+  const newLinkFormat: string = app.vault.getConfig('newLinkFormat') || 'shortest';
+
   // Normalize items folder path (remove trailing slash)
   const normalizedItemsFolder = itemsFolder.replace(/\/$/, '');
 
@@ -69,10 +74,26 @@ export function convertWikilinksToRelativePaths(
       const file = app.metadataCache.getFirstLinkpathDest(linkInfo.path, '');
 
       if (file) {
-        // Calculate relative path from items folder to the file
-        const filePath = file.path.replace(/\.md$/, ''); // Remove .md extension
-        const relativePath = calculateRelativePath(normalizedItemsFolder, filePath);
-        return `[[${relativePath}|${display}]]`;
+        let formattedPath: string;
+
+        switch (newLinkFormat) {
+          case 'absolute':
+            // Use full path from vault root (without .md extension)
+            formattedPath = file.path.replace(/\.md$/, '');
+            break;
+          case 'relative':
+            // Calculate relative path from items folder
+            const filePath = file.path.replace(/\.md$/, '');
+            formattedPath = calculateRelativePath(normalizedItemsFolder, filePath);
+            break;
+          case 'shortest':
+          default:
+            // Use just the filename (shortest unique path)
+            formattedPath = file.basename;
+            break;
+        }
+
+        return `[[${formattedPath}|${display}]]`;
       } else {
         // File not found, keep as-is
         return match;

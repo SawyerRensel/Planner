@@ -49,7 +49,7 @@
             }
           }
         ],
-        "currentTab": 1
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -183,13 +183,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Planner/Calendar.base",
+                "file": "Planner/Fix Login Bug.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Calendar"
+              "title": "Outline of Fix Login Bug"
             }
           },
           {
@@ -223,10 +223,12 @@
       "obsidian-full-calendar:Open Full Calendar": false
     }
   },
-  "active": "1ef5e8fc8559af65",
+  "active": "6fcf55efb29ce38b",
   "lastOpenFiles": [
-    "Planner/Fix Login Bug.md",
+    "Planner/test.md",
     "Planner/Calendar.base",
+    "Planner/Fix Login Bug.md",
+    "Planner/test1.md",
     "notes/feedback-and-ideas.md",
     "Templates/test.md",
     "Planner/Design Mockups.md",
@@ -258,8 +260,6 @@
     "ref/tasknotes/tasknotes-e2e-vault/Welcome.md",
     "ref/tasknotes/tasknotes-e2e-vault/2025-12-31.md",
     "ref/tasknotes/styles/UTILITY-USAGE-GUIDE.md",
-    "ref/tasknotes/styles/UTILITIES.md",
-    "ref/tasknotes/styles/README.md",
     "ref/tasknotes/media/docs/workflow-task-hover.png",
     "ref/tasknotes/media/docs/workflow-task-context-menu.png",
     "ref/tasknotes/media/docs/workflow-quick-add-calendar.png",
