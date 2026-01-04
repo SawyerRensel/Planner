@@ -1,6 +1,6 @@
 # Planner - Product Requirements Document
 
-> **Version:** 2.2.0
+> **Version:** 2.4.0
 > **Last Updated:** 2026-01-03
 > **Author:** Claude and Sawyer Rensel
 > **Status:** Active
@@ -406,6 +406,76 @@ Table/list view with sortable columns.
 - Configurable visible columns
 - Nested subtasks (collapsible tree)
 - Quick status toggle
+
+### 5.5 Timeline View
+
+Beautiful chronological timeline visualization powered by [Markwhen](https://markwhen.com/).
+
+**Overview:**
+Unlike the Gantt View (which focuses on project management with dependencies, progress bars, and hierarchies), the Timeline View provides an elegant, narrative-style visualization of events over time. It's ideal for:
+- Life timelines and personal history
+- Project milestones and roadmaps
+- Historical event visualization
+- Event-centric planning (vs. task-centric Gantt)
+
+**Architecture:**
+The Timeline View adapts the Markwhen Timeline component to work with Obsidian Planner's frontmatter schema. Instead of parsing Markwhen's text syntax, we transform frontmatter data into Markwhen's JSON format and communicate via the LPC (Local Procedure Call) protocol.
+
+```
+Frontmatter (YAML) ←→ Adapter Layer ←→ LPC Messages ←→ Markwhen Timeline (iframe)
+```
+
+**Features:**
+- **Grouping**: Group events by `calendar`, `status`, `parent`, `people`, or `priority`
+- **Color By**: Color event bars by any field (same as Calendar/Gantt)
+- **Drag to Edit**: Drag events to reschedule (updates frontmatter dates)
+- **Click to Edit**: Single-click opens ItemModal for full editing
+- **Create Events**: Click empty space to create new event via ItemModal
+- **Built-in Controls**: Uses Markwhen's native zoom, pan, and navigation
+- **Progress Display**: Shows `progress` percentage on events (via Markwhen's `percent` field)
+- **Tags**: Displays frontmatter `tags` as Markwhen tags with colors
+
+**Bases Integration:**
+- Filter: `WHERE calendar = "Work" AND tags CONTAINS "#event"`
+- Sort: By `date_start_scheduled`, etc.
+- Group: By `calendar`, `status`, `parent`, `people`, `priority`
+- Properties: Visible properties drive metadata shown in tooltips
+
+**Bases Configuration Menu Options:**
+- **Group By**: Select field to group events (`calendar`, `status`, `parent`, `people`, `priority`, or none)
+- **Color By**: Select field to color event bars (calendar, priority, status, etc.)
+- **Date Start Field**: Select which frontmatter field defines event start
+- **Date End Field**: Select which frontmatter field defines event end
+- **Title Field**: Select which field displays as event text
+
+**Interactions:**
+
+| Action | Behavior |
+|--------|----------|
+| Single-click event | Open ItemModal for editing |
+| Double-click event | Open ItemModal for editing |
+| Drag event | Reschedule (updates `date_start_scheduled`, `date_end_scheduled`) |
+| Drag event edges | Resize duration |
+| Click empty space | Create new event via ItemModal (date pre-filled) |
+| Scroll/pinch | Zoom in/out (Markwhen built-in) |
+| Pan | Navigate timeline (Markwhen built-in) |
+
+**Differences from Gantt View:**
+
+| Feature | Gantt View | Timeline View |
+|---------|------------|---------------|
+| Library | DHTMLX Gantt | Markwhen Timeline |
+| Focus | Project management | Event visualization |
+| Dependencies | ✅ Arrows between tasks | ❌ Not supported |
+| Progress bars | ✅ Drag to update | ✅ Display only |
+| Hierarchy | ✅ Parent/child indentation | ❌ Flat (groups only) |
+| Milestones | ✅ Diamond markers | Regular events |
+| Grid/Table | ✅ Configurable columns | ❌ No table |
+| Aesthetic | Functional/dense | Clean/narrative |
+
+**When to Use:**
+- **Timeline View**: For visualizing life events, historical timelines, or when you want a clean, beautiful overview
+- **Gantt View**: For project planning with dependencies, progress tracking, and task hierarchies
 
 ---
 
@@ -869,6 +939,48 @@ Legend: ██ Done  ▓▓ In-Progress  ░░ To-Do  ◆ Milestone  ─► Dep
 └─────────────────────────────────────────────────────────────┘
 ```
 
+### 8.6 Timeline View
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Timeline                [Group: Calendar ▼] [Color: Calendar ▼] │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │                   Markwhen Timeline (iframe)                │ │
+│  │                                                             │ │
+│  │  2026                                                       │ │
+│  │  ════════════════════════════════════════════════════════  │ │
+│  │                                                             │ │
+│  │  ┌─ Work ────────────────────────────────────────────────┐ │ │
+│  │  │                                                        │ │ │
+│  │  │  Jan 6        Jan 13       Jan 20       Jan 27        │ │ │
+│  │  │  ├────────────┼────────────┼────────────┼──────────   │ │ │
+│  │  │                                                        │ │ │
+│  │  │  ████████████████████████  Website Redesign            │ │ │
+│  │  │                   ▓▓▓▓▓▓▓▓  API Development             │ │ │
+│  │  │                            ░░░░  Launch Event           │ │ │
+│  │  │                                                        │ │ │
+│  │  └────────────────────────────────────────────────────────┘ │ │
+│  │                                                             │ │
+│  │  ┌─ Personal ────────────────────────────────────────────┐ │ │
+│  │  │                                                        │ │ │
+│  │  │  ████  Doctor Appt                                     │ │ │
+│  │  │              ▓▓▓▓▓▓▓▓▓▓▓▓  Vacation                     │ │ │
+│  │  │                                                        │ │ │
+│  │  └────────────────────────────────────────────────────────┘ │ │
+│  │                                                             │ │
+│  │  ← [Zoom -] ══════════════○══════════════ [Zoom +] →       │ │
+│  │                      [Today]                                │ │
+│  └────────────────────────────────────────────────────────────┘ │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+
+Legend: ████ Complete  ▓▓▓▓ In Progress  ░░░░ Scheduled
+        Groups are collapsible. Bars are draggable.
+        Click event → ItemModal. Drag event → Update dates.
+```
+
 ---
 
 ## 9. Technical Architecture
@@ -881,9 +993,10 @@ Legend: ██ Done  ▓▓ In-Progress  ░░ To-Do  ◆ Milestone  ─► Dep
 | Platform | Obsidian Plugin API | Core integration |
 | Views | Obsidian Bases | View system, filtering, queries |
 | Calendar | FullCalendar | Calendar rendering |
-| Gantt | DHTMLX Gantt | Timeline visualization |
+| Gantt | DHTMLX Gantt | Project timeline visualization |
+| Timeline | Markwhen Timeline | Event timeline visualization |
 | Recurrence | rrule | iCal RRULE parsing |
-| NLP Dates | TBD (chrono-node or alternative) | Natural language parsing |
+| NLP Dates | chrono-node | Natural language parsing |
 
 ### 9.2 Project Structure
 
@@ -902,6 +1015,7 @@ src/
 ├── views/
 │   ├── CalendarView.ts       # FullCalendar integration
 │   ├── GanttView.ts          # DHTMLX Gantt integration
+│   ├── TimelineView.ts       # Markwhen Timeline integration
 │   ├── KanbanView.ts         # Kanban board
 │   └── TaskListView.ts       # Table/list view
 ├── components/
@@ -953,7 +1067,183 @@ Views consume Bases:
 3. Plugin views render the query results
 4. User edits update frontmatter, triggering re-render
 
-### 9.5 Performance Considerations
+### 9.5 Markwhen Timeline Integration
+
+The Timeline View integrates the Markwhen Timeline component via an iframe-based architecture, similar to the official Markwhen Obsidian plugin but powered by our frontmatter schema instead of Markwhen's text syntax.
+
+**Architecture Overview:**
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                         TimelineView.ts                              │
+│  (Obsidian BasesView)                                               │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  ┌──────────────┐    ┌──────────────────┐    ┌──────────────────┐   │
+│  │ BasesEntry[] │───▶│ MarkwhenAdapter  │───▶│ MarkwhenState    │   │
+│  │ (frontmatter)│    │ - toEvent()      │    │ {                │   │
+│  └──────────────┘    │ - toEventGroup() │    │   rawText: "",   │   │
+│                      │ - buildPath()    │    │   parsed: {...}  │   │
+│                      └──────────────────┘    │ }                │   │
+│                                              └────────┬─────────┘   │
+│                                                       │              │
+│  ┌──────────────────────────────────────────────────┐ │              │
+│  │                  LPC Host                         │ │              │
+│  │  - postMessage('markwhenState', state)      ◀────┘ │              │
+│  │  - postMessage('appState', {darkMode, colors})     │              │
+│  │  - onMessage('editEventDateRange', handler)        │              │
+│  │  - onMessage('newEvent', handler)                  │              │
+│  └──────────────────────────────────────────────────┘                │
+│                              │                                       │
+│                              │ postMessage                           │
+│                              ▼                                       │
+│  ┌──────────────────────────────────────────────────────────────┐   │
+│  │                    <iframe>                                   │   │
+│  │                 Markwhen Timeline                             │   │
+│  │                   (Vue 3 App)                                 │   │
+│  │  ┌────────────────────────────────────────────────────────┐  │   │
+│  │  │  useLpc() - receives state, emits edit events          │  │   │
+│  │  └────────────────────────────────────────────────────────┘  │   │
+│  └──────────────────────────────────────────────────────────────┘   │
+│                              │                                       │
+│                              │ postMessage (edit events)             │
+│                              ▼                                       │
+│  ┌──────────────────────────────────────────────────────────────┐   │
+│  │                  Event Handlers                               │   │
+│  │  - handleEditDateRange() → processFrontMatter()               │   │
+│  │  - handleNewEvent() → open ItemModal                          │   │
+│  │  - handleEventClick() → open ItemModal                        │   │
+│  └──────────────────────────────────────────────────────────────┘   │
+│                                                                      │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+**Key Components:**
+
+| Component | Purpose |
+|-----------|---------|
+| `MarkwhenAdapter` | Transforms `BasesEntry[]` to Markwhen's `ParseResult` JSON format |
+| `LPC Host` | Manages bidirectional postMessage communication with iframe |
+| `PathResolver` | Maps Markwhen event paths (`[0, 2, 1]`) back to file paths |
+| `Timeline iframe` | Hosts the Markwhen Timeline Vue component |
+
+**Data Transformation (Frontmatter → Markwhen Event):**
+
+```typescript
+// Input: Obsidian frontmatter
+{
+  title: "Team Meeting",
+  date_start_scheduled: "2026-01-15T14:00:00",
+  date_end_scheduled: "2026-01-15T15:00:00",
+  calendar: ["Work"],
+  tags: ["event"],
+  progress: 50
+}
+
+// Output: Markwhen Event
+{
+  id: "Planner/Team Meeting.md",  // File path for reverse lookup
+  dateRangeIso: {
+    fromDateTimeIso: "2026-01-15T14:00:00",
+    toDateTimeIso: "2026-01-15T15:00:00"
+  },
+  firstLine: {
+    full: "2026-01-15: Team Meeting",
+    datePart: "2026-01-15",
+    rest: "Team Meeting",
+    restTrimmed: "Team Meeting"
+  },
+  tags: ["event"],
+  percent: 50,
+  properties: {
+    calendar: "Work"
+  }
+}
+```
+
+**LPC Message Types:**
+
+| Direction | Message Type | Purpose |
+|-----------|--------------|---------|
+| Host → Timeline | `markwhenState` | Send parsed event data |
+| Host → Timeline | `appState` | Send UI state (dark mode, colors, selection) |
+| Timeline → Host | `editEventDateRange` | User dragged event to new dates |
+| Timeline → Host | `newEvent` | User created new event |
+| Timeline → Host | `setDetailPath` | User clicked/selected event |
+| Timeline → Host | `setHoveringPath` | User hovering over event |
+
+**Bidirectional Sync Flow:**
+
+```
+User drags event in Timeline
+         │
+         ▼
+Timeline emits 'editEventDateRange' via postMessage
+  {
+    path: [0, 2],           // Event position in tree
+    range: { from, to },    // New date range
+    scale: "day"
+  }
+         │
+         ▼
+LPC Host receives message
+         │
+         ▼
+PathResolver.getFilePath([0, 2]) → "Planner/Team Meeting.md"
+         │
+         ▼
+app.fileManager.processFrontMatter(file, (fm) => {
+  fm.date_start_scheduled = range.from.toISOString();
+  fm.date_end_scheduled = range.to.toISOString();
+  fm.date_modified = new Date().toISOString();
+})
+         │
+         ▼
+Obsidian triggers metadata cache update
+         │
+         ▼
+BasesView.onDataChanged() → re-render
+```
+
+**Grouping Implementation:**
+
+Groups in Markwhen are represented as `EventGroup` objects with nested `children`. The adapter creates groups based on the configured `groupBy` field:
+
+```typescript
+// groupBy: "calendar"
+{
+  events: {
+    title: "Timeline",
+    children: [
+      {
+        title: "Work",           // Group: Work calendar
+        children: [/* events */]
+      },
+      {
+        title: "Personal",       // Group: Personal calendar
+        children: [/* events */]
+      }
+    ]
+  }
+}
+```
+
+**Color Mapping:**
+
+Colors are passed via `appState` and applied to events based on the `colorBy` configuration:
+
+```typescript
+appState: {
+  colorMap: {
+    "Work": "#4A90D9",      // Calendar colors from settings
+    "Personal": "#50C878",
+    "High": "#EF4444",      // Priority colors
+    "Low": "#3B82F6"
+  }
+}
+```
+
+### 9.6 Performance Considerations
 
 - **Lazy rendering**: Only render visible items in large lists
 - **Virtual scrolling**: For lists with 500+ items
@@ -1072,6 +1362,52 @@ Views consume Bases:
 
 **Deliverable:** Plugin ready for public release.
 
+### Phase 8: Timeline View
+
+**Goal:** Beautiful event timeline visualization powered by Markwhen
+
+**Research & Design (Completed):**
+- [x] Analyze Markwhen ecosystem (Parser, Timeline, View-Client, Obsidian Plugin)
+- [x] Document LPC communication protocol
+- [x] Design frontmatter-to-Markwhen adapter architecture
+- [x] Define Bases integration model (groupBy, colorBy options)
+- [x] Determine interaction patterns (click, drag, create)
+
+**Implementation:**
+- [ ] Create `MarkwhenAdapter` class
+  - [ ] `toEvent()`: Transform `BasesEntry` → Markwhen Event
+  - [ ] `toEventGroup()`: Build groups from `groupBy` field
+  - [ ] `buildPathMap()`: Create path ↔ filePath mapping
+- [ ] Create `LpcHost` class
+  - [ ] Handle `postMessage` communication with iframe
+  - [ ] Implement message type handlers
+  - [ ] Manage appState (dark mode, colors, selection)
+- [ ] Create `BasesTimelineView` class
+  - [ ] Register as Bases view type (`planner-timeline`)
+  - [ ] Build toolbar (minimal - leverage Markwhen's built-in controls)
+  - [ ] Embed Markwhen Timeline iframe
+  - [ ] Handle data refresh on Bases query changes
+- [ ] Implement edit handlers
+  - [ ] `handleEditDateRange()`: Update frontmatter dates
+  - [ ] `handleNewEvent()`: Open ItemModal with pre-filled dates
+  - [ ] `handleEventClick()`: Open ItemModal for editing
+- [ ] Add Bases configuration options
+  - [ ] Group By selector
+  - [ ] Color By selector
+  - [ ] Date Start/End field selectors
+  - [ ] Title field selector
+- [ ] Bundle Markwhen Timeline
+  - [ ] Decide: bundle locally vs. load from CDN
+  - [ ] Configure iframe sandbox permissions
+  - [ ] Handle Obsidian theme sync (dark/light mode)
+- [ ] Testing
+  - [ ] Verify bidirectional sync (edit in Timeline → frontmatter updated)
+  - [ ] Test all groupBy options
+  - [ ] Test colorBy with calendar/priority/status
+  - [ ] Mobile/touch interaction testing
+
+**Deliverable:** Can visualize events on a beautiful Markwhen timeline with full editing capabilities.
+
 ### Future (v1.1+)
 
 - External calendar sync (Google, Microsoft, ICS)
@@ -1120,6 +1456,11 @@ Common patterns:
 - FullCalendar: https://fullcalendar.io/
 - DHTMLX Gantt: https://docs.dhtmlx.com/gantt/
 - GitHub Projects: Gantt and configurability inspiration
+- Markwhen: https://markwhen.com/ (Timeline View inspiration)
+  - Timeline component: https://github.com/mark-when/timeline
+  - Parser: https://github.com/mark-when/parser
+  - View Client (LPC): https://github.com/mark-when/view-client
+  - Obsidian Plugin: https://github.com/mark-when/obsidian-plugin
 
 ### 11.4 Related Files
 
@@ -1136,6 +1477,7 @@ Common patterns:
 | 2.1.0 | 2026-01-01 | Claude & Sawyer | Unified Item Modal feature: merged Quick Capture with Item Edit Modal. Added icon-based action bar, context menus for dates/recurrence/priority/status, collapsible Details section, and action buttons (Open Note, Delete, Cancel, Save). Inspired by TaskNotes UI patterns. |
 | 2.2.0 | 2026-01-03 | Claude & Sawyer | Item Modal enhancements: field autocomplete (Context, People, Parent, Tags, Blocked by), link format support (respects Wikilinks setting), pull existing values when editing, Summary field, Note Content field with markdown preview. Calendar View improvements: fixed drag-and-drop, mobile-optimized toolbar, configurable Bases options (Date Start/End fields, Title field, Default View Mode). Settings additions: Status and Priority icons (Lucide), calendar font size slider, Open Behavior setting. Phases 1-4 completed. |
 | 2.3.0 | 2026-01-03 | Claude & Sawyer | Gantt library decision: Replaced Frappe Gantt with DHTMLX Gantt (GPL v2.0) for better TypeScript support, mobile compatibility, and richer feature set (swimlanes, 4 link types, undo/redo, keyboard navigation). Plugin will be released under GPL license. |
+| 2.4.0 | 2026-01-03 | Claude & Sawyer | **Timeline View**: New view powered by Markwhen Timeline. Provides beautiful chronological event visualization complementing the project-focused Gantt View. Features: iframe-based architecture with LPC bidirectional communication, configurable groupBy (calendar/status/parent/people/priority), colorBy support, drag-to-reschedule with frontmatter sync, click-to-edit via ItemModal, Markwhen's built-in zoom/pan/navigation controls. Added Section 5.5 (Timeline View), Section 8.6 (UI mockup), Section 9.5 (Markwhen integration architecture), and Phase 8 implementation roadmap. |
 
 ---
 

@@ -1,42 +1,73 @@
-Let's begin Phase 5: Gantt View. Ask me any clarifying questions you may have before we implement. I have answered some of your existing questions in questions.md . Let's update the PRD to reflect these changes as well.
+## Additional Clarifying Questions
 
-I'd be happy to help with these Calendar View improvements! Let me ask a few clarifying questions to make sure I understand the requirements correctly:
+### 7. Double-Click Behavior
 
+**When a user double-clicks an event in the Timeline:**
 
-**1. Font Size Slider:**
+- **A)** Open the note file directly in Obsidian (like Gantt's double-click)
+- **B)** Same as single-click (ItemModal)
+- **C)** No double-click behavior
 
-- What range would you like for the font size slider? For example, should it go from something like 10px to 18px, or a percentage-based scale like 80% to 120%?
+> B)
+### 8. Vue Embedding Strategy
 
-> Let's go from 6px to 18px. 
+The Markwhen Timeline is a Vue 3 component. The existing Obsidian plugin embeds it in an **iframe**. Options:
 
-- When you say "a bit smaller" for the new default, do you have a specific reduction in mind (e.g., reduce by 2px, or ~10-15% smaller)?
+|Option|Pros|Cons|
+|---|---|---|
+|**A) iframe** (like Markwhen plugin)|Clean isolation, uses built-in controls, easier updates|Cross-origin communication via LPC, slightly more latency|
+|**B) Direct Vue integration**|More control, no iframe overhead|Adds Vue to bundle (~50KB), more complex integration|
 
-> 20% smaller. 
+My recommendation: **Option A (iframe)** - matches the proven Markwhen plugin architecture and lets us use their built-in controls as you requested.
 
-**2. Mobile Layout Clarification:**
+> A)
 
-- For mobile, you want to go from 3 rows to 2 rows - so all action buttons (view modes, today icon, forward/back arrows) on row 1, and the calendar title (e.g., "January 2026") on row 2. Is that correct?
+### 9. New Event Creation via Timeline
 
-> Correct.
+When Markwhen emits a `newEvent` message (user clicks empty space to create), should we:
 
-- Should all the action buttons be centered on mobile, or aligned in a specific way?
+- **A)** Open ItemModal with the date range pre-filled (consistent with your answer to Q3)
+- **B)** Something else?
 
-> Centered.
+> A)
 
-**3. Default Calendar Dropdown:**
+### 10. Today Marker & Navigation
 
-- Where are the calendars currently defined in your settings? I want to make sure I pull from the correct source to populate the dropdown.
+Should the Timeline View have:
 
-> It's the setting that says "Calendar Colors".  Let's also rename that heading to "Calendar Configuration and move it near the top of Planner Settings.
+- **A)** A "Today" button in the toolbar (like Calendar/Gantt)
+- **B)** Rely on Markwhen's built-in navigation only
+- **C)** Both
 
-**4. View Mode Button Sizing:**
+> B)  (Markwhen already has this.)
 
-- When you say "reduce the size a little," do you have a target size in mind, or should I just make them proportionally smaller (e.g., ~80% of current size)?
+### 11. Milestones
 
-> 80% of current size.
+Your frontmatter supports milestones (events where start = end). Should these:
 
-**5. Item Modal on Mobile:**
+- **A)** Display as Markwhen milestones (if supported)
+- **B)** Display as regular events
+- **C)** Not show in Timeline View
 
-- Is the Item Modal the same as the "Quick Capture Item Modal" I see in the recent commits, or is this a different modal that appears when clicking on calendar items?
+> B) Display as regular events
 
-> Same one.
+### 12. Dependencies Visual Indicator
+
+Markwhen doesn't support dependency arrows. For items with `blocked_by`:
+
+- **A)** Show a small 🔗 icon or indicator on the event bar
+- **B)** Show in tooltip/hover only
+- **C)** No visual indication (users can see in ItemModal)
+
+> C)
+
+---
+
+Once you answer these, I'll draft the complete Timeline View section for the PRD including:
+
+- Feature description
+- Architecture (Frontmatter ↔ Adapter ↔ LPC ↔ Timeline)
+- Bases integration details
+- View configuration options
+- Data flow diagram
+- Implementation phases
