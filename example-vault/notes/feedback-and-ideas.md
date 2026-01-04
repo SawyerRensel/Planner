@@ -56,6 +56,12 @@
 - [ ] Enable in-line editing for properties show in the Gantt Table
 - [ ] Currently not possible to adjust Gantt Bars (start, end, position, progress, dependency arrows.  We need to make this functionality happen.
 
+## Timeline View
+
+- [ ] Colors aren't working
+- [ ] Item frontmatter isn't getting pulled into the Item Modal when clicking on a bar to edit the Item.  
+- [ ] 
+
 ## Other
 
 - [ ] Map View integration in calendar item mobile popup.  

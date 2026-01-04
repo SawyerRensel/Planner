@@ -1,4 +1,4 @@
-import { Plugin, TFile, Notice } from 'obsidian';
+import { Plugin, TFile, Notice, Platform } from 'obsidian';
 import { PlannerSettings, DEFAULT_SETTINGS } from './types/settings';
 import { PlannerSettingTab } from './settings/SettingsTab';
 import { ItemService } from './services/ItemService';
@@ -17,10 +17,10 @@ import {
   BASES_GANTT_VIEW_ID,
   createGanttViewRegistration,
 } from './views/BasesGanttView';
-import {
-  BASES_TIMELINE_VIEW_ID,
-  createTimelineViewRegistration,
-} from './views/BasesTimelineView';
+// Timeline view is imported dynamically to reduce bundle size on mobile
+// The import is only done when actually needed (desktop only)
+let BASES_TIMELINE_VIEW_ID: string;
+let createTimelineViewRegistration: ((plugin: any) => any) | undefined;
 
 export default class PlannerPlugin extends Plugin {
   settings: PlannerSettings;
@@ -44,7 +44,7 @@ export default class PlannerPlugin extends Plugin {
     );
 
     // Register Bases views
-    this.registerBasesViews();
+    await this.registerBasesViews();
 
     // Add settings tab
     this.addSettingTab(new PlannerSettingTab(this.app, this));
@@ -65,9 +65,12 @@ export default class PlannerPlugin extends Plugin {
       this.activateGanttView();
     });
 
-    this.addRibbonIcon('calendar-range', 'Open Planner Timeline', () => {
-      this.activateTimelineView();
-    });
+    // Only add Timeline ribbon on desktop (large bundle size issue on mobile)
+    if (!Platform.isMobile) {
+      this.addRibbonIcon('calendar-range', 'Open Planner Timeline', () => {
+        this.activateTimelineView();
+      });
+    }
 
     console.log('Planner plugin loaded');
   }
@@ -75,7 +78,7 @@ export default class PlannerPlugin extends Plugin {
   /**
    * Register custom view types with Obsidian Bases
    */
-  private registerBasesViews(): void {
+  private async registerBasesViews(): Promise<void> {
     // Register Task List view for Bases
     const taskListRegistered = this.registerBasesView(
       BASES_TASK_LIST_VIEW_ID,
@@ -94,11 +97,24 @@ export default class PlannerPlugin extends Plugin {
       createGanttViewRegistration(this)
     );
 
-    // Register Timeline view for Bases
-    const timelineRegistered = this.registerBasesView(
-      BASES_TIMELINE_VIEW_ID,
-      createTimelineViewRegistration(this)
-    );
+    // Register Timeline view for Bases (skip on mobile due to large bundle size)
+    // Dynamic import to avoid loading the large timeline HTML on mobile
+    let timelineRegistered = false;
+    if (!Platform.isMobile) {
+      try {
+        const timelineModule = await import('./views/BasesTimelineView');
+        BASES_TIMELINE_VIEW_ID = timelineModule.BASES_TIMELINE_VIEW_ID;
+        createTimelineViewRegistration = timelineModule.createTimelineViewRegistration;
+        timelineRegistered = this.registerBasesView(
+          BASES_TIMELINE_VIEW_ID,
+          createTimelineViewRegistration(this)
+        );
+      } catch (e) {
+        console.error('Planner: Failed to load Timeline view:', e);
+      }
+    } else {
+      console.log('Planner: Skipping Timeline view on mobile');
+    }
 
     if (taskListRegistered || calendarRegistered || ganttRegistered || timelineRegistered) {
       console.log('Planner: Registered Bases views');
@@ -147,11 +163,15 @@ export default class PlannerPlugin extends Plugin {
       },
     });
 
-    // Open Timeline view
+    // Open Timeline view (desktop only)
     this.addCommand({
       id: 'open-timeline',
       name: 'Open Timeline',
       callback: () => {
+        if (Platform.isMobile) {
+          new Notice('Timeline view is not available on mobile');
+          return;
+        }
         this.activateTimelineView();
       },
     });

@@ -8,7 +8,7 @@
         "type": "tabs",
         "children": [
           {
-            "id": "a73f8bca5c7b1f9c",
+            "id": "d4cd5546a53eaa78",
             "type": "leaf",
             "state": {
               "type": "bases",
@@ -19,8 +19,22 @@
               "icon": "calendar-range",
               "title": "Timeline"
             }
+          },
+          {
+            "id": "6059deef8d4a5237",
+            "type": "leaf",
+            "state": {
+              "type": "bases",
+              "state": {
+                "file": "Planner/Calendar.base",
+                "viewName": "Calendar"
+              },
+              "icon": "calendar",
+              "title": "Calendar"
+            }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -169,8 +183,8 @@
             "state": {
               "type": "planner-task-list",
               "state": {},
-              "icon": "list-checks",
-              "title": "Planner: Task List"
+              "icon": "lucide-ghost",
+              "title": "planner-task-list"
             }
           }
         ],
@@ -183,9 +197,6 @@
   },
   "left-ribbon": {
     "hiddenItems": {
-      "planner:Open Planner Timeline": false,
-      "planner:Open Planner Gantt": false,
-      "planner:Open Planner Calendar": false,
       "switcher:Open quick switcher": false,
       "graph:Open graph view": false,
       "canvas:Create new canvas": false,
@@ -193,19 +204,23 @@
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
       "bases:Create new base": false,
+      "obsidian-full-calendar:Open Full Calendar": false,
       "planner:Open Planner Task List": false,
-      "obsidian-full-calendar:Open Full Calendar": false
+      "planner:Open Planner Calendar": false,
+      "planner:Open Planner Gantt": false,
+      "planner:Open Planner Timeline": false
     }
   },
-  "active": "a73f8bca5c7b1f9c",
+  "active": "6059deef8d4a5237",
   "lastOpenFiles": [
-    "Planner/test.md",
     "Planner/Timeline.base",
+    "Planner/Calendar.base",
+    "Planner/Gantt.base",
+    "notes/feedback-and-ideas.md",
+    "Planner/test.md",
     "Planner/Design Mockups.md",
     "notes/questions.md",
     "notes/obsidian-planner-prd.md",
-    "Planner/Calendar.base",
-    "notes/feedback-and-ideas.md",
     "notes/obsidian-planner-prd.md.tmp.319.1767492133033",
     "notes/obsidian-planner-prd.md.tmp.319.1767492122590",
     "notes/obsidian-planner-prd.md.tmp.319.1767492115981",

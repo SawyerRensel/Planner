@@ -4,11 +4,19 @@ import builtins from "builtin-modules";
 import fs from "fs";
 import path from "path";
 
-// Plugin to load HTML files as strings
+// Plugin to load HTML files as strings (except timeline-markwhen.html which is loaded at runtime)
 const htmlPlugin = {
   name: "html-loader",
   setup(build) {
     build.onLoad({ filter: /\.html$/ }, async (args) => {
+      // Timeline HTML is loaded at runtime to reduce bundle size
+      if (args.path.includes("timeline-markwhen.html")) {
+        // Export a placeholder that signals runtime loading is needed
+        return {
+          contents: `export default "__TIMELINE_HTML_RUNTIME_LOAD__";`,
+          loader: "js",
+        };
+      }
       const html = await fs.promises.readFile(args.path, "utf8");
       return {
         contents: `export default ${JSON.stringify(html)};`,
@@ -72,6 +80,14 @@ const copyToExampleVault = {
           fs.copyFileSync(file, path.join(targetDir, file));
           console.log(`Copied ${file} to ${targetDir}`);
         }
+      }
+
+      // Copy timeline HTML separately (loaded at runtime to reduce bundle size)
+      const timelineHtmlSrc = "./assets/timeline-markwhen.html";
+      const timelineHtmlDest = path.join(targetDir, "timeline.html");
+      if (fs.existsSync(timelineHtmlSrc)) {
+        fs.copyFileSync(timelineHtmlSrc, timelineHtmlDest);
+        console.log(`Copied timeline.html to ${targetDir}`);
       }
     });
   },

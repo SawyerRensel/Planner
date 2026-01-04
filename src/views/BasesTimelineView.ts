@@ -26,8 +26,13 @@ import {
   NewEventMessage,
   EventPath,
 } from '../types/markwhen';
-// Markwhen Timeline rebuilt with memory router (no History API needed)
-import timelineHtml from '../../assets/timeline-markwhen.html';
+
+// Timeline HTML placeholder - actual content is loaded at runtime
+// This keeps the main bundle small for mobile compatibility
+import timelineHtmlPlaceholder from '../../assets/timeline-markwhen.html';
+
+// Cache for runtime-loaded timeline HTML
+let timelineHtmlCache: string | null = null;
 
 export const BASES_TIMELINE_VIEW_ID = 'planner-timeline';
 
@@ -253,9 +258,44 @@ export class BasesTimelineView extends BasesView {
   private blobUrl: string | null = null;
 
   /**
+   * Load the timeline HTML (from runtime file or cache)
+   */
+  private async loadTimelineHtml(): Promise<string> {
+    // Return cached HTML if available
+    if (timelineHtmlCache) {
+      return timelineHtmlCache;
+    }
+
+    // Check if we have the bundled version or need to load at runtime
+    if (timelineHtmlPlaceholder !== '__TIMELINE_HTML_RUNTIME_LOAD__') {
+      // HTML was bundled (dev mode or small file)
+      timelineHtmlCache = timelineHtmlPlaceholder;
+      return timelineHtmlCache;
+    }
+
+    // Load from plugin directory at runtime
+    console.log('Timeline: Loading HTML from plugin directory...');
+    const pluginDir = this.plugin.manifest.dir;
+    if (!pluginDir) {
+      throw new Error('Could not determine plugin directory');
+    }
+
+    const timelineHtmlPath = `${pluginDir}/timeline.html`;
+    const adapter = this.plugin.app.vault.adapter;
+
+    if (await adapter.exists(timelineHtmlPath)) {
+      timelineHtmlCache = await adapter.read(timelineHtmlPath);
+      console.log('Timeline: Loaded HTML from file, length:', timelineHtmlCache.length);
+      return timelineHtmlCache;
+    } else {
+      throw new Error(`Timeline HTML file not found: ${timelineHtmlPath}`);
+    }
+  }
+
+  /**
    * Initialize the timeline
    */
-  private initTimeline(): void {
+  private async initTimeline(): Promise<void> {
     if (!this.iframe) {
       console.log('Timeline: No iframe element');
       return;
@@ -266,9 +306,20 @@ export class BasesTimelineView extends BasesView {
     // Pre-compute state before loading iframe so it's ready for requests
     this.computeState();
 
-    // Load the Timeline HTML into the iframe using blob URL
-    const html = this.getTimelineHtml();
-    console.log('Timeline: HTML length:', html.length);
+    // Load the Timeline HTML (from bundle or runtime file)
+    let timelineHtml: string;
+    try {
+      timelineHtml = await this.loadTimelineHtml();
+    } catch (e) {
+      console.error('Timeline: Failed to load HTML:', e);
+      this.containerEl.empty();
+      this.containerEl.createEl('div', {
+        text: 'Failed to load Timeline. Please reinstall the plugin.',
+        cls: 'planner-timeline-error',
+      });
+      return;
+    }
+    console.log('Timeline: HTML length:', timelineHtml.length);
 
     // Clean up previous blob URL
     if (this.blobUrl) {
@@ -276,7 +327,7 @@ export class BasesTimelineView extends BasesView {
     }
 
     // Create blob URL
-    const blob = new Blob([html], { type: 'text/html' });
+    const blob = new Blob([timelineHtml], { type: 'text/html' });
     this.blobUrl = URL.createObjectURL(blob);
 
     // Set up onload handler
@@ -446,14 +497,6 @@ export class BasesTimelineView extends BasesView {
     if (this.iframeContainer) {
       this.resizeObserver.observe(this.iframeContainer);
     }
-  }
-
-  /**
-   * Get the Timeline HTML to load into the iframe
-   * Uses the pre-built Markwhen Timeline bundled from @markwhen/timeline
-   */
-  private getTimelineHtml(): string {
-    return timelineHtml;
   }
 
   /**
