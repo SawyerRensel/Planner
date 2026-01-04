@@ -26,6 +26,8 @@ import {
   NewEventMessage,
   EventPath,
 } from '../types/markwhen';
+// Markwhen Timeline rebuilt with memory router (no History API needed)
+import timelineHtml from '../../assets/timeline-markwhen.html';
 
 export const BASES_TIMELINE_VIEW_ID = 'planner-timeline';
 
@@ -44,6 +46,9 @@ export class BasesTimelineView extends BasesView {
   private lpcHost: LpcHost;
   private isInitialized: boolean = false;
   private resizeObserver: ResizeObserver | null = null;
+  // Cached state for responding to Timeline requests
+  private currentMarkwhenState: MarkwhenState | null = null;
+  private currentAppState: AppState | null = null;
 
   // Configuration getters
   private getGroupBy(): TimelineGroupBy {
@@ -94,14 +99,38 @@ export class BasesTimelineView extends BasesView {
       onNewEvent: this.handleNewEvent.bind(this),
       onSetDetailPath: this.handleSetDetailPath.bind(this),
       onSetHoveringPath: this.handleSetHoveringPath.bind(this),
+      // State providers - called when Timeline requests current state
+      getMarkwhenState: () => this.currentMarkwhenState,
+      getAppState: () => this.currentAppState,
     };
     this.lpcHost = new LpcHost(callbacks);
   }
 
   /**
-   * Render the timeline view
+   * Render the timeline view - called internally
    */
-  async render(): Promise<void> {
+  private render(): void {
+    console.log('Timeline: render() called');
+
+    // Set up container if needed
+    if (!this.iframeContainer || !this.iframeContainer.isConnected) {
+      this.setupContainer();
+    }
+
+    // Initialize or update timeline
+    if (!this.isInitialized) {
+      this.initTimeline();
+    } else {
+      this.updateTimeline();
+    }
+  }
+
+  /**
+   * Set up the container with toolbar and iframe
+   */
+  private setupContainer(): void {
+    console.log('Timeline: setupContainer() called');
+
     // Clear container
     this.containerEl.empty();
     this.containerEl.addClass('planner-bases-timeline');
@@ -112,15 +141,18 @@ export class BasesTimelineView extends BasesView {
     // Build iframe container
     this.buildIframeContainer();
 
-    // Initialize if we have data
-    if (!this.isInitialized) {
-      await this.initTimeline();
-    } else {
-      await this.updateTimeline();
-    }
-
     // Set up resize observer
     this.setupResizeObserver();
+
+    console.log('Timeline: container setup complete, iframe exists:', !!this.iframe);
+  }
+
+  /**
+   * Called by Bases when data is updated
+   */
+  onDataUpdated(): void {
+    console.log('Timeline: onDataUpdated() called');
+    this.render();
   }
 
   /**
@@ -206,11 +238,10 @@ export class BasesTimelineView extends BasesView {
   private buildIframeContainer(): void {
     this.iframeContainer = this.containerEl.createDiv('planner-timeline-iframe-container');
 
-    // Create iframe
+    // Create iframe (no sandbox needed - we control the content)
     this.iframe = this.iframeContainer.createEl('iframe', {
       cls: 'planner-timeline-iframe',
       attr: {
-        sandbox: 'allow-scripts allow-same-origin',
         title: 'Markwhen Timeline',
       },
     });
@@ -219,42 +250,58 @@ export class BasesTimelineView extends BasesView {
     this.lpcHost.connect(this.iframe);
   }
 
+  private blobUrl: string | null = null;
+
   /**
    * Initialize the timeline
    */
-  private async initTimeline(): Promise<void> {
-    if (!this.iframe) return;
+  private initTimeline(): void {
+    if (!this.iframe) {
+      console.log('Timeline: No iframe element');
+      return;
+    }
 
-    // Load the Timeline HTML into the iframe
-    // For now, we'll use a placeholder until we set up the build process
-    const timelineHtml = this.getTimelineHtml();
-    this.iframe.srcdoc = timelineHtml;
+    console.log('Timeline: Initializing iframe...');
 
-    // Wait for iframe to load
-    await new Promise<void>((resolve) => {
-      if (!this.iframe) {
-        resolve();
-        return;
+    // Pre-compute state before loading iframe so it's ready for requests
+    this.computeState();
+
+    // Load the Timeline HTML into the iframe using blob URL
+    const html = this.getTimelineHtml();
+    console.log('Timeline: HTML length:', html.length);
+
+    // Clean up previous blob URL
+    if (this.blobUrl) {
+      URL.revokeObjectURL(this.blobUrl);
+    }
+
+    // Create blob URL
+    const blob = new Blob([html], { type: 'text/html' });
+    this.blobUrl = URL.createObjectURL(blob);
+
+    // Set up onload handler
+    this.iframe.onload = () => {
+      console.log('Timeline: iframe loaded');
+      this.isInitialized = true;
+
+      // Push initial state to the Timeline after it's loaded
+      // The Timeline's useLpc listeners receive state via "request" messages
+      if (this.currentMarkwhenState && this.currentAppState) {
+        console.log('Timeline: Pushing initial state to iframe');
+        this.lpcHost.sendState(this.currentMarkwhenState, this.currentAppState);
       }
-      this.iframe.onload = () => {
-        this.isInitialized = true;
-        // Send initial state after a short delay to ensure the app is ready
-        setTimeout(() => {
-          this.updateTimeline();
-          resolve();
-        }, 100);
-      };
-    });
+    };
+
+    this.iframe.src = this.blobUrl;
   }
 
   /**
-   * Update the timeline with current data
+   * Compute and cache the current state
    */
-  private async updateTimeline(): Promise<void> {
-    if (!this.isInitialized || !this.iframe) return;
-
+  private computeState(): void {
     // Get entries from Bases data
     const entries = this.getEntriesFromData();
+    console.log('Timeline: Computing state for', entries.length, 'entries');
 
     // Build adapter options
     const options: AdapterOptions = {
@@ -267,21 +314,36 @@ export class BasesTimelineView extends BasesView {
 
     // Adapt entries to Markwhen format
     const { parseResult, colorMap } = this.adapter.adapt(entries, options);
+    console.log('Timeline: Adapted to', parseResult.events?.children?.length || 0, 'events/groups');
 
-    // Build Markwhen state
-    const markwhenState: MarkwhenState = {
+    // Cache Markwhen state
+    this.currentMarkwhenState = {
       rawText: '',
       parsed: parseResult,
     };
 
-    // Build app state
-    const appState: AppState = {
+    // Cache app state
+    this.currentAppState = {
       isDark: document.body.classList.contains('theme-dark'),
       colorMap,
     };
+  }
 
-    // Send state to Timeline
-    this.lpcHost.sendState(markwhenState, appState);
+  /**
+   * Update the timeline with current data
+   */
+  private updateTimeline(): void {
+    console.log('Timeline: updateTimeline called, initialized:', this.isInitialized, 'iframe:', !!this.iframe);
+    if (!this.iframe) return;
+
+    // Compute and cache state
+    this.computeState();
+
+    // If initialized, push state update to Timeline
+    if (this.isInitialized && this.currentMarkwhenState && this.currentAppState) {
+      console.log('Timeline: Pushing state update to iframe');
+      this.lpcHost.sendState(this.currentMarkwhenState, this.currentAppState);
+    }
   }
 
   /**
@@ -386,93 +448,10 @@ export class BasesTimelineView extends BasesView {
 
   /**
    * Get the Timeline HTML to load into the iframe
-   * This is a placeholder until we set up the proper build process
+   * Uses the pre-built Markwhen Timeline bundled from @markwhen/timeline
    */
   private getTimelineHtml(): string {
-    // TODO: Replace with actual bundled Markwhen Timeline
-    // For now, return a placeholder that shows a message
-    const isDark = document.body.classList.contains('theme-dark');
-
-    return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-      background: ${isDark ? '#1e1e1e' : '#ffffff'};
-      color: ${isDark ? '#dcddde' : '#1e1e1e'};
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    .placeholder {
-      text-align: center;
-      max-width: 400px;
-    }
-    h2 {
-      margin-bottom: 16px;
-      color: ${isDark ? '#7f6df2' : '#5c3cb3'};
-    }
-    p {
-      line-height: 1.6;
-      margin-bottom: 12px;
-      opacity: 0.8;
-    }
-    .status {
-      margin-top: 20px;
-      padding: 12px 16px;
-      background: ${isDark ? '#2d2d2d' : '#f5f5f5'};
-      border-radius: 8px;
-      font-size: 14px;
-    }
-    .listening {
-      color: ${isDark ? '#4caf50' : '#2e7d32'};
-    }
-  </style>
-</head>
-<body>
-  <div class="placeholder">
-    <h2>🗓️ Timeline View</h2>
-    <p>The Markwhen Timeline component needs to be bundled.</p>
-    <p>This placeholder is listening for LPC messages from the host.</p>
-    <div class="status">
-      <span class="listening">● Listening for messages...</span>
-    </div>
-  </div>
-  <script>
-    // Basic LPC listener for testing
-    window.addEventListener('message', (event) => {
-      console.log('Timeline received message:', event.data);
-
-      // If it's a markwhenState or appState message, log the data
-      if (event.data && event.data.type) {
-        const status = document.querySelector('.status');
-        if (status) {
-          const eventCount = event.data.params?.parsed?.events?.children?.length || 0;
-          status.innerHTML = '<span class="listening">● Received ' + event.data.type +
-            (event.data.type === 'markwhenState' ? ' (' + eventCount + ' events)' : '') +
-            '</span>';
-        }
-      }
-    });
-
-    // Signal that we're ready
-    console.log('Timeline placeholder loaded and listening');
-  </script>
-</body>
-</html>
-`;
+    return timelineHtml;
   }
 
   /**
@@ -488,6 +467,8 @@ export class BasesTimelineView extends BasesView {
 
     this.iframe = null;
     this.isInitialized = false;
+    this.currentMarkwhenState = null;
+    this.currentAppState = null;
   }
 }
 

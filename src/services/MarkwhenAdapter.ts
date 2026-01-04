@@ -47,6 +47,7 @@ export interface AdaptedResult {
 export class MarkwhenAdapter {
   private settings: PlannerSettings;
   private pathMappings: PathMapping[] = [];
+  private debugCount: number = 0;
 
   constructor(settings: PlannerSettings) {
     this.settings = settings;
@@ -57,6 +58,7 @@ export class MarkwhenAdapter {
    */
   adapt(entries: BasesEntry[], options: AdapterOptions): AdaptedResult {
     this.pathMappings = [];
+    this.debugCount = 0;
 
     // Convert entries to timeline events
     const timelineEvents = this.entriesToTimelineEvents(entries, options);
@@ -121,6 +123,23 @@ export class MarkwhenAdapter {
     const endValue = entry.getValue(options.dateEndField);
     const titleValue = entry.getValue(options.titleField);
 
+    // Debug: Log first few entries
+    if (this.debugCount < 3) {
+      console.log('Timeline Adapter: Entry', filePath);
+      console.log('  dateStartField:', options.dateStartField);
+      console.log('  startValue type:', typeof startValue);
+      if (startValue && typeof startValue === 'object') {
+        console.log('  startValue keys:', Object.keys(startValue));
+        console.log('  startValue.ts:', (startValue as any).ts);
+        console.log('  startValue.toISO?:', typeof (startValue as any).toISO === 'function' ? (startValue as any).toISO() : 'N/A');
+        console.log('  startValue.toString():', startValue.toString());
+        console.log('  startValue.valueOf():', startValue.valueOf());
+      } else {
+        console.log('  startValue:', startValue);
+      }
+      this.debugCount++;
+    }
+
     // Parse start date - skip if no valid date
     const startDate = this.parseDate(startValue);
     if (!startDate) {
@@ -183,6 +202,8 @@ export class MarkwhenAdapter {
 
   /**
    * Parse a date value from frontmatter
+   * Handles Date instances, strings, numbers, and Bases date objects
+   * that have toString() returning ISO date strings
    */
   private parseDate(value: unknown): Date | null {
     if (!value) return null;
@@ -198,6 +219,15 @@ export class MarkwhenAdapter {
 
     if (typeof value === 'number') {
       return new Date(value);
+    }
+
+    // Handle Bases date objects that have toString() returning ISO strings
+    if (typeof value === 'object' && value !== null) {
+      const str = value.toString();
+      if (str && str !== '[object Object]') {
+        const date = new Date(str);
+        return isNaN(date.getTime()) ? null : date;
+      }
     }
 
     return null;

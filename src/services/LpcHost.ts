@@ -26,6 +26,9 @@ export interface LpcCallbacks {
   onSetHoveringPath?: (path: EventPath) => void;
   onSetDetailPath?: (path: EventPath) => void;
   onShowInEditor?: (path: EventPath) => void;
+  // State providers - called when Timeline requests current state
+  getMarkwhenState?: () => MarkwhenState | null;
+  getAppState?: () => AppState | null;
 }
 
 /**
@@ -137,10 +140,25 @@ export class LpcHost {
         break;
 
       case 'markwhenState':
+        // Timeline is requesting current state
+        if (this.callbacks.getMarkwhenState) {
+          const state = this.callbacks.getMarkwhenState();
+          console.log('LpcHost: Responding to markwhenState request with', state ? 'data' : 'null');
+          this.sendResponse(message.id, message.type, state ? this.serialize(state) : null);
+        } else {
+          this.sendResponse(message.id, message.type, null);
+        }
+        break;
+
       case 'appState':
-        // These are requests for state - send our current state
-        // The Timeline is asking for the current state
-        this.sendResponse(message.id, message.type, null);
+        // Timeline is requesting app state
+        if (this.callbacks.getAppState) {
+          const state = this.callbacks.getAppState();
+          console.log('LpcHost: Responding to appState request with', state ? 'data' : 'null');
+          this.sendResponse(message.id, message.type, state ? this.serialize(state) : null);
+        } else {
+          this.sendResponse(message.id, message.type, null);
+        }
         break;
 
       default:
@@ -199,16 +217,28 @@ export class LpcHost {
   }
 
   /**
+   * Serialize data for postMessage (strips functions and non-serializable data)
+   */
+  private serialize<T>(data: T): T {
+    return JSON.parse(JSON.stringify(data));
+  }
+
+  /**
    * Send Markwhen state to the Timeline
+   * State updates are sent as requests so the Timeline's listener is called
    */
   sendMarkwhenState(state: MarkwhenState): void {
     if (!this.iframe?.contentWindow) return;
 
+    // Serialize to strip any functions or non-serializable data
+    const serializedState = this.serialize(state);
+
+    // Send as a request - the Timeline's useLpc listeners are called on requests
     const message: LpcMessage<MarkwhenState> = {
       type: 'markwhenState',
       request: true,
       id: `markwhen_${getNonce()}`,
-      params: state,
+      params: serializedState,
     };
 
     this.iframe.contentWindow.postMessage(message, '*');
@@ -216,15 +246,20 @@ export class LpcHost {
 
   /**
    * Send app state to the Timeline
+   * State updates are sent as requests so the Timeline's listener is called
    */
   sendAppState(state: AppState): void {
     if (!this.iframe?.contentWindow) return;
 
+    // Serialize to strip any functions or non-serializable data
+    const serializedState = this.serialize(state);
+
+    // Send as a request - the Timeline's useLpc listeners are called on requests
     const message: LpcMessage<AppState> = {
       type: 'appState',
       request: true,
       id: `markwhen_${getNonce()}`,
-      params: state,
+      params: serializedState,
     };
 
     this.iframe.contentWindow.postMessage(message, '*');

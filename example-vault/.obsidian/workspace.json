@@ -4,65 +4,23 @@
     "type": "split",
     "children": [
       {
-        "id": "2f952e8520dec364",
+        "id": "41de5f17093f0b18",
         "type": "tabs",
         "children": [
           {
-            "id": "ca10b9a74f1a5612",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "notes/questions.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "questions"
-            }
-          },
-          {
-            "id": "dbd177337956ead9",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "notes/obsidian-planner-prd.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "obsidian-planner-prd"
-            }
-          },
-          {
-            "id": "9c0bedcd26de7265",
+            "id": "eea00d7d72ec776b",
             "type": "leaf",
             "state": {
               "type": "bases",
               "state": {
                 "file": "Planner/Timeline.base",
-                "viewName": ""
+                "viewName": "Timeline"
               },
-              "icon": "lucide-layout-list",
+              "icon": "calendar-range",
               "title": "Timeline"
             }
-          },
-          {
-            "id": "6457e20a28c5182d",
-            "type": "leaf",
-            "state": {
-              "type": "bases",
-              "state": {
-                "file": "Planner/Calendar.base",
-                "viewName": "Calendar"
-              },
-              "icon": "calendar",
-              "title": "Calendar"
-            }
           }
-        ],
-        "currentTab": 2
+        ]
       }
     ],
     "direction": "vertical"
@@ -239,13 +197,14 @@
       "obsidian-full-calendar:Open Full Calendar": false
     }
   },
-  "active": "9c0bedcd26de7265",
+  "active": "eea00d7d72ec776b",
   "lastOpenFiles": [
-    "notes/feedback-and-ideas.md",
     "Planner/Timeline.base",
-    "notes/obsidian-planner-prd.md",
-    "Planner/Design Mockups.md",
     "notes/questions.md",
+    "notes/obsidian-planner-prd.md",
+    "Planner/Calendar.base",
+    "notes/feedback-and-ideas.md",
+    "Planner/Design Mockups.md",
     "notes/obsidian-planner-prd.md.tmp.319.1767492133033",
     "notes/obsidian-planner-prd.md.tmp.319.1767492122590",
     "notes/obsidian-planner-prd.md.tmp.319.1767492115981",
@@ -254,7 +213,6 @@
     "notes/obsidian-planner-prd.md.tmp.319.1767491981434",
     "notes/obsidian-planner-prd.md.tmp.319.1767491938581",
     "notes/obsidian-planner-prd.md.tmp.319.1767491928560",
-    "notes/obsidian-planner-prd.md.tmp.319.1767491909047",
     "notes/markwhen-integration-analysis.md",
     "notes/frappe-gantt-implementation-plan.md",
     "Planner/Fix Login Bug.md",

@@ -224,7 +224,9 @@ views:
     sort:
       - property: date_start_scheduled
         direction: ASC
-    groupBy: calendar
+    groupBy:
+      property: calendar
+      direction: ASC
     colorBy: note.calendar
   - type: table
     name: Table

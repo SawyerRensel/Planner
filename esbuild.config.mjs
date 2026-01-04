@@ -4,6 +4,20 @@ import builtins from "builtin-modules";
 import fs from "fs";
 import path from "path";
 
+// Plugin to load HTML files as strings
+const htmlPlugin = {
+  name: "html-loader",
+  setup(build) {
+    build.onLoad({ filter: /\.html$/ }, async (args) => {
+      const html = await fs.promises.readFile(args.path, "utf8");
+      return {
+        contents: `export default ${JSON.stringify(html)};`,
+        loader: "js",
+      };
+    });
+  },
+};
+
 // Plugin to extract and merge CSS into styles.css
 const cssPlugin = {
   name: "css-merge",
@@ -100,7 +114,7 @@ const context = await esbuild.context({
   treeShaking: true,
   outfile: "main.js",
   minify: prod,
-  plugins: [cssPlugin, copyToExampleVault],
+  plugins: [htmlPlugin, cssPlugin, copyToExampleVault],
 });
 
 if (prod) {

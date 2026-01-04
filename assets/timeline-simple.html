@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body.dark {
+      background: var(--bg-primary, #1e1e1e);
+      color: var(--text-primary, #dcddde);
+      --bg-primary: #1e1e1e;
+      --bg-secondary: #2d2d2d;
+      --bg-tertiary: #3d3d3d;
+      --text-primary: #dcddde;
+      --text-secondary: #a0a0a0;
+      --border-color: #404040;
+      --accent: #7f6df2;
+    }
+    body.light {
+      background: var(--bg-primary, #ffffff);
+      color: var(--text-primary, #1e1e1e);
+      --bg-primary: #ffffff;
+      --bg-secondary: #f5f5f5;
+      --bg-tertiary: #e8e8e8;
+      --text-primary: #1e1e1e;
+      --text-secondary: #666666;
+      --border-color: #e0e0e0;
+      --accent: #7f6df2;
+    }
+
+    .timeline-container {
+      height: 100%;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .timeline-header {
+      display: flex;
+      align-items: center;
+      padding: 8px 16px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      gap: 16px;
+    }
+
+    .timeline-nav {
+      display: flex;
+      gap: 4px;
+    }
+
+    .timeline-nav button {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 4px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .timeline-nav button:hover {
+      background: var(--accent);
+      color: white;
+    }
+
+    .timeline-date-range {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .timeline-content {
+      flex: 1;
+      overflow: auto;
+      position: relative;
+    }
+
+    .timeline-scroll {
+      min-height: 100%;
+      position: relative;
+    }
+
+    .timeline-group {
+      margin-bottom: 16px;
+    }
+
+    .timeline-group-header {
+      padding: 8px 16px;
+      font-weight: 600;
+      font-size: 14px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .timeline-events {
+      padding: 8px 16px;
+    }
+
+    .timeline-event {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      margin: 4px 0;
+      background: var(--bg-secondary);
+      border-radius: 6px;
+      border-left: 4px solid var(--event-color, var(--accent));
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .timeline-event:hover {
+      background: var(--bg-tertiary);
+    }
+
+    .timeline-event-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 12px;
+      flex-shrink: 0;
+      background: var(--event-color, var(--accent));
+    }
+
+    .timeline-event-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .timeline-event-title {
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .timeline-event-date {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .timeline-event-tags {
+      display: flex;
+      gap: 4px;
+      margin-left: 12px;
+    }
+
+    .timeline-event-tag {
+      font-size: 10px;
+      padding: 2px 6px;
+      background: var(--bg-tertiary);
+      border-radius: 3px;
+      color: var(--text-secondary);
+    }
+
+    .timeline-empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body class="dark">
+  <div id="app" class="timeline-container">
+    <div class="loading">Loading timeline...</div>
+  </div>
+
+  <script>
+    // State
+    let markwhenState = null;
+    let appState = { isDark: true, colorMap: {} };
+
+    // LPC communication
+    function postToHost(type, params) {
+      const id = 'markwhen_' + Math.random().toString(36).substring(2, 15);
+      window.parent.postMessage({ type, request: true, id, params }, '*');
+    }
+
+    // Request initial state
+    function requestState() {
+      postToHost('appState');
+      postToHost('markwhenState');
+    }
+
+    // Handle messages from host
+    window.addEventListener('message', (event) => {
+      const data = event.data;
+      if (!data || !data.id || !data.id.startsWith('markwhen')) return;
+
+      if (data.response) {
+        // Handle response to our request
+        if (data.type === 'markwhenState' && data.params) {
+          markwhenState = data.params;
+          render();
+        } else if (data.type === 'appState' && data.params) {
+          appState = data.params;
+          updateTheme();
+          render();
+        }
+      } else if (!data.request && !data.response) {
+        // Handle pushed state updates
+        if (data.type === 'markwhenState' && data.params) {
+          markwhenState = data.params;
+          render();
+        } else if (data.type === 'appState' && data.params) {
+          appState = data.params;
+          updateTheme();
+          render();
+        }
+      }
+    });
+
+    function updateTheme() {
+      document.body.className = appState.isDark ? 'dark' : 'light';
+    }
+
+    function formatDate(isoString) {
+      if (!isoString) return '';
+      const date = new Date(isoString);
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit'
+      });
+    }
+
+    function getEventColor(event) {
+      // Check colorMap for the event's properties
+      const propValue = event.properties?.calendar;
+      if (propValue && appState.colorMap?.[propValue]) {
+        return appState.colorMap[propValue].color;
+      }
+      return null;
+    }
+
+    function render() {
+      const app = document.getElementById('app');
+
+      if (!markwhenState?.parsed?.events) {
+        app.innerHTML = '<div class="timeline-empty">No events to display</div>';
+        return;
+      }
+
+      const events = markwhenState.parsed.events;
+      const children = events.children || [];
+
+      if (children.length === 0) {
+        app.innerHTML = '<div class="timeline-empty">No events to display</div>';
+        return;
+      }
+
+      let html = `
+        <div class="timeline-header">
+          <div class="timeline-nav">
+            <button onclick="navigateToday()">Today</button>
+          </div>
+          <div class="timeline-date-range">${events.title || 'Timeline'}</div>
+        </div>
+        <div class="timeline-content">
+          <div class="timeline-scroll">
+      `;
+
+      for (const child of children) {
+        if (child.children) {
+          // It's a group
+          html += renderGroup(child);
+        } else if (child.dateRangeIso) {
+          // It's a direct event
+          html += renderEvent(child, [children.indexOf(child)]);
+        }
+      }
+
+      html += `
+          </div>
+        </div>
+      `;
+
+      app.innerHTML = html;
+    }
+
+    function renderGroup(group) {
+      const groupColor = appState.colorMap?.[group.title]?.color;
+      let html = `
+        <div class="timeline-group">
+          <div class="timeline-group-header" style="${groupColor ? `border-left: 4px solid ${groupColor}; padding-left: 12px;` : ''}">
+            ${escapeHtml(group.title || 'Untitled Group')}
+          </div>
+          <div class="timeline-events">
+      `;
+
+      const children = group.children || [];
+      for (let i = 0; i < children.length; i++) {
+        const child = children[i];
+        if (child.dateRangeIso) {
+          // Find parent group index
+          const groupIndex = markwhenState.parsed.events.children.indexOf(group);
+          html += renderEvent(child, [groupIndex, i]);
+        }
+      }
+
+      html += `
+          </div>
+        </div>
+      `;
+
+      return html;
+    }
+
+    function renderEvent(event, path) {
+      const color = getEventColor(event);
+      const title = event.firstLine?.restTrimmed || event.id || 'Untitled';
+      const dateFrom = formatDate(event.dateRangeIso?.fromDateTimeIso);
+      const dateTo = event.dateRangeIso?.toDateTimeIso !== event.dateRangeIso?.fromDateTimeIso
+        ? formatDate(event.dateRangeIso?.toDateTimeIso)
+        : null;
+
+      const dateDisplay = dateTo ? `${dateFrom} - ${dateTo}` : dateFrom;
+      const tags = event.tags || [];
+
+      const pathAttr = JSON.stringify(path);
+
+      return `
+        <div class="timeline-event"
+             style="${color ? `--event-color: ${color}` : ''}"
+             data-path='${pathAttr}'
+             onclick="handleEventClick(this)">
+          <div class="timeline-event-color"></div>
+          <div class="timeline-event-content">
+            <div class="timeline-event-title">${escapeHtml(title)}</div>
+            <div class="timeline-event-date">${escapeHtml(dateDisplay)}</div>
+          </div>
+          ${tags.length > 0 ? `
+            <div class="timeline-event-tags">
+              ${tags.slice(0, 3).map(t => `<span class="timeline-event-tag">#${escapeHtml(t)}</span>`).join('')}
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function handleEventClick(element) {
+      const path = JSON.parse(element.dataset.path);
+      postToHost('setDetailPath', path);
+    }
+
+    function navigateToday() {
+      const today = new Date().toISOString();
+      postToHost('jumpToRange', {
+        fromDateTimeIso: today,
+        toDateTimeIso: today
+      });
+    }
+
+    // Initialize
+    requestState();
+  </script>
+</body>
+</html>
