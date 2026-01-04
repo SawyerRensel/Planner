@@ -17,6 +17,10 @@ import {
   BASES_GANTT_VIEW_ID,
   createGanttViewRegistration,
 } from './views/BasesGanttView';
+import {
+  BASES_TIMELINE_VIEW_ID,
+  createTimelineViewRegistration,
+} from './views/BasesTimelineView';
 
 export default class PlannerPlugin extends Plugin {
   settings: PlannerSettings;
@@ -61,6 +65,10 @@ export default class PlannerPlugin extends Plugin {
       this.activateGanttView();
     });
 
+    this.addRibbonIcon('calendar-range', 'Open Planner Timeline', () => {
+      this.activateTimelineView();
+    });
+
     console.log('Planner plugin loaded');
   }
 
@@ -86,7 +94,13 @@ export default class PlannerPlugin extends Plugin {
       createGanttViewRegistration(this)
     );
 
-    if (taskListRegistered || calendarRegistered || ganttRegistered) {
+    // Register Timeline view for Bases
+    const timelineRegistered = this.registerBasesView(
+      BASES_TIMELINE_VIEW_ID,
+      createTimelineViewRegistration(this)
+    );
+
+    if (taskListRegistered || calendarRegistered || ganttRegistered || timelineRegistered) {
       console.log('Planner: Registered Bases views');
     } else {
       console.log('Planner: Bases not enabled, skipping Bases view registration');
@@ -130,6 +144,15 @@ export default class PlannerPlugin extends Plugin {
       name: 'Open Gantt chart',
       callback: () => {
         this.activateGanttView();
+      },
+    });
+
+    // Open Timeline view
+    this.addCommand({
+      id: 'open-timeline',
+      name: 'Open Timeline',
+      callback: () => {
+        this.activateTimelineView();
       },
     });
 
@@ -177,6 +200,11 @@ export default class PlannerPlugin extends Plugin {
     await this.openBaseFile(basePath, 'Gantt');
   }
 
+  async activateTimelineView() {
+    const basePath = this.baseGeneratorService.getTimelineBasePath();
+    await this.openBaseFile(basePath, 'Timeline');
+  }
+
   /**
    * Open a .base file, creating it if it doesn't exist
    */
@@ -195,6 +223,8 @@ export default class PlannerPlugin extends Plugin {
         created = await this.baseGeneratorService.generateCalendarBase(false);
       } else if (name === 'Gantt') {
         created = await this.baseGeneratorService.generateGanttBase(false);
+      } else if (name === 'Timeline') {
+        created = await this.baseGeneratorService.generateTimelineBase(false);
       }
 
       if (created) {

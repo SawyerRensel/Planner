@@ -42,6 +42,7 @@
 - [x] Pull existing field values and add to Item Modal when editing an item. 
 - [x] Default tag for new Items - right now it's event.  Prepopulate the tag in the Item Modal.
 - [ ] ~~Would be nice to have a Day Planner-style sidebar for Planner, especially on mobile.  Just a quick swipe right to see the day’s agenda.~~
+- [ ] Recurrence is behaving/displaying in odd ways.  Try creating a recurring event for Church on Sundays at 9am-10:30am repeating every week.  It incorrectly puts it on the calendar between 4am-5:30am.  Click-drag to move it back to 9am, but then it snaps back to 4am.
 
 ## Gantt View
 

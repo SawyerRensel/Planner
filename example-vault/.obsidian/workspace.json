@@ -39,14 +39,13 @@
             "id": "9c0bedcd26de7265",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "bases",
               "state": {
-                "file": "notes/feedback-and-ideas.md",
-                "mode": "source",
-                "source": false
+                "file": "Planner/Timeline.base",
+                "viewName": ""
               },
-              "icon": "lucide-file",
-              "title": "feedback-and-ideas"
+              "icon": "lucide-layout-list",
+              "title": "Timeline"
             }
           },
           {
@@ -63,7 +62,7 @@
             }
           }
         ],
-        "currentTab": 1
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -226,6 +225,7 @@
   },
   "left-ribbon": {
     "hiddenItems": {
+      "planner:Open Planner Timeline": false,
       "planner:Open Planner Gantt": false,
       "planner:Open Planner Calendar": false,
       "switcher:Open quick switcher": false,
@@ -239,8 +239,11 @@
       "obsidian-full-calendar:Open Full Calendar": false
     }
   },
-  "active": "dbd177337956ead9",
+  "active": "9c0bedcd26de7265",
   "lastOpenFiles": [
+    "notes/feedback-and-ideas.md",
+    "Planner/Timeline.base",
+    "notes/obsidian-planner-prd.md",
     "Planner/Design Mockups.md",
     "notes/questions.md",
     "notes/obsidian-planner-prd.md.tmp.319.1767492133033",
@@ -253,10 +256,7 @@
     "notes/obsidian-planner-prd.md.tmp.319.1767491928560",
     "notes/obsidian-planner-prd.md.tmp.319.1767491909047",
     "notes/markwhen-integration-analysis.md",
-    "Planner/Gantt.base",
-    "notes/feedback-and-ideas.md",
     "notes/frappe-gantt-implementation-plan.md",
-    "notes/obsidian-planner-prd.md",
     "Planner/Fix Login Bug.md",
     "Planner/Test.md",
     "Planner/test.md",

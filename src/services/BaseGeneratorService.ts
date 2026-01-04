@@ -38,6 +38,14 @@ export class BaseGeneratorService {
   }
 
   /**
+   * Get the path to the Timeline.base file
+   */
+  getTimelineBasePath(): string {
+    const folder = this.getSettings().basesFolder.replace(/\/$/, '');
+    return normalizePath(`${folder}/Timeline.base`);
+  }
+
+  /**
    * Check if the Tasks.base file exists
    */
   async tasksBaseExists(): Promise<boolean> {
@@ -58,6 +66,14 @@ export class BaseGeneratorService {
    */
   async ganttBaseExists(): Promise<boolean> {
     const path = this.getGanttBasePath();
+    return this.app.vault.getAbstractFileByPath(path) instanceof TFile;
+  }
+
+  /**
+   * Check if the Timeline.base file exists
+   */
+  async timelineBaseExists(): Promise<boolean> {
+    const path = this.getTimelineBasePath();
     return this.app.vault.getAbstractFileByPath(path) instanceof TFile;
   }
 
@@ -178,6 +194,44 @@ views:
   }
 
   /**
+   * Generate the Timeline.base file content
+   */
+  private generateTimelineBaseContent(): string {
+    const settings = this.getSettings();
+    const sourceFolder = settings.itemsFolder.replace(/\/$/, '') + '/';
+
+    return `source: ${sourceFolder}
+properties:
+  note.title:
+    width: 250
+  note.date_start_scheduled:
+    width: 120
+  note.date_end_scheduled:
+    width: 120
+  note.calendar:
+    width: 120
+  note.status:
+    width: 100
+  note.progress:
+    width: 80
+views:
+  - type: planner-timeline
+    name: Timeline
+    order:
+      - note.title
+      - note.date_start_scheduled
+      - note.date_end_scheduled
+    sort:
+      - property: date_start_scheduled
+        direction: ASC
+    groupBy: calendar
+    colorBy: note.calendar
+  - type: table
+    name: Table
+`;
+  }
+
+  /**
    * Ensure the bases folder exists
    */
   private async ensureBasesFolder(): Promise<void> {
@@ -271,13 +325,41 @@ views:
   }
 
   /**
+   * Generate the Timeline.base file
+   * @param overwrite If true, overwrite existing file
+   * @returns true if file was created/updated, false if skipped
+   */
+  async generateTimelineBase(overwrite: boolean = false): Promise<boolean> {
+    const path = this.getTimelineBasePath();
+    const exists = await this.timelineBaseExists();
+
+    if (exists && !overwrite) {
+      return false;
+    }
+
+    await this.ensureBasesFolder();
+
+    const content = this.generateTimelineBaseContent();
+
+    if (exists) {
+      const file = this.app.vault.getAbstractFileByPath(path) as TFile;
+      await this.app.vault.modify(file, content);
+    } else {
+      await this.app.vault.create(path, content);
+    }
+
+    return true;
+  }
+
+  /**
    * Generate all base files
    * @param overwrite If true, overwrite existing files
    */
-  async generateAllBases(overwrite: boolean = false): Promise<{ tasks: boolean; calendar: boolean; gantt: boolean }> {
+  async generateAllBases(overwrite: boolean = false): Promise<{ tasks: boolean; calendar: boolean; gantt: boolean; timeline: boolean }> {
     const tasks = await this.generateTasksBase(overwrite);
     const calendar = await this.generateCalendarBase(overwrite);
     const gantt = await this.generateGanttBase(overwrite);
-    return { tasks, calendar, gantt };
+    const timeline = await this.generateTimelineBase(overwrite);
+    return { tasks, calendar, gantt, timeline };
   }
 }
