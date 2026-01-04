@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "41de5f17093f0b18",
+        "id": "c1bafcd2cb60eca0",
         "type": "tabs",
         "children": [
           {
-            "id": "eea00d7d72ec776b",
+            "id": "a73f8bca5c7b1f9c",
             "type": "leaf",
             "state": {
               "type": "bases",
@@ -197,14 +197,15 @@
       "obsidian-full-calendar:Open Full Calendar": false
     }
   },
-  "active": "eea00d7d72ec776b",
+  "active": "a73f8bca5c7b1f9c",
   "lastOpenFiles": [
+    "Planner/test.md",
     "Planner/Timeline.base",
+    "Planner/Design Mockups.md",
     "notes/questions.md",
     "notes/obsidian-planner-prd.md",
     "Planner/Calendar.base",
     "notes/feedback-and-ideas.md",
-    "Planner/Design Mockups.md",
     "notes/obsidian-planner-prd.md.tmp.319.1767492133033",
     "notes/obsidian-planner-prd.md.tmp.319.1767492122590",
     "notes/obsidian-planner-prd.md.tmp.319.1767492115981",
@@ -217,7 +218,6 @@
     "notes/frappe-gantt-implementation-plan.md",
     "Planner/Fix Login Bug.md",
     "Planner/Test.md",
-    "Planner/test.md",
     "Planner/test1.md",
     "Templates/test.md",
     "Templates/Daily Note Template.md",

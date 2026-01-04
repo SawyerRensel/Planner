@@ -317,9 +317,11 @@ export class BasesTimelineView extends BasesView {
     console.log('Timeline: Adapted to', parseResult.events?.children?.length || 0, 'events/groups');
 
     // Cache Markwhen state
+    // Note: 'transformed' is required by the Timeline's timelineStore
     this.currentMarkwhenState = {
       rawText: '',
       parsed: parseResult,
+      transformed: parseResult.events,
     };
 
     // Cache app state

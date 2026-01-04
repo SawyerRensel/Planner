@@ -15,16 +15,16 @@ properties:
 views:
   - type: planner-timeline
     name: Timeline
-    order:
-      - note.title
-      - note.date_start_scheduled
-      - note.date_end_scheduled
-    sort:
-      - property: date_start_scheduled
-        direction: ASC
     groupBy:
       property: calendar
       direction: ASC
+    order:
+      - title
+      - date_start_scheduled
+      - date_end_scheduled
+    sort:
+      - property: date_start_scheduled
+        direction: ASC
     colorBy: note.calendar
   - type: table
     name: Table
