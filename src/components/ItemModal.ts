@@ -1016,7 +1016,7 @@ export class ItemModal extends Modal {
 
     // Calendar
     if (this.calendars.length > 0) {
-      const color = this.plugin.settings.calendarColors[this.calendars[0]];
+      const color = this.plugin.settings.calendars[this.calendars[0]]?.color;
       this.addPreviewBadge(preview, `~${this.calendars[0]}`, 'calendar', color);
     }
 

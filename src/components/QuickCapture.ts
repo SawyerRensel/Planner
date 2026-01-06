@@ -267,7 +267,7 @@ export class QuickCaptureModal extends Modal {
 
     // Calendar
     if (parsedInput.calendar?.length) {
-      const calendarColor = this.plugin.settings.calendarColors[parsedInput.calendar[0]];
+      const calendarColor = this.plugin.settings.calendars[parsedInput.calendar[0]]?.color;
       this.addPreviewBadge(
         previewDetails,
         `~${parsedInput.calendar[0]}`,

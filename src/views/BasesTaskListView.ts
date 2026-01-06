@@ -157,7 +157,7 @@ export class BasesTaskListView extends BasesView {
 
     if (propName === 'calendar' && value) {
       const calendarName = Array.isArray(value) ? value[0] : String(value);
-      const color = this.plugin.settings.calendarColors[calendarName] ?? '#6b7280';
+      const color = this.plugin.settings.calendars[calendarName]?.color ?? '#6b7280';
       const badge = cell.createSpan({ cls: 'planner-badge', text: calendarName });
       badge.style.backgroundColor = color;
       badge.style.color = this.getContrastColor(color);

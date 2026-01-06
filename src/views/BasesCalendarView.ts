@@ -777,7 +777,7 @@ export class BasesCalendarView extends BasesView {
 
     if (propName === 'calendar') {
       const calendarName = Array.isArray(value) ? value[0] : String(value);
-      return this.plugin.settings.calendarColors[calendarName] ?? '#6b7280';
+      return this.plugin.settings.calendars[calendarName]?.color ?? '#6b7280';
     }
 
     if (propName === 'priority') {

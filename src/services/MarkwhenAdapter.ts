@@ -430,8 +430,8 @@ export class MarkwhenAdapter {
 
     if (fieldName === 'calendar') {
       // Use calendar colors from settings
-      for (const [name, color] of Object.entries(this.settings.calendarColors)) {
-        colorMap[name] = { color };
+      for (const [name, config] of Object.entries(this.settings.calendars)) {
+        colorMap[name] = { color: config.color };
       }
     } else if (fieldName === 'priority') {
       // Use priority colors from settings

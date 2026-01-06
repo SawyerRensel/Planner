@@ -5,7 +5,7 @@ import {
   PlannerItemWithComputed,
   FRONTMATTER_FIELD_ORDER,
 } from '../types/item';
-import { PlannerSettings, isCompletedStatus } from '../types/settings';
+import { PlannerSettings, isCompletedStatus, getCalendarFolder } from '../types/settings';
 
 /**
  * Service for managing Planner items (CRUD operations)
@@ -137,7 +137,12 @@ export class ItemService {
     content: string = ''
   ): Promise<PlannerItem> {
     const settings = this.getSettings();
-    const folder = settings.itemsFolder;
+
+    // Determine folder: use calendar-specific folder if available, otherwise global itemsFolder
+    const calendarName = frontmatter.calendar?.[0];
+    const folder = calendarName
+      ? getCalendarFolder(settings, calendarName)
+      : settings.itemsFolder;
 
     // Ensure folder exists
     await this.ensureFolderExists(folder);

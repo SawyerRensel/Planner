@@ -14,9 +14,9 @@
               "type": "bases",
               "state": {
                 "file": "Planner/Timeline.base",
-                "viewName": "Timeline"
+                "viewName": "Calendar"
               },
-              "icon": "calendar-range",
+              "icon": "calendar",
               "title": "Timeline"
             }
           },
@@ -91,7 +91,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 229.5
+    "width": 232.5
   },
   "right": {
     "id": "ed9ed6ed0a6d4bf8",
@@ -214,26 +214,27 @@
   },
   "active": "29386b0875059938",
   "lastOpenFiles": [
-    "Screenshot_20260105-200533.png",
+    "Personal/Test.md",
+    "Personal",
     "notes/feedback-and-ideas.md",
     "Planner/Timeline.base",
+    "Planner/Website Redesign.md",
+    "Planner/Design Mockups.md",
+    "Planner/Fix Login Bug.md",
+    "Screenshot_20260105-200533.png",
     "Markwhen/Markwhen 1-5-2026 19.42.51.mw",
     "Markwhen",
     "Planner/Calendar.base",
     "Planner/Tasks.base",
     "Planner/Gantt.base",
-    "Planner/Website Redesign.md",
     "Planner/test.md",
-    "Planner/Design Mockups.md",
     "notes/questions.md",
     "notes/obsidian-planner-prd.md",
     "notes/obsidian-planner-prd.md.tmp.319.1767492133033",
     "notes/obsidian-planner-prd.md.tmp.319.1767492122590",
     "notes/obsidian-planner-prd.md.tmp.319.1767492115981",
-    "notes/obsidian-planner-prd.md.tmp.319.1767492080501",
     "notes/markwhen-integration-analysis.md",
     "notes/frappe-gantt-implementation-plan.md",
-    "Planner/Fix Login Bug.md",
     "Planner/Test.md",
     "Planner/test1.md",
     "Templates/test.md",
@@ -258,7 +259,6 @@
     "ref/tasknotes/media/docs/views-kanban.png",
     "ref/tasknotes/media/docs/views-calendar-year.png",
     "ref/tasknotes/media/docs/views-calendar-week.png",
-    "ref/tasknotes/media/docs/views-calendar-month.png",
-    "ref/tasknotes/media/docs/views-calendar-day.png"
+    "ref/tasknotes/media/docs/views-calendar-month.png"
   ]
 }

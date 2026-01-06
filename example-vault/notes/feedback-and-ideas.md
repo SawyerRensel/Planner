@@ -44,6 +44,10 @@
 - [ ] ~~Would be nice to have a Day Planner-style sidebar for Planner, especially on mobile.  Just a quick swipe right to see the day’s agenda.~~
 - [ ] Recurrence is behaving/displaying in odd ways.  Try creating a recurring event for Church on Sundays at 9am-10:30am repeating every week.  It incorrectly puts it on the calendar between 4am-5:30am.  Click-drag to move it back to 9am, but then it snaps back to 4am.
 - [ ] In Settings, add an option to add link(s) to the given days' daily notes in the `related` field.  Don't create the daily notes, just add placeholder links of where they would be stored relative to the Item Note (according to the Daily Note folder specified in the Daily Note core plugin) (also remember to respect Link behavior (absolute, relative, shortest)).  Happens both when you create and or edit an Item from the Item Modal.
+- [ ] Ability to add folders to each Calendar in Settings.  If a folder is specified, this overrides the global Planner folder for that Calendar.  Fallback to global Planner folder when none is specified.
+- [ ] Planner.  There's no way to say "Recurs on the second Sunday of every month"
+- [ ] ~~Planner.  Tags, and colors for tags.  Similar to folders.  Any note that has a tag in Included Tags and has date_start_scheduled and date_end_scheduled gets rendered on the Calendar.~~
+	- *This can be accomplished through Bases.  I should actually remove the identify configuration options in Settings because they don't do anything anyway. *
 
 ## Gantt View
 
@@ -61,7 +65,8 @@
 
 - [ ] Colors aren't working
 - [ ] Item frontmatter isn't getting pulled into the Item Modal when clicking on a bar to edit the Item.  
-- [ ] Add another config menu for "Sections by" with options including `calendar`, `status`, `priority`, `folder`, 
+- [ ] Add another config menu for "Sections by" with options including `calendar`, `status`, `priority`, `folder`, etc.
+- [ ] start and end times are generally not consistent between Timeline View and Calendar View when compared with the actual frontmatter in the note itself.
 
 ## Other
 

@@ -112,7 +112,23 @@ export default class PlannerPlugin extends Plugin {
   }
 
   async loadSettings() {
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+    const loadedData = await this.loadData();
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, loadedData);
+
+    // Migrate old calendarColors format to new calendars format
+    if (loadedData?.calendarColors && !loadedData?.calendars) {
+      const oldCalendarColors = loadedData.calendarColors as Record<string, string>;
+      this.settings.calendars = {};
+      for (const [name, color] of Object.entries(oldCalendarColors)) {
+        // Only migrate if value is a string (old format)
+        if (typeof color === 'string') {
+          this.settings.calendars[name] = { color };
+        }
+      }
+      // Save migrated settings
+      await this.saveSettings();
+      console.log('Planner: Migrated calendarColors to calendars format');
+    }
   }
 
   async saveSettings() {

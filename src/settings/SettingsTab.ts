@@ -150,7 +150,7 @@ export class PlannerSettingTab extends PluginSettingTab {
       .setDesc('Auto-assigned to new items')
       .addDropdown(dropdown => {
         dropdown.addOption('', 'None');
-        for (const calendarName of Object.keys(this.plugin.settings.calendarColors)) {
+        for (const calendarName of Object.keys(this.plugin.settings.calendars)) {
           dropdown.addOption(calendarName, calendarName);
         }
         return dropdown
@@ -435,25 +435,35 @@ export class PlannerSettingTab extends PluginSettingTab {
   }
 
   private renderCalendarColors(containerEl: HTMLElement): void {
-    const calendars = Object.entries(this.plugin.settings.calendarColors);
+    const calendars = Object.entries(this.plugin.settings.calendars);
 
-    for (const [name, color] of calendars) {
-      new Setting(containerEl)
+    for (const [name, config] of calendars) {
+      const setting = new Setting(containerEl)
         .setName(name)
-        .addColorPicker(picker => picker
-          .setValue(color)
+        .addText(text => text
+          .setPlaceholder('Folder (optional)')
+          .setValue(config.folder || '')
           .onChange(async (value) => {
-            this.plugin.settings.calendarColors[name] = value;
+            this.plugin.settings.calendars[name].folder = value || undefined;
+            await this.plugin.saveSettings();
+          }))
+        .addColorPicker(picker => picker
+          .setValue(config.color)
+          .onChange(async (value) => {
+            this.plugin.settings.calendars[name].color = value;
             await this.plugin.saveSettings();
           }))
         .addExtraButton(button => button
           .setIcon('trash')
           .setTooltip('Delete calendar')
           .onClick(async () => {
-            delete this.plugin.settings.calendarColors[name];
+            delete this.plugin.settings.calendars[name];
             await this.plugin.saveSettings();
             this.display();
           }));
+
+      // Add description for the folder field
+      setting.settingEl.querySelector('.setting-item-control input[type="text"]')?.setAttribute('title', 'Folder where new items for this calendar are created');
     }
 
     // Add new calendar
@@ -468,8 +478,8 @@ export class PlannerSettingTab extends PluginSettingTab {
       .addButton(button => button
         .setButtonText('Add')
         .onClick(async () => {
-          if (newCalendarName && !this.plugin.settings.calendarColors[newCalendarName]) {
-            this.plugin.settings.calendarColors[newCalendarName] = '#6b7280';
+          if (newCalendarName && !this.plugin.settings.calendars[newCalendarName]) {
+            this.plugin.settings.calendars[newCalendarName] = { color: '#6b7280' };
             await this.plugin.saveSettings();
             this.display();
           }

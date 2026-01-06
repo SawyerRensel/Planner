@@ -23,7 +23,7 @@ export interface PlannerSettings {
   priorities: PriorityConfig[];
 
   // Calendar Configuration
-  calendarColors: Record<string, string>;
+  calendars: Record<string, CalendarConfig>;
   calendarFontSize: number; // px value, range 6-18
 
   // Quick Capture
@@ -54,6 +54,14 @@ export interface PriorityConfig {
   color: string;
   weight: number;
   icon?: string; // Lucide icon name (e.g., 'alert-triangle', 'arrow-up', 'minus')
+}
+
+/**
+ * Calendar configuration
+ */
+export interface CalendarConfig {
+  color: string;
+  folder?: string; // Optional - falls back to global itemsFolder when not set
 }
 
 /**
@@ -104,9 +112,9 @@ export const DEFAULT_SETTINGS: PlannerSettings = {
   ],
 
   // Calendar Configuration
-  calendarColors: {
-    'Personal': '#3b82f6',
-    'Work': '#22c55e',
+  calendars: {
+    'Personal': { color: '#3b82f6' },
+    'Work': { color: '#22c55e' },
   },
   calendarFontSize: 10, // 20% smaller than default 12px
 
@@ -138,7 +146,14 @@ export function getPriorityConfig(settings: PlannerSettings, priorityName: strin
  * Get calendar color
  */
 export function getCalendarColor(settings: PlannerSettings, calendarName: string): string {
-  return settings.calendarColors[calendarName] ?? '#6b7280'; // Default gray
+  return settings.calendars[calendarName]?.color ?? '#6b7280'; // Default gray
+}
+
+/**
+ * Get calendar folder (falls back to global itemsFolder if not set)
+ */
+export function getCalendarFolder(settings: PlannerSettings, calendarName: string): string {
+  return settings.calendars[calendarName]?.folder || settings.itemsFolder;
 }
 
 /**
