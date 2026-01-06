@@ -230,6 +230,42 @@ export class ItemService {
   }
 
   /**
+   * Move an item to a different folder
+   * Returns the new path if successful, null if failed
+   */
+  async moveItem(path: string, targetFolder: string): Promise<string | null> {
+    const file = this.app.vault.getAbstractFileByPath(path);
+    if (!(file instanceof TFile)) {
+      return null;
+    }
+
+    // Ensure target folder exists
+    await this.ensureFolderExists(targetFolder);
+
+    // Build new path
+    const normalizedFolder = normalizePath(targetFolder);
+    let newPath = normalizePath(`${normalizedFolder}/${file.name}`);
+
+    // Handle filename conflicts
+    let counter = 1;
+    const baseName = file.basename;
+    const ext = file.extension;
+    while (this.app.vault.getAbstractFileByPath(newPath) && newPath !== path) {
+      newPath = normalizePath(`${normalizedFolder}/${baseName} ${counter}.${ext}`);
+      counter++;
+    }
+
+    // Don't move if already in the target folder
+    if (newPath === path) {
+      return path;
+    }
+
+    // Move the file
+    await this.app.fileManager.renameFile(file, newPath);
+    return newPath;
+  }
+
+  /**
    * Get the body content (markdown below frontmatter) of an item
    */
   async getItemBody(path: string): Promise<string> {

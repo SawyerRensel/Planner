@@ -2,6 +2,7 @@ import { Modal, Notice, setIcon, setTooltip, MarkdownRenderer, Component } from 
 import * as chrono from 'chrono-node';
 import type PlannerPlugin from '../main';
 import type { ItemFrontmatter, PlannerItem, RepeatFrequency, DayOfWeek } from '../types/item';
+import { getCalendarFolder } from '../types/settings';
 import {
   DateContextMenu,
   StatusContextMenu,
@@ -52,6 +53,7 @@ export class ItemModal extends Modal {
   private blockedBy: string[] = [];
   private details = '';
   private tags: string[] = [];
+  private originalCalendar: string | null = null; // Track original calendar for move detection
 
   // UI elements
   private titleInput: HTMLInputElement | null = null;
@@ -97,6 +99,7 @@ export class ItemModal extends Modal {
       this.status = item.status || null;
       this.priority = item.priority || null;
       this.calendars = item.calendar || [];
+      this.originalCalendar = item.calendar?.[0] || null; // Track for move detection
       // Convert link fields to simple wikilinks for display (will be converted back on save)
       this.context = (convertToSimpleWikilinks(item.context || []) as string[]);
       this.people = (convertToSimpleWikilinks(item.people || []) as string[]);
@@ -1093,11 +1096,23 @@ export class ItemModal extends Modal {
     try {
       if (this.options.mode === 'edit' && this.options.item) {
         // Update existing item
-        await this.plugin.itemService.updateItem(this.options.item.path, frontmatter);
+        let currentPath = this.options.item.path;
+        await this.plugin.itemService.updateItem(currentPath, frontmatter);
         // Also update the body if changed
         if (this.details !== '') {
-          await this.plugin.itemService.updateItemBody(this.options.item.path, this.details);
+          await this.plugin.itemService.updateItemBody(currentPath, this.details);
         }
+
+        // Check if calendar changed and move file if needed
+        const newCalendar = this.calendars[0] || null;
+        if (newCalendar !== this.originalCalendar) {
+          const targetFolder = getCalendarFolder(this.plugin.settings, newCalendar || '');
+          const newPath = await this.plugin.itemService.moveItem(currentPath, targetFolder);
+          if (newPath && newPath !== currentPath) {
+            new Notice(`Moved to: ${targetFolder}`);
+          }
+        }
+
         new Notice(`Updated: ${title}`);
       } else {
         // Create new item
