@@ -14,7 +14,7 @@ views:
   - type: planner-calendar
     name: Calendar
     order:
-      - note.title
+      - title
     sort: []
     colorBy: note.calendar
   - type: table

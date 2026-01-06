@@ -4,19 +4,13 @@ import builtins from "builtin-modules";
 import fs from "fs";
 import path from "path";
 
-// Plugin to load HTML files as strings (except timeline-markwhen.html which is loaded at runtime)
+// Plugin to load HTML files as strings (timeline HTML is bundled inline for mobile compatibility)
 const htmlPlugin = {
   name: "html-loader",
   setup(build) {
     build.onLoad({ filter: /\.html$/ }, async (args) => {
-      // Timeline HTML is loaded at runtime to reduce bundle size
-      if (args.path.includes("timeline-markwhen.html")) {
-        // Export a placeholder that signals runtime loading is needed
-        return {
-          contents: `export default "__TIMELINE_HTML_RUNTIME_LOAD__";`,
-          loader: "js",
-        };
-      }
+      // Bundle all HTML files inline, including timeline HTML
+      // This is required for mobile compatibility where runtime file loading doesn't work
       const html = await fs.promises.readFile(args.path, "utf8");
       return {
         contents: `export default ${JSON.stringify(html)};`,

@@ -61,7 +61,7 @@
 
 - [ ] Colors aren't working
 - [ ] Item frontmatter isn't getting pulled into the Item Modal when clicking on a bar to edit the Item.  
-- [ ] 
+- [ ] Add another config menu for "Sections by" with options including `calendar`, `status`, `priority`, `folder`, 
 
 ## Other
 

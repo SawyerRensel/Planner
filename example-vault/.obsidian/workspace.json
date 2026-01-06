@@ -8,7 +8,7 @@
         "type": "tabs",
         "children": [
           {
-            "id": "cfaf663e1c646eb7",
+            "id": "29386b0875059938",
             "type": "leaf",
             "state": {
               "type": "bases",
@@ -21,7 +21,7 @@
             }
           },
           {
-            "id": "29386b0875059938",
+            "id": "e2ec49b4a88da477",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -205,19 +205,20 @@
       "command-palette:Open command palette": false,
       "bases:Create new base": false,
       "obsidian-full-calendar:Open Full Calendar": false,
+      "markwhen:Create new Markwhen file": false,
       "planner:Open Planner Task List": false,
       "planner:Open Planner Calendar": false,
       "planner:Open Planner Gantt": false,
-      "planner:Open Planner Timeline": false,
-      "markwhen:Create new Markwhen file": false
+      "planner:Open Planner Timeline": false
     }
   },
-  "active": "cfaf663e1c646eb7",
+  "active": "29386b0875059938",
   "lastOpenFiles": [
-    "Markwhen/Markwhen 1-5-2026 19.42.51.mw",
-    "Planner/Timeline.base",
-    "Markwhen",
+    "Screenshot_20260105-200533.png",
     "notes/feedback-and-ideas.md",
+    "Planner/Timeline.base",
+    "Markwhen/Markwhen 1-5-2026 19.42.51.mw",
+    "Markwhen",
     "Planner/Calendar.base",
     "Planner/Tasks.base",
     "Planner/Gantt.base",
@@ -230,7 +231,6 @@
     "notes/obsidian-planner-prd.md.tmp.319.1767492122590",
     "notes/obsidian-planner-prd.md.tmp.319.1767492115981",
     "notes/obsidian-planner-prd.md.tmp.319.1767492080501",
-    "notes/obsidian-planner-prd.md.tmp.319.1767492014058",
     "notes/markwhen-integration-analysis.md",
     "notes/frappe-gantt-implementation-plan.md",
     "Planner/Fix Login Bug.md",

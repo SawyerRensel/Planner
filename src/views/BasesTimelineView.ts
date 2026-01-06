@@ -27,12 +27,9 @@ import {
   EventPath,
 } from '../types/markwhen';
 
-// Timeline HTML placeholder - actual content is loaded at runtime
-// This keeps the main bundle small for mobile compatibility
-import timelineHtmlPlaceholder from '../../assets/timeline-markwhen.html';
-
-// Cache for runtime-loaded timeline HTML
-let timelineHtmlCache: string | null = null;
+// Timeline HTML is bundled inline for mobile compatibility
+// Runtime file loading doesn't work reliably on mobile platforms
+import timelineHtml from '../../assets/timeline-markwhen.html';
 
 export const BASES_TIMELINE_VIEW_ID = 'planner-timeline';
 
@@ -255,47 +252,28 @@ export class BasesTimelineView extends BasesView {
     this.lpcHost.connect(this.iframe);
   }
 
-  private blobUrl: string | null = null;
-
   /**
-   * Load the timeline HTML (from runtime file or cache)
+   * Show an error message in the container
    */
-  private async loadTimelineHtml(): Promise<string> {
-    // Return cached HTML if available
-    if (timelineHtmlCache) {
-      return timelineHtmlCache;
-    }
-
-    // Check if we have the bundled version or need to load at runtime
-    if (timelineHtmlPlaceholder !== '__TIMELINE_HTML_RUNTIME_LOAD__') {
-      // HTML was bundled (dev mode or small file)
-      timelineHtmlCache = timelineHtmlPlaceholder;
-      return timelineHtmlCache;
-    }
-
-    // Load from plugin directory at runtime
-    console.log('Timeline: Loading HTML from plugin directory...');
-    const pluginDir = this.plugin.manifest.dir;
-    if (!pluginDir) {
-      throw new Error('Could not determine plugin directory');
-    }
-
-    const timelineHtmlPath = `${pluginDir}/timeline.html`;
-    const adapter = this.plugin.app.vault.adapter;
-
-    if (await adapter.exists(timelineHtmlPath)) {
-      timelineHtmlCache = await adapter.read(timelineHtmlPath);
-      console.log('Timeline: Loaded HTML from file, length:', timelineHtmlCache.length);
-      return timelineHtmlCache;
-    } else {
-      throw new Error(`Timeline HTML file not found: ${timelineHtmlPath}`);
-    }
+  private showError(message: string): void {
+    this.containerEl.empty();
+    const errorDiv = this.containerEl.createEl('div', {
+      cls: 'planner-timeline-error',
+    });
+    errorDiv.createEl('div', {
+      text: '⚠️ Timeline Error',
+      cls: 'planner-timeline-error-title',
+    });
+    errorDiv.createEl('div', {
+      text: message,
+      cls: 'planner-timeline-error-message',
+    });
   }
 
   /**
    * Initialize the timeline
    */
-  private async initTimeline(): Promise<void> {
+  private initTimeline(): void {
     if (!this.iframe) {
       console.log('Timeline: No iframe element');
       return;
@@ -306,29 +284,19 @@ export class BasesTimelineView extends BasesView {
     // Pre-compute state before loading iframe so it's ready for requests
     this.computeState();
 
-    // Load the Timeline HTML (from bundle or runtime file)
-    let timelineHtml: string;
-    try {
-      timelineHtml = await this.loadTimelineHtml();
-    } catch (e) {
-      console.error('Timeline: Failed to load HTML:', e);
-      this.containerEl.empty();
-      this.containerEl.createEl('div', {
-        text: 'Failed to load Timeline. Please reinstall the plugin.',
-        cls: 'planner-timeline-error',
-      });
+    // Verify bundled HTML is available
+    if (!timelineHtml || timelineHtml.length === 0) {
+      console.error('Timeline: Bundled HTML is empty');
+      this.showError('Timeline HTML not found. Please reinstall the plugin.');
       return;
     }
     console.log('Timeline: HTML length:', timelineHtml.length);
 
-    // Clean up previous blob URL
-    if (this.blobUrl) {
-      URL.revokeObjectURL(this.blobUrl);
-    }
-
-    // Create blob URL
-    const blob = new Blob([timelineHtml], { type: 'text/html' });
-    this.blobUrl = URL.createObjectURL(blob);
+    // Set up error handler
+    this.iframe.onerror = (event) => {
+      console.error('Timeline: iframe error:', event);
+      this.showError('Failed to load Timeline content. Please try reloading.');
+    };
 
     // Set up onload handler
     this.iframe.onload = () => {
@@ -343,7 +311,10 @@ export class BasesTimelineView extends BasesView {
       }
     };
 
-    this.iframe.src = this.blobUrl;
+    // Use srcdoc instead of blob URL for better mobile compatibility
+    // srcdoc embeds HTML directly in the iframe attribute, avoiding
+    // blob URL issues on mobile browsers
+    this.iframe.srcdoc = timelineHtml;
   }
 
   /**
