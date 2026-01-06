@@ -1,31 +1,142 @@
 /**
  * Markwhen types for Timeline View integration
- * These types are based on @markwhen/parser and @markwhen/view-client
- * but simplified for our use case where we generate data from frontmatter
+ * These types are defined locally to avoid loading heavy dependencies on mobile
+ * Based on @markwhen/parser and @markwhen/view-client
  */
 
-// Re-export types we use directly from the packages
-export type {
-  Event,
-  EventGroup,
-  Eventy,
-  DateRangeIso,
-  DateTimeGranularity,
-  DateFormat,
-  ParseResult,
-  Path,
-  Range,
-  MarkdownBlock,
-} from '@markwhen/parser';
+// Define enums locally to avoid importing the full @markwhen/parser package
+export enum RangeType {
+  Comment = "comment",
+  CheckboxItemIndicator = "checkboxItemIndicator",
+  listItemIndicator = "listItemIndicator",
+  ListItemContents = "listItemContents",
+  Tag = "tag",
+  tagDefinition = "tagDefinition",
+  Title = "title",
+  View = "view",
+  Viewer = "viewer",
+  Description = "description",
+  Section = "section",
+  DateRange = "dateRange",
+  DateRangeColon = "dateRangeColon",
+  Event = "event",
+  Edit = "edit",
+  Editor = "editor",
+  Recurrence = "recurrence",
+  FrontmatterDelimiter = "frontMatterDelimiter",
+  HeaderKey = "headerKey",
+  HeaderKeyColon = "headerKeyColon",
+  HeaderValue = "headerValue",
+  PropertyKey = "propertyKey",
+  PropertyKeyColon = "propertyKeyColon",
+  PropertyValue = "propertyValue",
+  EventDefinition = "eventDefinition",
+  SectionDefinition = "sectionDefinition",
+  Properties = "properties",
+}
 
-// Re-export enums as values (not types)
-export { RangeType, BlockType } from '@markwhen/parser';
+export enum BlockType {
+  TEXT = "text",
+  LIST_ITEM = "listItem",
+  CHECKBOX = "checkbox",
+  IMAGE = "image",
+}
 
-export type {
-  AppState,
-  MarkwhenState,
-  DisplayScale,
-} from '@markwhen/view-client';
+// Define types locally - simplified versions of @markwhen/parser types
+export interface DateRangeIso {
+  fromDateTimeIso: string;
+  toDateTimeIso: string;
+}
+
+export interface Range {
+  from: number;
+  to: number;
+  type: RangeType;
+}
+
+export interface EventFirstLine {
+  full: string;
+  datePart: string;
+  rest: string;
+  restTrimmed: string;
+}
+
+export interface Event {
+  firstLine: EventFirstLine;
+  textRanges: {
+    whole: Range;
+    datePart: Range;
+    definition: Range;
+    recurrence?: Range;
+    properties?: Range;
+  };
+  properties: Record<string, unknown>;
+  propOrder: string[];
+  dateRangeIso: DateRangeIso;
+  tags: string[];
+  supplemental: unknown[];
+  matchedListItems: unknown[];
+  isRelative: boolean;
+  id?: string;
+  percent?: number;
+  completed?: boolean;
+}
+
+export interface EventGroup {
+  textRanges: {
+    whole: Range;
+    definition: Range;
+  };
+  properties: Record<string, unknown>;
+  propOrder: string[];
+  tags: string[];
+  title: string;
+  startExpanded?: boolean;
+  children: (Event | EventGroup)[];
+}
+
+export type Eventy = Event | EventGroup;
+
+export interface ParseResult {
+  ranges: Range[];
+  foldables: Record<string, unknown>;
+  events: EventGroup;
+  header: Record<string, unknown>;
+  ids: Record<string, unknown>;
+  parseMessages: unknown[];
+  documentMessages: unknown[];
+  parser: {
+    version: string;
+    incremental: boolean;
+  };
+}
+
+export type DateTimeGranularity = 'instant' | 'day' | 'month' | 'year';
+export type DateFormat = string;
+export type Path = number[];
+
+export interface MarkdownBlock {
+  type: BlockType;
+  value?: unknown;
+  raw: string;
+}
+
+// Define types from @markwhen/view-client locally
+export interface AppState {
+  isDark?: boolean;
+  hoveringPath?: number[];
+  detailPath?: number[];
+  path?: string;
+  colorMap: Record<string, Record<string, string>>;
+}
+
+export interface MarkwhenState {
+  rawText?: string;
+  parsed: ParseResult;
+  transformed?: EventGroup;
+}
+
+export type DisplayScale = 'second' | 'minute' | 'hour' | 'day' | 'month' | 'year';
 
 /**
  * Event path - array of indices representing position in the event tree

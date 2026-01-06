@@ -43,6 +43,7 @@
 - [x] Default tag for new Items - right now it's event.  Prepopulate the tag in the Item Modal.
 - [ ] ~~Would be nice to have a Day Planner-style sidebar for Planner, especially on mobile.  Just a quick swipe right to see the day’s agenda.~~
 - [ ] Recurrence is behaving/displaying in odd ways.  Try creating a recurring event for Church on Sundays at 9am-10:30am repeating every week.  It incorrectly puts it on the calendar between 4am-5:30am.  Click-drag to move it back to 9am, but then it snaps back to 4am.
+- [ ] In Settings, add an option to add link(s) to the given days' daily notes in the `related` field.  Don't create the daily notes, just add placeholder links of where they would be stored relative to the Item Note (according to the Daily Note folder specified in the Daily Note core plugin) (also remember to respect Link behavior (absolute, relative, shortest)).  Happens both when you create and or edit an Item from the Item Modal.
 
 ## Gantt View
 

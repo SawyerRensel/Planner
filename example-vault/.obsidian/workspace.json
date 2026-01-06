@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "c1bafcd2cb60eca0",
+        "id": "b2dc0969ff3b1ea5",
         "type": "tabs",
         "children": [
           {
-            "id": "d4cd5546a53eaa78",
+            "id": "cfaf663e1c646eb7",
             "type": "leaf",
             "state": {
               "type": "bases",
@@ -21,20 +21,20 @@
             }
           },
           {
-            "id": "6059deef8d4a5237",
+            "id": "29386b0875059938",
             "type": "leaf",
             "state": {
-              "type": "bases",
+              "type": "markdown",
               "state": {
-                "file": "Planner/Calendar.base",
-                "viewName": "Calendar"
+                "file": "notes/feedback-and-ideas.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "calendar",
-              "title": "Calendar"
+              "icon": "lucide-file",
+              "title": "feedback-and-ideas"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -208,15 +208,20 @@
       "planner:Open Planner Task List": false,
       "planner:Open Planner Calendar": false,
       "planner:Open Planner Gantt": false,
-      "planner:Open Planner Timeline": false
+      "planner:Open Planner Timeline": false,
+      "markwhen:Create new Markwhen file": false
     }
   },
-  "active": "6059deef8d4a5237",
+  "active": "cfaf663e1c646eb7",
   "lastOpenFiles": [
+    "Markwhen/Markwhen 1-5-2026 19.42.51.mw",
     "Planner/Timeline.base",
-    "Planner/Calendar.base",
-    "Planner/Gantt.base",
+    "Markwhen",
     "notes/feedback-and-ideas.md",
+    "Planner/Calendar.base",
+    "Planner/Tasks.base",
+    "Planner/Gantt.base",
+    "Planner/Website Redesign.md",
     "Planner/test.md",
     "Planner/Design Mockups.md",
     "notes/questions.md",
@@ -226,9 +231,6 @@
     "notes/obsidian-planner-prd.md.tmp.319.1767492115981",
     "notes/obsidian-planner-prd.md.tmp.319.1767492080501",
     "notes/obsidian-planner-prd.md.tmp.319.1767492014058",
-    "notes/obsidian-planner-prd.md.tmp.319.1767491981434",
-    "notes/obsidian-planner-prd.md.tmp.319.1767491938581",
-    "notes/obsidian-planner-prd.md.tmp.319.1767491928560",
     "notes/markwhen-integration-analysis.md",
     "notes/frappe-gantt-implementation-plan.md",
     "Planner/Fix Login Bug.md",
@@ -236,7 +238,6 @@
     "Planner/test1.md",
     "Templates/test.md",
     "Templates/Daily Note Template.md",
-    "Planner/Website Redesign.md",
     "Planner/Vacation.md",
     "ref/tasknotes/tests/coverage-report.md",
     "ref/tasknotes/tasknotes-e2e-vault/TaskNotes/Write documentation.md",

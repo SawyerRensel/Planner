@@ -1,7 +1,4 @@
 source: Planner/
-filters:
-  and:
-    - file.hasTag("task", "event")
 properties:
   note.title:
     width: 250
@@ -20,27 +17,20 @@ properties:
 views:
   - type: planner-gantt
     name: Gantt
-    filters:
-      and:
-        - file.hasTag("task", "event")
     order:
-      - title
+      - note.title
+      - note.date_start_scheduled
+      - note.date_end_scheduled
+      - note.progress
     sort:
       - property: date_start_scheduled
-        direction: DESC
+        direction: ASC
     defaultZoom: month
     colorBy: note.calendar
-    showProgress: false
+    showProgress: true
     showDependencies: true
     autoScrollToday: true
-    dateStartField: note.date_start_scheduled
-    dateEndField: note.date_end_scheduled
-    truncateTitles: false
-    showDateInBars: false
-    showDuration: false
-    gridWidth: small
     showGanttTable: true
-    ganttTableWidth: 170
-    ganttFontSize: 12
+    ganttTableWidth: 350
   - type: table
     name: Table
