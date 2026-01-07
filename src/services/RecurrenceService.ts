@@ -95,17 +95,18 @@ export class RecurrenceService {
 
   /**
    * Parse a date string into a UTC Date for RRule
+   * Uses UTC methods to preserve the actual UTC time from the stored date
    */
   private createUTCDateForRRule(dateStr: string): Date {
     const date = new Date(dateStr);
-    // Create a UTC date at midnight for consistency
+    // Use UTC methods to preserve the actual UTC time - the stored date already has timezone info
     return new Date(Date.UTC(
-      date.getFullYear(),
-      date.getMonth(),
-      date.getDate(),
-      date.getHours(),
-      date.getMinutes(),
-      date.getSeconds(),
+      date.getUTCFullYear(),
+      date.getUTCMonth(),
+      date.getUTCDate(),
+      date.getUTCHours(),
+      date.getUTCMinutes(),
+      date.getUTCSeconds(),
       0
     ));
   }

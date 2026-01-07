@@ -6,7 +6,8 @@
  * bidirectional sync between Obsidian notes and the Timeline visualization.
  */
 
-import { BasesEntry } from 'obsidian';
+import { BasesEntry, App } from 'obsidian';
+import { RRule } from 'rrule';
 import {
   Event,
   EventGroup,
@@ -20,6 +21,7 @@ import {
   EventPath,
 } from '../types/markwhen';
 import type { PlannerSettings } from '../types/settings';
+import type { PlannerItem, DayOfWeek } from '../types/item';
 
 /**
  * Options for the adapter
@@ -46,11 +48,13 @@ export interface AdaptedResult {
  */
 export class MarkwhenAdapter {
   private settings: PlannerSettings;
+  private app: App;
   private pathMappings: PathMapping[] = [];
   private debugCount: number = 0;
 
-  constructor(settings: PlannerSettings) {
+  constructor(settings: PlannerSettings, app: App) {
     this.settings = settings;
+    this.app = app;
   }
 
   /**
@@ -88,10 +92,26 @@ export class MarkwhenAdapter {
   ): TimelineEvent[] {
     const events: TimelineEvent[] = [];
 
+    // Define range for recurring items (1 year before and after today)
+    const now = new Date();
+    const rangeStart = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+    const rangeEnd = new Date(now.getFullYear() + 1, now.getMonth(), now.getDate());
+
     for (const entry of entries) {
-      const event = this.entryToTimelineEvent(entry, options);
-      if (event) {
-        events.push(event);
+      const fm = this.getFrontmatter(entry);
+      const isRecurring = fm?.repeat_frequency &&
+        ['daily', 'weekly', 'monthly', 'yearly'].includes(fm.repeat_frequency);
+
+      if (isRecurring) {
+        // Expand recurring entry into multiple events
+        const expandedEvents = this.expandRecurringEntry(entry, options, rangeStart, rangeEnd);
+        events.push(...expandedEvents);
+      } else {
+        // Non-recurring: create single event
+        const event = this.entryToTimelineEvent(entry, options);
+        if (event) {
+          events.push(event);
+        }
       }
     }
 
@@ -101,6 +121,284 @@ export class MarkwhenAdapter {
       const dateB = new Date(b.dateRangeIso.fromDateTimeIso).getTime();
       return dateA - dateB;
     });
+
+    return events;
+  }
+
+  /**
+   * Get frontmatter from entry using Obsidian's metadata cache
+   */
+  private getFrontmatter(entry: BasesEntry): Record<string, any> | null {
+    try {
+      const cache = this.app.metadataCache.getCache(entry.file.path);
+      return cache?.frontmatter || null;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Extract recurrence data from a BasesEntry
+   */
+  private extractRecurrenceData(entry: BasesEntry, options: AdapterOptions): Partial<PlannerItem> {
+    const fm = this.getFrontmatter(entry) || {};
+    const startFieldName = options.dateStartField.replace(/^note\./, '');
+    const endFieldName = options.dateEndField.replace(/^note\./, '');
+
+    let dateStart = fm[startFieldName];
+    let dateEnd = fm[endFieldName];
+
+    // Fall back to Bases getValue
+    if (!dateStart) {
+      const basesValue = entry.getValue(options.dateStartField);
+      if (basesValue !== undefined && basesValue !== null && basesValue !== '') {
+        dateStart = this.parseDate(basesValue)?.toISOString();
+      }
+    }
+    if (!dateEnd) {
+      const basesValue = entry.getValue(options.dateEndField);
+      if (basesValue !== undefined && basesValue !== null && basesValue !== '') {
+        dateEnd = this.parseDate(basesValue)?.toISOString();
+      }
+    }
+
+    // Extract recurrence fields
+    const repeatFrequency = fm.repeat_frequency as string | undefined;
+    const repeatInterval = fm.repeat_interval as number | undefined;
+    const repeatUntil = fm.repeat_until as string | undefined;
+    const repeatCount = fm.repeat_count as number | undefined;
+    const repeatByday = fm.repeat_byday as DayOfWeek[] | undefined;
+    const repeatBymonth = fm.repeat_bymonth as number[] | undefined;
+    const repeatBymonthday = fm.repeat_bymonthday as number[] | undefined;
+    const repeatBysetpos = fm.repeat_bysetpos as number | undefined;
+    const repeatCompletedDates = fm.repeat_completed_dates as string[] | undefined;
+
+    // Validate repeat_frequency
+    const validFrequencies = ['daily', 'weekly', 'monthly', 'yearly'];
+    const validatedFrequency = typeof repeatFrequency === 'string' && validFrequencies.includes(repeatFrequency)
+      ? repeatFrequency as PlannerItem['repeat_frequency']
+      : undefined;
+
+    // Validate bysetpos
+    const validatedBysetpos = typeof repeatBysetpos === 'number' && repeatBysetpos !== 0 &&
+                              repeatBysetpos >= -366 && repeatBysetpos <= 366
+      ? repeatBysetpos
+      : undefined;
+
+    return {
+      path: entry.file.path,
+      date_start_scheduled: dateStart ? (typeof dateStart === 'string' ? dateStart : this.parseDate(dateStart)?.toISOString()) : undefined,
+      date_end_scheduled: dateEnd ? (typeof dateEnd === 'string' ? dateEnd : this.parseDate(dateEnd)?.toISOString()) : undefined,
+      repeat_frequency: validatedFrequency,
+      repeat_interval: typeof repeatInterval === 'number' ? repeatInterval : undefined,
+      repeat_until: repeatUntil,
+      repeat_count: typeof repeatCount === 'number' ? repeatCount : undefined,
+      repeat_byday: Array.isArray(repeatByday) && repeatByday.length > 0 ? repeatByday : undefined,
+      repeat_bymonth: Array.isArray(repeatBymonth) && repeatBymonth.length > 0 ? repeatBymonth : undefined,
+      repeat_bymonthday: Array.isArray(repeatBymonthday) && repeatBymonthday.length > 0 ? repeatBymonthday : undefined,
+      repeat_bysetpos: validatedBysetpos,
+      repeat_completed_dates: Array.isArray(repeatCompletedDates) ? repeatCompletedDates : undefined,
+    };
+  }
+
+  /**
+   * Build an RRULE string from item data
+   */
+  private buildRRuleString(item: Partial<PlannerItem>): string {
+    const parts: string[] = [];
+
+    const freqMap: Record<string, string> = {
+      daily: 'DAILY',
+      weekly: 'WEEKLY',
+      monthly: 'MONTHLY',
+      yearly: 'YEARLY',
+    };
+
+    if (item.repeat_frequency) {
+      parts.push(`FREQ=${freqMap[item.repeat_frequency]}`);
+    }
+
+    if (item.repeat_interval && item.repeat_interval > 1) {
+      parts.push(`INTERVAL=${item.repeat_interval}`);
+    }
+
+    if (item.repeat_byday?.length) {
+      parts.push(`BYDAY=${item.repeat_byday.join(',')}`);
+    }
+
+    if (item.repeat_bymonth?.length) {
+      parts.push(`BYMONTH=${item.repeat_bymonth.join(',')}`);
+    }
+
+    if (item.repeat_bymonthday?.length) {
+      parts.push(`BYMONTHDAY=${item.repeat_bymonthday.join(',')}`);
+    }
+
+    if (item.repeat_bysetpos !== undefined && item.repeat_bysetpos !== 0) {
+      parts.push(`BYSETPOS=${item.repeat_bysetpos}`);
+    }
+
+    if (item.repeat_count) {
+      parts.push(`COUNT=${item.repeat_count}`);
+    }
+
+    if (item.repeat_until) {
+      const until = new Date(item.repeat_until);
+      if (!isNaN(until.getTime())) {
+        const year = until.getUTCFullYear();
+        const month = String(until.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(until.getUTCDate()).padStart(2, '0');
+        parts.push(`UNTIL=${year}${month}${day}`);
+      }
+    }
+
+    return parts.join(';');
+  }
+
+  /**
+   * Generate recurring occurrences using RRule
+   */
+  private generateOccurrences(item: Partial<PlannerItem>, rangeStart: Date, rangeEnd: Date): Date[] {
+    if (!item.repeat_frequency || !item.date_start_scheduled) {
+      return [];
+    }
+
+    try {
+      const startDate = new Date(item.date_start_scheduled);
+      if (isNaN(startDate.getTime())) {
+        return [];
+      }
+
+      // Create UTC date for RRule - use UTC methods to preserve the actual UTC time
+      const dtstart = new Date(Date.UTC(
+        startDate.getUTCFullYear(),
+        startDate.getUTCMonth(),
+        startDate.getUTCDate(),
+        startDate.getUTCHours(),
+        startDate.getUTCMinutes(),
+        startDate.getUTCSeconds(),
+        0
+      ));
+
+      const rruleString = this.buildRRuleString(item);
+      const rruleOptions = RRule.parseString(rruleString);
+      rruleOptions.dtstart = dtstart;
+      const rule = new RRule(rruleOptions);
+
+      // Convert range to UTC
+      const utcStart = new Date(Date.UTC(
+        rangeStart.getFullYear(),
+        rangeStart.getMonth(),
+        rangeStart.getDate(),
+        0, 0, 0, 0
+      ));
+      const utcEnd = new Date(Date.UTC(
+        rangeEnd.getFullYear(),
+        rangeEnd.getMonth(),
+        rangeEnd.getDate(),
+        23, 59, 59, 999
+      ));
+
+      return rule.between(utcStart, utcEnd, true);
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Check if a date is in the completed dates list
+   */
+  private isOccurrenceCompleted(completedDates: string[] | undefined, date: Date): boolean {
+    if (!completedDates?.length) return false;
+    const dateStr = date.toISOString().split('T')[0];
+    return completedDates.some(d => d.split('T')[0] === dateStr);
+  }
+
+  /**
+   * Expand a recurring entry into multiple timeline events
+   */
+  private expandRecurringEntry(
+    entry: BasesEntry,
+    options: AdapterOptions,
+    rangeStart: Date,
+    rangeEnd: Date
+  ): TimelineEvent[] {
+    const itemData = this.extractRecurrenceData(entry, options);
+    const occurrences = this.generateOccurrences(itemData, rangeStart, rangeEnd);
+
+    if (occurrences.length === 0) {
+      const event = this.entryToTimelineEvent(entry, options);
+      return event ? [event] : [];
+    }
+
+    // Calculate duration
+    let duration = 0;
+    if (itemData.date_start_scheduled && itemData.date_end_scheduled) {
+      const start = new Date(itemData.date_start_scheduled);
+      const end = new Date(itemData.date_end_scheduled);
+      duration = end.getTime() - start.getTime();
+    }
+
+    const events: TimelineEvent[] = [];
+    const filePath = entry.file.path;
+    const titleFieldName = options.titleField.replace(/^note\./, '');
+    const fm = this.getFrontmatter(entry) || {};
+    const title = fm[titleFieldName] || entry.file.basename;
+
+    // Get tags
+    const tagsValue = entry.getValue('note.tags');
+    const tags: string[] = Array.isArray(tagsValue)
+      ? tagsValue.map(t => String(t).replace(/^#/, ''))
+      : [];
+
+    // Get group value
+    const groupValue = this.getGroupValue(entry, options.groupBy);
+
+    // Build properties object
+    const properties: Record<string, unknown> = {};
+    const calendarValue = entry.getValue('note.calendar');
+    if (calendarValue) {
+      properties.calendar = Array.isArray(calendarValue) ? calendarValue[0] : calendarValue;
+    }
+    const priorityValue = entry.getValue('note.priority');
+    if (priorityValue) {
+      properties.priority = priorityValue;
+    }
+    const statusVal = entry.getValue('note.status');
+    if (statusVal) {
+      properties.status = statusVal;
+    }
+
+    for (let i = 0; i < occurrences.length; i++) {
+      const occurrenceStart = occurrences[i];
+      const occurrenceEnd = duration > 0
+        ? new Date(occurrenceStart.getTime() + duration)
+        : occurrenceStart;
+
+      const isCompleted = this.isOccurrenceCompleted(itemData.repeat_completed_dates, occurrenceStart);
+
+      // Store path mapping for this occurrence
+      const occurrenceId = `${filePath}::${i}`;
+      this.pathMappings.push({
+        path: [occurrenceId],
+        filePath,
+      });
+
+      events.push({
+        id: occurrenceId,
+        filePath,
+        title,
+        dateRangeIso: {
+          fromDateTimeIso: occurrenceStart.toISOString(),
+          toDateTimeIso: occurrenceEnd.toISOString(),
+        },
+        tags,
+        percent: isCompleted ? 100 : undefined,
+        completed: isCompleted,
+        properties,
+        groupValue,
+      });
+    }
 
     return events;
   }

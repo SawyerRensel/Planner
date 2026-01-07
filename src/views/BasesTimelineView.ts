@@ -93,7 +93,7 @@ export class BasesTimelineView extends BasesView {
     super(controller, containerEl);
     this.plugin = plugin;
     this.containerEl = containerEl;
-    this.adapter = new MarkwhenAdapter(plugin.settings);
+    this.adapter = new MarkwhenAdapter(plugin.settings, this.app);
 
     // Set up LPC callbacks
     const callbacks: LpcCallbacks = {

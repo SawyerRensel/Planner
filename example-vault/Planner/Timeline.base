@@ -30,3 +30,6 @@ views:
     name: Table
   - type: planner-calendar
     name: Calendar
+  - type: planner-gantt
+    name: Gantt
+    truncateTitles: false

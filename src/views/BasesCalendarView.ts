@@ -592,14 +592,15 @@ export class BasesCalendarView extends BasesView {
         return [];
       }
 
-      // Create UTC date for RRule (TaskNotes approach)
+      // Create UTC date for RRule - use UTC methods to preserve the actual UTC time
+      // The stored date already has timezone info, so getUTC* methods give us the correct UTC values
       const dtstart = new Date(Date.UTC(
-        startDate.getFullYear(),
-        startDate.getMonth(),
-        startDate.getDate(),
-        startDate.getHours(),
-        startDate.getMinutes(),
-        startDate.getSeconds(),
+        startDate.getUTCFullYear(),
+        startDate.getUTCMonth(),
+        startDate.getUTCDate(),
+        startDate.getUTCHours(),
+        startDate.getUTCMinutes(),
+        startDate.getUTCSeconds(),
         0
       ));
 
@@ -832,6 +833,27 @@ export class BasesCalendarView extends BasesView {
     return false;
   }
 
+  /**
+   * Format a Date object as an ISO string with local timezone offset
+   * e.g., "2026-01-06T10:30:00-05:00" instead of "2026-01-06T15:30:00.000Z"
+   */
+  private toLocalISOString(date: Date): string {
+    const tzOffset = date.getTimezoneOffset();
+    const offsetHours = Math.abs(Math.floor(tzOffset / 60));
+    const offsetMinutes = Math.abs(tzOffset % 60);
+    const offsetSign = tzOffset <= 0 ? '+' : '-';
+    const offsetStr = `${offsetSign}${String(offsetHours).padStart(2, '0')}:${String(offsetMinutes).padStart(2, '0')}`;
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}${offsetStr}`;
+  }
+
   private getWeekStartDay(): number {
     const dayMap: Record<string, number> = {
       sunday: 0,
@@ -899,10 +921,11 @@ export class BasesCalendarView extends BasesView {
     const newEnd = info.event.end;
 
     // Update the file's frontmatter - preserve duration by updating both start and end
+    // Use local timezone format for user-friendly display in frontmatter
     await this.app.fileManager.processFrontMatter(entry.file, (fm) => {
-      fm.date_start_scheduled = newStart.toISOString();
+      fm.date_start_scheduled = this.toLocalISOString(newStart);
       if (newEnd) {
-        fm.date_end_scheduled = newEnd.toISOString();
+        fm.date_end_scheduled = this.toLocalISOString(newEnd);
       }
       fm.date_modified = new Date().toISOString();
     });
@@ -914,12 +937,13 @@ export class BasesCalendarView extends BasesView {
     const newEnd = info.event.end;
 
     // Update the file's frontmatter with new start/end times
+    // Use local timezone format for user-friendly display in frontmatter
     await this.app.fileManager.processFrontMatter(entry.file, (fm) => {
       if (newStart) {
-        fm.date_start_scheduled = newStart.toISOString();
+        fm.date_start_scheduled = this.toLocalISOString(newStart);
       }
       if (newEnd) {
-        fm.date_end_scheduled = newEnd.toISOString();
+        fm.date_end_scheduled = this.toLocalISOString(newEnd);
       }
       fm.date_modified = new Date().toISOString();
     });

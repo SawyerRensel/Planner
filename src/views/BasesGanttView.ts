@@ -6,9 +6,11 @@ import {
   setIcon,
 } from 'obsidian';
 import { gantt, Task, Link } from 'dhtmlx-gantt';
+import { RRule } from 'rrule';
 // Import DHTMLX Gantt CSS - will be merged into styles.css by esbuild
 import 'dhtmlx-gantt/codebase/dhtmlxgantt.css';
 import type PlannerPlugin from '../main';
+import type { PlannerItem, DayOfWeek } from '../types/item';
 import { openItemModal } from '../components/ItemModal';
 
 export const BASES_GANTT_VIEW_ID = 'planner-gantt';
@@ -700,11 +702,27 @@ export class BasesGanttView extends BasesView {
       allEntries.push(...group.entries);
     }
 
-    // Transform entries to tasks
+    // Define range for recurring items (1 year before and after today)
+    const now = new Date();
+    const rangeStart = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+    const rangeEnd = new Date(now.getFullYear() + 1, now.getMonth(), now.getDate());
+
+    // Transform entries to tasks, expanding recurring entries
     for (const entry of allEntries) {
-      const task = this.entryToTask(entry);
-      if (task) {
-        tasks.push(task);
+      const fm = this.getFrontmatter(entry);
+      const isRecurring = fm?.repeat_frequency &&
+        ['daily', 'weekly', 'monthly', 'yearly'].includes(fm.repeat_frequency);
+
+      if (isRecurring) {
+        // Expand recurring entry into multiple tasks
+        const expandedTasks = this.expandRecurringEntry(entry, rangeStart, rangeEnd);
+        tasks.push(...expandedTasks);
+      } else {
+        // Non-recurring: create single task
+        const task = this.entryToTask(entry);
+        if (task) {
+          tasks.push(task);
+        }
       }
     }
 
@@ -904,6 +922,268 @@ export class BasesGanttView extends BasesView {
     return String(value);
   }
 
+  /**
+   * Format a Date object as an ISO string with local timezone offset
+   * e.g., "2026-01-06T10:30:00-05:00" instead of "2026-01-06T15:30:00.000Z"
+   */
+  private toLocalISOString(date: Date): string {
+    const tzOffset = date.getTimezoneOffset();
+    const offsetHours = Math.abs(Math.floor(tzOffset / 60));
+    const offsetMinutes = Math.abs(tzOffset % 60);
+    const offsetSign = tzOffset <= 0 ? '+' : '-';
+    const offsetStr = `${offsetSign}${String(offsetHours).padStart(2, '0')}:${String(offsetMinutes).padStart(2, '0')}`;
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}${offsetStr}`;
+  }
+
+  /**
+   * Extract recurrence data from a BasesEntry
+   */
+  private extractRecurrenceData(entry: BasesEntry): Partial<PlannerItem> {
+    const fm = this.getFrontmatter(entry) || {};
+    const dateStartField = this.getDateStartField();
+    const dateEndField = this.getDateEndField();
+
+    let dateStart = fm.date_start_scheduled;
+    let dateEnd = fm.date_end_scheduled;
+
+    // If using non-default date fields, try Bases getValue as fallback
+    if (!dateStart && dateStartField !== 'note.date_start_scheduled') {
+      const basesValue = entry.getValue(dateStartField as any);
+      if (basesValue !== undefined && basesValue !== null && basesValue !== '') {
+        dateStart = basesValue;
+      }
+    }
+    if (!dateEnd && dateEndField !== 'note.date_end_scheduled') {
+      const basesValue = entry.getValue(dateEndField as any);
+      if (basesValue !== undefined && basesValue !== null && basesValue !== '') {
+        dateEnd = basesValue;
+      }
+    }
+
+    // Extract recurrence fields
+    const repeatFrequency = fm.repeat_frequency as string | undefined;
+    const repeatInterval = fm.repeat_interval as number | undefined;
+    const repeatUntil = fm.repeat_until as string | undefined;
+    const repeatCount = fm.repeat_count as number | undefined;
+    const repeatByday = fm.repeat_byday as DayOfWeek[] | undefined;
+    const repeatBymonth = fm.repeat_bymonth as number[] | undefined;
+    const repeatBymonthday = fm.repeat_bymonthday as number[] | undefined;
+    const repeatBysetpos = fm.repeat_bysetpos as number | undefined;
+    const repeatCompletedDates = fm.repeat_completed_dates as string[] | undefined;
+
+    // Validate repeat_frequency
+    const validFrequencies = ['daily', 'weekly', 'monthly', 'yearly'];
+    const validatedFrequency = typeof repeatFrequency === 'string' && validFrequencies.includes(repeatFrequency)
+      ? repeatFrequency as PlannerItem['repeat_frequency']
+      : undefined;
+
+    // Validate bysetpos
+    const validatedBysetpos = typeof repeatBysetpos === 'number' && repeatBysetpos !== 0 &&
+                              repeatBysetpos >= -366 && repeatBysetpos <= 366
+      ? repeatBysetpos
+      : undefined;
+
+    return {
+      path: entry.file.path,
+      date_start_scheduled: dateStart ? this.toISOString(dateStart) : undefined,
+      date_end_scheduled: dateEnd ? this.toISOString(dateEnd) : undefined,
+      repeat_frequency: validatedFrequency,
+      repeat_interval: typeof repeatInterval === 'number' ? repeatInterval : undefined,
+      repeat_until: repeatUntil ? this.toISOString(repeatUntil) : undefined,
+      repeat_count: typeof repeatCount === 'number' ? repeatCount : undefined,
+      repeat_byday: Array.isArray(repeatByday) && repeatByday.length > 0 ? repeatByday : undefined,
+      repeat_bymonth: Array.isArray(repeatBymonth) && repeatBymonth.length > 0 ? repeatBymonth : undefined,
+      repeat_bymonthday: Array.isArray(repeatBymonthday) && repeatBymonthday.length > 0 ? repeatBymonthday : undefined,
+      repeat_bysetpos: validatedBysetpos,
+      repeat_completed_dates: Array.isArray(repeatCompletedDates) ? repeatCompletedDates : undefined,
+    };
+  }
+
+  /**
+   * Build an RRULE string from item data
+   */
+  private buildRRuleString(item: Partial<PlannerItem>): string {
+    const parts: string[] = [];
+
+    const freqMap: Record<string, string> = {
+      daily: 'DAILY',
+      weekly: 'WEEKLY',
+      monthly: 'MONTHLY',
+      yearly: 'YEARLY',
+    };
+
+    if (item.repeat_frequency) {
+      parts.push(`FREQ=${freqMap[item.repeat_frequency]}`);
+    }
+
+    if (item.repeat_interval && item.repeat_interval > 1) {
+      parts.push(`INTERVAL=${item.repeat_interval}`);
+    }
+
+    if (item.repeat_byday?.length) {
+      parts.push(`BYDAY=${item.repeat_byday.join(',')}`);
+    }
+
+    if (item.repeat_bymonth?.length) {
+      parts.push(`BYMONTH=${item.repeat_bymonth.join(',')}`);
+    }
+
+    if (item.repeat_bymonthday?.length) {
+      parts.push(`BYMONTHDAY=${item.repeat_bymonthday.join(',')}`);
+    }
+
+    if (item.repeat_bysetpos !== undefined && item.repeat_bysetpos !== 0) {
+      parts.push(`BYSETPOS=${item.repeat_bysetpos}`);
+    }
+
+    if (item.repeat_count) {
+      parts.push(`COUNT=${item.repeat_count}`);
+    }
+
+    if (item.repeat_until) {
+      const until = new Date(item.repeat_until);
+      if (!isNaN(until.getTime())) {
+        const year = until.getUTCFullYear();
+        const month = String(until.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(until.getUTCDate()).padStart(2, '0');
+        parts.push(`UNTIL=${year}${month}${day}`);
+      }
+    }
+
+    return parts.join(';');
+  }
+
+  /**
+   * Generate recurring occurrences using RRule
+   */
+  private generateOccurrences(item: Partial<PlannerItem>, rangeStart: Date, rangeEnd: Date): Date[] {
+    if (!item.repeat_frequency || !item.date_start_scheduled) {
+      return [];
+    }
+
+    try {
+      const startDate = new Date(item.date_start_scheduled);
+      if (isNaN(startDate.getTime())) {
+        return [];
+      }
+
+      // Create UTC date for RRule - use UTC methods to preserve the actual UTC time
+      const dtstart = new Date(Date.UTC(
+        startDate.getUTCFullYear(),
+        startDate.getUTCMonth(),
+        startDate.getUTCDate(),
+        startDate.getUTCHours(),
+        startDate.getUTCMinutes(),
+        startDate.getUTCSeconds(),
+        0
+      ));
+
+      const rruleString = this.buildRRuleString(item);
+      const rruleOptions = RRule.parseString(rruleString);
+      rruleOptions.dtstart = dtstart;
+      const rule = new RRule(rruleOptions);
+
+      // Convert range to UTC
+      const utcStart = new Date(Date.UTC(
+        rangeStart.getFullYear(),
+        rangeStart.getMonth(),
+        rangeStart.getDate(),
+        0, 0, 0, 0
+      ));
+      const utcEnd = new Date(Date.UTC(
+        rangeEnd.getFullYear(),
+        rangeEnd.getMonth(),
+        rangeEnd.getDate(),
+        23, 59, 59, 999
+      ));
+
+      return rule.between(utcStart, utcEnd, true);
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Check if a date is in the completed dates list
+   */
+  private isDateCompleted(completedDates: string[] | undefined, date: Date): boolean {
+    if (!completedDates?.length) return false;
+    const dateStr = date.toISOString().split('T')[0];
+    return completedDates.some(d => d.split('T')[0] === dateStr);
+  }
+
+  /**
+   * Expand a recurring entry into multiple Gantt tasks
+   */
+  private expandRecurringEntry(entry: BasesEntry, rangeStart: Date, rangeEnd: Date): GanttTaskExtended[] {
+    const colorByField = this.getColorByField();
+    const fm = this.getFrontmatter(entry) || {};
+    const itemData = this.extractRecurrenceData(entry);
+
+    const occurrences = this.generateOccurrences(itemData, rangeStart, rangeEnd);
+
+    if (occurrences.length === 0) {
+      const task = this.entryToTask(entry);
+      return task ? [task] : [];
+    }
+
+    // Calculate duration
+    let duration = 0;
+    if (itemData.date_start_scheduled && itemData.date_end_scheduled) {
+      const start = new Date(itemData.date_start_scheduled);
+      const end = new Date(itemData.date_end_scheduled);
+      duration = end.getTime() - start.getTime();
+    }
+
+    const tasks: GanttTaskExtended[] = [];
+    const title = fm?.title || entry.file.basename || 'Untitled';
+    const color = this.getEntryColor(entry, colorByField);
+    const isAllDay = fm?.all_day !== false;
+
+    for (let i = 0; i < occurrences.length; i++) {
+      const occurrenceStart = occurrences[i];
+      const occurrenceEnd = duration > 0
+        ? new Date(occurrenceStart.getTime() + duration)
+        : undefined;
+
+      const isCompleted = this.isDateCompleted(itemData.repeat_completed_dates, occurrenceStart);
+
+      // Calculate duration in days for Gantt
+      let durationDays = 1;
+      if (occurrenceEnd) {
+        const diffMs = occurrenceEnd.getTime() - occurrenceStart.getTime();
+        durationDays = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+      }
+
+      const isMilestone = !occurrenceEnd || (occurrenceStart.toDateString() === occurrenceEnd.toDateString() && isAllDay);
+
+      tasks.push({
+        id: `${entry.file.path}::${i}`,
+        text: title,
+        start_date: occurrenceStart,
+        end_date: occurrenceEnd,
+        duration: durationDays,
+        progress: isCompleted ? 1 : 0,
+        parent: 0,
+        type: isMilestone ? 'milestone' : 'task',
+        color: isCompleted ? '#9ca3af' : color,
+        open: true,
+        $entry: entry,
+        allDay: isAllDay,
+      });
+    }
+
+    return tasks;
+  }
+
   private async handleTaskClick(id: string): Promise<void> {
     const task = gantt.getTask(id) as GanttTaskExtended;
     if (!task || !task.$entry) return;
@@ -934,11 +1214,12 @@ export class BasesGanttView extends BasesView {
 
     await this.app.fileManager.processFrontMatter(entry.file, (fm) => {
       if (mode === 'move' || mode === 'resize') {
+        // Use local timezone format for user-friendly display in frontmatter
         if (task.start_date) {
-          fm[startFieldName] = task.start_date.toISOString();
+          fm[startFieldName] = this.toLocalISOString(task.start_date);
         }
         if (task.end_date) {
-          fm[endFieldName] = task.end_date.toISOString();
+          fm[endFieldName] = this.toLocalISOString(task.end_date);
         }
       }
 
