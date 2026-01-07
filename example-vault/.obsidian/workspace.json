@@ -14,9 +14,9 @@
               "type": "bases",
               "state": {
                 "file": "Planner/Timeline.base",
-                "viewName": "Gantt"
+                "viewName": "Timeline"
               },
-              "icon": "gantt-chart",
+              "icon": "calendar-range",
               "title": "Timeline"
             }
           },
@@ -222,7 +222,6 @@
       "markwhen:Create new Markwhen file": false,
       "planner:Open Planner Task List": false,
       "planner:Open Planner Calendar": false,
-      "planner:Open Planner Gantt": false,
       "planner:Open Planner Timeline": false
     }
   },

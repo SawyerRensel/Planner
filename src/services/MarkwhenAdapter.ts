@@ -7,7 +7,6 @@
  */
 
 import { BasesEntry, App } from 'obsidian';
-import { RRule } from 'rrule';
 import {
   Event,
   EventGroup,
@@ -19,6 +18,7 @@ import {
   TimelineColorBy,
   PathMapping,
   EventPath,
+  Recurrence,
 } from '../types/markwhen';
 import type { PlannerSettings } from '../types/settings';
 import type { PlannerItem, DayOfWeek } from '../types/item';
@@ -92,26 +92,11 @@ export class MarkwhenAdapter {
   ): TimelineEvent[] {
     const events: TimelineEvent[] = [];
 
-    // Define range for recurring items (1 year before and after today)
-    const now = new Date();
-    const rangeStart = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
-    const rangeEnd = new Date(now.getFullYear() + 1, now.getMonth(), now.getDate());
-
     for (const entry of entries) {
-      const fm = this.getFrontmatter(entry);
-      const isRecurring = fm?.repeat_frequency &&
-        ['daily', 'weekly', 'monthly', 'yearly'].includes(fm.repeat_frequency);
-
-      if (isRecurring) {
-        // Expand recurring entry into multiple events
-        const expandedEvents = this.expandRecurringEntry(entry, options, rangeStart, rangeEnd);
-        events.push(...expandedEvents);
-      } else {
-        // Non-recurring: create single event
-        const event = this.entryToTimelineEvent(entry, options);
-        if (event) {
-          events.push(event);
-        }
+      // Create single event (with recurrence data if applicable)
+      const event = this.entryToTimelineEvent(entry, options);
+      if (event) {
+        events.push(event);
       }
     }
 
@@ -202,205 +187,60 @@ export class MarkwhenAdapter {
   }
 
   /**
-   * Build an RRULE string from item data
+   * Build a Markwhen Recurrence object from item data
+   * This format is used by Markwhen's timeline to display multiple occurrences on a single row
    */
-  private buildRRuleString(item: Partial<PlannerItem>): string {
-    const parts: string[] = [];
+  private buildRecurrence(item: Partial<PlannerItem>): Recurrence | undefined {
+    if (!item.repeat_frequency) {
+      return undefined;
+    }
 
-    const freqMap: Record<string, string> = {
-      daily: 'DAILY',
-      weekly: 'WEEKLY',
-      monthly: 'MONTHLY',
-      yearly: 'YEARLY',
+    // Map frequency to RRule.Frequency numeric values
+    const freqMap: Record<string, number> = {
+      yearly: 0,   // RRule.YEARLY
+      monthly: 1,  // RRule.MONTHLY
+      weekly: 2,   // RRule.WEEKLY
+      daily: 3,    // RRule.DAILY
     };
 
-    if (item.repeat_frequency) {
-      parts.push(`FREQ=${freqMap[item.repeat_frequency]}`);
-    }
+    const recurrence: Recurrence = {
+      freq: freqMap[item.repeat_frequency],
+    };
 
     if (item.repeat_interval && item.repeat_interval > 1) {
-      parts.push(`INTERVAL=${item.repeat_interval}`);
-    }
-
-    if (item.repeat_byday?.length) {
-      parts.push(`BYDAY=${item.repeat_byday.join(',')}`);
-    }
-
-    if (item.repeat_bymonth?.length) {
-      parts.push(`BYMONTH=${item.repeat_bymonth.join(',')}`);
-    }
-
-    if (item.repeat_bymonthday?.length) {
-      parts.push(`BYMONTHDAY=${item.repeat_bymonthday.join(',')}`);
-    }
-
-    if (item.repeat_bysetpos !== undefined && item.repeat_bysetpos !== 0) {
-      parts.push(`BYSETPOS=${item.repeat_bysetpos}`);
+      recurrence.interval = item.repeat_interval;
     }
 
     if (item.repeat_count) {
-      parts.push(`COUNT=${item.repeat_count}`);
+      recurrence.count = item.repeat_count;
     }
 
     if (item.repeat_until) {
-      const until = new Date(item.repeat_until);
-      if (!isNaN(until.getTime())) {
-        const year = until.getUTCFullYear();
-        const month = String(until.getUTCMonth() + 1).padStart(2, '0');
-        const day = String(until.getUTCDate()).padStart(2, '0');
-        parts.push(`UNTIL=${year}${month}${day}`);
-      }
+      recurrence.until = item.repeat_until;
     }
 
-    return parts.join(';');
-  }
-
-  /**
-   * Generate recurring occurrences using RRule
-   */
-  private generateOccurrences(item: Partial<PlannerItem>, rangeStart: Date, rangeEnd: Date): Date[] {
-    if (!item.repeat_frequency || !item.date_start_scheduled) {
-      return [];
+    if (item.repeat_byday?.length) {
+      recurrence.byweekday = item.repeat_byday;
     }
 
-    try {
-      const startDate = new Date(item.date_start_scheduled);
-      if (isNaN(startDate.getTime())) {
-        return [];
-      }
-
-      // Create UTC date for RRule - use UTC methods to preserve the actual UTC time
-      const dtstart = new Date(Date.UTC(
-        startDate.getUTCFullYear(),
-        startDate.getUTCMonth(),
-        startDate.getUTCDate(),
-        startDate.getUTCHours(),
-        startDate.getUTCMinutes(),
-        startDate.getUTCSeconds(),
-        0
-      ));
-
-      const rruleString = this.buildRRuleString(item);
-      const rruleOptions = RRule.parseString(rruleString);
-      rruleOptions.dtstart = dtstart;
-      const rule = new RRule(rruleOptions);
-
-      // Convert range to UTC
-      const utcStart = new Date(Date.UTC(
-        rangeStart.getFullYear(),
-        rangeStart.getMonth(),
-        rangeStart.getDate(),
-        0, 0, 0, 0
-      ));
-      const utcEnd = new Date(Date.UTC(
-        rangeEnd.getFullYear(),
-        rangeEnd.getMonth(),
-        rangeEnd.getDate(),
-        23, 59, 59, 999
-      ));
-
-      return rule.between(utcStart, utcEnd, true);
-    } catch {
-      return [];
-    }
-  }
-
-  /**
-   * Check if a date is in the completed dates list
-   */
-  private isOccurrenceCompleted(completedDates: string[] | undefined, date: Date): boolean {
-    if (!completedDates?.length) return false;
-    const dateStr = date.toISOString().split('T')[0];
-    return completedDates.some(d => d.split('T')[0] === dateStr);
-  }
-
-  /**
-   * Expand a recurring entry into multiple timeline events
-   */
-  private expandRecurringEntry(
-    entry: BasesEntry,
-    options: AdapterOptions,
-    rangeStart: Date,
-    rangeEnd: Date
-  ): TimelineEvent[] {
-    const itemData = this.extractRecurrenceData(entry, options);
-    const occurrences = this.generateOccurrences(itemData, rangeStart, rangeEnd);
-
-    if (occurrences.length === 0) {
-      const event = this.entryToTimelineEvent(entry, options);
-      return event ? [event] : [];
+    if (item.repeat_bymonth?.length) {
+      recurrence.bymonth = item.repeat_bymonth;
     }
 
-    // Calculate duration
-    let duration = 0;
-    if (itemData.date_start_scheduled && itemData.date_end_scheduled) {
-      const start = new Date(itemData.date_start_scheduled);
-      const end = new Date(itemData.date_end_scheduled);
-      duration = end.getTime() - start.getTime();
+    if (item.repeat_bymonthday?.length) {
+      recurrence.bymonthday = item.repeat_bymonthday;
     }
 
-    const events: TimelineEvent[] = [];
-    const filePath = entry.file.path;
-    const titleFieldName = options.titleField.replace(/^note\./, '');
-    const fm = this.getFrontmatter(entry) || {};
-    const title = fm[titleFieldName] || entry.file.basename;
-
-    // Get tags
-    const tagsValue = entry.getValue('note.tags');
-    const tags: string[] = Array.isArray(tagsValue)
-      ? tagsValue.map(t => String(t).replace(/^#/, ''))
-      : [];
-
-    // Get group value
-    const groupValue = this.getGroupValue(entry, options.groupBy);
-
-    // Build properties object
-    const properties: Record<string, unknown> = {};
-    const calendarValue = entry.getValue('note.calendar');
-    if (calendarValue) {
-      properties.calendar = Array.isArray(calendarValue) ? calendarValue[0] : calendarValue;
-    }
-    const priorityValue = entry.getValue('note.priority');
-    if (priorityValue) {
-      properties.priority = priorityValue;
-    }
-    const statusVal = entry.getValue('note.status');
-    if (statusVal) {
-      properties.status = statusVal;
+    if (item.repeat_bysetpos !== undefined && item.repeat_bysetpos !== 0) {
+      recurrence.bysetpos = item.repeat_bysetpos;
     }
 
-    for (let i = 0; i < occurrences.length; i++) {
-      const occurrenceStart = occurrences[i];
-      const occurrenceEnd = duration > 0
-        ? new Date(occurrenceStart.getTime() + duration)
-        : occurrenceStart;
-
-      const isCompleted = this.isOccurrenceCompleted(itemData.repeat_completed_dates, occurrenceStart);
-
-      // Store path mapping for this occurrence
-      const occurrenceId = `${filePath}::${i}`;
-      this.pathMappings.push({
-        path: [occurrenceId],
-        filePath,
-      });
-
-      events.push({
-        id: occurrenceId,
-        filePath,
-        title,
-        dateRangeIso: {
-          fromDateTimeIso: occurrenceStart.toISOString(),
-          toDateTimeIso: occurrenceEnd.toISOString(),
-        },
-        tags,
-        percent: isCompleted ? 100 : undefined,
-        completed: isCompleted,
-        properties,
-        groupValue,
-      });
+    // Set dtstart from the item's start date
+    if (item.date_start_scheduled) {
+      recurrence.dtstart = item.date_start_scheduled;
     }
 
-    return events;
+    return recurrence;
   }
 
   /**
@@ -482,6 +322,10 @@ export class MarkwhenAdapter {
       properties.status = statusVal;
     }
 
+    // Build recurrence data if this is a recurring event
+    const itemData = this.extractRecurrenceData(entry, options);
+    const recurrence = this.buildRecurrence(itemData);
+
     return {
       id: filePath,
       filePath,
@@ -495,6 +339,7 @@ export class MarkwhenAdapter {
       completed,
       properties,
       groupValue,
+      recurrence,
     };
   }
 
@@ -691,6 +536,7 @@ export class MarkwhenAdapter {
       id: event.id,
       percent: event.percent,
       completed: event.completed,
+      recurrence: event.recurrence,
     };
 
     return mwEvent;

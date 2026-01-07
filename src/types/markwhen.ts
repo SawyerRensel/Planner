@@ -61,6 +61,22 @@ export interface EventFirstLine {
   restTrimmed: string;
 }
 
+/**
+ * Recurrence type - matches @markwhen/parser's Recurrence type
+ * Based on RRule Options with string dates instead of JS Dates
+ */
+export interface Recurrence {
+  freq?: number;        // RRule.Frequency: YEARLY=0, MONTHLY=1, WEEKLY=2, DAILY=3
+  interval?: number;    // Interval between occurrences
+  count?: number;       // Number of occurrences
+  until?: string;       // ISO date string for end date
+  byweekday?: string[]; // Days of week: ['MO', 'TU', 'WE', etc.] - RRule uses byweekday not byday
+  bymonth?: number[];   // Months: [1, 2, 3, etc.]
+  bymonthday?: number[]; // Days of month: [1, 15, -1, etc.]
+  bysetpos?: number;    // Position in set: -1 for last, 1 for first, etc.
+  dtstart?: string;     // Start date in ISO format
+}
+
 export interface Event {
   firstLine: EventFirstLine;
   textRanges: {
@@ -80,6 +96,7 @@ export interface Event {
   id?: string;
   percent?: number;
   completed?: boolean;
+  recurrence?: Recurrence;
 }
 
 export interface EventGroup {
@@ -213,6 +230,7 @@ export interface TimelineEvent {
   completed?: boolean;
   properties: Record<string, unknown>;
   groupValue?: string;  // Value of the groupBy field
+  recurrence?: Recurrence; // Recurrence data for recurring events
 }
 
 /**
