@@ -8,6 +8,22 @@ import {
 import { PlannerSettings, isCompletedStatus, getCalendarFolder } from '../types/settings';
 
 /**
+ * Get current local time in ISO 8601 format
+ * Returns format like "2026-01-06T19:44:23.405Z" using local time
+ */
+function getLocalISOString(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+  const ms = String(now.getMilliseconds()).padStart(3, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${ms}Z`;
+}
+
+/**
  * Service for managing Planner items (CRUD operations)
  */
 export class ItemService {
@@ -158,7 +174,7 @@ export class ItemService {
     }
 
     // Set auto-generated dates
-    const now = new Date().toISOString();
+    const now = getLocalISOString();
     const itemFrontmatter: Partial<ItemFrontmatter> = {
       ...frontmatter,
       date_created: frontmatter.date_created ?? now,
@@ -193,18 +209,22 @@ export class ItemService {
 
     const settings = this.getSettings();
     const content = await this.app.vault.read(file);
-    const { frontmatter, body } = this.parseFrontmatter(content);
+    const { body } = this.parseFrontmatter(content);
+
+    // Get existing frontmatter from Obsidian's metadata cache
+    const cache = this.app.metadataCache.getFileCache(file);
+    const existingFrontmatter = cache?.frontmatter ?? {};
 
     // Apply updates
     const updatedFrontmatter: Partial<ItemFrontmatter> = {
-      ...frontmatter,
+      ...existingFrontmatter,
       ...updates,
-      date_modified: new Date().toISOString(),
+      date_modified: getLocalISOString(),
     };
 
     // Auto-set date_end_actual when status changes to completed
-    if (updates.status && isCompletedStatus(settings, updates.status) && !frontmatter.date_end_actual) {
-      updatedFrontmatter.date_end_actual = new Date().toISOString();
+    if (updates.status && isCompletedStatus(settings, updates.status) && !existingFrontmatter.date_end_actual) {
+      updatedFrontmatter.date_end_actual = getLocalISOString();
     }
 
     // Build new file content

@@ -19,6 +19,7 @@
     "date_end_scheduled": "datetime",
     "date_end_actual": "datetime",
     "repeat_until": "datetime",
-    "people": "multitext"
+    "people": "multitext",
+    "repeat_completed_dates": "multitext"
   }
 }
