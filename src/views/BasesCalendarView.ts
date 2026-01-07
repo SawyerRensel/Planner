@@ -586,21 +586,48 @@ export class BasesCalendarView extends BasesView {
     }
 
     try {
-      // Parse the start date
-      const startDate = new Date(item.date_start_scheduled);
-      if (isNaN(startDate.getTime())) {
-        return [];
+      const dateStr = String(item.date_start_scheduled);
+
+      // Check if this is a date-only string (no 'T' means no time component)
+      // Date-only strings like "2026-01-05" are parsed as UTC midnight by JavaScript,
+      // but we want to treat them as local dates for all-day events
+      const isDateOnly = !dateStr.includes('T');
+
+      let startDate: Date;
+      let originalLocalHours: number;
+      let originalLocalMinutes: number;
+      let originalLocalSeconds: number;
+
+      if (isDateOnly) {
+        // For date-only strings, parse the date parts directly to avoid UTC interpretation
+        // "2026-01-05" should mean January 5th in local time, not UTC
+        const [year, month, day] = dateStr.split('-').map(Number);
+        startDate = new Date(year, month - 1, day, 0, 0, 0);
+        originalLocalHours = 0;
+        originalLocalMinutes = 0;
+        originalLocalSeconds = 0;
+      } else {
+        // For datetime strings, parse normally and extract local time
+        startDate = new Date(dateStr);
+        if (isNaN(startDate.getTime())) {
+          return [];
+        }
+        // Extract the original LOCAL time components - this is what the user intended
+        // (e.g., "midnight" should stay midnight regardless of DST)
+        originalLocalHours = startDate.getHours();
+        originalLocalMinutes = startDate.getMinutes();
+        originalLocalSeconds = startDate.getSeconds();
       }
 
-      // Create UTC date for RRule - use UTC methods to preserve the actual UTC time
-      // The stored date already has timezone info, so getUTC* methods give us the correct UTC values
+      // Create UTC date for RRule - use local date components for date-based recurrence
+      // This ensures RRule generates occurrences on the correct calendar days
       const dtstart = new Date(Date.UTC(
-        startDate.getUTCFullYear(),
-        startDate.getUTCMonth(),
-        startDate.getUTCDate(),
-        startDate.getUTCHours(),
-        startDate.getUTCMinutes(),
-        startDate.getUTCSeconds(),
+        startDate.getFullYear(),
+        startDate.getMonth(),
+        startDate.getDate(),
+        originalLocalHours,
+        originalLocalMinutes,
+        originalLocalSeconds,
         0
       ));
 
@@ -630,8 +657,21 @@ export class BasesCalendarView extends BasesView {
         23, 59, 59, 999
       ));
 
-      // Generate occurrences
-      return rule.between(utcStart, utcEnd, true);
+      // Generate occurrences - RRule returns UTC dates
+      const rawOccurrences = rule.between(utcStart, utcEnd, true);
+
+      // Convert each occurrence to preserve the original LOCAL time
+      // This fixes DST issues: "midnight" stays midnight regardless of timezone offset
+      return rawOccurrences.map(occ => {
+        // Get the UTC date components from the occurrence
+        const year = occ.getUTCFullYear();
+        const month = occ.getUTCMonth();
+        const day = occ.getUTCDate();
+
+        // Create a new date with the occurrence's date but the original local time
+        // Using the Date constructor with individual components treats them as local time
+        return new Date(year, month, day, originalLocalHours, originalLocalMinutes, originalLocalSeconds);
+      });
     } catch {
       return [];
     }
@@ -678,12 +718,28 @@ export class BasesCalendarView extends BasesView {
       return event ? [event] : [];
     }
 
-    // Calculate event duration
-    let duration = 0;
+    // Determine if this is an all-day event
+    const isAllDay = this.isAllDayValue(allDayValue) ||
+      (typeof itemData.date_start_scheduled === 'string' && !itemData.date_start_scheduled.includes('T'));
+
+    // Calculate event duration (in days for all-day events, milliseconds for timed events)
+    let durationMs = 0;
+    let durationDays = 0;
     if (itemData.date_start_scheduled && itemData.date_end_scheduled) {
-      const start = new Date(itemData.date_start_scheduled);
-      const end = new Date(itemData.date_end_scheduled);
-      duration = end.getTime() - start.getTime();
+      if (isAllDay) {
+        // For all-day events, calculate duration in days
+        const startStr = String(itemData.date_start_scheduled);
+        const endStr = String(itemData.date_end_scheduled);
+        const startParts = startStr.split('T')[0].split('-').map(Number);
+        const endParts = endStr.split('T')[0].split('-').map(Number);
+        const startLocal = new Date(startParts[0], startParts[1] - 1, startParts[2]);
+        const endLocal = new Date(endParts[0], endParts[1] - 1, endParts[2]);
+        durationDays = Math.round((endLocal.getTime() - startLocal.getTime()) / (24 * 60 * 60 * 1000));
+      } else {
+        const start = new Date(itemData.date_start_scheduled);
+        const end = new Date(itemData.date_end_scheduled);
+        durationMs = end.getTime() - start.getTime();
+      }
     }
 
     const events: EventInput[] = [];
@@ -691,19 +747,40 @@ export class BasesCalendarView extends BasesView {
     // Convert each occurrence to an EventInput
     for (let i = 0; i < occurrences.length; i++) {
       const occurrenceStart = occurrences[i];
-      const occurrenceEnd = duration > 0
-        ? new Date(occurrenceStart.getTime() + duration)
-        : undefined;
-
       const isCompleted = this.isDateCompleted(itemData.repeat_completed_dates, occurrenceStart);
-      const startStr = occurrenceStart.toISOString();
-      const isAllDay = this.isAllDayValue(allDayValue) || !this.hasTime(startStr);
+
+      let startStr: string;
+      let endStr: string | undefined;
+
+      if (isAllDay) {
+        // For all-day events, use date-only strings (YYYY-MM-DD) to avoid timezone issues
+        const year = occurrenceStart.getFullYear();
+        const month = String(occurrenceStart.getMonth() + 1).padStart(2, '0');
+        const day = String(occurrenceStart.getDate()).padStart(2, '0');
+        startStr = `${year}-${month}-${day}`;
+
+        if (durationDays > 0) {
+          const occurrenceEnd = new Date(occurrenceStart);
+          occurrenceEnd.setDate(occurrenceEnd.getDate() + durationDays);
+          const endYear = occurrenceEnd.getFullYear();
+          const endMonth = String(occurrenceEnd.getMonth() + 1).padStart(2, '0');
+          const endDay = String(occurrenceEnd.getDate()).padStart(2, '0');
+          endStr = `${endYear}-${endMonth}-${endDay}`;
+        }
+      } else {
+        // For timed events, use ISO strings
+        startStr = occurrenceStart.toISOString();
+        if (durationMs > 0) {
+          const occurrenceEnd = new Date(occurrenceStart.getTime() + durationMs);
+          endStr = occurrenceEnd.toISOString();
+        }
+      }
 
       events.push({
         id: `${entry.file.path}::${i}`,
         title: String(title),
         start: startStr,
-        end: occurrenceEnd?.toISOString(),
+        end: endStr,
         allDay: isAllDay,
         backgroundColor: isCompleted ? '#9ca3af' : color,
         borderColor: isCompleted ? '#9ca3af' : color,

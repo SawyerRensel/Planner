@@ -95,18 +95,31 @@ export class RecurrenceService {
 
   /**
    * Parse a date string into a UTC Date for RRule
-   * Uses UTC methods to preserve the actual UTC time from the stored date
+   * Uses LOCAL time components to ensure recurrence happens at the same local time
+   * regardless of DST changes
    */
   private createUTCDateForRRule(dateStr: string): Date {
+    // Check if this is a date-only string (no 'T' means no time component)
+    // Date-only strings like "2026-01-05" are parsed as UTC midnight by JavaScript,
+    // but we want to treat them as local dates
+    const isDateOnly = !dateStr.includes('T');
+
+    if (isDateOnly) {
+      // For date-only strings, parse the date parts directly to avoid UTC interpretation
+      const [year, month, day] = dateStr.split('-').map(Number);
+      return new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+    }
+
     const date = new Date(dateStr);
-    // Use UTC methods to preserve the actual UTC time - the stored date already has timezone info
+    // Use LOCAL time components - this ensures RRule generates occurrences
+    // at the same local wall clock time, not the same UTC instant
     return new Date(Date.UTC(
-      date.getUTCFullYear(),
-      date.getUTCMonth(),
-      date.getUTCDate(),
-      date.getUTCHours(),
-      date.getUTCMinutes(),
-      date.getUTCSeconds(),
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      date.getHours(),
+      date.getMinutes(),
+      date.getSeconds(),
       0
     ));
   }
@@ -153,7 +166,7 @@ export class RecurrenceService {
 
   /**
    * Get all occurrences within a date range
-   * Uses UTC dates for consistency with RRule (like TaskNotes does)
+   * Preserves the original local time for each occurrence to handle DST correctly
    */
   getOccurrences(item: PlannerItem, start: Date, end: Date): Date[] {
     const rule = this.getRRule(item);
@@ -162,7 +175,28 @@ export class RecurrenceService {
       return fallbackDate ? [fallbackDate] : [];
     }
 
-    // Convert start and end to UTC to match dtstart (like TaskNotes does)
+    // Extract original local time components from the start date
+    // Handle date-only strings specially to avoid UTC interpretation issues
+    const dateStr = String(item.date_start_scheduled ?? '');
+    const isDateOnly = dateStr && !dateStr.includes('T');
+
+    let originalLocalHours: number;
+    let originalLocalMinutes: number;
+    let originalLocalSeconds: number;
+
+    if (isDateOnly) {
+      // For date-only strings, use midnight local time
+      originalLocalHours = 0;
+      originalLocalMinutes = 0;
+      originalLocalSeconds = 0;
+    } else {
+      const originalDate = this.parseDate(item.date_start_scheduled);
+      originalLocalHours = originalDate?.getHours() ?? 0;
+      originalLocalMinutes = originalDate?.getMinutes() ?? 0;
+      originalLocalSeconds = originalDate?.getSeconds() ?? 0;
+    }
+
+    // Convert start and end to UTC to match dtstart
     const utcStart = new Date(Date.UTC(
       start.getFullYear(),
       start.getMonth(),
@@ -176,11 +210,24 @@ export class RecurrenceService {
       23, 59, 59, 999
     ));
 
-    return rule.between(utcStart, utcEnd, true);
+    // Get raw occurrences from RRule (in UTC)
+    const rawOccurrences = rule.between(utcStart, utcEnd, true);
+
+    // Convert each occurrence to preserve the original LOCAL time
+    // This fixes DST issues: the event stays at the same local wall clock time
+    return rawOccurrences.map(occ => {
+      const year = occ.getUTCFullYear();
+      const month = occ.getUTCMonth();
+      const day = occ.getUTCDate();
+
+      // Create a new date with the occurrence's date but the original local time
+      return new Date(year, month, day, originalLocalHours, originalLocalMinutes, originalLocalSeconds);
+    });
   }
 
   /**
    * Get the next occurrence after a given date
+   * Preserves the original local time to handle DST correctly
    */
   getNextOccurrence(item: PlannerItem, afterDate: Date = new Date()): Date | null {
     const rule = this.getRRule(item);
@@ -188,9 +235,38 @@ export class RecurrenceService {
       return null;
     }
 
-    // Get the next occurrence after the given date
-    const nextOccurrences = rule.after(afterDate, false);
-    return nextOccurrences;
+    // Extract original local time components from the start date
+    // Handle date-only strings specially to avoid UTC interpretation issues
+    const dateStr = String(item.date_start_scheduled ?? '');
+    const isDateOnly = dateStr && !dateStr.includes('T');
+
+    let originalLocalHours: number;
+    let originalLocalMinutes: number;
+    let originalLocalSeconds: number;
+
+    if (isDateOnly) {
+      originalLocalHours = 0;
+      originalLocalMinutes = 0;
+      originalLocalSeconds = 0;
+    } else {
+      const originalDate = this.parseDate(item.date_start_scheduled);
+      originalLocalHours = originalDate?.getHours() ?? 0;
+      originalLocalMinutes = originalDate?.getMinutes() ?? 0;
+      originalLocalSeconds = originalDate?.getSeconds() ?? 0;
+    }
+
+    // Get the next occurrence after the given date (returns UTC)
+    const nextOcc = rule.after(afterDate, false);
+    if (!nextOcc) {
+      return null;
+    }
+
+    // Convert to preserve the original LOCAL time
+    const year = nextOcc.getUTCFullYear();
+    const month = nextOcc.getUTCMonth();
+    const day = nextOcc.getUTCDate();
+
+    return new Date(year, month, day, originalLocalHours, originalLocalMinutes, originalLocalSeconds);
   }
 
   /**

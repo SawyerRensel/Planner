@@ -8,48 +8,34 @@
         "type": "tabs",
         "children": [
           {
-            "id": "29386b0875059938",
+            "id": "e2ec49b4a88da477",
             "type": "leaf",
             "state": {
               "type": "bases",
               "state": {
-                "file": "Planner/Timeline.base",
+                "file": "Planner/Calendar.base",
                 "viewName": "Calendar"
               },
               "icon": "calendar",
-              "title": "Timeline"
+              "title": "Calendar"
             }
           },
           {
-            "id": "094905138a67b98f",
+            "id": "a200b43c11a1b48c",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Personal/test.md",
+                "file": "Personal/FirstMonday.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "test"
+              "title": "FirstMonday"
             }
           },
           {
-            "id": "26568338abc8c808",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Personal/test.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "test"
-            }
-          },
-          {
-            "id": "e2ec49b4a88da477",
+            "id": "71b87c1478dc5c57",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -197,13 +183,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Planner/Timeline.base",
+                "file": "Planner/Calendar.base",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Timeline"
+              "title": "Outline of Calendar"
             }
           },
           {
@@ -239,11 +225,14 @@
       "planner:Open Planner Timeline": false
     }
   },
-  "active": "29386b0875059938",
+  "active": "e2ec49b4a88da477",
   "lastOpenFiles": [
-    "Personal/test.md",
-    "Planner/Timeline.base",
+    "Personal/FirstMonday.md",
+    "Planner/Calendar.base",
     "notes/feedback-and-ideas.md",
+    "Personal/test.md",
+    "Personal/testing.md",
+    "Planner/Timeline.base",
     "Personal/test 1.md",
     "Planner/Grocery Shopping.md",
     "Personal/RecurringExample.md",
@@ -256,7 +245,6 @@
     "Screenshot_20260105-200533.png",
     "Markwhen/Markwhen 1-5-2026 19.42.51.mw",
     "Markwhen",
-    "Planner/Calendar.base",
     "Planner/Tasks.base",
     "Planner/Gantt.base",
     "Planner/test.md",
@@ -275,8 +263,6 @@
     "ref/tasknotes/tasknotes-e2e-vault/TaskNotes/Write documentation.md",
     "ref/tasknotes/tasknotes-e2e-vault/TaskNotes/Weekly team meeting.md",
     "ref/tasknotes/tasknotes-e2e-vault/TaskNotes/Review project proposal.md",
-    "ref/tasknotes/tasknotes-e2e-vault/TaskNotes/Plan vacation.md",
-    "ref/tasknotes/tasknotes-e2e-vault/TaskNotes/Overdue report.md",
     "ref/tasknotes/media/docs/workflow-task-hover.png",
     "ref/tasknotes/media/docs/workflow-task-context-menu.png",
     "ref/tasknotes/media/docs/workflow-quick-add-calendar.png",
