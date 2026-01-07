@@ -1,6 +1,6 @@
 import { App, PluginSettingTab, Setting, Modal, Notice } from 'obsidian';
 import type PlannerPlugin from '../main';
-import { PlannerSettings, StatusConfig, PriorityConfig, DEFAULT_SETTINGS, OpenBehavior } from '../types/settings';
+import { PlannerSettings, StatusConfig, PriorityConfig, DEFAULT_SETTINGS, OpenBehavior, getNextCalendarColor } from '../types/settings';
 import { BaseGeneratorService } from '../services/BaseGeneratorService';
 
 /**
@@ -479,7 +479,9 @@ export class PlannerSettingTab extends PluginSettingTab {
         .setButtonText('Add')
         .onClick(async () => {
           if (newCalendarName && !this.plugin.settings.calendars[newCalendarName]) {
-            this.plugin.settings.calendars[newCalendarName] = { color: '#6b7280' };
+            const calendarCount = Object.keys(this.plugin.settings.calendars).length;
+            const nextColor = getNextCalendarColor(calendarCount);
+            this.plugin.settings.calendars[newCalendarName] = { color: nextColor };
             await this.plugin.saveSettings();
             this.display();
           }

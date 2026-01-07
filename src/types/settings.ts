@@ -1,4 +1,19 @@
 /**
+ * Solarized accent colors for calendars
+ * Order: yellow, orange, red, magenta, violet, blue, cyan, green
+ */
+export const SOLARIZED_ACCENT_COLORS = [
+  '#b58900', // yellow
+  '#cb4b16', // orange
+  '#dc322f', // red
+  '#d33682', // magenta
+  '#6c71c4', // violet
+  '#268bd2', // blue
+  '#2aa198', // cyan
+  '#859900', // green
+] as const;
+
+/**
  * Planner Plugin Settings
  */
 export interface PlannerSettings {
@@ -113,8 +128,8 @@ export const DEFAULT_SETTINGS: PlannerSettings = {
 
   // Calendar Configuration
   calendars: {
-    'Personal': { color: '#3b82f6' },
-    'Work': { color: '#22c55e' },
+    'Personal': { color: '#b58900' }, // Solarized yellow
+    'Work': { color: '#cb4b16' },     // Solarized orange
   },
   calendarFontSize: 10, // 20% smaller than default 12px
 
@@ -162,4 +177,12 @@ export function getCalendarFolder(settings: PlannerSettings, calendarName: strin
 export function isCompletedStatus(settings: PlannerSettings, statusName: string): boolean {
   const status = getStatusConfig(settings, statusName);
   return status?.isCompleted ?? false;
+}
+
+/**
+ * Get the next Solarized accent color based on calendar index
+ * Cycles through the 8 colors
+ */
+export function getNextCalendarColor(calendarIndex: number): string {
+  return SOLARIZED_ACCENT_COLORS[calendarIndex % SOLARIZED_ACCENT_COLORS.length];
 }

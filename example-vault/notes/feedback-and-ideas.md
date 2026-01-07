@@ -46,7 +46,7 @@
 - [x] `date_created` and `date_modified` are also wildly incorrect.  We should be pulling these times from the operating system's clock, which is presumed to be the correct time zone for the user. 
 - [ ] ~~In Settings, add an option to add link(s) to the given days' daily notes in the `related` field.  Don't create the daily notes, just add placeholder links of where they would be stored relative to the Item Note (according to the Daily Note folder specified in the Daily Note core plugin) (also remember to respect Link behavior (absolute, relative, shortest)).  Happens both when you create and or edit an Item from the Item Modal.~~  
 	- *Not really a priority nor important.*
-- [ ] Planner.  There's no way to say "Recurs on the second Sunday of every month"
+- [x] Planner.  There's no way to say "Recurs on the second Sunday of every month"
 - [x] Ability to add folders to each Calendar in Settings.  If a folder is specified, this overrides the global Planner folder for that Calendar.  Fallback to global Planner folder when none is specified.
 - [ ] ~~Planner.  Tags, and colors for tags.  Similar to folders.  Any note that has a tag in Included Tags and has date_start_scheduled and date_end_scheduled gets rendered on the Calendar.~~
 	- *This can be accomplished through Bases.  I should actually remove the identify configuration options in Settings because they don't do anything anyway. *
