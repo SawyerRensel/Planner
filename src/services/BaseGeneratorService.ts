@@ -30,14 +30,6 @@ export class BaseGeneratorService {
   }
 
   /**
-   * Get the path to the Gantt.base file
-   */
-  getGanttBasePath(): string {
-    const folder = this.getSettings().basesFolder.replace(/\/$/, '');
-    return normalizePath(`${folder}/Gantt.base`);
-  }
-
-  /**
    * Get the path to the Timeline.base file
    */
   getTimelineBasePath(): string {
@@ -58,14 +50,6 @@ export class BaseGeneratorService {
    */
   async calendarBaseExists(): Promise<boolean> {
     const path = this.getCalendarBasePath();
-    return this.app.vault.getAbstractFileByPath(path) instanceof TFile;
-  }
-
-  /**
-   * Check if the Gantt.base file exists
-   */
-  async ganttBaseExists(): Promise<boolean> {
-    const path = this.getGanttBasePath();
     return this.app.vault.getAbstractFileByPath(path) instanceof TFile;
   }
 
@@ -142,52 +126,6 @@ views:
       - note.title
     sort: []
     colorBy: note.calendar
-  - type: table
-    name: Table
-`;
-  }
-
-  /**
-   * Generate the Gantt.base file content
-   */
-  private generateGanttBaseContent(): string {
-    const settings = this.getSettings();
-    const sourceFolder = settings.itemsFolder.replace(/\/$/, '') + '/';
-
-    return `source: ${sourceFolder}
-properties:
-  note.title:
-    width: 250
-  note.date_start_scheduled:
-    width: 120
-  note.date_end_scheduled:
-    width: 120
-  note.progress:
-    width: 80
-  note.calendar:
-    width: 120
-  note.status:
-    width: 100
-  note.blocked_by:
-    width: 150
-views:
-  - type: planner-gantt
-    name: Gantt
-    order:
-      - note.title
-      - note.date_start_scheduled
-      - note.date_end_scheduled
-      - note.progress
-    sort:
-      - property: date_start_scheduled
-        direction: ASC
-    defaultZoom: month
-    colorBy: note.calendar
-    showProgress: true
-    showDependencies: true
-    autoScrollToday: true
-    showGanttTable: true
-    ganttTableWidth: 350
   - type: table
     name: Table
 `;
@@ -300,33 +238,6 @@ views:
   }
 
   /**
-   * Generate the Gantt.base file
-   * @param overwrite If true, overwrite existing file
-   * @returns true if file was created/updated, false if skipped
-   */
-  async generateGanttBase(overwrite: boolean = false): Promise<boolean> {
-    const path = this.getGanttBasePath();
-    const exists = await this.ganttBaseExists();
-
-    if (exists && !overwrite) {
-      return false;
-    }
-
-    await this.ensureBasesFolder();
-
-    const content = this.generateGanttBaseContent();
-
-    if (exists) {
-      const file = this.app.vault.getAbstractFileByPath(path) as TFile;
-      await this.app.vault.modify(file, content);
-    } else {
-      await this.app.vault.create(path, content);
-    }
-
-    return true;
-  }
-
-  /**
    * Generate the Timeline.base file
    * @param overwrite If true, overwrite existing file
    * @returns true if file was created/updated, false if skipped
@@ -357,11 +268,10 @@ views:
    * Generate all base files
    * @param overwrite If true, overwrite existing files
    */
-  async generateAllBases(overwrite: boolean = false): Promise<{ tasks: boolean; calendar: boolean; gantt: boolean; timeline: boolean }> {
+  async generateAllBases(overwrite: boolean = false): Promise<{ tasks: boolean; calendar: boolean; timeline: boolean }> {
     const tasks = await this.generateTasksBase(overwrite);
     const calendar = await this.generateCalendarBase(overwrite);
-    const gantt = await this.generateGanttBase(overwrite);
     const timeline = await this.generateTimelineBase(overwrite);
-    return { tasks, calendar, gantt, timeline };
+    return { tasks, calendar, timeline };
   }
 }

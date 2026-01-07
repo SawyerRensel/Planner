@@ -14,9 +14,9 @@
               "type": "bases",
               "state": {
                 "file": "Planner/Timeline.base",
-                "viewName": "Timeline"
+                "viewName": "Gantt"
               },
-              "icon": "calendar-range",
+              "icon": "gantt-chart",
               "title": "Timeline"
             }
           },

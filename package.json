@@ -14,7 +14,6 @@
     "calendar",
     "planner",
     "tasks",
-    "gantt",
     "kanban"
   ],
   "author": "Sawyer Rensel",
@@ -41,7 +40,6 @@
     "@markwhen/parser": "^0.16.7",
     "@markwhen/view-client": "^1.5.4",
     "chrono-node": "^2.9.0",
-    "dhtmlx-gantt": "^9.1.1",
     "rrule": "^2.8.1"
   }
 }

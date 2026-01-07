@@ -14,10 +14,6 @@ import {
   createCalendarViewRegistration,
 } from './views/BasesCalendarView';
 import {
-  BASES_GANTT_VIEW_ID,
-  createGanttViewRegistration,
-} from './views/BasesGanttView';
-import {
   BASES_TIMELINE_VIEW_ID,
   createTimelineViewRegistration,
 } from './views/BasesTimelineView';
@@ -61,10 +57,6 @@ export default class PlannerPlugin extends Plugin {
       this.activateCalendarView();
     });
 
-    this.addRibbonIcon('gantt-chart', 'Open Planner Gantt', () => {
-      this.activateGanttView();
-    });
-
     this.addRibbonIcon('calendar-range', 'Open Planner Timeline', () => {
       this.activateTimelineView();
     });
@@ -88,19 +80,13 @@ export default class PlannerPlugin extends Plugin {
       createCalendarViewRegistration(this)
     );
 
-    // Register Gantt view for Bases
-    const ganttRegistered = this.registerBasesView(
-      BASES_GANTT_VIEW_ID,
-      createGanttViewRegistration(this)
-    );
-
     // Register Timeline view for Bases
     const timelineRegistered = this.registerBasesView(
       BASES_TIMELINE_VIEW_ID,
       createTimelineViewRegistration(this)
     );
 
-    if (taskListRegistered || calendarRegistered || ganttRegistered || timelineRegistered) {
+    if (taskListRegistered || calendarRegistered || timelineRegistered) {
       console.log('Planner: Registered Bases views');
     } else {
       console.log('Planner: Bases not enabled, skipping Bases view registration');
@@ -154,15 +140,6 @@ export default class PlannerPlugin extends Plugin {
       },
     });
 
-    // Open Gantt view
-    this.addCommand({
-      id: 'open-gantt',
-      name: 'Open Gantt chart',
-      callback: () => {
-        this.activateGanttView();
-      },
-    });
-
     // Open Timeline view
     this.addCommand({
       id: 'open-timeline',
@@ -211,11 +188,6 @@ export default class PlannerPlugin extends Plugin {
     await this.openBaseFile(basePath, 'Calendar');
   }
 
-  async activateGanttView() {
-    const basePath = this.baseGeneratorService.getGanttBasePath();
-    await this.openBaseFile(basePath, 'Gantt');
-  }
-
   async activateTimelineView() {
     const basePath = this.baseGeneratorService.getTimelineBasePath();
     await this.openBaseFile(basePath, 'Timeline');
@@ -237,8 +209,6 @@ export default class PlannerPlugin extends Plugin {
         created = await this.baseGeneratorService.generateTasksBase(false);
       } else if (name === 'Calendar') {
         created = await this.baseGeneratorService.generateCalendarBase(false);
-      } else if (name === 'Gantt') {
-        created = await this.baseGeneratorService.generateGanttBase(false);
       } else if (name === 'Timeline') {
         created = await this.baseGeneratorService.generateTimelineBase(false);
       }
