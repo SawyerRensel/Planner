@@ -13,7 +13,7 @@ status: To-Do
 priority:
 progress:
 date_created: "2026-01-06T20:28:06.037Z"
-date_modified: "2026-01-06T20:28:06.037Z"
+date_modified: "2026-01-06T21:03:39.804Z"
 date_start_scheduled: 2026-01-05
 date_start_actual:
 date_end_scheduled: 2026-01-06
@@ -22,7 +22,7 @@ all_day: true
 repeat_frequency: monthly
 repeat_interval: 1
 repeat_until:
-repeat_count:
+repeat_count: 24
 repeat_byday:
   - MO
 repeat_bymonth:
@@ -35,4 +35,5 @@ blocked_by:
 cover:
 color:
 ---
+
 z

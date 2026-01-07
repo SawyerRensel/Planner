@@ -494,7 +494,7 @@ export class BasesTimelineView extends BasesView {
 export function createTimelineViewRegistration(plugin: PlannerPlugin): BasesViewRegistration {
   return {
     name: 'Timeline',
-    icon: 'calendar-range',
+    icon: 'square-chart-gantt',
     factory: (controller: QueryController, containerEl: HTMLElement) => {
       return new BasesTimelineView(controller, containerEl, plugin);
     },

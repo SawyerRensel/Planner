@@ -53,11 +53,11 @@ export default class PlannerPlugin extends Plugin {
       this.activateTaskListView();
     });
 
-    this.addRibbonIcon('calendar', 'Open Planner Calendar', () => {
+    this.addRibbonIcon('calendar-fold', 'Open Planner Calendar', () => {
       this.activateCalendarView();
     });
 
-    this.addRibbonIcon('calendar-range', 'Open Planner Timeline', () => {
+    this.addRibbonIcon('square-chart-gantt', 'Open Planner Timeline', () => {
       this.activateTimelineView();
     });
 

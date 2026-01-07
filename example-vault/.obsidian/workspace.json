@@ -8,19 +8,6 @@
         "type": "tabs",
         "children": [
           {
-            "id": "e2ec49b4a88da477",
-            "type": "leaf",
-            "state": {
-              "type": "bases",
-              "state": {
-                "file": "Planner/Calendar.base",
-                "viewName": "Calendar"
-              },
-              "icon": "calendar",
-              "title": "Calendar"
-            }
-          },
-          {
             "id": "a200b43c11a1b48c",
             "type": "leaf",
             "state": {
@@ -38,17 +25,30 @@
             "id": "71b87c1478dc5c57",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "bases",
               "state": {
-                "file": "notes/feedback-and-ideas.md",
-                "mode": "source",
-                "source": false
+                "file": "Planner/Calendar.base",
+                "viewName": "Calendar"
               },
-              "icon": "lucide-file",
-              "title": "feedback-and-ideas"
+              "icon": "calendar-fold",
+              "title": "Calendar"
+            }
+          },
+          {
+            "id": "831f2190fa7a3f0a",
+            "type": "leaf",
+            "state": {
+              "type": "bases",
+              "state": {
+                "file": "Planner/Timeline.base",
+                "viewName": "Timeline"
+              },
+              "icon": "square-chart-gantt",
+              "title": "Timeline"
             }
           }
-        ]
+        ],
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -207,7 +207,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 261.5
+    "width": 261.5,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -225,14 +226,14 @@
       "planner:Open Planner Timeline": false
     }
   },
-  "active": "e2ec49b4a88da477",
+  "active": "831f2190fa7a3f0a",
   "lastOpenFiles": [
-    "notes/feedback-and-ideas.md",
     "Planner/Calendar.base",
     "Personal/FirstMonday.md",
+    "Planner/Timeline.base",
+    "notes/feedback-and-ideas.md",
     "Personal/test.md",
     "Personal/testing.md",
-    "Planner/Timeline.base",
     "Personal/test 1.md",
     "Planner/Grocery Shopping.md",
     "Personal/RecurringExample.md",

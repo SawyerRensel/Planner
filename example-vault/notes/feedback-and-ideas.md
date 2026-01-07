@@ -50,7 +50,7 @@
 - [x] Ability to add folders to each Calendar in Settings.  If a folder is specified, this overrides the global Planner folder for that Calendar.  Fallback to global Planner folder when none is specified.
 - [ ] ~~Planner.  Tags, and colors for tags.  Similar to folders.  Any note that has a tag in Included Tags and has date_start_scheduled and date_end_scheduled gets rendered on the Calendar.~~
 	- *This can be accomplished through Bases.  I should actually remove the identify configuration options in Settings because they don't do anything anyway. *
-- [ ] Whenever a user creates a new calendar in Planner Settings, let's add the next Solarized Accent Color for it as the default color (the user should still be able to customize their calendar colors).  There are 8 accent colors.  Use the index number of the created Calendar to determine which accent color to apply.  
+- [x] Whenever a user creates a new calendar in Planner Settings, let's add the next Solarized Accent Color for it as the default color (the user should still be able to customize their calendar colors).  There are 8 accent colors.  Use the index number of the created Calendar to determine which accent color to apply.  
 
 ## Gantt View
 
@@ -69,7 +69,7 @@
 - [ ] Colors aren't working
 - [ ] Item frontmatter isn't getting pulled into the Item Modal when clicking on a bar to edit the Item.  
 - [ ] Add another config menu for "Sections by" with options including `calendar`, `status`, `priority`, `folder`, etc.
-- [ ] start and end times are generally not consistent between Timeline View and Calendar View when compared with the actual frontmatter in the note itself.
+- [ ] Remove Group by and Color by menus from the action row in Timeline View.  Let's move/keep these menus in the Timeline View Configuration menu. 
 
 ## Other
 
