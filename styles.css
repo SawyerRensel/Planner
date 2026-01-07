@@ -1160,6 +1160,41 @@
   color: var(--text-muted);
 }
 
+/* Nth Weekday Selector */
+.planner-nth-weekday-selector {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.planner-nth-weekday-selector select {
+  padding: 6px 10px;
+  font-size: 13px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  cursor: pointer;
+}
+
+.planner-nth-weekday-selector select:hover {
+  border-color: var(--interactive-accent);
+}
+
+.planner-nth-weekday-selector select:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 2px var(--background-modifier-border-focus);
+}
+
+.planner-nth-position-select {
+  min-width: 90px;
+}
+
+.planner-nth-day-select {
+  min-width: 120px;
+}
+
 /* Summary Input */
 .planner-summary-container {
   margin-bottom: 16px;
