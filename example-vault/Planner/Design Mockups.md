@@ -5,6 +5,7 @@ tags:
   - task
 calendar:
   - Work
+  - Personal
 context:
   - office
 people:

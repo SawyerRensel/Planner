@@ -36,7 +36,7 @@ parent:
 children:
 blocked_by:
 cover:
-color:
+color: d33682
 ---
 
 ## Agenda

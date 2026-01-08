@@ -46,6 +46,21 @@ export interface AdaptedResult {
 }
 
 /**
+ * Solarized Accent Colors (in RGB format for Timeline)
+ * Used for fields without predefined colors in settings
+ */
+const SOLARIZED_ACCENT_COLORS = [
+  '181, 137, 0',   // yellow
+  '203, 75, 22',   // orange
+  '220, 50, 47',   // red
+  '211, 54, 130',  // magenta
+  '108, 113, 196', // violet
+  '38, 139, 210',  // blue
+  '42, 161, 152',  // cyan
+  '133, 153, 0',   // green
+];
+
+/**
  * Adapter class for converting BasesEntry to Markwhen format
  */
 export class MarkwhenAdapter {
@@ -411,6 +426,12 @@ export class MarkwhenAdapter {
       calendar: 'note.calendar',
       status: 'note.status',
       priority: 'note.priority',
+      parent: 'note.parent',
+      people: 'note.people',
+      tags: 'note.tags',
+      context: 'note.context',
+      location: 'note.location',
+      color: 'note.color',
     };
 
     const field = fieldMap[sectionsBy as Exclude<TimelineSectionsBy, 'none' | 'folder'>];
@@ -420,7 +441,7 @@ export class MarkwhenAdapter {
     if (!value) return 'Unsectioned';
 
     if (Array.isArray(value)) {
-      return value[0]?.toString() || 'Unsectioned';
+      return value[0]?.toString().replace(/^#/, '') || 'Unsectioned';
     }
 
     return value.toString();
@@ -432,23 +453,32 @@ export class MarkwhenAdapter {
   private getGroupValue(entry: BasesEntry, groupBy: TimelineGroupBy): string | undefined {
     if (groupBy === 'none') return undefined;
 
-    const fieldMap: Record<TimelineGroupBy, string> = {
-      none: '',
+    if (groupBy === 'folder') {
+      // Get the parent folder path
+      const folderPath = entry.file.parent?.path || '/';
+      return folderPath === '/' ? 'Root' : entry.file.parent?.name || 'Root';
+    }
+
+    const fieldMap: Record<Exclude<TimelineGroupBy, 'none' | 'folder'>, string> = {
       calendar: 'note.calendar',
       status: 'note.status',
+      priority: 'note.priority',
       parent: 'note.parent',
       people: 'note.people',
-      priority: 'note.priority',
+      tags: 'note.tags',
+      context: 'note.context',
+      location: 'note.location',
+      color: 'note.color',
     };
 
-    const field = fieldMap[groupBy];
+    const field = fieldMap[groupBy as Exclude<TimelineGroupBy, 'none' | 'folder'>];
     if (!field) return undefined;
 
     const value = entry.getValue(field);
     if (!value) return 'Ungrouped';
 
     if (Array.isArray(value)) {
-      return value[0]?.toString() || 'Ungrouped';
+      return value[0]?.toString().replace(/^#/, '') || 'Ungrouped';
     }
 
     return value.toString();
@@ -459,11 +489,19 @@ export class MarkwhenAdapter {
    * The Timeline looks for tags[0] in the colorMap to determine event color
    */
   private getColorTag(entry: BasesEntry, colorBy: TimelineColorBy): string | undefined {
+    if (colorBy === 'none') return undefined;
+
+    // Special handling for folder
+    if (colorBy === 'note.folder') {
+      const folderPath = entry.file.parent?.path || '/';
+      return folderPath === '/' ? 'Root' : entry.file.parent?.name || 'Root';
+    }
+
     const value = entry.getValue(colorBy);
     if (!value) return undefined;
 
     if (Array.isArray(value)) {
-      return value[0]?.toString();
+      return value[0]?.toString().replace(/^#/, '');
     }
 
     return value.toString();
@@ -699,23 +737,66 @@ export class MarkwhenAdapter {
     colorBy: TimelineColorBy
   ): Record<string, Record<string, string>> {
     const innerMap: Record<string, string> = {};
+
+    if (colorBy === 'none') {
+      return { default: innerMap };
+    }
+
     const fieldName = colorBy.replace(/^note\./, '');
 
+    // Fields with colors defined in settings
     if (fieldName === 'calendar') {
-      // Use calendar colors from settings
       for (const [name, config] of Object.entries(this.settings.calendars)) {
         innerMap[name] = this.hexToRgb(config.color);
       }
     } else if (fieldName === 'priority') {
-      // Use priority colors from settings
       for (const priority of this.settings.priorities) {
         innerMap[priority.name] = this.hexToRgb(priority.color);
       }
     } else if (fieldName === 'status') {
-      // Use status colors from settings
       for (const status of this.settings.statuses) {
         innerMap[status.name] = this.hexToRgb(status.color);
       }
+    } else if (fieldName === 'color') {
+      // For color field: use actual hex values from notes
+      for (const entry of entries) {
+        const colorValue = entry.getValue('note.color');
+        if (colorValue) {
+          const colorStr = colorValue.toString();
+          // The color value itself is the key, and we convert it to RGB
+          innerMap[colorStr] = this.hexToRgb(colorStr);
+        }
+      }
+    } else {
+      // For other fields (parent, people, folder, tags, context, location)
+      // Collect unique values and assign Solarized accent colors
+      const uniqueValues = new Set<string>();
+
+      for (const entry of entries) {
+        let value: unknown;
+
+        if (fieldName === 'folder') {
+          const folderPath = entry.file.parent?.path || '/';
+          value = folderPath === '/' ? 'Root' : entry.file.parent?.name || 'Root';
+        } else {
+          value = entry.getValue(colorBy);
+        }
+
+        if (value) {
+          if (Array.isArray(value)) {
+            const firstVal = value[0]?.toString().replace(/^#/, '');
+            if (firstVal) uniqueValues.add(firstVal);
+          } else {
+            uniqueValues.add(value.toString());
+          }
+        }
+      }
+
+      // Assign Solarized accent colors to unique values
+      const sortedValues = Array.from(uniqueValues).sort();
+      sortedValues.forEach((value, index) => {
+        innerMap[value] = SOLARIZED_ACCENT_COLORS[index % SOLARIZED_ACCENT_COLORS.length];
+      });
     }
 
     // Timeline expects colorMap["default"][tagName] = "r, g, b"

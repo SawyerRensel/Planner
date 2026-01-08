@@ -48,6 +48,20 @@
             }
           },
           {
+            "id": "0e2ac244702038f1",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Planner/Team Meeting.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Team Meeting"
+            }
+          },
+          {
             "id": "20ecf90280fefffa",
             "type": "leaf",
             "state": {
@@ -62,7 +76,7 @@
             }
           }
         ],
-        "currentTab": 3
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -239,12 +253,13 @@
       "planner:Open Planner Timeline": false
     }
   },
-  "active": "20ecf90280fefffa",
+  "active": "e8eb619b4813ce8c",
   "lastOpenFiles": [
+    "Planner/Team Meeting.md",
     "Planner/Timeline.base",
+    "Planner/Design Mockups.md",
     "Planner/Website Redesign.md",
     "Planner/Vacation.md",
-    "Planner/Team Meeting.md",
     "Planner/Meeting.md",
     "Planner/Implement Frontend.md",
     "notes/feedback-and-ideas.md",
@@ -258,7 +273,6 @@
     "Work",
     "Personal/Test.md",
     "Personal",
-    "Planner/Design Mockups.md",
     "Planner/Fix Login Bug.md",
     "Screenshot_20260105-200533.png",
     "Markwhen/Markwhen 1-5-2026 19.42.51.mw",

@@ -55,7 +55,10 @@ export class BasesTimelineView extends BasesView {
   // Configuration getters
   private getGroupBy(): TimelineGroupBy {
     const value = this.config?.get('groupBy') as string | undefined;
-    const validValues: TimelineGroupBy[] = ['none', 'calendar', 'status', 'parent', 'people', 'priority'];
+    const validValues: TimelineGroupBy[] = [
+      'none', 'calendar', 'status', 'priority', 'parent', 'people',
+      'folder', 'tags', 'context', 'location', 'color'
+    ];
     if (value && validValues.includes(value as TimelineGroupBy)) {
       return value as TimelineGroupBy;
     }
@@ -64,7 +67,10 @@ export class BasesTimelineView extends BasesView {
 
   private getSectionsBy(): TimelineSectionsBy {
     const value = this.config?.get('sectionsBy') as string | undefined;
-    const validValues: TimelineSectionsBy[] = ['none', 'calendar', 'status', 'priority', 'folder'];
+    const validValues: TimelineSectionsBy[] = [
+      'none', 'calendar', 'status', 'priority', 'parent', 'people',
+      'folder', 'tags', 'context', 'location', 'color'
+    ];
     if (value && validValues.includes(value as TimelineSectionsBy)) {
       return value as TimelineSectionsBy;
     }
@@ -73,8 +79,12 @@ export class BasesTimelineView extends BasesView {
 
   private getColorBy(): TimelineColorBy {
     const value = this.config?.get('colorBy') as string | undefined;
-    if (value === 'note.priority' || value === 'note.status') {
-      return value;
+    const validValues: TimelineColorBy[] = [
+      'none', 'note.calendar', 'note.status', 'note.priority', 'note.parent',
+      'note.people', 'note.folder', 'note.tags', 'note.context', 'note.location', 'note.color'
+    ];
+    if (value && validValues.includes(value as TimelineColorBy)) {
+      return value as TimelineColorBy;
     }
     return 'note.calendar';
   }
@@ -439,7 +449,13 @@ export function createTimelineViewRegistration(plugin: PlannerPlugin): BasesView
           calendar: 'Calendar',
           status: 'Status',
           priority: 'Priority',
+          parent: 'Parent',
+          people: 'People',
           folder: 'Folder',
+          tags: 'Tags',
+          context: 'Context',
+          location: 'Location',
+          color: 'Color',
         },
       },
       {
@@ -454,6 +470,11 @@ export function createTimelineViewRegistration(plugin: PlannerPlugin): BasesView
           priority: 'Priority',
           parent: 'Parent',
           people: 'People',
+          folder: 'Folder',
+          tags: 'Tags',
+          context: 'Context',
+          location: 'Location',
+          color: 'Color',
         },
       },
       {
@@ -462,9 +483,17 @@ export function createTimelineViewRegistration(plugin: PlannerPlugin): BasesView
         displayName: 'Color by',
         default: 'note.calendar',
         options: {
+          none: 'None',
           'note.calendar': 'Calendar',
-          'note.priority': 'Priority',
           'note.status': 'Status',
+          'note.priority': 'Priority',
+          'note.parent': 'Parent',
+          'note.people': 'People',
+          'note.folder': 'Folder',
+          'note.tags': 'Tags',
+          'note.context': 'Context',
+          'note.location': 'Location',
+          'note.color': 'Color',
         },
       },
       {

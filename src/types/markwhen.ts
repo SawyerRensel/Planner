@@ -203,21 +203,40 @@ export type TimelineGroupBy =
   | 'none'
   | 'calendar'
   | 'status'
+  | 'priority'
   | 'parent'
   | 'people'
-  | 'priority';
+  | 'folder'
+  | 'tags'
+  | 'context'
+  | 'location'
+  | 'color';
 
 export type TimelineSectionsBy =
   | 'none'
   | 'calendar'
   | 'status'
   | 'priority'
-  | 'folder';
+  | 'parent'
+  | 'people'
+  | 'folder'
+  | 'tags'
+  | 'context'
+  | 'location'
+  | 'color';
 
 export type TimelineColorBy =
+  | 'none'
   | 'note.calendar'
+  | 'note.status'
   | 'note.priority'
-  | 'note.status';
+  | 'note.parent'
+  | 'note.people'
+  | 'note.folder'
+  | 'note.tags'
+  | 'note.context'
+  | 'note.location'
+  | 'note.color';
 
 export interface TimelineViewConfig {
   groupBy: TimelineGroupBy;
