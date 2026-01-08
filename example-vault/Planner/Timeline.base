@@ -25,9 +25,9 @@ views:
     sort:
       - property: date_start_scheduled
         direction: ASC
-    colorBy: note.status
+    colorBy: note.calendar
     titleField: note.title
-    sectionsBy: folder
+    sectionsBy: calendar
   - type: table
     name: Table
   - type: planner-calendar

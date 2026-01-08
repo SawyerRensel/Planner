@@ -22,6 +22,20 @@ export const BASES_CALENDAR_VIEW_ID = 'planner-calendar';
 type CalendarViewType = 'multiMonthYear' | 'dayGridYear' | 'dayGridMonth' | 'timeGridWeek' | 'timeGridThreeDay' | 'timeGridDay' | 'listWeek';
 
 /**
+ * Solarized Accent Colors (for fields without predefined colors)
+ */
+const SOLARIZED_ACCENT_COLORS = [
+  '#b58900', // yellow
+  '#cb4b16', // orange
+  '#dc322f', // red
+  '#d33682', // magenta
+  '#6c71c4', // violet
+  '#268bd2', // blue
+  '#2aa198', // cyan
+  '#859900', // green
+];
+
+/**
  * Calendar view for Obsidian Bases
  * Displays items on a full calendar using FullCalendar's built-in headerToolbar
  */
@@ -34,11 +48,16 @@ export class BasesCalendarView extends BasesView {
   private currentView: CalendarViewType | null = null; // null means use config default
   private resizeObserver: ResizeObserver | null = null;
   private yearViewSplit: boolean = true; // true = multiMonthYear (split), false = dayGridYear (continuous)
+  private colorMapCache: Record<string, string> = {}; // Cache for color assignments
 
-  private getColorByField(): 'note.calendar' | 'note.priority' | 'note.status' {
+  private getColorByField(): 'none' | 'note.calendar' | 'note.priority' | 'note.status' | 'note.parent' | 'note.people' | 'note.folder' | 'note.tags' | 'note.context' | 'note.location' | 'note.color' {
     const value = this.config.get('colorBy') as string | undefined;
-    if (value === 'note.priority' || value === 'note.status') {
-      return value;
+    const validValues = [
+      'none', 'note.calendar', 'note.status', 'note.priority', 'note.parent',
+      'note.people', 'note.folder', 'note.tags', 'note.context', 'note.location', 'note.color'
+    ];
+    if (value && validValues.includes(value)) {
+      return value as any;
     }
     return 'note.calendar'; // default
   }
@@ -133,6 +152,9 @@ export class BasesCalendarView extends BasesView {
     } else {
       this.calendarEl.empty();
     }
+
+    // Build color map cache before initializing calendar
+    this.buildColorMapCache();
 
     if (this.calendarEl) {
       this.initCalendar(currentDate, currentViewType);
@@ -392,6 +414,49 @@ export class BasesCalendarView extends BasesView {
       const activeBtn = this.calendarEl.querySelector(activeSelector);
       activeBtn?.classList.add('fc-button-active');
     }
+  }
+
+  /**
+   * Build color map cache for fields that need auto-assigned colors
+   */
+  private buildColorMapCache(): void {
+    this.colorMapCache = {};
+    const colorByField = this.getColorByField();
+
+    // Only build cache for fields that need auto-assigned colors
+    const needsCache = ['note.parent', 'note.people', 'note.folder', 'note.tags', 'note.context', 'note.location'];
+    if (!needsCache.includes(colorByField)) {
+      return;
+    }
+
+    // Collect all unique values
+    const uniqueValues = new Set<string>();
+    for (const group of this.data.groupedData) {
+      for (const entry of group.entries) {
+        let value: unknown;
+        if (colorByField === 'note.folder') {
+          const folderPath = entry.file.parent?.path || '/';
+          value = folderPath === '/' ? 'Root' : entry.file.parent?.name || 'Root';
+        } else {
+          value = entry.getValue(colorByField as any);
+        }
+
+        if (value) {
+          if (Array.isArray(value)) {
+            const firstVal = value[0]?.toString();
+            if (firstVal) uniqueValues.add(firstVal);
+          } else {
+            uniqueValues.add(value.toString());
+          }
+        }
+      }
+    }
+
+    // Sort and assign Solarized colors
+    const sortedValues = Array.from(uniqueValues).sort();
+    sortedValues.forEach((value, index) => {
+      this.colorMapCache[value] = SOLARIZED_ACCENT_COLORS[index % SOLARIZED_ACCENT_COLORS.length];
+    });
   }
 
   /**
@@ -847,12 +912,36 @@ export class BasesCalendarView extends BasesView {
   }
 
   private getEntryColor(entry: BasesEntry, colorByProp: string): string {
-    const value = entry.getValue(colorByProp as any);
-
-    if (!value) return '#6b7280';
+    // Handle 'none' option
+    if (colorByProp === 'none') {
+      return '#6b7280'; // default gray
+    }
 
     const propName = colorByProp.split('.')[1];
 
+    // Handle 'color' field - use actual hex value from note
+    if (propName === 'color') {
+      const colorValue = entry.getValue(colorByProp as any);
+      if (colorValue) {
+        const colorStr = colorValue.toString();
+        // Ensure it starts with #
+        return colorStr.startsWith('#') ? colorStr : `#${colorStr}`;
+      }
+      return '#6b7280';
+    }
+
+    // Handle 'folder' field specially
+    if (propName === 'folder') {
+      const folderPath = entry.file.parent?.path || '/';
+      const folderName = folderPath === '/' ? 'Root' : entry.file.parent?.name || 'Root';
+      return this.colorMapCache[folderName] ?? '#6b7280';
+    }
+
+    // Get the value
+    const value = entry.getValue(colorByProp as any);
+    if (!value) return '#6b7280';
+
+    // Handle fields with colors defined in settings
     if (propName === 'calendar') {
       const calendarName = Array.isArray(value) ? value[0] : String(value);
       return this.plugin.settings.calendars[calendarName]?.color ?? '#6b7280';
@@ -866,6 +955,14 @@ export class BasesCalendarView extends BasesView {
     if (propName === 'status') {
       const status = this.plugin.settings.statuses.find(s => s.name === String(value));
       return status?.color ?? '#6b7280';
+    }
+
+    // Handle fields with auto-assigned Solarized colors
+    if (['parent', 'people', 'tags', 'context', 'location'].includes(propName)) {
+      const valueStr = Array.isArray(value) ? value[0]?.toString() : value.toString();
+      if (valueStr) {
+        return this.colorMapCache[valueStr] ?? '#6b7280';
+      }
     }
 
     return '#6b7280';
@@ -1192,9 +1289,17 @@ export function createCalendarViewRegistration(plugin: PlannerPlugin): BasesView
         displayName: 'Color by',
         default: 'note.calendar',
         options: {
+          none: 'None',
           'note.calendar': 'Calendar',
-          'note.priority': 'Priority',
           'note.status': 'Status',
+          'note.priority': 'Priority',
+          'note.parent': 'Parent',
+          'note.people': 'People',
+          'note.folder': 'Folder',
+          'note.tags': 'Tags',
+          'note.context': 'Context',
+          'note.location': 'Location',
+          'note.color': 'Color',
         },
       },
       {
