@@ -66,10 +66,10 @@
 
 ## Timeline View
 
-- [ ] Colors aren't working in Timeline View.
+- [x] Colors aren't working in Timeline View.
 - [ ] Item frontmatter isn't getting pulled into the Item Modal when clicking on a bar to edit the Item.  
-- [ ] Add another config menu for "Sections by" with options including `calendar`, `status`, `priority`, `folder`, etc.
 - [ ] Remove Group by and Color by menus from the action row in Timeline View.  Let's move/keep these menus in the Timeline View Configuration menu. 
+- [ ] Add another Timeline View configuration menu  for "Sections by" with options including `calendar`, `status`, `priority`, `folder`, etc.
 
 ## Other
 

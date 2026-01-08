@@ -8,6 +8,7 @@ calendar:
 context:
   - office
 people:
+  - Michelle
 location:
 related:
 status: In-Progress

@@ -27,6 +27,7 @@ views:
         direction: ASC
     colorBy: note.calendar
     titleField: note.title
+    sectionsBy: none
   - type: table
     name: Table
   - type: planner-calendar

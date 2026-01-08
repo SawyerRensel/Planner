@@ -15,6 +15,7 @@ import {
   RangeType,
   TimelineEvent,
   TimelineGroupBy,
+  TimelineSectionsBy,
   TimelineColorBy,
   PathMapping,
   EventPath,
@@ -28,6 +29,7 @@ import type { PlannerItem, DayOfWeek } from '../types/item';
  */
 export interface AdapterOptions {
   groupBy: TimelineGroupBy;
+  sectionsBy: TimelineSectionsBy;
   colorBy: TimelineColorBy;
   dateStartField: string;
   dateEndField: string;
@@ -67,8 +69,8 @@ export class MarkwhenAdapter {
     // Convert entries to timeline events
     const timelineEvents = this.entriesToTimelineEvents(entries, options);
 
-    // Group events if needed
-    const rootGroup = this.buildEventGroups(timelineEvents, options.groupBy);
+    // Build event hierarchy (sections and/or groups)
+    const rootGroup = this.buildEventHierarchy(timelineEvents, options);
 
     // Build the ParseResult structure
     const parseResult = this.buildParseResult(rootGroup);
@@ -304,7 +306,8 @@ export class MarkwhenAdapter {
     const statusValue = entry.getValue('note.status');
     const completed = this.isCompletedStatus(String(statusValue || ''));
 
-    // Get group value
+    // Get section and group values
+    const sectionValue = this.getSectionValue(entry, options.sectionsBy);
     const groupValue = this.getGroupValue(entry, options.groupBy);
 
     // Build properties object
@@ -343,6 +346,7 @@ export class MarkwhenAdapter {
       percent,
       completed,
       properties,
+      sectionValue,
       groupValue,
       recurrence,
     };
@@ -392,6 +396,37 @@ export class MarkwhenAdapter {
   }
 
   /**
+   * Get the value to section by for an entry
+   */
+  private getSectionValue(entry: BasesEntry, sectionsBy: TimelineSectionsBy): string | undefined {
+    if (sectionsBy === 'none') return undefined;
+
+    if (sectionsBy === 'folder') {
+      // Get the parent folder path
+      const folderPath = entry.file.parent?.path || '/';
+      return folderPath === '/' ? 'Root' : entry.file.parent?.name || 'Root';
+    }
+
+    const fieldMap: Record<Exclude<TimelineSectionsBy, 'none' | 'folder'>, string> = {
+      calendar: 'note.calendar',
+      status: 'note.status',
+      priority: 'note.priority',
+    };
+
+    const field = fieldMap[sectionsBy as Exclude<TimelineSectionsBy, 'none' | 'folder'>];
+    if (!field) return undefined;
+
+    const value = entry.getValue(field);
+    if (!value) return 'Unsectioned';
+
+    if (Array.isArray(value)) {
+      return value[0]?.toString() || 'Unsectioned';
+    }
+
+    return value.toString();
+  }
+
+  /**
    * Get the value to group by for an entry
    */
   private getGroupValue(entry: BasesEntry, groupBy: TimelineGroupBy): string | undefined {
@@ -435,11 +470,11 @@ export class MarkwhenAdapter {
   }
 
   /**
-   * Build event groups from timeline events
+   * Build event hierarchy with sections and/or groups
    */
-  private buildEventGroups(
+  private buildEventHierarchy(
     events: TimelineEvent[],
-    groupBy: TimelineGroupBy
+    options: AdapterOptions
   ): EventGroup {
     const rootGroup: EventGroup = {
       textRanges: {
@@ -453,17 +488,56 @@ export class MarkwhenAdapter {
       children: [],
     };
 
+    if (options.sectionsBy === 'none') {
+      // No sections - just build groups
+      this.buildGroupsIntoContainer(rootGroup, events, options.groupBy, []);
+    } else {
+      // Build sections, then groups within each section
+      const sections = new Map<string, TimelineEvent[]>();
+
+      for (const event of events) {
+        const sectionValue = event.sectionValue || 'Unsectioned';
+        if (!sections.has(sectionValue)) {
+          sections.set(sectionValue, []);
+        }
+        sections.get(sectionValue)!.push(event);
+      }
+
+      // Sort sections alphabetically
+      const sortedSectionNames = Array.from(sections.keys()).sort();
+
+      let sectionIndex = 0;
+      for (const sectionName of sortedSectionNames) {
+        const sectionEvents = sections.get(sectionName)!;
+        const section = this.createSection(sectionName, sectionEvents, options.groupBy, [sectionIndex]);
+        rootGroup.children.push(section);
+        sectionIndex++;
+      }
+    }
+
+    return rootGroup;
+  }
+
+  /**
+   * Build groups into a container (root or section)
+   */
+  private buildGroupsIntoContainer(
+    container: EventGroup,
+    events: TimelineEvent[],
+    groupBy: TimelineGroupBy,
+    pathPrefix: number[]
+  ): void {
     if (groupBy === 'none') {
       // No grouping - add all events directly
-      let pathIndex = 0;
+      let eventIndex = 0;
       for (const event of events) {
         const mwEvent = this.timelineEventToMarkwhenEvent(event);
-        rootGroup.children.push(mwEvent);
+        container.children.push(mwEvent);
         this.pathMappings.push({
-          path: [pathIndex],
+          path: [...pathPrefix, eventIndex],
           filePath: event.filePath,
         });
-        pathIndex++;
+        eventIndex++;
       }
     } else {
       // Group events by the specified field
@@ -483,13 +557,44 @@ export class MarkwhenAdapter {
       let groupIndex = 0;
       for (const groupName of sortedGroupNames) {
         const groupEvents = groups.get(groupName)!;
-        const eventGroup = this.createEventGroup(groupName, groupEvents, groupIndex);
-        rootGroup.children.push(eventGroup);
+        const eventGroup = this.createEventGroup(groupName, groupEvents, [...pathPrefix, groupIndex]);
+        container.children.push(eventGroup);
         groupIndex++;
       }
     }
+  }
 
-    return rootGroup;
+  /**
+   * Create a Section from a section name and events
+   * Sections can contain groups
+   */
+  private createSection(
+    name: string,
+    events: TimelineEvent[],
+    groupBy: TimelineGroupBy,
+    pathPrefix: number[]
+  ): EventGroup {
+    // Add the section name as a tag so the section header gets colored
+    const tags = name !== 'Unsectioned' ? [name] : [];
+
+    const section: EventGroup = {
+      textRanges: {
+        whole: { from: 0, to: 0, type: RangeType.Section },
+        definition: { from: 0, to: 0, type: RangeType.SectionDefinition },
+      },
+      properties: {},
+      propOrder: [],
+      tags,
+      title: name,
+      startExpanded: true,
+      style: 'section', // Mark as section (spans full timeline width)
+      children: [],
+    };
+
+    // Build groups within this section
+    this.buildGroupsIntoContainer(section, events, groupBy, pathPrefix);
+
+    return section;
   }
 
   /**
@@ -498,7 +603,7 @@ export class MarkwhenAdapter {
   private createEventGroup(
     name: string,
     events: TimelineEvent[],
-    groupIndex: number
+    pathPrefix: number[]
   ): EventGroup {
     // Add the group name as a tag so the group header gets colored
     const tags = name !== 'Ungrouped' ? [name] : [];
@@ -513,6 +618,7 @@ export class MarkwhenAdapter {
       tags,
       title: name,
       startExpanded: true,
+      style: 'group', // Mark as group (contained within timeline)
       children: [],
     };
 
@@ -521,7 +627,7 @@ export class MarkwhenAdapter {
       const mwEvent = this.timelineEventToMarkwhenEvent(event);
       group.children.push(mwEvent);
       this.pathMappings.push({
-        path: [groupIndex, eventIndex],
+        path: [...pathPrefix, eventIndex],
         filePath: event.filePath,
       });
       eventIndex++;

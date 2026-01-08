@@ -19,6 +19,7 @@ import { MarkwhenAdapter, AdapterOptions } from '../services/MarkwhenAdapter';
 import { LpcHost, LpcCallbacks } from '../services/LpcHost';
 import {
   TimelineGroupBy,
+  TimelineSectionsBy,
   TimelineColorBy,
   MarkwhenState,
   AppState,
@@ -41,7 +42,6 @@ export class BasesTimelineView extends BasesView {
   type = BASES_TIMELINE_VIEW_ID;
   private plugin: PlannerPlugin;
   private containerEl: HTMLElement;
-  private toolbarEl: HTMLElement | null = null;
   private iframeContainer: HTMLElement | null = null;
   private iframe: HTMLIFrameElement | null = null;
   private adapter: MarkwhenAdapter;
@@ -60,6 +60,15 @@ export class BasesTimelineView extends BasesView {
       return value as TimelineGroupBy;
     }
     return 'calendar';
+  }
+
+  private getSectionsBy(): TimelineSectionsBy {
+    const value = this.config?.get('sectionsBy') as string | undefined;
+    const validValues: TimelineSectionsBy[] = ['none', 'calendar', 'status', 'priority', 'folder'];
+    if (value && validValues.includes(value as TimelineSectionsBy)) {
+      return value as TimelineSectionsBy;
+    }
+    return 'none';
   }
 
   private getColorBy(): TimelineColorBy {
@@ -128,7 +137,7 @@ export class BasesTimelineView extends BasesView {
   }
 
   /**
-   * Set up the container with toolbar and iframe
+   * Set up the container with iframe
    */
   private setupContainer(): void {
     console.log('Timeline: setupContainer() called');
@@ -136,9 +145,6 @@ export class BasesTimelineView extends BasesView {
     // Clear container
     this.containerEl.empty();
     this.containerEl.addClass('planner-bases-timeline');
-
-    // Build toolbar
-    this.buildToolbar();
 
     // Build iframe container
     this.buildIframeContainer();
@@ -155,83 +161,6 @@ export class BasesTimelineView extends BasesView {
   onDataUpdated(): void {
     console.log('Timeline: onDataUpdated() called');
     this.render();
-  }
-
-  /**
-   * Build the toolbar
-   */
-  private buildToolbar(): void {
-    this.toolbarEl = this.containerEl.createDiv('planner-timeline-toolbar');
-
-    // Group By dropdown
-    const groupByContainer = this.toolbarEl.createDiv('planner-timeline-toolbar-item');
-    groupByContainer.createSpan({ text: 'Group: ', cls: 'planner-timeline-label' });
-    const groupBySelect = groupByContainer.createEl('select', { cls: 'planner-timeline-select' });
-
-    const groupOptions: { value: TimelineGroupBy; label: string }[] = [
-      { value: 'none', label: 'None' },
-      { value: 'calendar', label: 'Calendar' },
-      { value: 'status', label: 'Status' },
-      { value: 'priority', label: 'Priority' },
-      { value: 'parent', label: 'Parent' },
-      { value: 'people', label: 'People' },
-    ];
-
-    const currentGroupBy = this.getGroupBy();
-    for (const opt of groupOptions) {
-      const option = groupBySelect.createEl('option', {
-        value: opt.value,
-        text: opt.label,
-      });
-      if (opt.value === currentGroupBy) {
-        option.selected = true;
-      }
-    }
-
-    groupBySelect.addEventListener('change', () => {
-      this.config?.set('groupBy', groupBySelect.value);
-      this.updateTimeline();
-    });
-
-    // Color By dropdown
-    const colorByContainer = this.toolbarEl.createDiv('planner-timeline-toolbar-item');
-    colorByContainer.createSpan({ text: 'Color: ', cls: 'planner-timeline-label' });
-    const colorBySelect = colorByContainer.createEl('select', { cls: 'planner-timeline-select' });
-
-    const colorOptions: { value: TimelineColorBy; label: string }[] = [
-      { value: 'note.calendar', label: 'Calendar' },
-      { value: 'note.priority', label: 'Priority' },
-      { value: 'note.status', label: 'Status' },
-    ];
-
-    const currentColorBy = this.getColorBy();
-    for (const opt of colorOptions) {
-      const option = colorBySelect.createEl('option', {
-        value: opt.value,
-        text: opt.label,
-      });
-      if (opt.value === currentColorBy) {
-        option.selected = true;
-      }
-    }
-
-    colorBySelect.addEventListener('change', () => {
-      this.config?.set('colorBy', colorBySelect.value);
-      this.updateTimeline();
-    });
-
-    // Spacer
-    this.toolbarEl.createDiv('planner-timeline-spacer');
-
-    // Add Item button
-    const addBtn = this.toolbarEl.createEl('button', {
-      cls: 'planner-timeline-btn',
-      attr: { 'aria-label': 'Add item' },
-    });
-    setIcon(addBtn, 'plus');
-    addBtn.addEventListener('click', () => {
-      openItemModal(this.plugin, { mode: 'create' });
-    });
   }
 
   /**
@@ -328,6 +257,7 @@ export class BasesTimelineView extends BasesView {
     // Build adapter options
     const options: AdapterOptions = {
       groupBy: this.getGroupBy(),
+      sectionsBy: this.getSectionsBy(),
       colorBy: this.getColorBy(),
       dateStartField: this.getDateStartField(),
       dateEndField: this.getDateEndField(),
@@ -499,6 +429,19 @@ export function createTimelineViewRegistration(plugin: PlannerPlugin): BasesView
       return new BasesTimelineView(controller, containerEl, plugin);
     },
     options: () => [
+      {
+        type: 'dropdown',
+        key: 'sectionsBy',
+        displayName: 'Sections by',
+        default: 'none',
+        options: {
+          none: 'None',
+          calendar: 'Calendar',
+          status: 'Status',
+          priority: 'Priority',
+          folder: 'Folder',
+        },
+      },
       {
         type: 'dropdown',
         key: 'groupBy',

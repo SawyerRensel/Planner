@@ -8,6 +8,8 @@ calendar:
 context:
   - office
 people:
+  - Bob
+  - Michelle
 location: Conference Room A
 related:
 status:

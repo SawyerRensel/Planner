@@ -8,6 +8,7 @@ calendar:
 context:
   - office
 people:
+  - John
 location:
 related:
 status: To-Do

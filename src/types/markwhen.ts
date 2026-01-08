@@ -99,6 +99,8 @@ export interface Event {
   recurrence?: Recurrence;
 }
 
+export type GroupStyle = 'section' | 'group';
+
 export interface EventGroup {
   textRanges: {
     whole: Range;
@@ -109,6 +111,7 @@ export interface EventGroup {
   tags: string[];
   title: string;
   startExpanded?: boolean;
+  style?: GroupStyle;
   children: (Event | EventGroup)[];
 }
 
@@ -204,6 +207,13 @@ export type TimelineGroupBy =
   | 'people'
   | 'priority';
 
+export type TimelineSectionsBy =
+  | 'none'
+  | 'calendar'
+  | 'status'
+  | 'priority'
+  | 'folder';
+
 export type TimelineColorBy =
   | 'note.calendar'
   | 'note.priority'
@@ -211,6 +221,7 @@ export type TimelineColorBy =
 
 export interface TimelineViewConfig {
   groupBy: TimelineGroupBy;
+  sectionsBy: TimelineSectionsBy;
   colorBy: TimelineColorBy;
   dateStartField: string;
   dateEndField: string;
@@ -229,6 +240,7 @@ export interface TimelineEvent {
   percent?: number;
   completed?: boolean;
   properties: Record<string, unknown>;
+  sectionValue?: string; // Value of the sectionsBy field
   groupValue?: string;  // Value of the groupBy field
   recurrence?: Recurrence; // Recurrence data for recurring events
 }
