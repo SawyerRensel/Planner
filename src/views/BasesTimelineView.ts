@@ -372,18 +372,21 @@ export class BasesTimelineView extends BasesView {
   /**
    * Handle detail path selection (click on event)
    */
-  private handleSetDetailPath(path: EventPath): void {
+  private async handleSetDetailPath(path: EventPath): Promise<void> {
     const filePath = this.adapter.resolvePathToFilePath(path);
     if (!filePath) return;
 
-    const file = this.plugin.app.vault.getAbstractFileByPath(filePath);
-    if (!(file instanceof TFile)) return;
-
-    // Open ItemModal for editing
-    openItemModal(this.plugin, {
-      mode: 'edit',
-      file,
-    });
+    // Load the full item data for editing
+    const item = await this.plugin.itemService.getItem(filePath);
+    if (item) {
+      openItemModal(this.plugin, { mode: 'edit', item });
+    } else {
+      // Fallback to opening the file if item can't be loaded
+      const file = this.plugin.app.vault.getAbstractFileByPath(filePath);
+      if (file instanceof TFile) {
+        await this.plugin.app.workspace.openLinkText(filePath, '', 'tab');
+      }
+    }
   }
 
   /**
