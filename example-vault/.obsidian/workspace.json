@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Personal/FirstMonday.md",
+                "file": "notes/feedback-and-ideas.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "FirstMonday"
+              "title": "feedback-and-ideas"
             }
           },
           {
@@ -35,7 +35,7 @@
             }
           },
           {
-            "id": "831f2190fa7a3f0a",
+            "id": "e8eb619b4813ce8c",
             "type": "leaf",
             "state": {
               "type": "bases",
@@ -105,8 +105,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 232.5,
-    "collapsed": true
+    "width": 232.5
   },
   "right": {
     "id": "ed9ed6ed0a6d4bf8",
@@ -226,12 +225,12 @@
       "planner:Open Planner Timeline": false
     }
   },
-  "active": "831f2190fa7a3f0a",
+  "active": "e8eb619b4813ce8c",
   "lastOpenFiles": [
     "Planner/Calendar.base",
-    "Personal/FirstMonday.md",
     "Planner/Timeline.base",
     "notes/feedback-and-ideas.md",
+    "Personal/FirstMonday.md",
     "Personal/test.md",
     "Personal/testing.md",
     "Personal/test 1.md",

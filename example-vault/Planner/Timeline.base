@@ -26,10 +26,10 @@ views:
       - property: date_start_scheduled
         direction: ASC
     colorBy: note.calendar
+    titleField: note.title
   - type: table
     name: Table
   - type: planner-calendar
     name: Calendar
-  - type: planner-gantt
-    name: Gantt
-    truncateTitles: false
+  - type: planner-task-list
+    name: Tasks

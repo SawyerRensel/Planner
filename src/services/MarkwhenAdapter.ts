@@ -290,9 +290,9 @@ export class MarkwhenAdapter {
     // Get title
     const title = titleValue?.toString() || entry.file.basename;
 
-    // Get tags
+    // Get tags from note
     const tagsValue = entry.getValue('note.tags');
-    const tags: string[] = Array.isArray(tagsValue)
+    const noteTags: string[] = Array.isArray(tagsValue)
       ? tagsValue.map(t => String(t).replace(/^#/, ''))
       : [];
 
@@ -325,6 +325,11 @@ export class MarkwhenAdapter {
     // Build recurrence data if this is a recurring event
     const itemData = this.extractRecurrenceData(entry, options);
     const recurrence = this.buildRecurrence(itemData);
+
+    // Add color tag based on colorBy setting
+    // The Timeline uses tags[0] to look up colors in the colorMap
+    const colorTag = this.getColorTag(entry, options.colorBy);
+    const tags = colorTag ? [colorTag, ...noteTags] : noteTags;
 
     return {
       id: filePath,
@@ -415,6 +420,21 @@ export class MarkwhenAdapter {
   }
 
   /**
+   * Get the tag to use for coloring based on colorBy setting
+   * The Timeline looks for tags[0] in the colorMap to determine event color
+   */
+  private getColorTag(entry: BasesEntry, colorBy: TimelineColorBy): string | undefined {
+    const value = entry.getValue(colorBy);
+    if (!value) return undefined;
+
+    if (Array.isArray(value)) {
+      return value[0]?.toString();
+    }
+
+    return value.toString();
+  }
+
+  /**
    * Build event groups from timeline events
    */
   private buildEventGroups(
@@ -480,6 +500,9 @@ export class MarkwhenAdapter {
     events: TimelineEvent[],
     groupIndex: number
   ): EventGroup {
+    // Add the group name as a tag so the group header gets colored
+    const tags = name !== 'Ungrouped' ? [name] : [];
+
     const group: EventGroup = {
       textRanges: {
         whole: { from: 0, to: 0, type: RangeType.Section },
@@ -487,7 +510,7 @@ export class MarkwhenAdapter {
       },
       properties: {},
       propOrder: [],
-      tags: [],
+      tags,
       title: name,
       startExpanded: true,
       children: [],
@@ -563,33 +586,62 @@ export class MarkwhenAdapter {
 
   /**
    * Build color map for events based on colorBy setting
+   * Returns a nested map: { "default": { "tagName": "r, g, b" } }
    */
   private buildColorMap(
     entries: BasesEntry[],
     colorBy: TimelineColorBy
   ): Record<string, Record<string, string>> {
-    const colorMap: Record<string, Record<string, string>> = {};
-
+    const innerMap: Record<string, string> = {};
     const fieldName = colorBy.replace(/^note\./, '');
 
     if (fieldName === 'calendar') {
       // Use calendar colors from settings
       for (const [name, config] of Object.entries(this.settings.calendars)) {
-        colorMap[name] = { color: config.color };
+        innerMap[name] = this.hexToRgb(config.color);
       }
     } else if (fieldName === 'priority') {
       // Use priority colors from settings
       for (const priority of this.settings.priorities) {
-        colorMap[priority.name] = { color: priority.color };
+        innerMap[priority.name] = this.hexToRgb(priority.color);
       }
     } else if (fieldName === 'status') {
       // Use status colors from settings
       for (const status of this.settings.statuses) {
-        colorMap[status.name] = { color: status.color };
+        innerMap[status.name] = this.hexToRgb(status.color);
       }
     }
 
-    return colorMap;
+    // Timeline expects colorMap["default"][tagName] = "r, g, b"
+    return { default: innerMap };
+  }
+
+  /**
+   * Convert hex color to RGB string format expected by Timeline
+   * e.g., "#ff0000" -> "255, 0, 0"
+   */
+  private hexToRgb(hex: string): string {
+    // Remove # if present
+    hex = hex.replace('#', '');
+
+    // Handle shorthand hex (e.g., #f00)
+    const isShortHex = hex.length === 3;
+
+    const r = parseInt(
+      isShortHex ? hex.slice(0, 1).repeat(2) : hex.slice(0, 2),
+      16
+    );
+    const g = parseInt(
+      isShortHex ? hex.slice(1, 2).repeat(2) : hex.slice(2, 4),
+      16
+    );
+    const b = parseInt(
+      isShortHex ? hex.slice(2, 3).repeat(2) : hex.slice(4, 6),
+      16
+    );
+
+    // Return RGB string in format "r, g, b"
+    return `${r}, ${g}, ${b}`;
   }
 
   /**

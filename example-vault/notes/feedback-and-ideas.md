@@ -52,21 +52,21 @@
 	- *This can be accomplished through Bases.  I should actually remove the identify configuration options in Settings because they don't do anything anyway. *
 - [x] Whenever a user creates a new calendar in Planner Settings, let's add the next Solarized Accent Color for it as the default color (the user should still be able to customize their calendar colors).  There are 8 accent colors.  Use the index number of the created Calendar to determine which accent color to apply.  
 
-## Gantt View
+## ~~Gantt View~~
 
-- [x] Section 5.5 | Bar Click Popup: Use the same Item Modal used for Calendar view for a unified Item creation and editing experience. 
-- [x] Ability to expand or collapse the Gantt table.  (especially for mobile, as the table takes up a lot of space)
-- [x] Font size control for Gantt View (similar to Calendar View).  Add to Gantt View Configuration menu.
-- [x] Gantt View Day mode should show two hours per column at a time.  Right now it shows 4 hour increments.  Make the increments even (right now they're odd).
-- [x] In Gantt View, the Quarter and Year Mode subdivisions are incorrect.  Year mode is only showing three months.  I don't know what Quarter mode is showing.
-- [ ] Gantt View needs forward and back arrows just like in Calendar View.  DHTMLX seems to put strict boundaries on whether we can track forward and backward beyond the currently Month, Quarter or, Year.  I think this should be a toggle.  I like having the bounds, but sometimes I'd like to scroll 2, 3, 5, 10 or more years ahead or behind.
-- [ ] Gantt Zoom Feature:  Need to have dynamic zoom Plus/Minus buttons in the toolbar to expand or condense Gantt timeline in window.  For instance, clicking the Minus button would zoom out.  I would want to be able to see a 100+ year timeline if that is possible. 
-- [ ] Enable in-line editing for properties show in the Gantt Table
-- [ ] Currently not possible to adjust Gantt Bars (start, end, position, progress, dependency arrows.  We need to make this functionality happen.
+- [x] ~~Section 5.5 | Bar Click Popup: Use the same Item Modal used for Calendar view for a unified Item creation and editing experience.~~ 
+- [x] ~~Ability to expand or collapse the Gantt table.  (especially for mobile, as the table takes up a lot of space)~~
+- [x] ~~Font size control for Gantt View (similar to Calendar View).  Add to Gantt View Configuration menu.~~
+- [x] ~~Gantt View Day mode should show two hours per column at a time.  Right now it shows 4 hour increments.  Make the increments even (right now they're odd).~~
+- [x] ~~In Gantt View, the Quarter and Year Mode subdivisions are incorrect.  Year mode is only showing three months.  I don't know what Quarter mode is showing.~~
+- [ ] ~~Gantt View needs forward and back arrows just like in Calendar View.  DHTMLX seems to put strict boundaries on whether we can track forward and backward beyond the currently Month, Quarter or, Year.  I think this should be a toggle.  I like having the bounds, but sometimes I'd like to scroll 2, 3, 5, 10 or more years ahead or behind.~~
+- [ ] ~~Gantt Zoom Feature:  Need to have dynamic zoom Plus/Minus buttons in the toolbar to expand or condense Gantt timeline in window.  For instance, clicking the Minus button would zoom out.  I would want to be able to see a 100+ year timeline if that is possible.~~ 
+- [ ] ~~Enable in-line editing for properties show in the Gantt Table~~
+- [ ] ~~Currently not possible to adjust Gantt Bars (start, end, position, progress, dependency arrows.  We need to make this functionality happen.~~
 
 ## Timeline View
 
-- [ ] Colors aren't working
+- [ ] Colors aren't working in Timeline View.
 - [ ] Item frontmatter isn't getting pulled into the Item Modal when clicking on a bar to edit the Item.  
 - [ ] Add another config menu for "Sections by" with options including `calendar`, `status`, `priority`, `folder`, etc.
 - [ ] Remove Group by and Color by menus from the action row in Timeline View.  Let's move/keep these menus in the Timeline View Configuration menu. 

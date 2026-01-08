@@ -14,10 +14,10 @@ status: In-Progress
 priority: Urgent
 progress: 50
 date_created: 2026-01-08T09:00:00
-date_modified: 2026-01-10T11:00:00
-date_start_scheduled: 2026-01-08T09:00:00
+date_modified: 2026-01-07T02:20:52.078Z
+date_start_scheduled: 2026-01-08T14:00:00.000Z
 date_start_actual: 2026-01-08T09:00:00
-date_end_scheduled: 2026-01-08T17:00:00
+date_end_scheduled: 2026-01-08T16:00:00.000-05:00
 date_end_actual: 2026-01-09T07:30:00
 all_day: false
 repeat_frequency:
