@@ -35,7 +35,7 @@
             }
           },
           {
-            "id": "e8eb619b4813ce8c",
+            "id": "0e2ac244702038f1",
             "type": "leaf",
             "state": {
               "type": "bases",
@@ -45,19 +45,6 @@
               },
               "icon": "square-chart-gantt",
               "title": "Timeline"
-            }
-          },
-          {
-            "id": "0e2ac244702038f1",
-            "type": "leaf",
-            "state": {
-              "type": "bases",
-              "state": {
-                "file": "Planner/Tasks.base",
-                "viewName": "Task List"
-              },
-              "icon": "list-checks",
-              "title": "Tasks"
             }
           },
           {
@@ -74,7 +61,8 @@
               "title": "Design Mockups"
             }
           }
-        ]
+        ],
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -259,14 +247,15 @@
       "planner:Open Planner Timeline": false
     }
   },
-  "active": "a200b43c11a1b48c",
+  "active": "0e2ac244702038f1",
   "lastOpenFiles": [
-    "Planner/Timeline.base",
     "Planner/Tasks.base",
+    "Planner/Timeline.base",
+    "notes/feedback-and-ideas.md",
+    "TaskNotes/Views/kanban-default.base",
     "Planner/Design Mockups.md",
     "Planner/Calendar.base",
     "Planner/Team Meeting.md",
-    "notes/feedback-and-ideas.md",
     "Personal/Untitled",
     "Screenshot_20260108-193249.png",
     "Vacation",
@@ -287,7 +276,6 @@
     "Screenshot_20260105-200533.png",
     "Markwhen/Markwhen 1-5-2026 19.42.51.mw",
     "Markwhen",
-    "Planner/Gantt.base",
     "Planner/test.md",
     "notes/questions.md",
     "notes/obsidian-planner-prd.md",

@@ -29,8 +29,8 @@ views:
     colorBy: note.calendar
     titleField: note.title
     sectionsBy: note.calendar
-    dateStartField: note.date_start_actual
-    dateEndField: note.date_end_actual
+    dateStartField: note.date_start_scheduled
+    dateEndField: note.date_end_scheduled
   - type: table
     name: Table
   - type: planner-calendar

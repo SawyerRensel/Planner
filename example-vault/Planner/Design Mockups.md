@@ -17,7 +17,7 @@ date_created: 2026-01-10T09:00:00
 date_modified: 2026-01-04T03:48:15.984Z
 date_start_scheduled: 2026-01-10T08:00:00.000-05:00
 date_start_actual: 2026-01-12T10:43:00
-date_end_scheduled: 2026-01-10T15:00:00.000-05:00
+date_end_scheduled: ""
 date_end_actual: 2026-01-16T16:00:00
 all_day: false
 repeat_frequency:
