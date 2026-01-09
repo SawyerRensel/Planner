@@ -1754,7 +1754,7 @@ body.is-mobile .modal:has(.planner-item-modal) {
    Timeline View Styles
    ============================================ */
 
-/* Container */
+/* Container - fills entire Bases view area */
 .planner-bases-timeline {
   display: flex;
   flex-direction: column;
@@ -1762,6 +1762,16 @@ body.is-mobile .modal:has(.planner-item-modal) {
   width: 100%;
   overflow: hidden;
   background-color: var(--background-primary);
+  /* Remove any inherited margin/padding */
+  margin: 0;
+  padding: 0;
+}
+
+/* Ensure Bases view wrapper fills available space */
+.bases-view-container:has(.planner-bases-timeline) {
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 /* Toolbar */
@@ -1834,7 +1844,7 @@ body.is-mobile .modal:has(.planner-item-modal) {
   background-color: var(--background-modifier-active-hover);
 }
 
-/* Iframe container */
+/* Iframe container - fills all available space */
 .planner-timeline-iframe-container {
   flex: 1 1 0;
   min-height: 0;
@@ -1844,6 +1854,11 @@ body.is-mobile .modal:has(.planner-item-modal) {
 }
 
 .planner-timeline-iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   width: 100%;
   height: 100%;
   border: none;
