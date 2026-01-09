@@ -29,7 +29,7 @@ export class PriorityContextMenu {
       this.menu.addItem((item) => {
         item.setTitle(isSelected ? `✓ ${priority.name}` : priority.name);
         // Use custom icon if set, otherwise fall back to default
-        const icon = priority.icon || 'star';
+        const icon = priority.icon || 'signal';
         item.setIcon(icon);
         item.onClick(() => {
           this.options.onSelect(priority.name);

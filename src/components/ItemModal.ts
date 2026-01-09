@@ -327,7 +327,7 @@ export class ItemModal extends Modal {
     // Priority icon
     this.createActionIcon(
       this.actionBar,
-      'star',
+      'signal',
       'Priority',
       (el, event) => this.showPriorityContextMenu(event),
       'priority'
@@ -466,13 +466,13 @@ export class ItemModal extends Modal {
         const config = this.plugin.settings.priorities.find(p => p.name === this.priority);
         if (config) {
           // Update icon to match priority's custom icon
-          const priorityIconName = config.icon || 'star';
+          const priorityIconName = config.icon || 'signal';
           setIcon(iconEl, priorityIconName);
           iconEl?.style.setProperty('color', config.color);
         }
       } else {
         // Reset to default icon and color
-        setIcon(iconEl, 'star');
+        setIcon(iconEl, 'signal');
         iconEl?.style.removeProperty('color');
       }
     }

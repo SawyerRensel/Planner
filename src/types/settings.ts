@@ -119,11 +119,11 @@ export const DEFAULT_SETTINGS: PlannerSettings = {
 
   // Priority Configuration
   priorities: [
-    { name: 'Urgent', color: '#ef4444', weight: 4, icon: 'alert-triangle' },
-    { name: 'High', color: '#f97316', weight: 3, icon: 'chevrons-up' },
-    { name: 'Medium', color: '#eab308', weight: 2, icon: 'chevron-up' },
-    { name: 'Low', color: '#3b82f6', weight: 1, icon: 'chevron-down' },
-    { name: 'None', color: '#6b7280', weight: 0, icon: 'minus' },
+    { name: 'Urgent', color: '#ef4444', weight: 4, icon: 'signal' },
+    { name: 'High', color: '#f97316', weight: 3, icon: 'signal-high' },
+    { name: 'Medium', color: '#eab308', weight: 2, icon: 'signal-medium' },
+    { name: 'Low', color: '#3b82f6', weight: 1, icon: 'signal-low' },
+    { name: 'None', color: '#6b7280', weight: 0, icon: 'signal-zero' },
   ],
 
   // Calendar Configuration
