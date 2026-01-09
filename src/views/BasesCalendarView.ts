@@ -18,6 +18,7 @@ import type { OpenBehavior } from '../types/settings';
 import type { PlannerItem, DayOfWeek } from '../types/item';
 import { openItemModal } from '../components/ItemModal';
 import { PropertyTypeService } from '../services/PropertyTypeService';
+import { isOngoing } from '../utils/dateUtils';
 
 export const BASES_CALENDAR_VIEW_ID = 'planner-calendar';
 
@@ -979,6 +980,10 @@ export class BasesCalendarView extends BasesView {
   }
 
   private toISOString(value: unknown): string {
+    // Handle "ongoing" keyword - resolve to current time
+    if (isOngoing(value)) {
+      return new Date().toISOString();
+    }
     // Handle Date objects
     if (value instanceof Date) {
       return value.toISOString();

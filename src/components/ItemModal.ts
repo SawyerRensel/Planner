@@ -13,6 +13,7 @@ import {
 } from './menus';
 import { CustomRecurrenceModal } from './CustomRecurrenceModal';
 import { FileLinkSuggest, TagSuggest, ContextSuggest, convertToSimpleWikilinks, convertWikilinksToRelativePaths } from './suggests';
+import { isOngoing } from '../utils/dateUtils';
 
 interface ItemModalOptions {
   mode: 'create' | 'edit';
@@ -542,6 +543,7 @@ export class ItemModal extends Modal {
 
   private formatDateForTooltip(dateStr: string | null): string {
     if (!dateStr) return 'Not set';
+    if (isOngoing(dateStr)) return 'Ongoing';
     const date = new Date(dateStr);
     return date.toLocaleString();
   }
@@ -562,6 +564,7 @@ export class ItemModal extends Modal {
       },
       plugin: this.plugin,
       title: type === 'start' ? 'Start Date' : 'End Date',
+      fieldType: type,
     });
     menu.show(event);
   }
@@ -1008,9 +1011,13 @@ export class ItemModal extends Modal {
 
     // Date End
     if (this.dateEnd) {
-      const date = new Date(this.dateEnd);
-      const dateStr = this.allDay ? date.toLocaleDateString() : date.toLocaleString();
-      this.addPreviewBadge(preview, `🏁 ${dateStr}`, 'date');
+      if (isOngoing(this.dateEnd)) {
+        this.addPreviewBadge(preview, '🏁 Ongoing', 'date');
+      } else {
+        const date = new Date(this.dateEnd);
+        const dateStr = this.allDay ? date.toLocaleDateString() : date.toLocaleString();
+        this.addPreviewBadge(preview, `🏁 ${dateStr}`, 'date');
+      }
     }
 
     // Context

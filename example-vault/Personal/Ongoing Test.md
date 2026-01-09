@@ -1,24 +1,24 @@
 ---
-title: Meeting
+title: Ongoing Test
 summary:
 tags:
-  - task
+  - event
 calendar:
-  - Work
+  - Personal
 context:
 people:
 location:
 related:
 status: To-Do
-priority: Medium
+priority:
 progress:
-date_created:
-date_modified: "2026-01-09T16:36:40.770Z"
-date_start_scheduled: "2026-01-02T20:15:00.000Z"
+date_created: "2026-01-09T16:14:40.934Z"
+date_modified: "2026-01-09T16:36:48.807Z"
+date_start_scheduled: 2026-01-04
 date_start_actual:
-date_end_scheduled: "2026-01-02T21:15:00.000Z"
+date_end_scheduled: ongoing
 date_end_actual:
-all_day: false
+all_day: true
 repeat_frequency:
 repeat_interval:
 repeat_until:
@@ -34,7 +34,3 @@ blocked_by:
 cover:
 color:
 ---
-
-## Testing
-
-- List

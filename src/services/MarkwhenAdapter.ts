@@ -21,6 +21,7 @@ import {
   EventPath,
   Recurrence,
 } from '../types/markwhen';
+import { isOngoing } from '../utils/dateUtils';
 import type { PlannerSettings } from '../types/settings';
 import type { PlannerItem, DayOfWeek } from '../types/item';
 
@@ -67,7 +68,6 @@ export class MarkwhenAdapter {
   private settings: PlannerSettings;
   private app: App;
   private pathMappings: PathMapping[] = [];
-  private debugCount: number = 0;
 
   constructor(settings: PlannerSettings, app: App) {
     this.settings = settings;
@@ -79,7 +79,6 @@ export class MarkwhenAdapter {
    */
   adapt(entries: BasesEntry[], options: AdapterOptions): AdaptedResult {
     this.pathMappings = [];
-    this.debugCount = 0;
 
     // Convert entries to timeline events
     const timelineEvents = this.entriesToTimelineEvents(entries, options);
@@ -187,10 +186,14 @@ export class MarkwhenAdapter {
       ? repeatBysetpos
       : undefined;
 
+    // Resolve dates through parseDate() to handle "ongoing" keyword and other formats
+    const resolvedStart = dateStart ? this.parseDate(dateStart)?.toISOString() : undefined;
+    const resolvedEnd = dateEnd ? this.parseDate(dateEnd)?.toISOString() : undefined;
+
     return {
       path: entry.file.path,
-      date_start_scheduled: dateStart ? (typeof dateStart === 'string' ? dateStart : this.parseDate(dateStart)?.toISOString()) : undefined,
-      date_end_scheduled: dateEnd ? (typeof dateEnd === 'string' ? dateEnd : this.parseDate(dateEnd)?.toISOString()) : undefined,
+      date_start_scheduled: resolvedStart,
+      date_end_scheduled: resolvedEnd,
       repeat_frequency: validatedFrequency,
       repeat_interval: typeof repeatInterval === 'number' ? repeatInterval : undefined,
       repeat_until: repeatUntil,
@@ -278,23 +281,6 @@ export class MarkwhenAdapter {
     const endValue = entry.getValue(options.dateEndField);
     const titleValue = entry.getValue(options.titleField);
 
-    // Debug: Log first few entries
-    if (this.debugCount < 3) {
-      console.log('Timeline Adapter: Entry', filePath);
-      console.log('  dateStartField:', options.dateStartField);
-      console.log('  startValue type:', typeof startValue);
-      if (startValue && typeof startValue === 'object') {
-        console.log('  startValue keys:', Object.keys(startValue));
-        console.log('  startValue.ts:', (startValue as any).ts);
-        console.log('  startValue.toISO?:', typeof (startValue as any).toISO === 'function' ? (startValue as any).toISO() : 'N/A');
-        console.log('  startValue.toString():', startValue.toString());
-        console.log('  startValue.valueOf():', startValue.valueOf());
-      } else {
-        console.log('  startValue:', startValue);
-      }
-      this.debugCount++;
-    }
-
     // Parse start date - skip if no valid date
     const startDate = this.parseDate(startValue);
     if (!startDate) {
@@ -369,11 +355,16 @@ export class MarkwhenAdapter {
 
   /**
    * Parse a date value from frontmatter
-   * Handles Date instances, strings, numbers, and Bases date objects
-   * that have toString() returning ISO date strings
+   * Handles Date instances, strings, numbers, Bases date objects,
+   * and the special "ongoing" keyword (resolves to current time)
    */
   private parseDate(value: unknown): Date | null {
     if (!value) return null;
+
+    // Handle "ongoing" keyword - resolve to current time
+    if (isOngoing(value)) {
+      return new Date();
+    }
 
     if (value instanceof Date) {
       return value;

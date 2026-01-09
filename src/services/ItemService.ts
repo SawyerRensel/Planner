@@ -6,6 +6,7 @@ import {
   FRONTMATTER_FIELD_ORDER,
 } from '../types/item';
 import { PlannerSettings, isCompletedStatus, getCalendarFolder } from '../types/settings';
+import { isOngoing } from '../utils/dateUtils';
 
 /**
  * Get current local time in ISO 8601 format
@@ -342,14 +343,16 @@ export class ItemService {
     return items.map(item => {
       const blocking = blockingMap.get(item.path) ?? [];
 
-      // Calculate duration
+      // Calculate duration (null if either date is "ongoing")
       let duration: number | null = null;
-      if (item.date_start_scheduled && item.date_end_scheduled) {
+      if (item.date_start_scheduled && item.date_end_scheduled &&
+          !isOngoing(item.date_start_scheduled) && !isOngoing(item.date_end_scheduled)) {
         duration = new Date(item.date_end_scheduled).getTime() - new Date(item.date_start_scheduled).getTime();
       }
 
       // Check if overdue (date_end_scheduled is past and not completed)
-      const isOverdue = item.date_end_scheduled
+      // Items with "ongoing" end dates are never overdue
+      const isOverdue = item.date_end_scheduled && !isOngoing(item.date_end_scheduled)
         ? new Date(item.date_end_scheduled) < new Date() && !isCompletedStatus(settings, item.status ?? '')
         : false;
 

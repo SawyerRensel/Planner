@@ -1,11 +1,14 @@
 import { Menu } from 'obsidian';
 import type PlannerPlugin from '../../main';
+import { isOngoing, ONGOING_KEYWORD } from '../../utils/dateUtils';
 
 export interface DateContextMenuOptions {
   currentValue: string | null;
   onSelect: (value: string | null) => void;
   plugin: PlannerPlugin;
   title?: string;
+  /** Field type - 'end' enables the "Ongoing" option */
+  fieldType?: 'start' | 'end';
 }
 
 export class DateContextMenu {
@@ -56,6 +59,18 @@ export class DateContextMenu {
       });
     });
 
+    // Ongoing option (only for end dates)
+    if (this.options.fieldType === 'end') {
+      const isCurrentlyOngoing = isOngoing(this.options.currentValue);
+      this.menu.addItem((item) => {
+        item.setTitle(isCurrentlyOngoing ? '✓ Ongoing' : 'Ongoing');
+        item.setIcon('infinity');
+        item.onClick(() => {
+          this.options.onSelect(ONGOING_KEYWORD);
+        });
+      });
+    }
+
     // Clear date (only if there's a current value)
     if (this.options.currentValue) {
       this.menu.addItem((item) => {
@@ -81,7 +96,8 @@ export class DateContextMenu {
         item.setTitle(opt.label);
         item.setIcon(opt.icon);
         item.onClick(() => {
-          const baseDate = this.options.currentValue
+          // Use current date as base if value is "ongoing" or not set
+          const baseDate = this.options.currentValue && !isOngoing(this.options.currentValue)
             ? new Date(this.options.currentValue)
             : new Date();
           baseDate.setDate(baseDate.getDate() + opt.days);
@@ -93,7 +109,8 @@ export class DateContextMenu {
 
   private addQuickPickOptions(): void {
     const today = new Date();
-    const currentDateStr = this.options.currentValue
+    // Don't try to parse "ongoing" as a date
+    const currentDateStr = this.options.currentValue && !isOngoing(this.options.currentValue)
       ? this.formatDate(new Date(this.options.currentValue))
       : null;
 
@@ -169,8 +186,8 @@ export class DateContextMenu {
     const dateInput = modal.querySelector('.planner-date-input') as HTMLInputElement;
     const timeInput = modal.querySelector('.planner-time-input') as HTMLInputElement;
 
-    // Pre-fill with current value if exists
-    if (this.options.currentValue) {
+    // Pre-fill with current value if exists (skip if "ongoing")
+    if (this.options.currentValue && !isOngoing(this.options.currentValue)) {
       const current = new Date(this.options.currentValue);
       dateInput.value = this.formatDateForInput(current);
       timeInput.value = this.formatTimeForInput(current);

@@ -74,6 +74,25 @@
 - [x] Planner folder auto complete in settings
 - [x] Could the enabled Bases properties in Calendar, Task List, and Timeline Views drive what options appear on the `Color by`, `Group by`, and `Section by` menus as well as the date start and date end?  I'm thinking for example, if I want to map out history and use an "era" frontmatter field to `Section by` certain eras.  Properties should drive all config menu options, including start and end dates.  Use Field type (date, int, text, etc) to filter which properties are shown in which Bases view configuration menus for each View for Planner according to the type of menu.
 - [ ] How to account for events/items that have started but are still current/happening **now** and are not certain when they will end?  How to handle now in metadata.  Perhaps a "" in `date_end_scheduled`?  I'm thinking about People notes and displaying people who are still alive, or for tasks or events that are ongoing and you're not sure when they'll end (e.g. War in Ukraine)
+- [ ] Planner remove redundant/deprecated settings menus
+- [ ] Planner group settings into tabs
+- [ ] Planner config menu to change background color of Timeline View
+- [ ] Planner need to show all properties for date and date and time as options in the date config menus, not just fields that have “date” token in them
+- [ ] Planner Kanban view
+- [ ] Planner Improve performance for Timeline view
+- [ ] Fix Item Modal on mobile.  Make it appear centered.  Resize the modal container according to keyboard height when keyboard is activated
+- [ ] Planner when **editing** an existing note (e.g. a book note that has different frontmatter fields) in Item Modal, don’t replace any pre-existing metadata.  Merge duplicates, but otherwise append *only append the fields modified in the Edit Item Modal to the frontmatter of that note*.  For example, if I open a book note modify the status, then only append the status field and value to the book note’s frontmatter when I press Save.  If I haven’t modified the other fields, don’t add those fields to the frontmatter of that note.
+- [ ] (v0.0.2) What if the Edit Item Modal's expand details dynamically pulls frontmatter content from whatever note is selected?  Right now it's still very tailored to Planner/Calendar users
+- [ ] Planner Timeline add config menu for default zoom and center for Timeline View.
+- [ ] Planner update PRD with our changes. 
+- [ ] Planner publish 0.0.1
+	- [ ] Docs (Zensical) site (clone repo to ref folder)
+	- [ ] Issue Templates
+	- [ ] Project board
+	- [ ] Generate a lot of examples in `examples` vault per user persona in PRD
+		- [ ] Add “History Scholar” and “Book Enthusiast” personas
+	- [ ] Readme.md
+	- [ ] License - GPL? or MIT?
 
 
 ## Kanban View

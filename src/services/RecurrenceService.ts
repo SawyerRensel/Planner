@@ -1,5 +1,6 @@
 import { RRule, Frequency } from 'rrule';
 import { PlannerItem, RepeatFrequency, DayOfWeek } from '../types/item';
+import { isOngoing } from '../utils/dateUtils';
 
 /**
  * Service for handling recurring items using iCal RRULE
@@ -14,9 +15,15 @@ export class RecurrenceService {
 
   /**
    * Parse a date string or Date object into a valid Date
+   * Handles the special "ongoing" keyword (resolves to current time)
    */
   private parseDate(value: unknown): Date | null {
     if (!value) return null;
+
+    // Handle "ongoing" keyword - resolve to current time
+    if (isOngoing(value)) {
+      return new Date();
+    }
 
     let date: Date;
     if (value instanceof Date) {
