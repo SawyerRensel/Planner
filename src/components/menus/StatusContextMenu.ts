@@ -67,15 +67,9 @@ export class StatusContextMenu {
     statuses.forEach((status, index) => {
       const menuItem = menuItems[index] as HTMLElement;
       if (menuItem && status.color) {
-        // Color the icon
         const iconEl = menuItem.querySelector('.menu-item-icon') as HTMLElement;
         if (iconEl) {
           iconEl.style.color = status.color;
-        }
-        // Color the title text
-        const titleEl = menuItem.querySelector('.menu-item-title') as HTMLElement;
-        if (titleEl) {
-          titleEl.style.color = status.color;
         }
       }
     });

@@ -119,11 +119,6 @@ export class CalendarContextMenu {
         if (iconEl) {
           iconEl.style.color = color;
         }
-        // Also color the title text like Status and Priority menus
-        const titleEl = menuItem.querySelector('.menu-item-title') as HTMLElement;
-        if (titleEl) {
-          titleEl.style.color = color;
-        }
       }
     });
   }

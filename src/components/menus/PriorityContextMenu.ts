@@ -81,15 +81,9 @@ export class PriorityContextMenu {
     sortedPriorities.forEach((priority, index) => {
       const menuItem = menuItems[index] as HTMLElement;
       if (menuItem && priority.color) {
-        // Color the icon
         const iconEl = menuItem.querySelector('.menu-item-icon') as HTMLElement;
         if (iconEl) {
           iconEl.style.color = priority.color;
-        }
-        // Color the title text
-        const titleEl = menuItem.querySelector('.menu-item-title') as HTMLElement;
-        if (titleEl) {
-          titleEl.style.color = priority.color;
         }
       }
     });
