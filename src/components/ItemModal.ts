@@ -1261,23 +1261,87 @@ export class ItemModal extends Modal {
       return;
     }
 
-    const { contentEl } = this;
+    const { contentEl, modalEl } = this;
+    const topPadding = 44; // matches CSS padding-top
+    const bottomPadding = 4; // minimal bottom buffer - modal should touch keyboard
 
-    // On mobile, when an input is focused, scroll it into view after keyboard appears
+    // Store initial screen height to detect keyboard
+    const initialHeight = window.screen.height;
+    let keyboardOpen = false;
+
+    // Function to set modal height
+    const setModalHeight = (forKeyboard: boolean) => {
+      // Try to get actual viewport height first
+      let viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+
+      // If keyboard should be open but viewport hasn't changed (Android adjustPan mode),
+      // assume keyboard takes ~40% of screen, so modal can use ~60%
+      if (forKeyboard && viewportHeight > initialHeight * 0.7) {
+        viewportHeight = initialHeight * 0.58;
+      }
+
+      const availableHeight = viewportHeight - topPadding - bottomPadding;
+      modalEl.style.maxHeight = `${availableHeight}px`;
+      contentEl.style.maxHeight = `${availableHeight - 20}px`;
+    };
+
+    // Handler for viewport/window resize events
+    this.viewportResizeHandler = () => {
+      setModalHeight(keyboardOpen);
+    };
+
+    // Initial call to set correct height (no keyboard)
+    setModalHeight(false);
+
+    // Listen to visualViewport if available (iOS)
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', this.viewportResizeHandler);
+    }
+
+    // Also listen to window resize
+    window.addEventListener('resize', this.viewportResizeHandler);
+
+    // On focus: assume keyboard is opening, shrink modal proactively
     contentEl.addEventListener('focusin', (e) => {
       const target = e.target as HTMLElement;
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
-        // Wait for keyboard to appear, then scroll
+        keyboardOpen = true;
+        // Shrink modal immediately for keyboard
+        setModalHeight(true);
+
+        // Scroll focused element into view after a short delay
         setTimeout(() => {
-          // Use native scrollIntoView with block: 'center' to position in middle of visible area
           target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 350);
+        }, 100);
+      }
+    });
+
+    // On blur: keyboard is closing, restore modal height
+    contentEl.addEventListener('focusout', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+        // Small delay to check if focus moved to another input
+        setTimeout(() => {
+          const activeEl = document.activeElement;
+          const isStillInInput = activeEl?.tagName === 'INPUT' || activeEl?.tagName === 'TEXTAREA';
+          if (!isStillInInput) {
+            keyboardOpen = false;
+            setModalHeight(false);
+          }
+        }, 100);
       }
     });
   }
 
   private cleanupMobileKeyboardHandling(): void {
-    // No cleanup needed - event listener is on contentEl which gets emptied
+    // Clean up all viewport/resize listeners
+    if (this.viewportResizeHandler) {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', this.viewportResizeHandler);
+      }
+      window.removeEventListener('resize', this.viewportResizeHandler);
+      this.viewportResizeHandler = null;
+    }
   }
 }
 

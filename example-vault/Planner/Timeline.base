@@ -39,11 +39,3 @@ views:
     colorBy: note.calendar
   - type: planner-task-list
     name: Tasks
-  - type: planner-timeline
-    name: Calendar 2
-    filters:
-      and:
-        - file.inFolder("Books")
-    dateStartField: note.started
-    dateEndField: note.finished
-    colorBy: note.book_category

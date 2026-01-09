@@ -42,14 +42,13 @@
               "type": "bases",
               "state": {
                 "file": "Planner/Timeline.base",
-                "viewName": "Calendar 2"
+                "viewName": "Timeline"
               },
               "icon": "square-chart-gantt",
               "title": "Timeline"
             }
           }
-        ],
-        "currentTab": 2
+        ]
       }
     ],
     "direction": "vertical"
@@ -234,10 +233,10 @@
       "planner:Open Planner Timeline": false
     }
   },
-  "active": "023856e250503709",
+  "active": "a200b43c11a1b48c",
   "lastOpenFiles": [
-    "Books/Treasure Island.md",
     "Planner/Timeline.base",
+    "Books/Treasure Island.md",
     "Books/Guards! Guards!.md",
     "Books/The Raven King (The Raven Cycle Book 4).md",
     "Books/Atomic Habits.md",

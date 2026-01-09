@@ -77,7 +77,7 @@
 - [x] Planner config menu to change background color of Timeline View
 - [x] Planner remove redundant/deprecated settings menus
 - [x] Planner group settings into tabs
-- [ ] Planner need to show all properties for date and date and time as options in the date config menus, not just fields that have “date” token in them
+- [x] Planner need to show all properties for date and date and time as options in the date config menus, not just fields that have “date” token in them
 - [ ] Planner Kanban view
 - [ ] Planner Improve performance for Timeline view
 - [ ] Fix Item Modal on mobile.  Make it appear centered.  Resize the modal container according to keyboard height when keyboard is activated

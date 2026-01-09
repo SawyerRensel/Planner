@@ -574,21 +574,40 @@ body.is-mobile .planner-item-modal {
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  /* Use 50% of viewport as max - leaves room for keyboard */
-  max-height: 50vh;
+  /* Use dvh (dynamic viewport height) which auto-adjusts for keyboard */
+  /* Fallback to vh for older browsers, then dvh for modern ones */
+  max-height: calc(100vh - 64px);
+  max-height: calc(100dvh - 64px);
 }
 
 body.is-mobile .modal-container:has(.planner-item-modal) {
-  /* Position at top so keyboard has room below */
+  /* Position at top with comfortable margin */
   align-items: flex-start;
-  padding-top: 24px;
+  padding-top: 44px;
+  /* Use dynamic viewport height for container too */
+  height: 100vh;
+  height: 100dvh;
+  /* Ensure container stays in viewport */
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: auto;
+  overflow: hidden;
 }
 
 body.is-mobile .modal:has(.planner-item-modal) {
-  /* Let modal be content-sized up to max-height */
+  /* Use dvh for max-height to respond to keyboard */
+  max-height: calc(100vh - 64px);
+  max-height: calc(100dvh - 64px);
   max-width: calc(100vw - 32px);
   width: calc(100vw - 32px);
   margin: 0;
+  /* Smooth transitions and proper overflow */
+  transition: max-height 0.15s ease-out;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .planner-item-modal h2 {
