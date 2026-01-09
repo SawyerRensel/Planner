@@ -20,6 +20,8 @@
     "date_end_actual": "datetime",
     "repeat_until": "datetime",
     "people": "multitext",
-    "repeat_completed_dates": "multitext"
+    "repeat_completed_dates": "multitext",
+    "finished": "date",
+    "started": "date"
   }
 }

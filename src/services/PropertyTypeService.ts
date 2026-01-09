@@ -25,9 +25,23 @@ export class PropertyTypeService {
     // Access Obsidian's metadataTypeManager (undocumented API)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const metadataTypeManager = (app as any).metadataTypeManager;
-    if (metadataTypeManager?.getPropertyInfo) {
-      const info = metadataTypeManager.getPropertyInfo(fieldName);
-      return info?.type;
+    if (metadataTypeManager) {
+      // Try the properties object first (more reliable in recent Obsidian versions)
+      // Property names in Obsidian are stored lowercase
+      if (metadataTypeManager.properties) {
+        const propertyInfo = metadataTypeManager.properties[fieldName.toLowerCase()];
+        if (propertyInfo?.type) {
+          return propertyInfo.type;
+        }
+      }
+
+      // Fall back to getPropertyInfo method if available
+      if (metadataTypeManager.getPropertyInfo) {
+        const info = metadataTypeManager.getPropertyInfo(fieldName);
+        if (info?.type) {
+          return info.type;
+        }
+      }
     }
 
     return undefined;
@@ -42,12 +56,37 @@ export class PropertyTypeService {
    */
   static inferPropertyCategory(propId: string): PropertyCategory {
     const fieldName = propId.replace(/^(note|file|formula)\./, '');
+    const lowerFieldName = fieldName.toLowerCase();
 
     // Check for date properties by naming convention
     if (fieldName.startsWith('date_') ||
         fieldName.includes('date') ||
         fieldName === 'created' ||
         fieldName === 'modified') {
+      return 'date';
+    }
+
+    // Common date field names (task/project fields, event fields, media fields, etc.)
+    const dateFields = [
+      'started', 'finished', 'completed', 'done',
+      'due', 'deadline', 'scheduled',
+      'begin', 'end', 'start', 'finish',
+      'from', 'to', 'until',
+      'published', 'released', 'aired',
+      'born', 'died', 'birthday',
+      'opened', 'closed',
+      'created_at', 'updated_at', 'deleted_at',
+      'timestamp', 'time', 'when'
+    ];
+    if (dateFields.includes(lowerFieldName)) {
+      return 'date';
+    }
+
+    // Check for common date suffixes
+    if (lowerFieldName.endsWith('_at') ||
+        lowerFieldName.endsWith('_on') ||
+        lowerFieldName.endsWith('_date') ||
+        lowerFieldName.endsWith('_time')) {
       return 'date';
     }
 
