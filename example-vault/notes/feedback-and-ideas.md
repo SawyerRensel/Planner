@@ -1,4 +1,4 @@
-
+	
 ## Calendar View
 
 - [x] Improve Calendar view UI.  Conserve "real-estate".  Match the look, sizing and feel of Task Notes "Advanced Calendar" view.
@@ -69,7 +69,7 @@
 - [x] Colors aren't working in Timeline View.
 - [x] Remove Group by and Color by menus from the action row in Timeline View.  Let's move/keep these menus in the Timeline View Configuration menu. 
 - [x] Add another Timeline View configuration menu  for "Sections by" with options including `calendar`, `status`, `priority`, `folder`, etc.
-- [ ] Item frontmatter isn't getting pulled into the Item Modal when clicking on a bar to edit the Item.  
+- [x] Item frontmatter isn't getting pulled into the Item Modal when clicking on a bar to edit the Item.  
 - [ ] Item Modal - add a menu for Task or Event?  That way don't have to manually add tags for either
 - [ ] Planner folder auto complete in settings
 - [ ] Planner start to now.  How to handle now in metadata.  Perhaps a "" in `date_end_scheduled`?  I'm thinking about People notes and displaying people who are still alive, or for tasks or events that are ongoing and you're not sure when they'll end (e.g. War in Ukraine)

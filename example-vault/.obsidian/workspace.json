@@ -75,8 +75,7 @@
               "title": "Design Mockups"
             }
           }
-        ],
-        "currentTab": 2
+        ]
       }
     ],
     "direction": "vertical"
@@ -239,6 +238,14 @@
   },
   "left-ribbon": {
     "hiddenItems": {
+      "tasknotes:Open mini calendar": false,
+      "tasknotes:Open advanced calendar": false,
+      "tasknotes:Open task list": false,
+      "tasknotes:Open agenda": false,
+      "tasknotes:Open kanban board": false,
+      "tasknotes:Open pomodoro": false,
+      "tasknotes:Open pomodoro stats": false,
+      "tasknotes:Create new task": false,
       "switcher:Open quick switcher": false,
       "graph:Open graph view": false,
       "canvas:Create new canvas": false,
@@ -253,8 +260,9 @@
       "planner:Open Planner Timeline": false
     }
   },
-  "active": "e8eb619b4813ce8c",
+  "active": "a200b43c11a1b48c",
   "lastOpenFiles": [
+    "Screenshot_20260108-193249.png",
     "notes/feedback-and-ideas.md",
     "Planner/Timeline.base",
     "Planner/Calendar.base",
@@ -298,7 +306,6 @@
     "ref/tasknotes/media/docs/views-mini-calendar.png",
     "ref/tasknotes/media/docs/views-kanban.png",
     "ref/tasknotes/media/docs/views-calendar-year.png",
-    "ref/tasknotes/media/docs/views-calendar-week.png",
-    "ref/tasknotes/media/docs/views-calendar-month.png"
+    "ref/tasknotes/media/docs/views-calendar-week.png"
   ]
 }

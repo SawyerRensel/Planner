@@ -565,19 +565,30 @@
   max-width: 600px;
 }
 
-/* Fix Item Modal width on mobile */
-@media (max-width: 768px) {
-  .planner-item-modal {
-    min-width: unset;
-    max-width: 100%;
-    width: 100%;
-    padding: 16px;
-  }
+/* Mobile styles for Item Modal */
+body.is-mobile .planner-item-modal {
+  min-width: unset;
+  width: 100%;
+  padding: 16px;
+  padding-bottom: 20px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  /* Use 50% of viewport as max - leaves room for keyboard */
+  max-height: 50vh;
+}
 
-  .modal-container .planner-item-modal {
-    width: calc(100vw - 32px);
-    max-width: calc(100vw - 32px);
-  }
+body.is-mobile .modal-container:has(.planner-item-modal) {
+  /* Position at top so keyboard has room below */
+  align-items: flex-start;
+  padding-top: 24px;
+}
+
+body.is-mobile .modal:has(.planner-item-modal) {
+  /* Let modal be content-sized up to max-height */
+  max-width: calc(100vw - 32px);
+  width: calc(100vw - 32px);
+  margin: 0;
 }
 
 .planner-item-modal h2 {
@@ -659,9 +670,12 @@
   align-items: center;
   gap: 8px;
   padding: 8px 0;
-  margin-bottom: 16px;
   border-top: 1px solid var(--background-modifier-border);
-  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+/* Push calendar icon to the right */
+.planner-action-bar .planner-action-icon[data-type="calendar"] {
+  margin-left: auto;
 }
 
 .planner-action-icon {
@@ -711,44 +725,6 @@
   color: var(--text-normal);
 }
 
-/* Calendar Dropdown */
-.planner-calendar-dropdown {
-  margin-left: auto;
-}
-
-/* Detailed Options Toggle */
-.planner-detailed-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 8px;
-  margin: 8px 0;
-  border-radius: 6px;
-  cursor: pointer;
-  color: var(--text-muted);
-  font-size: 12px;
-  transition: all 0.15s ease;
-}
-
-.planner-detailed-toggle:hover {
-  background: var(--background-modifier-hover);
-  color: var(--text-normal);
-}
-
-.planner-detailed-toggle .planner-icon {
-  width: 16px;
-  height: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.planner-detailed-toggle .planner-icon svg {
-  width: 16px;
-  height: 16px;
-}
-
 /* Detailed Options Container */
 .planner-detailed-options {
   transition: all 0.2s ease;
@@ -756,33 +732,6 @@
 
 .planner-detailed-options.collapsed {
   display: none;
-}
-
-.planner-calendar-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 10px;
-  font-size: 13px;
-  border: 1px solid var(--background-modifier-border);
-  border-radius: 6px;
-  background: var(--background-secondary);
-  color: var(--text-normal);
-  cursor: pointer;
-}
-
-.planner-calendar-btn:hover {
-  background: var(--background-modifier-hover);
-}
-
-.planner-dropdown-icon {
-  display: flex;
-  opacity: 0.6;
-}
-
-.planner-dropdown-icon svg {
-  width: 14px;
-  height: 14px;
 }
 
 /* Details Section */
@@ -968,8 +917,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding-top: 16px;
-  border-top: 1px solid var(--background-modifier-border);
+  padding-top: 12px;
 }
 
 .planner-btn-spacer {

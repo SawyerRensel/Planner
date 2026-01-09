@@ -78,6 +78,10 @@ export class ItemModal extends Modal {
   private blockedByInput: HTMLInputElement | null = null;
   private tagsInput: HTMLInputElement | null = null;
 
+  // Mobile keyboard handling
+  private viewportResizeHandler: (() => void) | null = null;
+  private isMobile = false;
+
   constructor(plugin: PlannerPlugin, options: ItemModalOptions) {
     super(plugin.app);
     this.plugin = plugin;
@@ -163,6 +167,9 @@ export class ItemModal extends Modal {
     this.markdownComponent = new Component();
     this.markdownComponent.load();
 
+    // Set up mobile keyboard handling
+    this.setupMobileKeyboardHandling();
+
     // Modal header with title and Open Note button (edit mode only)
     const header = contentEl.createDiv({ cls: 'planner-modal-header' });
     const modalTitle = this.options.mode === 'edit' ? 'Edit Item' : 'New Item';
@@ -190,9 +197,6 @@ export class ItemModal extends Modal {
 
     // Icon action bar
     this.createActionBar(contentEl);
-
-    // Show Detailed Options toggle (below icon row)
-    this.createDetailedOptionsToggle(contentEl);
 
     // Detailed options container (hidden by default) - now BELOW the icon row
     this.detailedOptionsContainer = contentEl.createDiv({
@@ -347,44 +351,35 @@ export class ItemModal extends Modal {
       'recurrence'
     );
 
-    // Calendar dropdown
-    this.createCalendarDropdown(this.actionBar);
+    // Calendar icon
+    this.createCalendarIcon(this.actionBar);
+
+    // Detailed options icon (show/hide additional fields)
+    this.createActionIcon(
+      this.actionBar,
+      this.detailedOptionsExpanded ? 'chevron-up' : 'chevron-down',
+      'Detailed options',
+      () => this.toggleDetailedOptions(),
+      'detailed-options'
+    );
 
     // Update initial states
     this.updateIconStates();
   }
 
-  private createDetailedOptionsToggle(container: HTMLElement): void {
-    const toggleContainer = container.createDiv({ cls: 'planner-detailed-toggle' });
-    toggleContainer.setAttribute('tabindex', '0');
-    toggleContainer.setAttribute('role', 'button');
+  private toggleDetailedOptions(): void {
+    this.detailedOptionsExpanded = !this.detailedOptionsExpanded;
+    this.detailedOptionsContainer?.classList.toggle('collapsed', !this.detailedOptionsExpanded);
 
-    const icon = toggleContainer.createSpan({ cls: 'planner-icon' });
-    setIcon(icon, this.detailedOptionsExpanded ? 'chevron-up' : 'chevron-down');
-
-    const label = toggleContainer.createSpan({ cls: 'planner-toggle-label' });
-    label.textContent = this.detailedOptionsExpanded ? 'Hide detailed options' : 'Show detailed options';
-
-    const updateToggle = () => {
-      this.detailedOptionsExpanded = !this.detailedOptionsExpanded;
-      setIcon(icon, this.detailedOptionsExpanded ? 'chevron-up' : 'chevron-down');
-      label.textContent = this.detailedOptionsExpanded ? 'Hide detailed options' : 'Show detailed options';
-      this.detailedOptionsContainer?.classList.toggle('collapsed', !this.detailedOptionsExpanded);
-    };
-
-    toggleContainer.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      updateToggle();
-    });
-
-    toggleContainer.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        e.stopPropagation();
-        updateToggle();
+    // Update the icon
+    const detailedIcon = this.actionBar?.querySelector('[data-type="detailed-options"]');
+    if (detailedIcon) {
+      const iconEl = detailedIcon.querySelector('.planner-icon') as HTMLElement;
+      if (iconEl) {
+        setIcon(iconEl, this.detailedOptionsExpanded ? 'chevron-up' : 'chevron-down');
       }
-    });
+      setTooltip(detailedIcon as HTMLElement, this.detailedOptionsExpanded ? 'Hide detailed options' : 'Show detailed options', { placement: 'top' });
+    }
   }
 
   private createActionIcon(
@@ -420,32 +415,30 @@ export class ItemModal extends Modal {
     return iconContainer;
   }
 
-  private createCalendarDropdown(container: HTMLElement): void {
-    const wrapper = container.createDiv({ cls: 'planner-calendar-dropdown' });
+  private createCalendarIcon(container: HTMLElement): void {
+    const iconContainer = this.createActionIcon(
+      container,
+      'calendar-search',
+      this.calendars[0] || 'Calendar',
+      (el) => this.showCalendarContextMenu(el),
+      'calendar'
+    );
 
-    const btn = wrapper.createEl('button', {
-      cls: 'planner-calendar-btn',
-      text: this.calendars[0] || this.plugin.settings.defaultCalendar || 'Calendar',
+    // Store reference for updating
+    iconContainer.setAttribute('data-calendar-icon', 'true');
+  }
+
+  private showCalendarContextMenu(el: HTMLElement): void {
+    const menu = new CalendarContextMenu({
+      currentValue: this.calendars,
+      onSelect: (value) => {
+        this.calendars = value;
+        this.updateIconStates();
+        this.updateNLPPreview();
+      },
+      plugin: this.plugin,
     });
-
-    const icon = btn.createSpan({ cls: 'planner-dropdown-icon' });
-    setIcon(icon, 'chevron-down');
-
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      const menu = new CalendarContextMenu({
-        currentValue: this.calendars,
-        onSelect: (value) => {
-          this.calendars = value;
-          btn.textContent = value[0] || 'Calendar';
-          btn.appendChild(icon);
-          this.updateIconStates();
-          this.updateNLPPreview();
-        },
-        plugin: this.plugin,
-      });
-      menu.showAtElement(btn);
-    });
+    menu.showAtElement(el);
   }
 
   private updateIconStates(): void {
@@ -510,6 +503,31 @@ export class ItemModal extends Modal {
     if (recurrenceIcon) {
       const hasRecurrence = !!this.recurrence?.repeat_frequency;
       this.updateIconState(recurrenceIcon as HTMLElement, hasRecurrence, hasRecurrence ? 'Recurring' : 'Recurrence');
+    }
+
+    // Calendar
+    const calendarIcon = this.actionBar.querySelector('[data-type="calendar"]');
+    if (calendarIcon) {
+      const hasCalendar = this.calendars.length > 0;
+      const calendarName = this.calendars[0] || 'Calendar';
+      this.updateIconState(calendarIcon as HTMLElement, hasCalendar, calendarName);
+      const iconEl = calendarIcon.querySelector('.planner-icon') as HTMLElement;
+      if (hasCalendar && iconEl) {
+        const color = this.plugin.settings.calendars[this.calendars[0]]?.color;
+        if (color) {
+          iconEl.style.setProperty('color', color);
+        } else {
+          iconEl.style.removeProperty('color');
+        }
+      } else if (iconEl) {
+        iconEl.style.removeProperty('color');
+      }
+    }
+
+    // Detailed options
+    const detailedIcon = this.actionBar.querySelector('[data-type="detailed-options"]');
+    if (detailedIcon) {
+      this.updateIconState(detailedIcon as HTMLElement, this.detailedOptionsExpanded, this.detailedOptionsExpanded ? 'Hide detailed options' : 'Show detailed options');
     }
   }
 
@@ -1215,6 +1233,9 @@ export class ItemModal extends Modal {
   }
 
   onClose(): void {
+    // Clean up mobile keyboard handling
+    this.cleanupMobileKeyboardHandling();
+
     // Unload the markdown component
     if (this.markdownComponent) {
       this.markdownComponent.unload();
@@ -1223,6 +1244,33 @@ export class ItemModal extends Modal {
 
     const { contentEl } = this;
     contentEl.empty();
+  }
+
+  private setupMobileKeyboardHandling(): void {
+    // Check if we're on mobile (Obsidian adds this class to the body)
+    this.isMobile = document.body.classList.contains('is-mobile');
+
+    if (!this.isMobile) {
+      return;
+    }
+
+    const { contentEl } = this;
+
+    // On mobile, when an input is focused, scroll it into view after keyboard appears
+    contentEl.addEventListener('focusin', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+        // Wait for keyboard to appear, then scroll
+        setTimeout(() => {
+          // Use native scrollIntoView with block: 'center' to position in middle of visible area
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 350);
+      }
+    });
+  }
+
+  private cleanupMobileKeyboardHandling(): void {
+    // No cleanup needed - event listener is on contentEl which gets emptied
   }
 }
 
