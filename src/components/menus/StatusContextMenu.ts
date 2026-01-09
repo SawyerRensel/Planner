@@ -56,7 +56,9 @@ export class StatusContextMenu {
 
   private applyColorStyling(): void {
     const statuses = this.options.plugin.settings.statuses;
-    const menuEl = document.querySelector('.menu:last-of-type');
+    // Get all menus and select the last one (most recently added)
+    const menus = document.querySelectorAll('.menu');
+    const menuEl = menus[menus.length - 1];
 
     if (!menuEl) return;
 

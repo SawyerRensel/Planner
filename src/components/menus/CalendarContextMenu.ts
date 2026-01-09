@@ -96,7 +96,16 @@ export class CalendarContextMenu {
   private applyColorStyling(): void {
     const calendarConfigs = this.options.plugin.settings.calendars;
     const calendars = Object.keys(calendarConfigs);
-    const menuEl = document.querySelector('.menu:last-of-type');
+
+    // Add default calendar if not in the list (must match buildMenu order)
+    const defaultCalendar = this.options.plugin.settings.defaultCalendar;
+    if (defaultCalendar && !calendars.includes(defaultCalendar)) {
+      calendars.unshift(defaultCalendar);
+    }
+
+    // Get all menus and select the last one (most recently added)
+    const menus = document.querySelectorAll('.menu');
+    const menuEl = menus[menus.length - 1];
 
     if (!menuEl) return;
 
@@ -109,6 +118,11 @@ export class CalendarContextMenu {
         const iconEl = menuItem.querySelector('.menu-item-icon') as HTMLElement;
         if (iconEl) {
           iconEl.style.color = color;
+        }
+        // Also color the title text like Status and Priority menus
+        const titleEl = menuItem.querySelector('.menu-item-title') as HTMLElement;
+        if (titleEl) {
+          titleEl.style.color = color;
         }
       }
     });
