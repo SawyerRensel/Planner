@@ -26,11 +26,6 @@ export interface PlannerSettings {
   timeFormat: '12h' | '24h';
   weekStartsOn: WeekDay;
 
-  // Item Identification
-  identificationMethod: 'folder' | 'tag' | 'both';
-  includeFolders: string[];
-  includeTags: string[];
-
   // Status Configuration
   statuses: StatusConfig[];
 
@@ -101,11 +96,6 @@ export const DEFAULT_SETTINGS: PlannerSettings = {
   dateFormat: 'YYYY-MM-DD',
   timeFormat: '24h',
   weekStartsOn: 'monday',
-
-  // Item Identification
-  identificationMethod: 'folder',
-  includeFolders: ['Planner/'],
-  includeTags: [],
 
   // Status Configuration
   statuses: [

@@ -48,8 +48,7 @@
               "title": "Timeline"
             }
           }
-        ],
-        "currentTab": 2
+        ]
       }
     ],
     "direction": "vertical"
@@ -234,10 +233,10 @@
       "planner:Open Planner Timeline": false
     }
   },
-  "active": "618b47b44722e19b",
+  "active": "a200b43c11a1b48c",
   "lastOpenFiles": [
-    "Planner/Design Mockups.md",
     "Planner/Timeline.base",
+    "Planner/Design Mockups.md",
     "notes/feedback-and-ideas.md",
     "Planner/Meeting.md",
     "Untitled.md",

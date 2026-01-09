@@ -57,32 +57,8 @@ export class ItemService {
    * Check if a file is a planner item based on settings
    */
   private isItemFile(file: TFile, settings: PlannerSettings): boolean {
-    const { identificationMethod, includeFolders, includeTags } = settings;
-
-    // Check folder
-    const inFolder = includeFolders.some(folder => {
-      const normalizedFolder = normalizePath(folder);
-      return file.path.startsWith(normalizedFolder);
-    });
-
-    // Check tags (from frontmatter cache)
-    const cache = this.app.metadataCache.getFileCache(file);
-    const fileTags = cache?.frontmatter?.tags ?? [];
-    const hasTag = includeTags.some(tag => {
-      const normalizedTag = tag.startsWith('#') ? tag.slice(1) : tag;
-      return fileTags.includes(normalizedTag);
-    });
-
-    switch (identificationMethod) {
-      case 'folder':
-        return inFolder;
-      case 'tag':
-        return hasTag;
-      case 'both':
-        return inFolder || hasTag;
-      default:
-        return inFolder;
-    }
+    const normalizedFolder = normalizePath(settings.itemsFolder);
+    return file.path.startsWith(normalizedFolder);
   }
 
   /**

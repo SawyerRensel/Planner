@@ -2,7 +2,16 @@ import { App, PluginSettingTab, Setting, Modal, Notice } from 'obsidian';
 import type PlannerPlugin from '../main';
 import { PlannerSettings, StatusConfig, PriorityConfig, DEFAULT_SETTINGS, OpenBehavior, getNextCalendarColor } from '../types/settings';
 import { BaseGeneratorService } from '../services/BaseGeneratorService';
-import { FolderSuggest, FolderListSuggest } from '../components/suggests/FolderSuggest';
+import { FolderSuggest } from '../components/suggests/FolderSuggest';
+
+/**
+ * Tab configuration
+ */
+interface TabConfig {
+  id: string;
+  label: string;
+  render: (container: HTMLElement) => void;
+}
 
 /**
  * Confirmation modal for regenerating Base files
@@ -50,16 +59,86 @@ class RegenerateBasesModal extends Modal {
 
 export class PlannerSettingTab extends PluginSettingTab {
   plugin: PlannerPlugin;
+  private activeTab = 'general';
+  private tabContents: Map<string, HTMLElement> = new Map();
+  private tabButtons: Map<string, HTMLElement> = new Map();
 
   constructor(app: App, plugin: PlannerPlugin) {
     super(app, plugin);
     this.plugin = plugin;
   }
 
+  private getTabs(): TabConfig[] {
+    return [
+      { id: 'general', label: 'General', render: (c) => this.renderGeneralTab(c) },
+      { id: 'calendar', label: 'Calendar', render: (c) => this.renderCalendarTab(c) },
+      { id: 'statuses', label: 'Statuses & Priorities', render: (c) => this.renderStatusPriorityTab(c) },
+      { id: 'quickcapture', label: 'Quick Capture', render: (c) => this.renderQuickCaptureTab(c) },
+    ];
+  }
+
   display(): void {
     const { containerEl } = this;
     containerEl.empty();
+    this.tabContents.clear();
+    this.tabButtons.clear();
 
+    const tabs = this.getTabs();
+
+    // Create tab navigation
+    const tabNav = containerEl.createDiv({ cls: 'planner-settings-tabs' });
+    for (const tab of tabs) {
+      const btn = tabNav.createEl('button', {
+        text: tab.label,
+        cls: 'planner-settings-tab',
+      });
+      if (tab.id === this.activeTab) {
+        btn.addClass('is-active');
+      }
+      btn.addEventListener('click', () => this.switchTab(tab.id));
+      this.tabButtons.set(tab.id, btn);
+    }
+
+    // Create tab content containers
+    const tabContentsEl = containerEl.createDiv({ cls: 'planner-settings-tab-contents' });
+    for (const tab of tabs) {
+      const content = tabContentsEl.createDiv({ cls: 'planner-settings-tab-content' });
+      if (tab.id === this.activeTab) {
+        content.addClass('is-active');
+        tab.render(content);
+      }
+      this.tabContents.set(tab.id, content);
+    }
+  }
+
+  private switchTab(tabId: string): void {
+    if (tabId === this.activeTab) return;
+
+    const tabs = this.getTabs();
+
+    // Update button states
+    for (const [id, btn] of this.tabButtons) {
+      btn.toggleClass('is-active', id === tabId);
+    }
+
+    // Update content visibility
+    for (const [id, content] of this.tabContents) {
+      const isActive = id === tabId;
+      content.toggleClass('is-active', isActive);
+
+      // Lazy render: only render content on first access
+      if (isActive && content.children.length === 0) {
+        const tab = tabs.find(t => t.id === id);
+        if (tab) {
+          tab.render(content);
+        }
+      }
+    }
+
+    this.activeTab = tabId;
+  }
+
+  private renderGeneralTab(containerEl: HTMLElement): void {
     // General Settings
     containerEl.createEl('h2', { text: 'General Settings' });
 
@@ -145,7 +224,44 @@ export class PlannerSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         }));
 
-    // Calendar Configuration
+    // Bases Views section
+    containerEl.createEl('h2', { text: 'Bases Views' });
+
+    new Setting(containerEl)
+      .setName('Bases folder')
+      .setDesc('Where to save the Tasks.base and Calendar.base files')
+      .addText(text => {
+        text
+          .setPlaceholder('Planner/')
+          .setValue(this.plugin.settings.basesFolder)
+          .onChange(async (value) => {
+            this.plugin.settings.basesFolder = value || DEFAULT_SETTINGS.basesFolder;
+            await this.plugin.saveSettings();
+          });
+        new FolderSuggest(this.app, text.inputEl);
+      });
+
+    new Setting(containerEl)
+      .setName('Generate Base files')
+      .setDesc('Create or regenerate Tasks.base and Calendar.base files')
+      .addButton(button => button
+        .setButtonText('Generate')
+        .onClick(async () => {
+          const baseGenerator = new BaseGeneratorService(this.app, () => this.plugin.settings);
+          const tasksExists = await baseGenerator.tasksBaseExists();
+          const calendarExists = await baseGenerator.calendarBaseExists();
+
+          if (tasksExists || calendarExists) {
+            new RegenerateBasesModal(this.app, async () => {
+              await this.regenerateBases(baseGenerator);
+            }).open();
+          } else {
+            await this.regenerateBases(baseGenerator);
+          }
+        }));
+  }
+
+  private renderCalendarTab(containerEl: HTMLElement): void {
     containerEl.createEl('h2', { text: 'Calendar Configuration' });
     this.renderCalendarColors(containerEl);
 
@@ -175,99 +291,16 @@ export class PlannerSettingTab extends PluginSettingTab {
         .onChange(async (value) => {
           this.plugin.settings.calendarFontSize = value;
           await this.plugin.saveSettings();
-          this.display(); // Refresh to update description
-        }));
-
-    // Bases Views
-    containerEl.createEl('h2', { text: 'Bases Views' });
-
-    new Setting(containerEl)
-      .setName('Bases folder')
-      .setDesc('Where to save the Tasks.base and Calendar.base files')
-      .addText(text => {
-        text
-          .setPlaceholder('Planner/')
-          .setValue(this.plugin.settings.basesFolder)
-          .onChange(async (value) => {
-            this.plugin.settings.basesFolder = value || DEFAULT_SETTINGS.basesFolder;
-            await this.plugin.saveSettings();
-          });
-        new FolderSuggest(this.app, text.inputEl);
-      });
-
-    new Setting(containerEl)
-      .setName('Generate Base files')
-      .setDesc('Create or regenerate Tasks.base and Calendar.base files')
-      .addButton(button => button
-        .setButtonText('Generate')
-        .onClick(async () => {
-          const baseGenerator = new BaseGeneratorService(this.app, () => this.plugin.settings);
-          const tasksExists = await baseGenerator.tasksBaseExists();
-          const calendarExists = await baseGenerator.calendarBaseExists();
-
-          if (tasksExists || calendarExists) {
-            // Show confirmation modal
-            new RegenerateBasesModal(this.app, async () => {
-              await this.regenerateBases(baseGenerator);
-            }).open();
-          } else {
-            // No existing files, just create them
-            await this.regenerateBases(baseGenerator);
+          // Re-render this tab to update the description
+          const content = this.tabContents.get('calendar');
+          if (content) {
+            content.empty();
+            this.renderCalendarTab(content);
           }
         }));
+  }
 
-    // Item Identification
-    containerEl.createEl('h2', { text: 'Item Identification' });
-
-    new Setting(containerEl)
-      .setName('Identification method')
-      .setDesc('How to identify planner items')
-      .addDropdown(dropdown => dropdown
-        .addOption('folder', 'By folder')
-        .addOption('tag', 'By tag')
-        .addOption('both', 'Both (folder OR tag)')
-        .setValue(this.plugin.settings.identificationMethod)
-        .onChange(async (value: PlannerSettings['identificationMethod']) => {
-          this.plugin.settings.identificationMethod = value;
-          await this.plugin.saveSettings();
-          this.display(); // Refresh to show/hide relevant settings
-        }));
-
-    if (this.plugin.settings.identificationMethod !== 'tag') {
-      new Setting(containerEl)
-        .setName('Include folders')
-        .setDesc('Folders to scan for items (comma-separated)')
-        .addText(text => {
-          text
-            .setPlaceholder('Planner/')
-            .setValue(this.plugin.settings.includeFolders.join(', '))
-            .onChange(async (value) => {
-              this.plugin.settings.includeFolders = value
-                .split(',')
-                .map(s => s.trim())
-                .filter(s => s.length > 0);
-              await this.plugin.saveSettings();
-            });
-          new FolderListSuggest(this.app, text.inputEl);
-        });
-    }
-
-    if (this.plugin.settings.identificationMethod !== 'folder') {
-      new Setting(containerEl)
-        .setName('Include tags')
-        .setDesc('Tags that identify items (comma-separated, without #)')
-        .addText(text => text
-          .setPlaceholder('planner, task, event')
-          .setValue(this.plugin.settings.includeTags.join(', '))
-          .onChange(async (value) => {
-            this.plugin.settings.includeTags = value
-              .split(',')
-              .map(s => s.trim().replace(/^#/, ''))
-              .filter(s => s.length > 0);
-            await this.plugin.saveSettings();
-          }));
-    }
-
+  private renderStatusPriorityTab(containerEl: HTMLElement): void {
     // Status Configuration
     containerEl.createEl('h2', { text: 'Status Configuration' });
     containerEl.createEl('p', {
@@ -284,8 +317,9 @@ export class PlannerSettingTab extends PluginSettingTab {
       cls: 'setting-item-description'
     });
     this.renderPriorityList(containerEl);
+  }
 
-    // Quick Capture
+  private renderQuickCaptureTab(containerEl: HTMLElement): void {
     containerEl.createEl('h2', { text: 'Quick Capture' });
 
     new Setting(containerEl)
@@ -334,7 +368,7 @@ export class PlannerSettingTab extends PluginSettingTab {
             icon: 'circle',
           });
           await this.plugin.saveSettings();
-          this.display();
+          this.refreshCurrentTab();
         }));
   }
 
@@ -373,7 +407,7 @@ export class PlannerSettingTab extends PluginSettingTab {
         .onClick(async () => {
           this.plugin.settings.statuses.splice(index, 1);
           await this.plugin.saveSettings();
-          this.display();
+          this.refreshCurrentTab();
         }));
 
     setting.settingEl.addClass('planner-status-item');
@@ -399,7 +433,7 @@ export class PlannerSettingTab extends PluginSettingTab {
             icon: 'star',
           });
           await this.plugin.saveSettings();
-          this.display();
+          this.refreshCurrentTab();
         }));
   }
 
@@ -438,7 +472,7 @@ export class PlannerSettingTab extends PluginSettingTab {
         .onClick(async () => {
           this.plugin.settings.priorities.splice(index, 1);
           await this.plugin.saveSettings();
-          this.display();
+          this.refreshCurrentTab();
         }));
 
     setting.settingEl.addClass('planner-priority-item');
@@ -472,10 +506,9 @@ export class PlannerSettingTab extends PluginSettingTab {
           .onClick(async () => {
             delete this.plugin.settings.calendars[name];
             await this.plugin.saveSettings();
-            this.display();
+            this.refreshCurrentTab();
           }));
 
-      // Add description for the folder field
       setting.settingEl.querySelector('.setting-item-control input[type="text"]')?.setAttribute('title', 'Folder where new items for this calendar are created');
     }
 
@@ -496,9 +529,21 @@ export class PlannerSettingTab extends PluginSettingTab {
             const nextColor = getNextCalendarColor(calendarCount);
             this.plugin.settings.calendars[newCalendarName] = { color: nextColor };
             await this.plugin.saveSettings();
-            this.display();
+            this.refreshCurrentTab();
           }
         }));
+  }
+
+  private refreshCurrentTab(): void {
+    const content = this.tabContents.get(this.activeTab);
+    if (content) {
+      content.empty();
+      const tabs = this.getTabs();
+      const tab = tabs.find(t => t.id === this.activeTab);
+      if (tab) {
+        tab.render(content);
+      }
+    }
   }
 
   private async regenerateBases(baseGenerator: BaseGeneratorService): Promise<void> {
