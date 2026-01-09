@@ -31,6 +31,7 @@ views:
     sectionsBy: note.calendar
     dateStartField: note.date_start_scheduled
     dateEndField: note.date_end_scheduled
+    backgroundColor: default
   - type: table
     name: Table
   - type: planner-calendar

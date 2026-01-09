@@ -148,6 +148,7 @@ export interface AppState {
   detailPath?: number[];
   path?: string;
   colorMap: Record<string, Record<string, string>>;
+  backgroundColor?: string; // Custom background color in hex format (e.g., "#1e1e2e")
 }
 
 export interface MarkwhenState {

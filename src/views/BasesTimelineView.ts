@@ -91,6 +91,13 @@ export class BasesTimelineView extends BasesView {
     return value || 'note.title';
   }
 
+  private getBackgroundColor(): string | undefined {
+    const value = this.config?.get('backgroundColor') as string | undefined;
+    // Return undefined for 'default' or empty to use theme defaults
+    if (!value || value === 'default') return undefined;
+    return value;
+  }
+
   constructor(
     controller: QueryController,
     containerEl: HTMLElement,
@@ -277,6 +284,7 @@ export class BasesTimelineView extends BasesView {
     this.currentAppState = {
       isDark: document.body.classList.contains('theme-dark'),
       colorMap,
+      backgroundColor: this.getBackgroundColor(),
     };
   }
 
@@ -482,6 +490,30 @@ export function createTimelineViewRegistration(plugin: PlannerPlugin): BasesView
         placeholder: 'Select property',
         filter: (propId: BasesPropertyId) =>
           PropertyTypeService.isTextProperty(propId, plugin.app),
+      },
+      {
+        type: 'dropdown',
+        key: 'backgroundColor',
+        displayName: 'Background color',
+        default: 'default',
+        options: {
+          'default': 'Default (theme)',
+          '#1e1e2e': 'Catppuccin Mocha',
+          '#24273a': 'Catppuccin Macchiato',
+          '#303446': 'Catppuccin Frappe',
+          '#eff1f5': 'Catppuccin Latte',
+          '#002b36': 'Solarized Dark',
+          '#fdf6e3': 'Solarized Light',
+          '#282c34': 'One Dark',
+          '#fafafa': 'One Light',
+          '#1a1b26': 'Tokyo Night',
+          '#24283b': 'Tokyo Night Storm',
+          '#0d1117': 'GitHub Dark',
+          '#ffffff': 'GitHub Light',
+          '#2e3440': 'Nord',
+          '#282a36': 'Dracula',
+          '#1e1e1e': 'VS Code Dark',
+        },
       },
     ],
   };
