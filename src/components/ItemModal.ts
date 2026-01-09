@@ -81,6 +81,7 @@ export class ItemModal extends Modal {
 
   // Mobile keyboard handling
   private viewportResizeHandler: (() => void) | null = null;
+  private touchHandler: ((e: TouchEvent) => void) | null = null;
   private isMobile = false;
 
   constructor(plugin: PlannerPlugin, options: ItemModalOptions) {
@@ -1287,6 +1288,11 @@ export class ItemModal extends Modal {
 
     // Handler for viewport/window resize events
     this.viewportResizeHandler = () => {
+      const currentHeight = window.visualViewport?.height ?? window.innerHeight;
+      // If viewport is now large (>70% of screen), keyboard must be closed
+      if (currentHeight > initialHeight * 0.7) {
+        keyboardOpen = false;
+      }
       setModalHeight(keyboardOpen);
     };
 
@@ -1296,10 +1302,26 @@ export class ItemModal extends Modal {
     // Listen to visualViewport if available (iOS)
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', this.viewportResizeHandler);
+      window.visualViewport.addEventListener('scroll', this.viewportResizeHandler);
     }
 
     // Also listen to window resize
     window.addEventListener('resize', this.viewportResizeHandler);
+
+    // On Android, tapping outside input or pressing back closes keyboard
+    // but may not trigger focusout. Listen for touches outside inputs.
+    this.touchHandler = (e: TouchEvent) => {
+      const target = e.target as HTMLElement;
+      // If touch is not on an input/textarea and keyboard was open, close it
+      if (keyboardOpen && target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
+        // Delay to let the touch complete and keyboard animate closed
+        setTimeout(() => {
+          keyboardOpen = false;
+          setModalHeight(false);
+        }, 300);
+      }
+    };
+    contentEl.addEventListener('touchstart', this.touchHandler);
 
     // On focus: assume keyboard is opening, shrink modal proactively
     contentEl.addEventListener('focusin', (e) => {
@@ -1334,14 +1356,17 @@ export class ItemModal extends Modal {
   }
 
   private cleanupMobileKeyboardHandling(): void {
-    // Clean up all viewport/resize listeners
+    // Clean up all viewport/resize/scroll listeners
     if (this.viewportResizeHandler) {
       if (window.visualViewport) {
         window.visualViewport.removeEventListener('resize', this.viewportResizeHandler);
+        window.visualViewport.removeEventListener('scroll', this.viewportResizeHandler);
       }
       window.removeEventListener('resize', this.viewportResizeHandler);
       this.viewportResizeHandler = null;
     }
+    // Touch handler on contentEl is cleaned up automatically when modal closes
+    this.touchHandler = null;
   }
 }
 
