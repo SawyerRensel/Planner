@@ -21,3 +21,6 @@ views:
     dateStartField: note.date_start_scheduled
   - type: table
     name: Table
+  - type: planner-timeline
+    name: Timeline
+    backgroundColor: "#002b36"
