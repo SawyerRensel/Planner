@@ -51,14 +51,13 @@
             "id": "0e2ac244702038f1",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "bases",
               "state": {
-                "file": "Planner/Team Meeting.md",
-                "mode": "source",
-                "source": false
+                "file": "Planner/Tasks.base",
+                "viewName": "Task List"
               },
-              "icon": "lucide-file",
-              "title": "Team Meeting"
+              "icon": "list-checks",
+              "title": "Tasks"
             }
           },
           {
@@ -260,16 +259,17 @@
       "planner:Open Planner Timeline": false
     }
   },
-  "active": "a95a79f411ac4c1f",
+  "active": "a200b43c11a1b48c",
   "lastOpenFiles": [
+    "Planner/Timeline.base",
+    "Planner/Tasks.base",
+    "Planner/Design Mockups.md",
+    "Planner/Calendar.base",
+    "Planner/Team Meeting.md",
+    "notes/feedback-and-ideas.md",
     "Personal/Untitled",
     "Screenshot_20260108-193249.png",
-    "notes/feedback-and-ideas.md",
-    "Planner/Timeline.base",
-    "Planner/Calendar.base",
-    "Planner/Design Mockups.md",
     "Vacation",
-    "Planner/Team Meeting.md",
     "Planner/Website Redesign.md",
     "Vacation/Vacation.md",
     "Planner/Meeting.md",
@@ -287,12 +287,10 @@
     "Screenshot_20260105-200533.png",
     "Markwhen/Markwhen 1-5-2026 19.42.51.mw",
     "Markwhen",
-    "Planner/Tasks.base",
     "Planner/Gantt.base",
     "Planner/test.md",
     "notes/questions.md",
     "notes/obsidian-planner-prd.md",
-    "notes/obsidian-planner-prd.md.tmp.319.1767492133033",
     "notes/markwhen-integration-analysis.md",
     "notes/frappe-gantt-implementation-plan.md",
     "Personal/Test.md",

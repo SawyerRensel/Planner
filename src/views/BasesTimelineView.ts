@@ -9,6 +9,7 @@ import {
   BasesView,
   BasesViewRegistration,
   BasesEntry,
+  BasesPropertyId,
   QueryController,
   setIcon,
   TFile,
@@ -16,6 +17,7 @@ import {
 import type PlannerPlugin from '../main';
 import { openItemModal } from '../components/ItemModal';
 import { MarkwhenAdapter, AdapterOptions } from '../services/MarkwhenAdapter';
+import { PropertyTypeService } from '../services/PropertyTypeService';
 import { LpcHost, LpcCallbacks } from '../services/LpcHost';
 import {
   TimelineGroupBy,
@@ -52,41 +54,26 @@ export class BasesTimelineView extends BasesView {
   private currentMarkwhenState: MarkwhenState | null = null;
   private currentAppState: AppState | null = null;
 
-  // Configuration getters
+  // Configuration getters - now accept any property ID for custom properties
   private getGroupBy(): TimelineGroupBy {
     const value = this.config?.get('groupBy') as string | undefined;
-    const validValues: TimelineGroupBy[] = [
-      'none', 'calendar', 'status', 'priority', 'parent', 'people',
-      'folder', 'tags', 'context', 'location', 'color'
-    ];
-    if (value && validValues.includes(value as TimelineGroupBy)) {
-      return value as TimelineGroupBy;
-    }
-    return 'calendar';
+    // Accept any property ID; empty string or undefined means 'none'
+    if (!value) return 'none';
+    return value;
   }
 
   private getSectionsBy(): TimelineSectionsBy {
     const value = this.config?.get('sectionsBy') as string | undefined;
-    const validValues: TimelineSectionsBy[] = [
-      'none', 'calendar', 'status', 'priority', 'parent', 'people',
-      'folder', 'tags', 'context', 'location', 'color'
-    ];
-    if (value && validValues.includes(value as TimelineSectionsBy)) {
-      return value as TimelineSectionsBy;
-    }
-    return 'none';
+    // Accept any property ID; empty string or undefined means 'none'
+    if (!value) return 'none';
+    return value;
   }
 
   private getColorBy(): TimelineColorBy {
     const value = this.config?.get('colorBy') as string | undefined;
-    const validValues: TimelineColorBy[] = [
-      'none', 'note.calendar', 'note.status', 'note.priority', 'note.parent',
-      'note.people', 'note.folder', 'note.tags', 'note.context', 'note.location', 'note.color'
-    ];
-    if (value && validValues.includes(value as TimelineColorBy)) {
-      return value as TimelineColorBy;
-    }
-    return 'note.calendar';
+    // Accept any property ID; empty string or undefined defaults to calendar
+    if (!value) return 'note.calendar';
+    return value;
   }
 
   private getDateStartField(): string {
@@ -443,93 +430,58 @@ export function createTimelineViewRegistration(plugin: PlannerPlugin): BasesView
     },
     options: () => [
       {
-        type: 'dropdown',
+        type: 'property',
         key: 'sectionsBy',
         displayName: 'Sections by',
-        default: 'none',
-        options: {
-          none: 'None',
-          calendar: 'Calendar',
-          status: 'Status',
-          priority: 'Priority',
-          parent: 'Parent',
-          people: 'People',
-          folder: 'Folder',
-          tags: 'Tags',
-          context: 'Context',
-          location: 'Location',
-          color: 'Color',
-        },
+        default: '',
+        placeholder: 'None',
+        filter: (propId: BasesPropertyId) =>
+          PropertyTypeService.isCategoricalProperty(propId, plugin.app),
       },
       {
-        type: 'dropdown',
+        type: 'property',
         key: 'groupBy',
         displayName: 'Group by',
-        default: 'calendar',
-        options: {
-          none: 'None',
-          calendar: 'Calendar',
-          status: 'Status',
-          priority: 'Priority',
-          parent: 'Parent',
-          people: 'People',
-          folder: 'Folder',
-          tags: 'Tags',
-          context: 'Context',
-          location: 'Location',
-          color: 'Color',
-        },
+        default: 'note.calendar',
+        placeholder: 'None',
+        filter: (propId: BasesPropertyId) =>
+          PropertyTypeService.isCategoricalProperty(propId, plugin.app),
       },
       {
-        type: 'dropdown',
+        type: 'property',
         key: 'colorBy',
         displayName: 'Color by',
         default: 'note.calendar',
-        options: {
-          none: 'None',
-          'note.calendar': 'Calendar',
-          'note.status': 'Status',
-          'note.priority': 'Priority',
-          'note.parent': 'Parent',
-          'note.people': 'People',
-          'note.folder': 'Folder',
-          'note.tags': 'Tags',
-          'note.context': 'Context',
-          'note.location': 'Location',
-          'note.color': 'Color',
-        },
+        placeholder: 'None',
+        filter: (propId: BasesPropertyId) =>
+          PropertyTypeService.isCategoricalProperty(propId, plugin.app),
       },
       {
-        type: 'dropdown',
+        type: 'property',
         key: 'dateStartField',
         displayName: 'Date start field',
         default: 'note.date_start_scheduled',
-        options: {
-          'note.date_start_scheduled': 'Date Start Scheduled',
-          'note.date_start_actual': 'Date Start Actual',
-          'note.date_created': 'Date Created',
-        },
+        placeholder: 'Select property',
+        filter: (propId: BasesPropertyId) =>
+          PropertyTypeService.isDateProperty(propId, plugin.app),
       },
       {
-        type: 'dropdown',
+        type: 'property',
         key: 'dateEndField',
         displayName: 'Date end field',
         default: 'note.date_end_scheduled',
-        options: {
-          'note.date_end_scheduled': 'Date End Scheduled',
-          'note.date_end_actual': 'Date End Actual',
-          'note.date_modified': 'Date Modified',
-        },
+        placeholder: 'Select property',
+        filter: (propId: BasesPropertyId) =>
+          PropertyTypeService.isDateProperty(propId, plugin.app),
       },
       {
-        type: 'dropdown',
+        type: 'property',
         key: 'titleField',
         displayName: 'Title field',
         default: 'note.title',
-        options: {
-          'note.title': 'Title',
-          'note.summary': 'Summary',
-        },
+        placeholder: 'Select property',
+        filter: (propId: BasesPropertyId) =>
+          PropertyTypeService.isTextProperty(propId, plugin.app),
       },
     ],
   };

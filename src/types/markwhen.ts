@@ -198,45 +198,15 @@ export interface SetPathMessage {
 
 /**
  * Configuration options for the Timeline View
+ *
+ * These types now accept any property ID string to support custom properties.
+ * The 'none' value is special and means no grouping/sectioning/coloring.
  */
-export type TimelineGroupBy =
-  | 'none'
-  | 'calendar'
-  | 'status'
-  | 'priority'
-  | 'parent'
-  | 'people'
-  | 'folder'
-  | 'tags'
-  | 'context'
-  | 'location'
-  | 'color';
+export type TimelineGroupBy = 'none' | string;
 
-export type TimelineSectionsBy =
-  | 'none'
-  | 'calendar'
-  | 'status'
-  | 'priority'
-  | 'parent'
-  | 'people'
-  | 'folder'
-  | 'tags'
-  | 'context'
-  | 'location'
-  | 'color';
+export type TimelineSectionsBy = 'none' | string;
 
-export type TimelineColorBy =
-  | 'none'
-  | 'note.calendar'
-  | 'note.status'
-  | 'note.priority'
-  | 'note.parent'
-  | 'note.people'
-  | 'note.folder'
-  | 'note.tags'
-  | 'note.context'
-  | 'note.location'
-  | 'note.color';
+export type TimelineColorBy = 'none' | string;
 
 export interface TimelineViewConfig {
   groupBy: TimelineGroupBy;

@@ -6,7 +6,7 @@
  * bidirectional sync between Obsidian notes and the Timeline visualization.
  */
 
-import { BasesEntry, App } from 'obsidian';
+import { BasesEntry, BasesPropertyId, App } from 'obsidian';
 import {
   Event,
   EventGroup,
@@ -414,15 +414,16 @@ export class MarkwhenAdapter {
    * Get the value to section by for an entry
    */
   private getSectionValue(entry: BasesEntry, sectionsBy: TimelineSectionsBy): string | undefined {
-    if (sectionsBy === 'none') return undefined;
+    if (sectionsBy === 'none' || !sectionsBy) return undefined;
 
-    if (sectionsBy === 'folder') {
-      // Get the parent folder path
+    // Handle folder specially since it's not a frontmatter property
+    if (sectionsBy === 'folder' || sectionsBy === 'note.folder') {
       const folderPath = entry.file.parent?.path || '/';
       return folderPath === '/' ? 'Root' : entry.file.parent?.name || 'Root';
     }
 
-    const fieldMap: Record<Exclude<TimelineSectionsBy, 'none' | 'folder'>, string> = {
+    // Map legacy short names to full property IDs for backward compatibility
+    const legacyFieldMap: Record<string, string> = {
       calendar: 'note.calendar',
       status: 'note.status',
       priority: 'note.priority',
@@ -434,10 +435,10 @@ export class MarkwhenAdapter {
       color: 'note.color',
     };
 
-    const field = fieldMap[sectionsBy as Exclude<TimelineSectionsBy, 'none' | 'folder'>];
-    if (!field) return undefined;
+    // Use the mapped field if it's a legacy name, otherwise use the value directly
+    const field = legacyFieldMap[sectionsBy] || sectionsBy;
 
-    const value = entry.getValue(field);
+    const value = entry.getValue(field as BasesPropertyId);
     if (!value) return 'Unsectioned';
 
     if (Array.isArray(value)) {
@@ -451,15 +452,16 @@ export class MarkwhenAdapter {
    * Get the value to group by for an entry
    */
   private getGroupValue(entry: BasesEntry, groupBy: TimelineGroupBy): string | undefined {
-    if (groupBy === 'none') return undefined;
+    if (groupBy === 'none' || !groupBy) return undefined;
 
-    if (groupBy === 'folder') {
-      // Get the parent folder path
+    // Handle folder specially since it's not a frontmatter property
+    if (groupBy === 'folder' || groupBy === 'note.folder') {
       const folderPath = entry.file.parent?.path || '/';
       return folderPath === '/' ? 'Root' : entry.file.parent?.name || 'Root';
     }
 
-    const fieldMap: Record<Exclude<TimelineGroupBy, 'none' | 'folder'>, string> = {
+    // Map legacy short names to full property IDs for backward compatibility
+    const legacyFieldMap: Record<string, string> = {
       calendar: 'note.calendar',
       status: 'note.status',
       priority: 'note.priority',
@@ -471,10 +473,10 @@ export class MarkwhenAdapter {
       color: 'note.color',
     };
 
-    const field = fieldMap[groupBy as Exclude<TimelineGroupBy, 'none' | 'folder'>];
-    if (!field) return undefined;
+    // Use the mapped field if it's a legacy name, otherwise use the value directly
+    const field = legacyFieldMap[groupBy] || groupBy;
 
-    const value = entry.getValue(field);
+    const value = entry.getValue(field as BasesPropertyId);
     if (!value) return 'Ungrouped';
 
     if (Array.isArray(value)) {
@@ -768,18 +770,19 @@ export class MarkwhenAdapter {
         }
       }
     } else {
-      // For other fields (parent, people, folder, tags, context, location)
+      // For other fields (parent, people, folder, tags, context, location, and custom properties)
       // Collect unique values and assign Solarized accent colors
       const uniqueValues = new Set<string>();
 
       for (const entry of entries) {
         let value: unknown;
 
-        if (fieldName === 'folder') {
+        // Handle folder specially (both legacy 'folder' and new 'note.folder')
+        if (fieldName === 'folder' || colorBy === 'note.folder') {
           const folderPath = entry.file.parent?.path || '/';
           value = folderPath === '/' ? 'Root' : entry.file.parent?.name || 'Root';
         } else {
-          value = entry.getValue(colorBy);
+          value = entry.getValue(colorBy as BasesPropertyId);
         }
 
         if (value) {

@@ -71,14 +71,17 @@
 - [x] Add another Timeline View configuration menu  for "Sections by" with options including `calendar`, `status`, `priority`, `folder`, etc.
 - [x] Item frontmatter isn't getting pulled into the Item Modal when clicking on a bar to edit the Item.  
 - [ ] ~~Item Modal - add a menu for Task or Event?  That way don't have to manually add tags for either~~
-- [ ] Planner folder auto complete in settings
+- [x] Planner folder auto complete in settings
 - [ ] Planner start to now.  How to handle now in metadata.  Perhaps a "" in `date_end_scheduled`?  I'm thinking about People notes and displaying people who are still alive, or for tasks or events that are ongoing and you're not sure when they'll end (e.g. War in Ukraine)
-- [ ] Could enabled Bases properties in Calendar and Timeline View drive what options appear on the Color by, Group by, and Section by menus as well as the date start and date end?  I'm thinking for example, if I want to map out history and use an "era" frontmatter field to Section by certain events.  Properties should drive all config menu options, including start and end dates.  Use Field type (date, int, text, etc) to filter which properties are shown in which menus
+- [ ] Could the enabled Bases properties in Calendar, Task List, and Timeline Views drive what options appear on the `Color by`, `Group by`, and `Section by` menus as well as the date start and date end?  I'm thinking for example, if I want to map out history and use an "era" frontmatter field to `Section by` certain eras.  Properties should drive all config menu options, including start and end dates.  Use Field type (date, int, text, etc) to filter which properties are shown in which Bases view configuration menus for each View for Planner according to the type of menu.
+
+## Gantt View
 
 ## Other
 
 - [ ] Map View integration in calendar item mobile popup.  
 - [ ] Embed Map View in Calendar template
+	- [ ] Then you could pick a location on the map and copy to frontmatter
 - [ ] Embed the Day's agenda base view in Daily note template.
 - [ ] Embed Map View in daily note?  That way can easily draw/edit where I went that day?
 - [ ] Option to add multiple filter folders and multiple filter tags in settings 

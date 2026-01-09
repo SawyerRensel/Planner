@@ -17,11 +17,11 @@ views:
       property: calendar
       direction: ASC
     order:
-      - note.title
-      - note.priority
-      - note.status
-      - note.date_due
-      - note.calendar
+      - title
+      - status
+      - calendar
+      - priority
+      - date_start_scheduled
     sort:
       - property: priority
         direction: ASC

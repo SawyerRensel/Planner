@@ -70,15 +70,46 @@ export class BaseGeneratorService {
 
     return `source: ${sourceFolder}
 properties:
+  # Text/Title properties
   note.title:
     width: 200
+  note.summary:
+    width: 200
+  file.basename:
+    width: 150
+  # Categorical properties
   note.status:
     width: 100
   note.priority:
     width: 100
-  note.date_due:
-    width: 120
   note.calendar:
+    width: 120
+  note.parent:
+    width: 120
+  note.people:
+    width: 120
+  note.tags:
+    width: 120
+  note.context:
+    width: 100
+  note.location:
+    width: 120
+  note.color:
+    width: 80
+  # Date properties
+  note.date_start_scheduled:
+    width: 120
+  note.date_start_actual:
+    width: 120
+  note.date_end_scheduled:
+    width: 120
+  note.date_end_actual:
+    width: 120
+  note.date_created:
+    width: 120
+  note.date_modified:
+    width: 120
+  note.date_due:
     width: 120
 views:
   - type: planner-task-list
@@ -109,16 +140,47 @@ views:
 
     return `source: ${sourceFolder}
 properties:
+  # Text/Title properties
   note.title:
     width: 200
-  note.date_start:
+  note.summary:
+    width: 200
+  file.basename:
     width: 150
-  note.date_due:
-    width: 150
-  note.calendar:
-    width: 120
+  # Categorical properties
   note.status:
     width: 100
+  note.priority:
+    width: 100
+  note.calendar:
+    width: 120
+  note.parent:
+    width: 120
+  note.people:
+    width: 120
+  note.tags:
+    width: 120
+  note.context:
+    width: 100
+  note.location:
+    width: 120
+  note.color:
+    width: 80
+  # Date properties
+  note.date_start_scheduled:
+    width: 120
+  note.date_start_actual:
+    width: 120
+  note.date_end_scheduled:
+    width: 120
+  note.date_end_actual:
+    width: 120
+  note.date_created:
+    width: 120
+  note.date_modified:
+    width: 120
+  note.date_due:
+    width: 120
 views:
   - type: planner-calendar
     name: Calendar
@@ -140,18 +202,49 @@ views:
 
     return `source: ${sourceFolder}
 properties:
+  # Text/Title properties
   note.title:
     width: 250
+  note.summary:
+    width: 200
+  file.basename:
+    width: 150
+  # Categorical properties
+  note.status:
+    width: 100
+  note.priority:
+    width: 100
+  note.calendar:
+    width: 120
+  note.parent:
+    width: 120
+  note.people:
+    width: 120
+  note.tags:
+    width: 120
+  note.context:
+    width: 100
+  note.location:
+    width: 120
+  note.color:
+    width: 80
+  note.progress:
+    width: 80
+  # Date properties
   note.date_start_scheduled:
+    width: 120
+  note.date_start_actual:
     width: 120
   note.date_end_scheduled:
     width: 120
-  note.calendar:
+  note.date_end_actual:
     width: 120
-  note.status:
-    width: 100
-  note.progress:
-    width: 80
+  note.date_created:
+    width: 120
+  note.date_modified:
+    width: 120
+  note.date_due:
+    width: 120
 views:
   - type: planner-timeline
     name: Timeline

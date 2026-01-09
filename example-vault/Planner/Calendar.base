@@ -17,5 +17,7 @@ views:
       - title
     sort: []
     colorBy: note.calendar
+    titleField: note.title
+    dateStartField: note.date_start_scheduled
   - type: table
     name: Table

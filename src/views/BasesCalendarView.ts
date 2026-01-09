@@ -2,6 +2,7 @@ import {
   BasesView,
   BasesViewRegistration,
   BasesEntry,
+  BasesPropertyId,
   QueryController,
   setIcon,
 } from 'obsidian';
@@ -16,6 +17,7 @@ import type PlannerPlugin from '../main';
 import type { OpenBehavior } from '../types/settings';
 import type { PlannerItem, DayOfWeek } from '../types/item';
 import { openItemModal } from '../components/ItemModal';
+import { PropertyTypeService } from '../services/PropertyTypeService';
 
 export const BASES_CALENDAR_VIEW_ID = 'planner-calendar';
 
@@ -50,16 +52,12 @@ export class BasesCalendarView extends BasesView {
   private yearViewSplit: boolean = true; // true = multiMonthYear (split), false = dayGridYear (continuous)
   private colorMapCache: Record<string, string> = {}; // Cache for color assignments
 
-  private getColorByField(): 'none' | 'note.calendar' | 'note.priority' | 'note.status' | 'note.parent' | 'note.people' | 'note.folder' | 'note.tags' | 'note.context' | 'note.location' | 'note.color' {
+  // Now accepts any property ID for custom properties
+  private getColorByField(): string {
     const value = this.config.get('colorBy') as string | undefined;
-    const validValues = [
-      'none', 'note.calendar', 'note.status', 'note.priority', 'note.parent',
-      'note.people', 'note.folder', 'note.tags', 'note.context', 'note.location', 'note.color'
-    ];
-    if (value && validValues.includes(value)) {
-      return value as any;
-    }
-    return 'note.calendar'; // default
+    // Accept any property ID; empty string or undefined defaults to calendar
+    if (!value) return 'note.calendar';
+    return value;
   }
 
   private getDefaultView(): CalendarViewType {
@@ -913,15 +911,15 @@ export class BasesCalendarView extends BasesView {
 
   private getEntryColor(entry: BasesEntry, colorByProp: string): string {
     // Handle 'none' option
-    if (colorByProp === 'none') {
+    if (colorByProp === 'none' || !colorByProp) {
       return '#6b7280'; // default gray
     }
 
-    const propName = colorByProp.split('.')[1];
+    const propName = colorByProp.split('.')[1] || colorByProp;
 
     // Handle 'color' field - use actual hex value from note
     if (propName === 'color') {
-      const colorValue = entry.getValue(colorByProp as any);
+      const colorValue = entry.getValue(colorByProp as BasesPropertyId);
       if (colorValue) {
         const colorStr = colorValue.toString();
         // Ensure it starts with #
@@ -938,7 +936,7 @@ export class BasesCalendarView extends BasesView {
     }
 
     // Get the value
-    const value = entry.getValue(colorByProp as any);
+    const value = entry.getValue(colorByProp as BasesPropertyId);
     if (!value) return '#6b7280';
 
     // Handle fields with colors defined in settings
@@ -957,12 +955,11 @@ export class BasesCalendarView extends BasesView {
       return status?.color ?? '#6b7280';
     }
 
-    // Handle fields with auto-assigned Solarized colors
-    if (['parent', 'people', 'tags', 'context', 'location'].includes(propName)) {
-      const valueStr = Array.isArray(value) ? value[0]?.toString() : value.toString();
-      if (valueStr) {
-        return this.colorMapCache[valueStr] ?? '#6b7280';
-      }
+    // For all other fields (parent, people, tags, context, location, and custom properties):
+    // Use auto-assigned Solarized colors from the cache
+    const valueStr = Array.isArray(value) ? value[0]?.toString() : value.toString();
+    if (valueStr) {
+      return this.colorMapCache[valueStr] ?? '#6b7280';
     }
 
     return '#6b7280';
@@ -1284,56 +1281,40 @@ export function createCalendarViewRegistration(plugin: PlannerPlugin): BasesView
         },
       },
       {
-        type: 'dropdown',
+        type: 'property',
         key: 'colorBy',
         displayName: 'Color by',
         default: 'note.calendar',
-        options: {
-          none: 'None',
-          'note.calendar': 'Calendar',
-          'note.status': 'Status',
-          'note.priority': 'Priority',
-          'note.parent': 'Parent',
-          'note.people': 'People',
-          'note.folder': 'Folder',
-          'note.tags': 'Tags',
-          'note.context': 'Context',
-          'note.location': 'Location',
-          'note.color': 'Color',
-        },
+        placeholder: 'Select property',
+        filter: (propId: BasesPropertyId) =>
+          PropertyTypeService.isCategoricalProperty(propId, plugin.app),
       },
       {
-        type: 'dropdown',
+        type: 'property',
         key: 'titleField',
         displayName: 'Title field',
         default: 'note.title',
-        options: {
-          'note.title': 'Title',
-          'note.summary': 'Summary',
-          'file.basename': 'File name',
-        },
+        placeholder: 'Select property',
+        filter: (propId: BasesPropertyId) =>
+          PropertyTypeService.isTextProperty(propId, plugin.app),
       },
       {
-        type: 'dropdown',
+        type: 'property',
         key: 'dateStartField',
         displayName: 'Date start field',
         default: 'note.date_start_scheduled',
-        options: {
-          'note.date_start_scheduled': 'Start Scheduled',
-          'note.date_start_actual': 'Start Actual',
-          'note.date_created': 'Date Created',
-        },
+        placeholder: 'Select property',
+        filter: (propId: BasesPropertyId) =>
+          PropertyTypeService.isDateProperty(propId, plugin.app),
       },
       {
-        type: 'dropdown',
+        type: 'property',
         key: 'dateEndField',
         displayName: 'Date end field',
         default: 'note.date_end_scheduled',
-        options: {
-          'note.date_end_scheduled': 'End Scheduled',
-          'note.date_end_actual': 'End Actual',
-          'note.date_modified': 'Date Modified',
-        },
+        placeholder: 'Select property',
+        filter: (propId: BasesPropertyId) =>
+          PropertyTypeService.isDateProperty(propId, plugin.app),
       },
     ],
   };

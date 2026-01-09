@@ -22,12 +22,15 @@ views:
       - title
       - date_start_scheduled
       - date_end_scheduled
+      - calendar
     sort:
       - property: date_start_scheduled
         direction: ASC
     colorBy: note.calendar
     titleField: note.title
-    sectionsBy: calendar
+    sectionsBy: note.calendar
+    dateStartField: note.date_start_actual
+    dateEndField: note.date_end_actual
   - type: table
     name: Table
   - type: planner-calendar
