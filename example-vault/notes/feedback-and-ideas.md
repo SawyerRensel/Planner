@@ -70,7 +70,7 @@
 - [x] Remove Group by and Color by menus from the action row in Timeline View.  Let's move/keep these menus in the Timeline View Configuration menu. 
 - [x] Add another Timeline View configuration menu  for "Sections by" with options including `calendar`, `status`, `priority`, `folder`, etc.
 - [x] Item frontmatter isn't getting pulled into the Item Modal when clicking on a bar to edit the Item.  
-- [ ] Item Modal - add a menu for Task or Event?  That way don't have to manually add tags for either
+- [ ] ~~Item Modal - add a menu for Task or Event?  That way don't have to manually add tags for either~~
 - [ ] Planner folder auto complete in settings
 - [ ] Planner start to now.  How to handle now in metadata.  Perhaps a "" in `date_end_scheduled`?  I'm thinking about People notes and displaying people who are still alive, or for tasks or events that are ongoing and you're not sure when they'll end (e.g. War in Ukraine)
 - [ ] Could enabled Bases properties in Calendar and Timeline View drive what options appear on the Color by, Group by, and Section by menus as well as the date start and date end?  I'm thinking for example, if I want to map out history and use an "era" frontmatter field to Section by certain events.  Properties should drive all config menu options, including start and end dates.  Use Field type (date, int, text, etc) to filter which properties are shown in which menus

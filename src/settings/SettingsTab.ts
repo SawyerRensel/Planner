@@ -2,6 +2,7 @@ import { App, PluginSettingTab, Setting, Modal, Notice } from 'obsidian';
 import type PlannerPlugin from '../main';
 import { PlannerSettings, StatusConfig, PriorityConfig, DEFAULT_SETTINGS, OpenBehavior, getNextCalendarColor } from '../types/settings';
 import { BaseGeneratorService } from '../services/BaseGeneratorService';
+import { FolderSuggest, FolderListSuggest } from '../components/suggests/FolderSuggest';
 
 /**
  * Confirmation modal for regenerating Base files
@@ -65,13 +66,16 @@ export class PlannerSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName('Items folder')
       .setDesc('Where new items are created')
-      .addText(text => text
-        .setPlaceholder('Planner/')
-        .setValue(this.plugin.settings.itemsFolder)
-        .onChange(async (value) => {
-          this.plugin.settings.itemsFolder = value || DEFAULT_SETTINGS.itemsFolder;
-          await this.plugin.saveSettings();
-        }));
+      .addText(text => {
+        text
+          .setPlaceholder('Planner/')
+          .setValue(this.plugin.settings.itemsFolder)
+          .onChange(async (value) => {
+            this.plugin.settings.itemsFolder = value || DEFAULT_SETTINGS.itemsFolder;
+            await this.plugin.saveSettings();
+          });
+        new FolderSuggest(this.app, text.inputEl);
+      });
 
     new Setting(containerEl)
       .setName('Item template')
@@ -180,13 +184,16 @@ export class PlannerSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName('Bases folder')
       .setDesc('Where to save the Tasks.base and Calendar.base files')
-      .addText(text => text
-        .setPlaceholder('Planner/')
-        .setValue(this.plugin.settings.basesFolder)
-        .onChange(async (value) => {
-          this.plugin.settings.basesFolder = value || DEFAULT_SETTINGS.basesFolder;
-          await this.plugin.saveSettings();
-        }));
+      .addText(text => {
+        text
+          .setPlaceholder('Planner/')
+          .setValue(this.plugin.settings.basesFolder)
+          .onChange(async (value) => {
+            this.plugin.settings.basesFolder = value || DEFAULT_SETTINGS.basesFolder;
+            await this.plugin.saveSettings();
+          });
+        new FolderSuggest(this.app, text.inputEl);
+      });
 
     new Setting(containerEl)
       .setName('Generate Base files')
@@ -230,16 +237,19 @@ export class PlannerSettingTab extends PluginSettingTab {
       new Setting(containerEl)
         .setName('Include folders')
         .setDesc('Folders to scan for items (comma-separated)')
-        .addText(text => text
-          .setPlaceholder('Planner/')
-          .setValue(this.plugin.settings.includeFolders.join(', '))
-          .onChange(async (value) => {
-            this.plugin.settings.includeFolders = value
-              .split(',')
-              .map(s => s.trim())
-              .filter(s => s.length > 0);
-            await this.plugin.saveSettings();
-          }));
+        .addText(text => {
+          text
+            .setPlaceholder('Planner/')
+            .setValue(this.plugin.settings.includeFolders.join(', '))
+            .onChange(async (value) => {
+              this.plugin.settings.includeFolders = value
+                .split(',')
+                .map(s => s.trim())
+                .filter(s => s.length > 0);
+              await this.plugin.saveSettings();
+            });
+          new FolderListSuggest(this.app, text.inputEl);
+        });
     }
 
     if (this.plugin.settings.identificationMethod !== 'folder') {
@@ -440,13 +450,16 @@ export class PlannerSettingTab extends PluginSettingTab {
     for (const [name, config] of calendars) {
       const setting = new Setting(containerEl)
         .setName(name)
-        .addText(text => text
-          .setPlaceholder('Folder (optional)')
-          .setValue(config.folder || '')
-          .onChange(async (value) => {
-            this.plugin.settings.calendars[name].folder = value || undefined;
-            await this.plugin.saveSettings();
-          }))
+        .addText(text => {
+          text
+            .setPlaceholder('Folder (optional)')
+            .setValue(config.folder || '')
+            .onChange(async (value) => {
+              this.plugin.settings.calendars[name].folder = value || undefined;
+              await this.plugin.saveSettings();
+            });
+          new FolderSuggest(this.app, text.inputEl);
+        })
         .addColorPicker(picker => picker
           .setValue(config.color)
           .onChange(async (value) => {
