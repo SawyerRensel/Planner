@@ -36,7 +36,7 @@
             }
           },
           {
-            "id": "f6431b2dce94c42a",
+            "id": "3d1643574a15d9e9",
             "type": "leaf",
             "state": {
               "type": "bases",
@@ -48,8 +48,7 @@
               "title": "Kanban"
             }
           }
-        ],
-        "currentTab": 2
+        ]
       }
     ],
     "direction": "vertical"
@@ -236,12 +235,12 @@
       "obsidian-full-calendar:Open Full Calendar": false
     }
   },
-  "active": "f6431b2dce94c42a",
+  "active": "ca4aa4a1612dc5da",
   "lastOpenFiles": [
-    "Personal/FirstMonday.md",
     "Planner/Kanban.base",
-    "Vacation/Vacation.md",
     "notes/feedback-and-ideas.md",
+    "Personal/FirstMonday.md",
+    "Vacation/Vacation.md",
     "Planner/Grocery Shopping.md",
     "Planner/Website Redesign.md",
     "Planner/Calendar.base",

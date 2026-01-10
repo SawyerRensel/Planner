@@ -112,7 +112,31 @@
 | Date end field   |                 |                    |                                                                                                     |
 |                  | Badge placement |                    | Has no effect                                                                                       |
 |                  |                 | Hide empty columns | Works when you set it to `Yes`, but when you set it back to `No`, the empty columns don't reappear. |
+- [ ] Don't show null values for properties on cards.  If null, don't display
+- [ ] `summary` field is always displaying.  This needs to be driven by whether the summary field is toggled on in Bases properties.  Additionally, let's add a `Summary by` config menu for selecting which text-type field displays as a summary in Kanban cards
+- [ ] Swimlanes are partially working.  We need to make sure the columns containers extend fully even when they are empty.  Additionally, the column styling is being affected by adding swimlanes.  For instance, when Group by is set to status without swimlanes, it shows the colored icons for statuses in the columns.  When swimlanes are toggled on, those icons disappear. 
+- [ ] Cover display is failing
 
+```Obsidian Developer Console
+plugin:planner:450 Loading Planner plugin
+plugin:planner:450 Planner: Registered Bases views
+plugin:planner:450 Planner plugin loaded
+plugin:tasknotes:1850 TaskNotes: Starting early migration check...
+plugin:tasknotes:86 [TaskNotes][Bases] Successfully registered view via public API: tasknotesTaskList
+plugin:tasknotes:86 [TaskNotes][Bases] Successfully registered view via public API: tasknotesKanban
+plugin:tasknotes:86 [TaskNotes][Bases] Successfully registered view via public API: tasknotesCalendar
+plugin:tasknotes:86 [TaskNotes][Bases] Successfully registered view via public API: tasknotesMiniCalendar
+plugin:tasknotes:519 DependencyCache: isFileUsedAsProject called before indexes built, building now...
+isFileUsedAsProject @ plugin:tasknotes:519
+45plugin:obsidian-full-calendar:64623 fileUpdated() called for file notes/feedback-and-ideas.md
+2plugin:obsidian-full-calendar:64623 fileUpdated() called for file Personal/FirstMonday.md
+49plugin:obsidian-full-calendar:64623 fileUpdated() called for file notes/feedback-and-ideas.md
+null:1  Failed to load resource: net::ERR_FILE_NOT_FOUND
+Screenshot_20260101-185045.png]]:1  Failed to load resource: net::ERR_FILE_NOT_FOUND
+```
+
+- [ ] Cover height config menu should be a slider, not a dropdown menu.  Additionally, it should only appear when the Cover field menu is not empty/none.
+- [ ] Let's add an config slider to control Kanban Column width
 
 ## Release
 

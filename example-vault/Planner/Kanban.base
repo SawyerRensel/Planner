@@ -39,18 +39,18 @@ views:
       direction: ASC
     order:
       - title
+      - repeat_frequency
+      - file.tags
+      - priority
       - status
       - date_start_scheduled
       - calendar
-      - priority
-      - file.tags
-      - repeat_frequency
     colorBy: note.calendar
     borderStyle: left-accent
     badgePlacement: properties-section
     dateStartField: note.date_start_scheduled
     hideEmptyColumns: "false"
     coverDisplay: none
-    coverField: note.cover
+    coverHeight: "120"
   - type: table
     name: Table
