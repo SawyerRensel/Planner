@@ -80,8 +80,8 @@
 - [x] Planner need to show all properties for date and date and time as options in the date config menus, not just fields that have “date” token in them
 - [ ] Planner Kanban view
 - [ ] Planner Improve performance for Timeline view
-- [ ] Fix Item Modal on mobile.  Make it appear centered.  Resize the modal container according to keyboard height when keyboard is activated
-- [ ] Planner when **editing** an existing note (e.g. a book note that has different frontmatter fields) in Item Modal, don’t replace any pre-existing metadata.  Merge duplicates, but otherwise append *only append the fields modified in the Edit Item Modal to the frontmatter of that note*.  For example, if I open a book note modify the status, then only append the status field and value to the book note’s frontmatter when I press Save.  If I haven’t modified the other fields, don’t add those fields to the frontmatter of that note.
+- [x] Fix Item Modal on mobile.  Make it appear centered.  Resize the modal container according to keyboard height when keyboard is activated
+- [ ] Planner when **editing** an existing note (e.g. a book note that has different frontmatter fields) in Item Modal, don’t delete/replace any pre-existing fields in that note.  Merge duplicates, but otherwise append *only append the fields modified in the Edit Item Modal to the frontmatter of that note*.  For example, if I open a book note in the Item Modal to edit, then modify the status, then save, it should only append the status field and value to the book note’s frontmatter.  If I haven’t modified the other fields, don’t add those fields to the frontmatter of that note.
 - [ ] (v0.0.2) What if the Edit Item Modal's expand details dynamically pulls frontmatter content from whatever note is selected?  Right now it's still very tailored to Planner/Calendar users
 - [ ] Planner Timeline add config menu for default zoom and center for Timeline View.
 - [ ] Planner update PRD with our changes. 

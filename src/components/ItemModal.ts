@@ -1075,6 +1075,30 @@ export class ItemModal extends Modal {
     return luminance > 0.5 ? '#000000' : '#ffffff';
   }
 
+  /**
+   * Safely close the modal, handling potential scope errors gracefully.
+   * Some contexts (like postMessage handlers from iframes) can cause
+   * Obsidian's Modal.close() to fail with scope-related errors.
+   */
+  private safeClose(): void {
+    try {
+      this.close();
+    } catch (error) {
+      // Modal.close() can fail in certain contexts (e.g., when opened from
+      // iframe postMessage handlers) due to scope registration issues.
+      // Fall back to manual cleanup.
+      console.warn('Modal close error (using fallback):', error);
+      try {
+        // Call our cleanup handler
+        this.onClose();
+        // Manually remove modal elements from DOM
+        this.modalEl?.remove();
+      } catch (fallbackError) {
+        console.error('Modal fallback close also failed:', fallbackError);
+      }
+    }
+  }
+
   // Action handlers
   private async handleSave(): Promise<void> {
     const title = this.title.trim() || this.titleInput?.value.trim() || '';
@@ -1119,6 +1143,7 @@ export class ItemModal extends Modal {
       if (this.recurrence.repeat_count) frontmatter.repeat_count = this.recurrence.repeat_count;
     }
 
+    // Perform save operation
     try {
       if (this.options.mode === 'edit' && this.options.item) {
         // Update existing item
@@ -1149,12 +1174,14 @@ export class ItemModal extends Modal {
           await this.app.workspace.openLinkText(item.path, '', false);
         }
       }
-
-      this.close();
     } catch (error) {
       console.error('Failed to save item:', error);
       new Notice('Failed to save item');
+      return; // Don't close if save failed
     }
+
+    // Close modal after successful save
+    this.safeClose();
   }
 
   private async handleDelete(): Promise<void> {
@@ -1170,18 +1197,19 @@ export class ItemModal extends Modal {
       try {
         await this.plugin.itemService.deleteItem(this.options.item.path);
         new Notice(`Deleted: ${this.options.item.title}`);
-        this.close();
       } catch (error) {
         console.error('Failed to delete item:', error);
         new Notice('Failed to delete item');
+        return; // Don't close if delete failed
       }
+      this.safeClose();
     }
   }
 
   private async handleOpenNote(): Promise<void> {
     if (!this.options.item) return;
 
-    this.close();
+    this.safeClose();
 
     const openBehavior = this.plugin.settings.openBehavior;
     const leaf = (() => {

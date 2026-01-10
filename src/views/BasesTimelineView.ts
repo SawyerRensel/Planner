@@ -355,12 +355,15 @@ export class BasesTimelineView extends BasesView {
    */
   private handleNewEvent(params: NewEventMessage): void {
     // Open ItemModal with pre-filled dates
-    openItemModal(this.plugin, {
-      mode: 'create',
-      prefill: {
-        date_start_scheduled: params.dateRangeIso.fromDateTimeIso,
-        date_end_scheduled: params.dateRangeIso.toDateTimeIso,
-      },
+    // Use requestAnimationFrame to break out of postMessage context (same as handleSetDetailPath)
+    requestAnimationFrame(() => {
+      openItemModal(this.plugin, {
+        mode: 'create',
+        prePopulate: {
+          date_start_scheduled: params.dateRangeIso.fromDateTimeIso,
+          date_end_scheduled: params.dateRangeIso.toDateTimeIso,
+        },
+      });
     });
   }
 
@@ -374,7 +377,12 @@ export class BasesTimelineView extends BasesView {
     // Load the full item data for editing
     const item = await this.plugin.itemService.getItem(filePath);
     if (item) {
-      openItemModal(this.plugin, { mode: 'edit', item });
+      // Use requestAnimationFrame to break out of the postMessage event context.
+      // Opening a Modal from within a postMessage handler causes scope registration
+      // issues that make Modal.close() fail with "instanceOf is not a function".
+      requestAnimationFrame(() => {
+        openItemModal(this.plugin, { mode: 'edit', item });
+      });
     } else {
       // Fallback to opening the file if item can't be loaded
       const file = this.plugin.app.vault.getAbstractFileByPath(filePath);
