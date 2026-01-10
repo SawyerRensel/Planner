@@ -55,6 +55,7 @@ export class ItemModal extends Modal {
   private details = '';
   private tags: string[] = [];
   private originalCalendar: string | null = null; // Track original calendar for move detection
+  private originalValues: Partial<ItemFrontmatter> = {}; // Track original values for change detection in edit mode
 
   // UI elements
   private titleInput: HTMLInputElement | null = null;
@@ -125,6 +126,31 @@ export class ItemModal extends Modal {
           repeat_count: item.repeat_count,
         };
       }
+
+      // Store original values for change detection in edit mode
+      // These are the values as loaded from the note, before any user modifications
+      this.originalValues = {
+        title: item.title || '',
+        summary: item.summary || '',
+        tags: item.tags || [],
+        status: item.status || null,
+        priority: item.priority || null,
+        calendar: item.calendar || [],
+        date_start_scheduled: item.date_start_scheduled || null,
+        date_end_scheduled: item.date_end_scheduled || null,
+        all_day: item.all_day ?? true,
+        context: item.context || [],
+        people: item.people || [],
+        parent: item.parent || null,
+        blocked_by: item.blocked_by || [],
+        repeat_frequency: item.repeat_frequency,
+        repeat_interval: item.repeat_interval,
+        repeat_byday: item.repeat_byday,
+        repeat_bymonthday: item.repeat_bymonthday,
+        repeat_bysetpos: item.repeat_bysetpos,
+        repeat_until: item.repeat_until,
+        repeat_count: item.repeat_count,
+      };
     }
 
     // Apply pre-population (overrides loaded values)
@@ -1099,22 +1125,147 @@ export class ItemModal extends Modal {
     }
   }
 
-  // Action handlers
-  private async handleSave(): Promise<void> {
-    const title = this.title.trim() || this.titleInput?.value.trim() || '';
+  /**
+   * Helper to compare arrays for equality (order-independent for most cases)
+   */
+  private arraysEqual(a: unknown[] | undefined, b: unknown[] | undefined): boolean {
+    if (!a && !b) return true;
+    if (!a || !b) return false;
+    if (a.length !== b.length) return false;
+    const sortedA = [...a].sort();
+    const sortedB = [...b].sort();
+    return sortedA.every((val, idx) => val === sortedB[idx]);
+  }
 
-    if (!title) {
-      new Notice('Please enter a title');
-      return;
+  /**
+   * Build frontmatter for edit mode - only includes fields that were actually modified
+   */
+  private buildEditModeFrontmatter(
+    title: string,
+    convertedContext: string[],
+    convertedPeople: string[],
+    convertedParent: string | null,
+    convertedBlockedBy: string[]
+  ): Partial<ItemFrontmatter> {
+    const frontmatter: Partial<ItemFrontmatter> = {};
+    const orig = this.originalValues;
+
+    // Only include fields that have changed from their original values
+    if (title !== orig.title) {
+      frontmatter.title = title;
     }
 
-    // Convert wikilinks based on user's Obsidian link settings
-    const itemsFolder = this.plugin.settings.itemsFolder;
-    const convertedContext = convertWikilinksToRelativePaths(this.app, this.context, itemsFolder) as string[];
-    const convertedPeople = convertWikilinksToRelativePaths(this.app, this.people, itemsFolder) as string[];
-    const convertedParent = convertWikilinksToRelativePaths(this.app, this.parent, itemsFolder) as string | null;
-    const convertedBlockedBy = convertWikilinksToRelativePaths(this.app, this.blockedBy, itemsFolder) as string[];
+    if ((this.summary || '') !== (orig.summary || '')) {
+      frontmatter.summary = this.summary || undefined;
+    }
 
+    if (!this.arraysEqual(this.tags, orig.tags as string[])) {
+      frontmatter.tags = this.tags.length > 0 ? this.tags : undefined;
+    }
+
+    if (this.status !== orig.status) {
+      frontmatter.status = this.status || undefined;
+    }
+
+    if (this.priority !== orig.priority) {
+      frontmatter.priority = this.priority || undefined;
+    }
+
+    if (!this.arraysEqual(this.calendars, orig.calendar as string[])) {
+      frontmatter.calendar = this.calendars.length > 0 ? this.calendars : undefined;
+    }
+
+    if (this.dateStart !== orig.date_start_scheduled) {
+      frontmatter.date_start_scheduled = this.dateStart || undefined;
+    }
+
+    if (this.dateEnd !== orig.date_end_scheduled) {
+      frontmatter.date_end_scheduled = this.dateEnd || undefined;
+    }
+
+    if (this.allDay !== orig.all_day) {
+      frontmatter.all_day = this.allDay;
+    }
+
+    // Compare link fields - need to compare against original values (before wikilink conversion)
+    // The original values are stored as they came from the item (may be relative paths or wikilinks)
+    // The converted values are what we'll save
+    if (!this.arraysEqual(convertedContext, orig.context as string[])) {
+      frontmatter.context = convertedContext.length > 0 ? convertedContext : undefined;
+    }
+
+    if (!this.arraysEqual(convertedPeople, orig.people as string[])) {
+      frontmatter.people = convertedPeople.length > 0 ? convertedPeople : undefined;
+    }
+
+    if (convertedParent !== orig.parent) {
+      frontmatter.parent = convertedParent || undefined;
+    }
+
+    if (!this.arraysEqual(convertedBlockedBy, orig.blocked_by as string[])) {
+      frontmatter.blocked_by = convertedBlockedBy.length > 0 ? convertedBlockedBy : undefined;
+    }
+
+    // Handle recurrence - special case: if adding recurrence, add ALL recurrence fields
+    const hadRecurrence = !!orig.repeat_frequency;
+    const hasRecurrence = !!this.recurrence?.repeat_frequency;
+
+    if (!hadRecurrence && hasRecurrence) {
+      // Adding recurrence - include all recurrence fields
+      frontmatter.repeat_frequency = this.recurrence!.repeat_frequency;
+      if (this.recurrence!.repeat_interval) frontmatter.repeat_interval = this.recurrence!.repeat_interval;
+      if (this.recurrence!.repeat_byday) frontmatter.repeat_byday = this.recurrence!.repeat_byday;
+      if (this.recurrence!.repeat_bymonthday) frontmatter.repeat_bymonthday = this.recurrence!.repeat_bymonthday;
+      if (this.recurrence!.repeat_bysetpos) frontmatter.repeat_bysetpos = this.recurrence!.repeat_bysetpos;
+      if (this.recurrence!.repeat_until) frontmatter.repeat_until = this.recurrence!.repeat_until;
+      if (this.recurrence!.repeat_count) frontmatter.repeat_count = this.recurrence!.repeat_count;
+    } else if (hadRecurrence && hasRecurrence) {
+      // Had recurrence, still has recurrence - only update changed fields
+      if (this.recurrence!.repeat_frequency !== orig.repeat_frequency) {
+        frontmatter.repeat_frequency = this.recurrence!.repeat_frequency;
+      }
+      if (this.recurrence!.repeat_interval !== orig.repeat_interval) {
+        frontmatter.repeat_interval = this.recurrence!.repeat_interval || undefined;
+      }
+      if (!this.arraysEqual(this.recurrence!.repeat_byday, orig.repeat_byday)) {
+        frontmatter.repeat_byday = this.recurrence!.repeat_byday || undefined;
+      }
+      if (!this.arraysEqual(this.recurrence!.repeat_bymonthday, orig.repeat_bymonthday)) {
+        frontmatter.repeat_bymonthday = this.recurrence!.repeat_bymonthday || undefined;
+      }
+      if (this.recurrence!.repeat_bysetpos !== orig.repeat_bysetpos) {
+        frontmatter.repeat_bysetpos = this.recurrence!.repeat_bysetpos || undefined;
+      }
+      if (this.recurrence!.repeat_until !== orig.repeat_until) {
+        frontmatter.repeat_until = this.recurrence!.repeat_until || undefined;
+      }
+      if (this.recurrence!.repeat_count !== orig.repeat_count) {
+        frontmatter.repeat_count = this.recurrence!.repeat_count || undefined;
+      }
+    } else if (hadRecurrence && !hasRecurrence) {
+      // Removing recurrence - set all recurrence fields to undefined to clear them
+      frontmatter.repeat_frequency = undefined;
+      frontmatter.repeat_interval = undefined;
+      frontmatter.repeat_byday = undefined;
+      frontmatter.repeat_bymonthday = undefined;
+      frontmatter.repeat_bysetpos = undefined;
+      frontmatter.repeat_until = undefined;
+      frontmatter.repeat_count = undefined;
+    }
+
+    return frontmatter;
+  }
+
+  /**
+   * Build frontmatter for create mode - includes all fields with values
+   */
+  private buildCreateModeFrontmatter(
+    title: string,
+    convertedContext: string[],
+    convertedPeople: string[],
+    convertedParent: string | null,
+    convertedBlockedBy: string[]
+  ): Partial<ItemFrontmatter> {
     const frontmatter: Partial<ItemFrontmatter> = {
       title,
       summary: this.summary || undefined,
@@ -1142,6 +1293,30 @@ export class ItemModal extends Modal {
       if (this.recurrence.repeat_until) frontmatter.repeat_until = this.recurrence.repeat_until;
       if (this.recurrence.repeat_count) frontmatter.repeat_count = this.recurrence.repeat_count;
     }
+
+    return frontmatter;
+  }
+
+  // Action handlers
+  private async handleSave(): Promise<void> {
+    const title = this.title.trim() || this.titleInput?.value.trim() || '';
+
+    if (!title) {
+      new Notice('Please enter a title');
+      return;
+    }
+
+    // Convert wikilinks based on user's Obsidian link settings
+    const itemsFolder = this.plugin.settings.itemsFolder;
+    const convertedContext = convertWikilinksToRelativePaths(this.app, this.context, itemsFolder) as string[];
+    const convertedPeople = convertWikilinksToRelativePaths(this.app, this.people, itemsFolder) as string[];
+    const convertedParent = convertWikilinksToRelativePaths(this.app, this.parent, itemsFolder) as string | null;
+    const convertedBlockedBy = convertWikilinksToRelativePaths(this.app, this.blockedBy, itemsFolder) as string[];
+
+    // Build frontmatter based on mode
+    const frontmatter = this.options.mode === 'edit'
+      ? this.buildEditModeFrontmatter(title, convertedContext, convertedPeople, convertedParent, convertedBlockedBy)
+      : this.buildCreateModeFrontmatter(title, convertedContext, convertedPeople, convertedParent, convertedBlockedBy);
 
     // Perform save operation
     try {

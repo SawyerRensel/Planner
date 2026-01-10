@@ -22,20 +22,6 @@
             }
           },
           {
-            "id": "b91963e4a7d0ed5b",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Planner/Design Mockups.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Design Mockups"
-            }
-          },
-          {
             "id": "b2e110b658e28eb1",
             "type": "leaf",
             "state": {
@@ -46,6 +32,23 @@
               },
               "icon": "square-chart-gantt",
               "title": "Timeline"
+            }
+          }
+        ],
+        "currentTab": 1
+      },
+      {
+        "id": "9526bee664d81cd6",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "4285a414699f1b18",
+            "type": "leaf",
+            "state": {
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "New tab"
             }
           }
         ]
@@ -233,14 +236,16 @@
       "planner:Open Planner Timeline": false
     }
   },
-  "active": "a200b43c11a1b48c",
+  "active": "b2e110b658e28eb1",
   "lastOpenFiles": [
+    "Personal/Treasure Island.md",
     "Planner/Timeline.base",
+    "Planner/Design Mockups.md",
+    "Treasure Island.md",
+    "notes/feedback-and-ideas.md",
     "Planner/Meeting.md",
     "Personal/Ongoing Test.md",
-    "Planner/Design Mockups.md",
     "Personal/FirstMonday.md",
-    "notes/feedback-and-ideas.md",
     "Books/Treasure Island.md",
     "Books/Guards! Guards!.md",
     "Books/The Raven King (The Raven Cycle Book 4).md",
@@ -264,8 +269,6 @@
     "Books/The Ragamuffin Gospel.md",
     "Books/Piranesi/Piranesi.md",
     "Books/Piranesi",
-    "Books/Information Anxiety.md",
-    "Books/Supercommunicators.md",
     "Books/Practicing the Way/practicing_the_way_companion_guide.pdf",
     "Books/Practicing the Way",
     "Books/media/Guns Germs and Steel.jpg",

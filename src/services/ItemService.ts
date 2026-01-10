@@ -190,10 +190,18 @@ export class ItemService {
 
     // Get existing frontmatter from Obsidian's metadata cache
     const cache = this.app.metadataCache.getFileCache(file);
-    const existingFrontmatter = cache?.frontmatter ?? {};
+    const rawFrontmatter = cache?.frontmatter ?? {};
 
-    // Apply updates
-    const updatedFrontmatter: Partial<ItemFrontmatter> = {
+    // Filter out internal Obsidian properties (like 'position') that shouldn't be written back
+    const existingFrontmatter: Record<string, unknown> = {};
+    for (const key of Object.keys(rawFrontmatter)) {
+      if (key !== 'position') {
+        existingFrontmatter[key] = rawFrontmatter[key];
+      }
+    }
+
+    // Apply updates - only merge in fields that are explicitly set in updates
+    const updatedFrontmatter: Record<string, unknown> = {
       ...existingFrontmatter,
       ...updates,
       date_modified: getLocalISOString(),
@@ -204,8 +212,8 @@ export class ItemService {
       updatedFrontmatter.date_end_actual = getLocalISOString();
     }
 
-    // Build new file content
-    const newContent = this.buildFileContent(updatedFrontmatter, body);
+    // Build new file content - pass false to only include existing fields, not all template fields
+    const newContent = this.buildFileContent(updatedFrontmatter, body, false);
 
     // Update file
     await this.app.vault.modify(file, newContent);
@@ -344,43 +352,79 @@ export class ItemService {
 
   /**
    * Build file content from frontmatter and body
+   * @param frontmatter The frontmatter to write (may include custom fields not in ItemFrontmatter)
+   * @param body The body content
+   * @param includeAllFields If true, includes all fields from FRONTMATTER_FIELD_ORDER (for new items)
+   *                         If false, only includes fields that exist in the frontmatter object (for updates)
    */
-  private buildFileContent(frontmatter: Partial<ItemFrontmatter>, body: string = ''): string {
-    const yaml = this.buildYaml(frontmatter);
+  private buildFileContent(frontmatter: Record<string, unknown>, body: string = '', includeAllFields = true): string {
+    const yaml = this.buildYaml(frontmatter, includeAllFields);
     return `---\n${yaml}---\n${body}`;
   }
 
   /**
    * Build YAML string from frontmatter object
+   * @param frontmatter The frontmatter to write
+   * @param includeAllFields If true, includes all fields from FRONTMATTER_FIELD_ORDER
+   *                         If false, only includes fields that exist in the frontmatter object
    */
-  private buildYaml(frontmatter: Partial<ItemFrontmatter>): string {
+  private buildYaml(frontmatter: Record<string, unknown>, includeAllFields = true): string {
     const lines: string[] = [];
+    const processedKeys = new Set<string>();
 
+    // First, process fields in FRONTMATTER_FIELD_ORDER (for consistent ordering of Planner fields)
     for (const key of FRONTMATTER_FIELD_ORDER) {
       const value = frontmatter[key];
+      const hasKey = Object.prototype.hasOwnProperty.call(frontmatter, key);
+      processedKeys.add(key);
 
-      if (value === undefined || value === null || value === '') {
-        // Include empty fields for completeness
-        lines.push(`${key}:`);
-      } else if (Array.isArray(value)) {
-        if (value.length === 0) {
-          lines.push(`${key}:`);
-        } else {
-          lines.push(`${key}:`);
-          for (const item of value) {
-            lines.push(`  - ${this.yamlValue(item)}`);
-          }
-        }
-      } else if (typeof value === 'boolean') {
-        lines.push(`${key}: ${value}`);
-      } else if (typeof value === 'number') {
-        lines.push(`${key}: ${value}`);
-      } else {
-        lines.push(`${key}: ${this.yamlValue(value)}`);
+      // If not including all fields, skip keys that aren't in the frontmatter object
+      if (!includeAllFields && !hasKey) {
+        continue;
       }
+
+      this.appendYamlField(lines, key, value, includeAllFields, hasKey);
+    }
+
+    // Then, process any remaining fields NOT in FRONTMATTER_FIELD_ORDER (custom fields like author, isbn, etc.)
+    // These should always be preserved when updating
+    for (const key of Object.keys(frontmatter)) {
+      if (processedKeys.has(key)) {
+        continue;
+      }
+      const value = frontmatter[key];
+      this.appendYamlField(lines, key, value, true, true);
     }
 
     return lines.join('\n') + '\n';
+  }
+
+  /**
+   * Append a single field to the YAML lines array
+   */
+  private appendYamlField(lines: string[], key: string, value: unknown, includeAllFields: boolean, hasKey: boolean): void {
+    if (value === undefined || value === null || value === '') {
+      // Only include empty fields if we're including all fields (new item)
+      // or if the field explicitly exists in the object (was intentionally set)
+      if (includeAllFields || hasKey) {
+        lines.push(`${key}:`);
+      }
+    } else if (Array.isArray(value)) {
+      if (value.length === 0) {
+        lines.push(`${key}:`);
+      } else {
+        lines.push(`${key}:`);
+        for (const item of value) {
+          lines.push(`  - ${this.yamlValue(item)}`);
+        }
+      }
+    } else if (typeof value === 'boolean') {
+      lines.push(`${key}: ${value}`);
+    } else if (typeof value === 'number') {
+      lines.push(`${key}: ${value}`);
+    } else {
+      lines.push(`${key}: ${this.yamlValue(value)}`);
+    }
   }
 
   /**
