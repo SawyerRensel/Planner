@@ -44,7 +44,7 @@ views:
       - date_start_scheduled
       - calendar
       - summary
-    colorBy: note.calendar
+    colorBy: file.folder
     borderStyle: left-accent
     badgePlacement: properties-section
     dateStartField: note.date_start_scheduled
@@ -54,6 +54,6 @@ views:
     columnOrder: '["Idea","To-Do","In-Progress","In-Review","Done","Cancelled","in-progress","open","null"]'
     columnWidth: "280"
     swimlaneOrder: '["Personal","Vacation","Work","null"]'
-    swimlaneBy: note.calendar
+    swimlaneBy: note.status
   - type: table
     name: Table

@@ -34,6 +34,19 @@
               "icon": "lucide-file",
               "title": "Website Redesign"
             }
+          },
+          {
+            "id": "fd4d8b115992fd8d",
+            "type": "leaf",
+            "state": {
+              "type": "bases",
+              "state": {
+                "file": "Planner/Kanban.base",
+                "viewName": "Kanban"
+              },
+              "icon": "kanban",
+              "title": "Kanban"
+            }
           }
         ]
       }
@@ -225,8 +238,8 @@
   "active": "ca4aa4a1612dc5da",
   "lastOpenFiles": [
     "Planner/Kanban.base",
-    "notes/feedback-and-ideas.md",
     "Planner/Website Redesign.md",
+    "notes/feedback-and-ideas.md",
     "Personal/FirstMonday.md",
     "Vacation/Vacation.md",
     "Planner/Grocery Shopping.md",

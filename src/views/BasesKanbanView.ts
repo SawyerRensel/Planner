@@ -768,7 +768,9 @@ export class BasesKanbanView extends BasesView {
 
       swimlaneRow.appendChild(swimlaneLabel);
 
-      const swimlane = swimlaneGroups.get(swimlaneKey)!;
+      // Get swimlane data, defaulting to empty Map if this swimlane key has no entries
+      // (can happen with predefined priority/status values that have no data)
+      const swimlane = swimlaneGroups.get(swimlaneKey) || new Map<string, BasesEntry[]>();
 
       // Render columns in this swimlane
       for (const columnKey of columnKeys) {

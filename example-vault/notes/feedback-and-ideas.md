@@ -164,7 +164,10 @@ Screenshot_20260101-185045.png]]:1  Failed to load resource: net::ERR_FILE_NOT_F
 
 - [x] On mobile, when I tap to scroll and I happen to be over a card, it triggers the card drag, which is jarring.  Let's make sure the card drag trigger only happens with a tap-hold delay on the card.
 - [ ] On mobile, tap holding a swimlane and dragging to the very edge of the screen should scroll vertically.  Right now I can drag a swimlane to an adjacent swimlane already in view, but I can't go beyond that.
+
+- [ ] Title config menu
 - [ ] Bases sort should sort cards
+- [ ] When `Group by` or `Swimlanes by` menus are set to `folder` or `tags`, for example, and I try to drag a card into another folder or tag column or swimlane, it doesn't work.  We need to support updating all property fields when a card is moved to another column or swimlane, including or moving Item Notes to the respective folder when applicable.  Any questions.
 
 - [ ] Scrolling with a touchpad is constrained to one axis at a time.  It would be nice to diagonally scroll / scroll both left-right and up-down at the smae time.
 
