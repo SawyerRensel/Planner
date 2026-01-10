@@ -22,6 +22,40 @@
             }
           },
           {
+            "id": "cfb09815e4224497",
+            "type": "leaf",
+            "state": {
+              "type": "bases",
+              "state": {
+                "file": "Planner/Kanban.base",
+                "viewName": "Kanban"
+              },
+              "icon": "kanban",
+              "title": "Kanban"
+            }
+          }
+        ],
+        "currentTab": 1
+      },
+      {
+        "id": "ffadc583d30ecc8d",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "bce01986a328a147",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "notes/feedback-and-ideas.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "feedback-and-ideas"
+            }
+          },
+          {
             "id": "1353fd93fea9a692",
             "type": "leaf",
             "state": {
@@ -34,21 +68,9 @@
               "icon": "lucide-file",
               "title": "Website Redesign"
             }
-          },
-          {
-            "id": "fd4d8b115992fd8d",
-            "type": "leaf",
-            "state": {
-              "type": "bases",
-              "state": {
-                "file": "Planner/Kanban.base",
-                "viewName": "Kanban"
-              },
-              "icon": "kanban",
-              "title": "Kanban"
-            }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -235,7 +257,7 @@
       "obsidian-full-calendar:Open Full Calendar": false
     }
   },
-  "active": "ca4aa4a1612dc5da",
+  "active": "1353fd93fea9a692",
   "lastOpenFiles": [
     "Planner/Kanban.base",
     "Planner/Website Redesign.md",

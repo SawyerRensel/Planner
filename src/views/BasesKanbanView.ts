@@ -5,6 +5,8 @@ import {
   BasesPropertyId,
   QueryController,
   setIcon,
+  TFile,
+  TFolder,
 } from 'obsidian';
 import type PlannerPlugin from '../main';
 import { openItemModal } from '../components/ItemModal';
@@ -2121,21 +2123,97 @@ export class BasesKanbanView extends BasesView {
 
   private async handleCardDrop(filePath: string, newGroupValue: string, newSwimlaneValue?: string): Promise<void> {
     const groupByField = this.getGroupBy();
-    const fieldName = groupByField.replace(/^note\./, '');
+    const fieldName = groupByField.replace(/^(note|file)\./, '');
     const swimlaneBy = this.getSwimlaneBy();
-    const swimlaneFieldName = swimlaneBy ? swimlaneBy.replace(/^note\./, '') : null;
+    const swimlaneFieldName = swimlaneBy ? swimlaneBy.replace(/^(note|file)\./, '') : null;
 
     const file = this.plugin.app.vault.getAbstractFileByPath(filePath);
-    if (!file) return;
+    if (!(file instanceof TFile)) return;
 
-    await this.plugin.app.fileManager.processFrontMatter(file as any, (fm) => {
-      fm[fieldName] = newGroupValue;
-      // Also update swimlane field if swimlanes are enabled and a target swimlane was specified
-      if (swimlaneFieldName && newSwimlaneValue !== undefined) {
-        fm[swimlaneFieldName] = newSwimlaneValue;
+    // Check if we need to handle folder moves
+    const isFolderGroupBy = this.isFolderProperty(groupByField);
+    const isFolderSwimlane = swimlaneBy ? this.isFolderProperty(swimlaneBy) : false;
+
+    // Determine target folder from either groupBy or swimlane (folder takes priority)
+    let targetFolder: string | null = null;
+    if (isFolderGroupBy && newGroupValue && newGroupValue !== 'None') {
+      targetFolder = this.findFolderPath(newGroupValue);
+    } else if (isFolderSwimlane && newSwimlaneValue && newSwimlaneValue !== 'None') {
+      targetFolder = this.findFolderPath(newSwimlaneValue);
+    }
+
+    // Move file if folder changed
+    let newFilePath = filePath;
+    if (targetFolder !== null) {
+      const currentFolder = file.parent?.path || '';
+      if (targetFolder !== currentFolder) {
+        const movedPath = await this.plugin.itemService.moveItem(filePath, targetFolder);
+        if (movedPath) {
+          newFilePath = movedPath;
+        }
       }
-      fm.date_modified = new Date().toISOString();
-    });
+    }
+
+    // Now update frontmatter for non-folder properties
+    const needsFrontmatterUpdate =
+      (!isFolderGroupBy && newGroupValue !== undefined) ||
+      (!isFolderSwimlane && swimlaneFieldName && newSwimlaneValue !== undefined);
+
+    if (needsFrontmatterUpdate) {
+      const fileToUpdate = this.plugin.app.vault.getAbstractFileByPath(newFilePath);
+      if (!fileToUpdate) return;
+
+      await this.plugin.app.fileManager.processFrontMatter(fileToUpdate as TFile, (fm) => {
+        // Update groupBy field (if not folder)
+        if (!isFolderGroupBy) {
+          fm[fieldName] = this.convertValueForField(fieldName, newGroupValue);
+        }
+        // Update swimlane field (if not folder)
+        if (!isFolderSwimlane && swimlaneFieldName && newSwimlaneValue !== undefined) {
+          fm[swimlaneFieldName] = this.convertValueForField(swimlaneFieldName, newSwimlaneValue);
+        }
+        fm.date_modified = new Date().toISOString();
+      });
+    }
+  }
+
+  /**
+   * Check if a property ID refers to folder
+   */
+  private isFolderProperty(propId: string): boolean {
+    const normalized = propId.replace(/^(note|file)\./, '');
+    return normalized === 'folder';
+  }
+
+  /**
+   * Convert a value for a specific field, handling special cases like tags
+   */
+  private convertValueForField(fieldName: string, value: string): string | string[] {
+    // Tags should be stored as an array
+    if (fieldName === 'tags') {
+      // Ensure the tag has # prefix for consistency
+      const normalizedTag = value.startsWith('#') ? value : `#${value}`;
+      return [normalizedTag];
+    }
+    return value;
+  }
+
+  /**
+   * Find the full path to a folder by its name
+   * Returns the first matching folder path, or null if not found
+   */
+  private findFolderPath(folderName: string): string | null {
+    if (folderName === 'Root' || folderName === '/') {
+      return '';
+    }
+
+    const allFiles = this.plugin.app.vault.getAllLoadedFiles();
+    for (const file of allFiles) {
+      if (file instanceof TFolder && file.name === folderName) {
+        return file.path;
+      }
+    }
+    return null;
   }
 
   private async handleCardClick(entry: BasesEntry): Promise<void> {

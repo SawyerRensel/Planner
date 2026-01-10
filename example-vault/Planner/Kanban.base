@@ -44,6 +44,7 @@ views:
       - date_start_scheduled
       - calendar
       - summary
+      - tags
     colorBy: file.folder
     borderStyle: left-accent
     badgePlacement: properties-section
@@ -54,6 +55,6 @@ views:
     columnOrder: '["Idea","To-Do","In-Progress","In-Review","Done","Cancelled","in-progress","open","null"]'
     columnWidth: "280"
     swimlaneOrder: '["Personal","Vacation","Work","null"]'
-    swimlaneBy: note.status
+    swimlaneBy: note.tags
   - type: table
     name: Table
