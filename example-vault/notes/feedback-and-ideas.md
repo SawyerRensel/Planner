@@ -87,7 +87,7 @@
 
 ## Kanban View
 
-- [ ] Check the PRD to brush up on what you wanted
+- [x] Check the PRD to brush up on what you wanted
 - [ ] "Columns by" menu to allow picking how to configure Kanban columns.  
 - [ ] Support for cover images!
 - [ ] clear borders for cards (support colors?)

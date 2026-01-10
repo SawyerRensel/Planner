@@ -1,6 +1,6 @@
 # Planner - Product Requirements Document
 
-> **Version:** 2.5.0
+> **Version:** 2.6.0
 > **Last Updated:** 2026-01-10
 > **Author:** Claude and Sawyer Rensel
 > **Status:** Active
@@ -359,17 +359,60 @@ Full calendar display using FullCalendar library.
 
 ### 5.2 Kanban View
 
-Drag-and-drop board with configurable columns.
+Drag-and-drop board with configurable columns and rich card styling.
 
 **Features:**
-- Columns by any field (status, priority, calendar, etc.)
-- Swimlanes by any field (status, priority, calendar, etc.) for additional grouping
-- Drag cards between columns and swimlanes (updates field value(s))
-- Card shows: title, summary, dates, tags, and/or any property enabled in Bases Properties and not used as column or swimlanes.
-- Cover images via `cover` field
-- Configurable card properties (Bases)
+- Columns by any categorical Bases property (status, priority, calendar, context, tags, etc.)
+- Swimlanes by any categorical field for additional grouping (2D grid layout)
+- Drag cards between columns and swimlanes (updates field values)
+- Card displays: title, summary, dates, and any property enabled in Bases Properties
+- Cover images via configurable text field (user selects field in Bases config, default: none)
+- Colored card borders based on "Color by" field (configurable border style)
+- Styled field badges with custom colors (status, priority, calendar, date start, date end)
+- Configurable visible properties (Bases)
 - WIP limits per column (optional)
 - Search bar
+- Virtual scrolling for columns with 15+ cards
+
+**Bases Configuration Menu Options:**
+- **Group By (Columns)**: Select categorical property for columns (status, priority, calendar, etc.)
+- **Swimlane By**: Select categorical property for horizontal grouping (optional)
+- **Color By**: Select field to color cards by (applies to border color)
+- **Border Style**: `none`, `left-accent`, `full-border`
+- **Cover Field**: Select text property for cover image (default: none)
+- **Cover Display**: `none`, `banner`, `thumbnail-left`, `thumbnail-right`, `background`
+- **Date Start Field**: Select date property for start date badge (default: `date_start_scheduled`)
+- **Date End Field**: Select date property for end date badge (default: `date_end_scheduled`)
+- **Badge Placement**: `inline`, `properties-section`
+- **Column Width**: Slider (200-500px, default 280px)
+- **Hide Empty Columns**: Toggle to hide columns with no cards
+- **Enable Search**: Toggle search filter bar
+
+**Card Anatomy:**
+```
+┌─────────────────────────────────┐
+│ ▐ (left accent - if enabled)   │
+│ ┌─────────────────────────────┐ │
+│ │ [Cover Image - if enabled]  │ │
+│ ├─────────────────────────────┤ │
+│ │ Task Title                  │ │
+│ │ [badges inline - if enabled]│ │
+│ │ Summary text if present...  │ │
+│ ├─────────────────────────────┤ │
+│ │ [Properties section - if    │ │
+│ │  badge placement = section] │ │
+│ │ 🔵 In-Progress  🟠 High     │ │
+│ │ 📅 1/15/2026  🏁 1/20/2026  │ │
+│ │ ~Personal                   │ │
+│ └─────────────────────────────┘ │
+└─────────────────────────────────┘
+
+Badge styling:
+- Status/Priority: colored bg from settings, Lucide icon
+- Calendar: colored bg from settings
+- Date Start: 📅 (calendar icon), accent color bg
+- Date End: 🏁 (calendar-check icon), accent color bg
+```
 
 ### 5.3 Task List View
 
@@ -1392,6 +1435,7 @@ Common patterns:
 | 2.3.0 | 2026-01-03 | Claude & Sawyer | **Timeline View**: New view powered by Markwhen Timeline. Provides beautiful chronological event visualization. Features: iframe-based architecture with LPC bidirectional communication, configurable groupBy (calendar/status/parent/people/priority), colorBy support, drag-to-reschedule with frontmatter sync, click-to-edit via ItemModal, Markwhen's built-in zoom/pan/navigation controls. |
 | 2.4.0 | 2026-01-08 | Claude & Sawyer | Timeline View implementation completed. All Phase 7 tasks marked complete. |
 | 2.5.0 | 2026-01-10 | Claude & Sawyer | Removed Gantt View feature from PRD. Simplified roadmap to focus on Calendar, Timeline, and Kanban views. Renumbered phases. |
+| 2.6.0 | 2026-01-10 | Claude & Sawyer | **Kanban View enhancements**: Added Bases Configuration Menu Options (Group By, Swimlane By, Color By, Border Style, Cover Field, Cover Display, Date Start/End Fields, Badge Placement, Column Width, Hide Empty Columns, Enable Search). Added styled field badges for status, priority, calendar, and dates with custom colors and Lucide icons. Added card anatomy diagram. Added virtual scrolling for 15+ cards. |
 
 ---
 

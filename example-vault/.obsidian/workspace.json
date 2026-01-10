@@ -61,7 +61,8 @@
               "title": "Calendar"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -196,13 +197,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "notes/feedback-and-ideas.md",
+                "file": "notes/obsidian-planner-prd.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of feedback-and-ideas"
+              "title": "Outline of obsidian-planner-prd"
             }
           },
           {
@@ -246,21 +247,21 @@
       "obsidian-full-calendar:Open Full Calendar": false
     }
   },
-  "active": "ca4aa4a1612dc5da",
+  "active": "e2f19bb7ca449e8f",
   "lastOpenFiles": [
+    "notes/feedback-and-ideas.md",
+    "notes/obsidian-planner-prd.md",
+    "un.md",
+    "notes/obsidian-planner-prd.md.tmp.3047.1768045121548",
+    "notes/obsidian-planner-prd.md.tmp.3047.1768045115671",
+    "notes/obsidian-planner-prd.md.tmp.3047.1768045106623",
+    "Planner/Calendar.base",
     "notes/obsidian-planner-prd.md.tmp.1205.1768042992844",
     "notes/obsidian-planner-prd.md.tmp.1205.1768042985546",
     "notes/obsidian-planner-prd.md.tmp.1205.1768042961318",
     "notes/obsidian-planner-prd.md.tmp.1205.1768042940103",
     "notes/obsidian-planner-prd.md.tmp.1205.1768042922699",
     "notes/obsidian-planner-prd.md.tmp.1205.1768042895450",
-    "notes/obsidian-planner-prd.md.tmp.1205.1768042891688",
-    "notes/obsidian-planner-prd.md.tmp.1205.1768042872383",
-    "notes/obsidian-planner-prd.md.tmp.1205.1768042858366",
-    "notes/obsidian-planner-prd.md.tmp.1205.1768042838969",
-    "notes/obsidian-planner-prd.md.tmp.1205.1768042831144",
-    "notes/obsidian-planner-prd.md",
-    "notes/feedback-and-ideas.md",
     "notes/questions.md",
     "notes/markwhen-integration-analysis.md",
     "notes/Screenshot_20260101-185045.png",
@@ -291,7 +292,6 @@
     "Books/The Raven King (The Raven Cycle Book 4).md",
     "Books/Atomic Habits.md",
     "Books/Crazy Busy.md",
-    "Books/Guns Germs and Steel.md",
     "Books/media/Guns Germs and Steel.jpg",
     "Books/media/The Raven King (The Raven Cycle Book 4).jpg"
   ]
