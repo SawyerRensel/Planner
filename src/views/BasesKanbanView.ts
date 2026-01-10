@@ -80,6 +80,14 @@ export class BasesKanbanView extends BasesView {
   private draggedSwimlane: HTMLElement | null = null;
   private draggedSwimlaneKey: string | null = null;
 
+  // Swimlane touch drag state (for mobile)
+  private touchDragSwimlane: HTMLElement | null = null;
+  private touchDragSwimlaneClone: HTMLElement | null = null;
+  private touchSwimlaneStartX: number = 0;
+  private touchSwimlaneStartY: number = 0;
+  private touchSwimlaneHoldTimer: number | null = null;
+  private touchSwimlaneHoldReady: boolean = false;
+
   // Configuration getters
   private getGroupBy(): string {
     const value = this.config.get('groupBy') as string | undefined;
@@ -1178,6 +1186,165 @@ export class BasesKanbanView extends BasesView {
       this.reorderSwimlanes(this.draggedSwimlaneKey, swimlaneKey, insertBefore);
 
       swimlaneRow.classList.remove('planner-kanban-swimlane--drop-above', 'planner-kanban-swimlane--drop-below');
+    });
+
+    // Mobile touch handlers for swimlane reordering with hold delay
+    const HOLD_DELAY_MS = 200;
+
+    grabHandle.addEventListener('touchstart', (e: TouchEvent) => {
+      this.touchSwimlaneStartX = e.touches[0].clientX;
+      this.touchSwimlaneStartY = e.touches[0].clientY;
+      this.touchSwimlaneHoldReady = false;
+
+      this.touchSwimlaneHoldTimer = window.setTimeout(() => {
+        this.touchSwimlaneHoldReady = true;
+        grabHandle.classList.add('planner-kanban-grab--hold-ready');
+      }, HOLD_DELAY_MS);
+    }, { passive: true });
+
+    grabHandle.addEventListener('touchmove', (e: TouchEvent) => {
+      const dx = Math.abs(e.touches[0].clientX - this.touchSwimlaneStartX);
+      const dy = Math.abs(e.touches[0].clientY - this.touchSwimlaneStartY);
+
+      // If moved before hold timer completed, cancel and allow normal scrolling
+      if (!this.touchSwimlaneHoldReady && (dx > 10 || dy > 10)) {
+        this.cancelSwimlaneTouchHold(grabHandle);
+        return;
+      }
+
+      // Start touch drag if hold completed and moved enough
+      if (this.touchSwimlaneHoldReady && !this.touchDragSwimlane) {
+        if (dx > 10 || dy > 10) {
+          this.startSwimlaneTouchDrag(swimlaneRow, swimlaneKey, e);
+        }
+      } else if (this.touchDragSwimlaneClone) {
+        e.preventDefault();
+        this.updateSwimlaneTouchDrag(e);
+      }
+    }, { passive: false });
+
+    grabHandle.addEventListener('touchend', (e: TouchEvent) => {
+      this.cancelSwimlaneTouchHold(grabHandle);
+      if (this.touchDragSwimlane) {
+        this.endSwimlaneTouchDrag(e);
+      }
+    });
+
+    grabHandle.addEventListener('touchcancel', () => {
+      this.cancelSwimlaneTouchHold(grabHandle);
+      this.cleanupSwimlaneTouchDrag();
+    });
+  }
+
+  private cancelSwimlaneTouchHold(grabHandle: HTMLElement): void {
+    if (this.touchSwimlaneHoldTimer) {
+      clearTimeout(this.touchSwimlaneHoldTimer);
+      this.touchSwimlaneHoldTimer = null;
+    }
+    grabHandle.classList.remove('planner-kanban-grab--hold-ready');
+    this.touchSwimlaneHoldReady = false;
+  }
+
+  private startSwimlaneTouchDrag(swimlaneRow: HTMLElement, swimlaneKey: string, e: TouchEvent): void {
+    this.touchDragSwimlane = swimlaneRow;
+    this.draggedSwimlaneKey = swimlaneKey;
+
+    // Create visual clone
+    const labelEl = swimlaneRow.querySelector('.planner-kanban-swimlane-label');
+    if (labelEl) {
+      this.touchDragSwimlaneClone = labelEl.cloneNode(true) as HTMLElement;
+      this.touchDragSwimlaneClone.style.cssText = `
+        position: fixed;
+        pointer-events: none;
+        z-index: 1000;
+        opacity: 0.9;
+        transform: scale(1.02);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        width: ${labelEl.clientWidth}px;
+      `;
+      document.body.appendChild(this.touchDragSwimlaneClone);
+    }
+
+    swimlaneRow.classList.add('planner-kanban-swimlane--dragging');
+    this.updateSwimlaneTouchDrag(e);
+  }
+
+  private updateSwimlaneTouchDrag(e: TouchEvent): void {
+    if (!this.touchDragSwimlaneClone || !this.boardEl) return;
+
+    const touch = e.touches[0];
+    this.touchDragSwimlaneClone.style.left = `${touch.clientX - 50}px`;
+    this.touchDragSwimlaneClone.style.top = `${touch.clientY - 20}px`;
+
+    // Handle edge scrolling
+    this.handleEdgeScroll(touch.clientX, touch.clientY);
+
+    // Highlight drop target
+    this.highlightSwimlaneDropTarget(touch.clientY);
+  }
+
+  private highlightSwimlaneDropTarget(clientY: number): void {
+    // Clear previous highlights
+    document.querySelectorAll('.planner-kanban-swimlane--drop-above, .planner-kanban-swimlane--drop-below').forEach(el => {
+      el.classList.remove('planner-kanban-swimlane--drop-above', 'planner-kanban-swimlane--drop-below');
+    });
+
+    // Find swimlane row under touch point
+    const rows = Array.from(document.querySelectorAll('.planner-kanban-swimlane-row'));
+    for (const row of rows) {
+      if (row === this.touchDragSwimlane) continue;
+      const rect = row.getBoundingClientRect();
+      if (clientY >= rect.top && clientY <= rect.bottom) {
+        const midpoint = rect.top + rect.height / 2;
+        if (clientY < midpoint) {
+          row.classList.add('planner-kanban-swimlane--drop-above');
+        } else {
+          row.classList.add('planner-kanban-swimlane--drop-below');
+        }
+        break;
+      }
+    }
+  }
+
+  private endSwimlaneTouchDrag(e: TouchEvent): void {
+    this.stopAutoScroll();
+
+    const touch = e.changedTouches[0];
+
+    // Find drop target
+    const rows = Array.from(document.querySelectorAll('.planner-kanban-swimlane-row'));
+    for (const row of rows) {
+      if (row === this.touchDragSwimlane) continue;
+      const rect = row.getBoundingClientRect();
+      if (touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+        const targetKey = row.getAttribute('data-swimlane-row');
+        if (targetKey && this.draggedSwimlaneKey) {
+          const midpoint = rect.top + rect.height / 2;
+          const insertBefore = touch.clientY < midpoint;
+          this.reorderSwimlanes(this.draggedSwimlaneKey, targetKey, insertBefore);
+        }
+        break;
+      }
+    }
+
+    this.cleanupSwimlaneTouchDrag();
+  }
+
+  private cleanupSwimlaneTouchDrag(): void {
+    if (this.touchDragSwimlaneClone) {
+      this.touchDragSwimlaneClone.remove();
+      this.touchDragSwimlaneClone = null;
+    }
+    if (this.touchDragSwimlane) {
+      this.touchDragSwimlane.classList.remove('planner-kanban-swimlane--dragging');
+      this.touchDragSwimlane = null;
+    }
+    this.draggedSwimlaneKey = null;
+    this.stopAutoScroll();
+
+    // Clear all drop indicators
+    document.querySelectorAll('.planner-kanban-swimlane--drop-above, .planner-kanban-swimlane--drop-below').forEach(el => {
+      el.classList.remove('planner-kanban-swimlane--drop-above', 'planner-kanban-swimlane--drop-below');
     });
   }
 
