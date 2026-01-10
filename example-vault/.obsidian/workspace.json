@@ -34,19 +34,6 @@
               "icon": "lucide-file",
               "title": "Website Redesign"
             }
-          },
-          {
-            "id": "15bfdaa4ad1eec2a",
-            "type": "leaf",
-            "state": {
-              "type": "bases",
-              "state": {
-                "file": "Planner/Kanban.base",
-                "viewName": "Kanban"
-              },
-              "icon": "kanban",
-              "title": "Kanban"
-            }
           }
         ]
       }

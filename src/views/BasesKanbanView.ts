@@ -2012,24 +2012,29 @@ export class BasesKanbanView extends BasesView {
   private handleEdgeScroll(clientX: number, clientY: number): void {
     if (!this.boardEl) return;
 
-    const rect = this.boardEl.getBoundingClientRect();
+    const boardRect = this.boardEl.getBoundingClientRect();
     const edgeThreshold = 60;
     const scrollSpeed = 15;
 
     let scrollX = 0;
     let scrollY = 0;
 
-    // Check horizontal edges
-    if (clientX < rect.left + edgeThreshold) {
+    // Check horizontal edges (always use boardEl rect)
+    if (clientX < boardRect.left + edgeThreshold) {
       scrollX = -scrollSpeed;
-    } else if (clientX > rect.right - edgeThreshold) {
+    } else if (clientX > boardRect.right - edgeThreshold) {
       scrollX = scrollSpeed;
     }
 
     // Check vertical edges
-    if (clientY < rect.top + edgeThreshold) {
+    // When swimlanes are enabled, use containerEl rect since that's the vertical scroll container
+    const verticalRect = this.getSwimlaneBy()
+      ? this.containerEl.getBoundingClientRect()
+      : boardRect;
+
+    if (clientY < verticalRect.top + edgeThreshold) {
       scrollY = -scrollSpeed;
-    } else if (clientY > rect.bottom - edgeThreshold) {
+    } else if (clientY > verticalRect.bottom - edgeThreshold) {
       scrollY = scrollSpeed;
     }
 
@@ -2047,8 +2052,16 @@ export class BasesKanbanView extends BasesView {
 
     this.scrollInterval = window.setInterval(() => {
       if (this.boardEl) {
+        // Horizontal scrolling always uses boardEl
         this.boardEl.scrollLeft += scrollX;
-        this.boardEl.scrollTop += scrollY;
+
+        // Vertical scrolling: when swimlanes are enabled, use containerEl
+        // because boardEl has min-height: min-content and expands to fit content
+        if (scrollY !== 0 && this.getSwimlaneBy()) {
+          this.containerEl.scrollTop += scrollY;
+        } else {
+          this.boardEl.scrollTop += scrollY;
+        }
       }
     }, 16);
   }
