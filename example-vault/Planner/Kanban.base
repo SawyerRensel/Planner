@@ -52,7 +52,9 @@ views:
     coverDisplay: banner
     coverHeight: "100"
     columnOrder: '["Idea","To-Do","In-Progress","In-Review","Done","Cancelled","in-progress","open","null"]'
-    coverField: note.cover
     columnWidth: "280"
+    coverField: note.cover
+    swimlaneOrder: '["Personal","Vacation","Work","null"]'
+    swimlaneBy: note.calendar
   - type: table
     name: Table

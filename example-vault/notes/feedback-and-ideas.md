@@ -140,10 +140,29 @@ Screenshot_20260101-185045.png]]:1  Failed to load resource: net::ERR_FILE_NOT_F
 - [x] Let's add grab icon to Kanban columns and enable the ability to manually rearrange their order.
 - [x] On mobile, tap holding a card and moving to very edge of screen should scroll sideways.  Right now I can drag a card to an adjacent column already in view, but I can't go beyond that.
 
-- [ ] Columns areas/containers are still not extending the full height of the tallest relative column (due to having the most cards) when swimlanes are enabled.
-- [ ] When swimlanes are enabled, dragging a card into another column and swimlane only places the card in a the target column, but not also in the swimlane. 
-- [ ] When swimlanes are enabled, we lose the ability to rearrange columns (icon disappears).  We should also add the ability to manually rearrange swimlanes in the same way that we do with columns
-- [ ] On mobile, tap holding a column and moving to the very edge of the screen should scroll sideways.  Right now I can drag a column to an adjacent column already in view, but I can't go beyond that.
+- [x] Columns areas/containers are still not extending the full height of the tallest relative column (due to having the most cards) when swimlanes are enabled.
+- [x] When swimlanes are enabled, dragging a card into another column and swimlane only places the card in a the target column, but not also in the swimlane. 
+- [x] When swimlanes are enabled, we lose the ability to rearrange columns (icon disappears), and the count total number also disappears.  We should also add the ability to manually rearrange swimlanes in the same way that we do with columns.  Basically, swimlanes should appear and work very similar to their Column-only counterpart.
+- [x] On mobile, tap holding a column and moving to the very edge of the screen should scroll sideways.  Right now I can drag a column to an adjacent column already in view, but I can't go beyond that.
+- [ ] Cover images are failing.  See console log below:
+
+```
+Obsidian Developer Console
+plugin:planner:475 Loading Planner plugin
+plugin:planner:475 Planner: Registered Bases views
+plugin:planner:475 Planner plugin loaded
+plugin:tasknotes:1850 TaskNotes: Starting early migration check...
+plugin:tasknotes:86 [TaskNotes][Bases] Successfully registered view via public API: tasknotesTaskList
+plugin:tasknotes:86 [TaskNotes][Bases] Successfully registered view via public API: tasknotesKanban
+plugin:tasknotes:86 [TaskNotes][Bases] Successfully registered view via public API: tasknotesCalendar
+plugin:tasknotes:86 [TaskNotes][Bases] Successfully registered view via public API: tasknotesMiniCalendar
+plugin:tasknotes:519 DependencyCache: getBlockingTaskPaths called before indexes built, building now...
+getBlockingTaskPaths @ plugin:tasknotes:519
+null:1  Failed to load resource: net::ERR_FILE_NOT_FOUND
+Screenshot_20260101-185045.png]]:1  Failed to load resource: net::ERR_FILE_NOT_FOUND
+```
+
+- [ ] On mobile, when I tap to scroll and I happen to be over a card, it triggers the card drag, which is jarring.  Let's make sure the card drag trigger only happens with a tap-hold delay on the card.
 
 ## Release
 

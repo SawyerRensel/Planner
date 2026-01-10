@@ -72,6 +72,10 @@ export class BasesKanbanView extends BasesView {
   private draggedColumn: HTMLElement | null = null;
   private draggedColumnKey: string | null = null;
 
+  // Swimlane reordering state
+  private draggedSwimlane: HTMLElement | null = null;
+  private draggedSwimlaneKey: string | null = null;
+
   // Configuration getters
   private getGroupBy(): string {
     const value = this.config.get('groupBy') as string | undefined;
@@ -160,6 +164,20 @@ export class BasesKanbanView extends BasesView {
 
   private setCustomColumnOrder(order: string[]): void {
     this.config.set('columnOrder', JSON.stringify(order));
+  }
+
+  private getCustomSwimlaneOrder(): string[] {
+    const value = this.config.get('swimlaneOrder') as string | undefined;
+    if (!value) return [];
+    try {
+      return JSON.parse(value);
+    } catch {
+      return [];
+    }
+  }
+
+  private setCustomSwimlaneOrder(order: string[]): void {
+    this.config.set('swimlaneOrder', JSON.stringify(order));
   }
 
   private getCoverHeight(): number {
@@ -404,6 +422,49 @@ export class BasesKanbanView extends BasesView {
   }
 
   /**
+   * Get ordered swimlane keys based on the swimlaneBy field and custom order
+   */
+  private getOrderedSwimlaneKeys(swimlaneKeys: string[], swimlaneBy: string): string[] {
+    const propName = swimlaneBy.replace(/^note\./, '');
+    const customOrder = this.getCustomSwimlaneOrder();
+
+    let defaultKeys: string[];
+    if (propName === 'status') {
+      defaultKeys = this.plugin.settings.statuses.map(s => s.name);
+      for (const key of swimlaneKeys) {
+        if (!defaultKeys.includes(key)) defaultKeys.push(key);
+      }
+    } else if (propName === 'priority') {
+      defaultKeys = this.plugin.settings.priorities.map(p => p.name);
+      for (const key of swimlaneKeys) {
+        if (!defaultKeys.includes(key)) defaultKeys.push(key);
+      }
+    } else {
+      defaultKeys = [...swimlaneKeys].sort();
+    }
+
+    // If we have a custom order, use it (but include any new keys that weren't in the saved order)
+    if (customOrder.length > 0) {
+      const orderedKeys: string[] = [];
+      // First, add keys in custom order that still exist
+      for (const key of customOrder) {
+        if (defaultKeys.includes(key)) {
+          orderedKeys.push(key);
+        }
+      }
+      // Then add any new keys that weren't in custom order
+      for (const key of defaultKeys) {
+        if (!orderedKeys.includes(key)) {
+          orderedKeys.push(key);
+        }
+      }
+      return orderedKeys;
+    }
+
+    return defaultKeys;
+  }
+
+  /**
    * Render with swimlanes (2D grid layout)
    */
   private renderWithSwimlanes(swimlaneBy: string): void {
@@ -453,6 +514,16 @@ export class BasesKanbanView extends BasesView {
       min-width: fit-content;
     `;
 
+    // Calculate column totals across all swimlanes
+    const columnCounts = new Map<string, number>();
+    for (const columnKey of columnKeys) {
+      let total = 0;
+      for (const swimlane of swimlaneGroups.values()) {
+        total += (swimlane.get(columnKey) || []).length;
+      }
+      columnCounts.set(columnKey, total);
+    }
+
     // Render column headers row first
     const headerRow = document.createElement('div');
     headerRow.className = 'planner-kanban-header-row';
@@ -471,6 +542,8 @@ export class BasesKanbanView extends BasesView {
 
     for (const columnKey of columnKeys) {
       const headerCell = document.createElement('div');
+      headerCell.className = 'planner-kanban-swimlane-header-cell';
+      headerCell.setAttribute('data-group', columnKey);
       headerCell.style.cssText = `
         width: ${columnWidth}px;
         min-width: ${columnWidth}px;
@@ -480,11 +553,31 @@ export class BasesKanbanView extends BasesView {
         border-radius: 6px;
         display: flex;
         align-items: center;
-        justify-content: center;
         gap: 6px;
       `;
 
-      // Add icon for status/priority columns
+      // Grab handle for column reordering
+      const grabHandle = document.createElement('span');
+      grabHandle.className = 'planner-kanban-column-grab';
+      grabHandle.style.cssText = `
+        cursor: grab;
+        opacity: 0.4;
+        transition: opacity 0.15s ease;
+        display: flex;
+        align-items: center;
+      `;
+      setIcon(grabHandle, 'grip-vertical');
+      grabHandle.addEventListener('mouseenter', () => {
+        grabHandle.style.opacity = '1';
+      });
+      grabHandle.addEventListener('mouseleave', () => {
+        grabHandle.style.opacity = '0.4';
+      });
+      grabHandle.setAttribute('draggable', 'true');
+      this.setupSwimlaneColumnDragHandlers(grabHandle, headerCell, columnKey);
+      headerCell.appendChild(grabHandle);
+
+      // Add icon for status/priority/calendar columns
       if (groupByProp === 'status') {
         const config = getStatusConfig(this.plugin.settings, columnKey);
         if (config) {
@@ -503,28 +596,67 @@ export class BasesKanbanView extends BasesView {
           iconEl.style.color = config.color;
           headerCell.appendChild(iconEl);
         }
+      } else if (groupByProp === 'calendar') {
+        const color = getCalendarColor(this.plugin.settings, columnKey);
+        const iconEl = document.createElement('span');
+        iconEl.className = 'planner-kanban-column-icon';
+        setIcon(iconEl, 'calendar');
+        iconEl.style.color = color;
+        headerCell.appendChild(iconEl);
       }
 
+      // Title (with flex: 1 to push count to the right)
       const titleSpan = document.createElement('span');
+      titleSpan.style.flex = '1';
       titleSpan.textContent = columnKey;
       headerCell.appendChild(titleSpan);
+
+      // Count badge
+      const count = columnCounts.get(columnKey) || 0;
+      const countBadge = document.createElement('span');
+      countBadge.className = 'planner-kanban-column-count';
+      countBadge.textContent = String(count);
+      countBadge.style.cssText = `
+        background: var(--background-modifier-border);
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 12px;
+        font-weight: 500;
+      `;
+      headerCell.appendChild(countBadge);
+
       headerRow.appendChild(headerCell);
     }
     swimlaneContainer.appendChild(headerRow);
 
+    // Calculate swimlane counts
+    const swimlaneCounts = new Map<string, number>();
+    for (const [swimlaneKey, swimlane] of swimlaneGroups) {
+      let total = 0;
+      for (const entries of swimlane.values()) {
+        total += entries.length;
+      }
+      swimlaneCounts.set(swimlaneKey, total);
+    }
+
+    // Get ordered swimlane keys
+    const orderedSwimlaneKeys = this.getOrderedSwimlaneKeys(swimlaneKeys, swimlaneBy);
+
     // Render each swimlane row
-    for (const swimlaneKey of swimlaneKeys) {
+    for (const swimlaneKey of orderedSwimlaneKeys) {
       const swimlaneRow = document.createElement('div');
       swimlaneRow.className = 'planner-kanban-swimlane-row';
+      swimlaneRow.setAttribute('data-swimlane-row', swimlaneKey);
       swimlaneRow.style.cssText = `
         display: flex;
         gap: 12px;
-        align-items: flex-start;
+        align-items: stretch;
       `;
 
-      // Swimlane label
+      // Swimlane label with drag handle, icon, title, and count
       const swimlaneLabel = document.createElement('div');
       swimlaneLabel.className = 'planner-kanban-swimlane-label';
+      swimlaneLabel.setAttribute('data-swimlane', swimlaneKey);
       swimlaneLabel.style.cssText = `
         width: 138px;
         min-width: 138px;
@@ -535,8 +667,93 @@ export class BasesKanbanView extends BasesView {
         position: sticky;
         left: 0;
         z-index: 5;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-height: 60px;
       `;
-      swimlaneLabel.textContent = swimlaneKey;
+
+      // Header row with grab handle, icon, and title
+      const labelHeader = document.createElement('div');
+      labelHeader.style.cssText = `
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      `;
+
+      // Grab handle for swimlane reordering
+      const grabHandle = document.createElement('span');
+      grabHandle.className = 'planner-kanban-swimlane-grab';
+      grabHandle.style.cssText = `
+        cursor: grab;
+        opacity: 0.4;
+        transition: opacity 0.15s ease;
+        display: flex;
+        align-items: center;
+      `;
+      setIcon(grabHandle, 'grip-vertical');
+      grabHandle.addEventListener('mouseenter', () => {
+        grabHandle.style.opacity = '1';
+      });
+      grabHandle.addEventListener('mouseleave', () => {
+        grabHandle.style.opacity = '0.4';
+      });
+      grabHandle.setAttribute('draggable', 'true');
+      this.setupSwimlaneDragHandlers(grabHandle, swimlaneRow, swimlaneKey);
+      labelHeader.appendChild(grabHandle);
+
+      // Add icon for status/priority/calendar swimlanes
+      const swimlaneProp = swimlaneBy.replace(/^note\./, '');
+      if (swimlaneProp === 'status') {
+        const config = getStatusConfig(this.plugin.settings, swimlaneKey);
+        if (config) {
+          const iconEl = document.createElement('span');
+          iconEl.className = 'planner-kanban-swimlane-icon';
+          setIcon(iconEl, config.icon || 'circle');
+          iconEl.style.color = config.color;
+          labelHeader.appendChild(iconEl);
+        }
+      } else if (swimlaneProp === 'priority') {
+        const config = getPriorityConfig(this.plugin.settings, swimlaneKey);
+        if (config) {
+          const iconEl = document.createElement('span');
+          iconEl.className = 'planner-kanban-swimlane-icon';
+          setIcon(iconEl, config.icon || 'signal');
+          iconEl.style.color = config.color;
+          labelHeader.appendChild(iconEl);
+        }
+      } else if (swimlaneProp === 'calendar') {
+        const color = getCalendarColor(this.plugin.settings, swimlaneKey);
+        const iconEl = document.createElement('span');
+        iconEl.className = 'planner-kanban-swimlane-icon';
+        setIcon(iconEl, 'calendar');
+        iconEl.style.color = color;
+        labelHeader.appendChild(iconEl);
+      }
+
+      // Title
+      const titleSpan = document.createElement('span');
+      titleSpan.style.cssText = 'flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
+      titleSpan.textContent = swimlaneKey;
+      labelHeader.appendChild(titleSpan);
+
+      swimlaneLabel.appendChild(labelHeader);
+
+      // Count badge
+      const count = swimlaneCounts.get(swimlaneKey) || 0;
+      const countBadge = document.createElement('span');
+      countBadge.className = 'planner-kanban-swimlane-count';
+      countBadge.textContent = String(count);
+      countBadge.style.cssText = `
+        background: var(--background-primary);
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 11px;
+        font-weight: 500;
+        align-self: flex-start;
+      `;
+      swimlaneLabel.appendChild(countBadge);
+
       swimlaneRow.appendChild(swimlaneLabel);
 
       const swimlane = swimlaneGroups.get(swimlaneKey)!;
@@ -555,10 +772,11 @@ export class BasesKanbanView extends BasesView {
             background: var(--background-secondary);
             border-radius: 6px;
             opacity: 0.5;
+            flex: 1;
           `;
           swimlaneRow.appendChild(placeholder);
         } else {
-          const cell = this.createSwimlaneCell(columnKey, entries, columnWidth);
+          const cell = this.createSwimlaneCell(columnKey, swimlaneKey, entries, columnWidth);
           swimlaneRow.appendChild(cell);
         }
       }
@@ -572,7 +790,7 @@ export class BasesKanbanView extends BasesView {
   /**
    * Create a cell for swimlane view (simplified column without header)
    */
-  private createSwimlaneCell(groupKey: string, entries: BasesEntry[], width: number): HTMLElement {
+  private createSwimlaneCell(groupKey: string, swimlaneKey: string, entries: BasesEntry[], width: number): HTMLElement {
     const cell = document.createElement('div');
     cell.className = 'planner-kanban-swimlane-cell';
     cell.style.cssText = `
@@ -587,9 +805,10 @@ export class BasesKanbanView extends BasesView {
       gap: 8px;
     `;
     cell.setAttribute('data-group', groupKey);
+    cell.setAttribute('data-swimlane', swimlaneKey);
 
     // Setup drop handlers
-    this.setupDropHandlers(cell, groupKey);
+    this.setupDropHandlers(cell, groupKey, swimlaneKey);
 
     // Render cards
     for (const entry of entries) {
@@ -742,12 +961,19 @@ export class BasesKanbanView extends BasesView {
       e.dataTransfer!.effectAllowed = 'move';
     });
 
+    // Handle edge scrolling during column drag
+    grabHandle.addEventListener('drag', (e: DragEvent) => {
+      if (!this.boardEl || !e.clientX) return;
+      this.handleEdgeScroll(e.clientX, e.clientY);
+    });
+
     grabHandle.addEventListener('dragend', () => {
       if (this.draggedColumn) {
         this.draggedColumn.classList.remove('planner-kanban-column--dragging');
       }
       this.draggedColumn = null;
       this.draggedColumnKey = null;
+      this.stopAutoScroll(); // Stop any auto-scrolling
       // Remove all drop indicators
       document.querySelectorAll('.planner-kanban-column--drop-left, .planner-kanban-column--drop-right').forEach(el => {
         el.classList.remove('planner-kanban-column--drop-left', 'planner-kanban-column--drop-right');
@@ -808,6 +1034,180 @@ export class BasesKanbanView extends BasesView {
 
     // Save custom order
     this.setCustomColumnOrder(currentOrder);
+
+    // Re-render
+    this.render();
+  }
+
+  /**
+   * Setup drag handlers for swimlane column headers (for reordering columns in swimlane view)
+   */
+  private setupSwimlaneColumnDragHandlers(grabHandle: HTMLElement, headerCell: HTMLElement, groupKey: string): void {
+    grabHandle.addEventListener('dragstart', (e: DragEvent) => {
+      e.stopPropagation();
+      this.draggedColumn = headerCell;
+      this.draggedColumnKey = groupKey;
+      headerCell.classList.add('planner-kanban-column--dragging');
+      e.dataTransfer?.setData('text/plain', `column:${groupKey}`);
+      e.dataTransfer!.effectAllowed = 'move';
+    });
+
+    // Handle edge scrolling during column drag
+    grabHandle.addEventListener('drag', (e: DragEvent) => {
+      if (!this.boardEl || !e.clientX) return;
+      this.handleEdgeScroll(e.clientX, e.clientY);
+    });
+
+    grabHandle.addEventListener('dragend', () => {
+      if (this.draggedColumn) {
+        this.draggedColumn.classList.remove('planner-kanban-column--dragging');
+      }
+      this.draggedColumn = null;
+      this.draggedColumnKey = null;
+      this.stopAutoScroll(); // Stop any auto-scrolling
+      // Remove all drop indicators
+      document.querySelectorAll('.planner-kanban-column--drop-left, .planner-kanban-column--drop-right').forEach(el => {
+        el.classList.remove('planner-kanban-column--drop-left', 'planner-kanban-column--drop-right');
+      });
+    });
+
+    // Setup drop handlers on the header cell itself
+    headerCell.addEventListener('dragover', (e: DragEvent) => {
+      // Only handle column drops
+      if (!this.draggedColumn || this.draggedColumn === headerCell) return;
+      e.preventDefault();
+      e.dataTransfer!.dropEffect = 'move';
+
+      // Determine drop position (left or right half)
+      const rect = headerCell.getBoundingClientRect();
+      const midpoint = rect.left + rect.width / 2;
+      headerCell.classList.remove('planner-kanban-column--drop-left', 'planner-kanban-column--drop-right');
+      if (e.clientX < midpoint) {
+        headerCell.classList.add('planner-kanban-column--drop-left');
+      } else {
+        headerCell.classList.add('planner-kanban-column--drop-right');
+      }
+    });
+
+    headerCell.addEventListener('dragleave', () => {
+      headerCell.classList.remove('planner-kanban-column--drop-left', 'planner-kanban-column--drop-right');
+    });
+
+    headerCell.addEventListener('drop', (e: DragEvent) => {
+      if (!this.draggedColumn || !this.draggedColumnKey || this.draggedColumn === headerCell) return;
+      e.preventDefault();
+
+      const rect = headerCell.getBoundingClientRect();
+      const midpoint = rect.left + rect.width / 2;
+      const insertBefore = e.clientX < midpoint;
+
+      // Reorder columns
+      this.reorderColumns(this.draggedColumnKey, groupKey, insertBefore);
+
+      headerCell.classList.remove('planner-kanban-column--drop-left', 'planner-kanban-column--drop-right');
+    });
+  }
+
+  /**
+   * Setup drag handlers for swimlane rows (for reordering swimlanes)
+   */
+  private setupSwimlaneDragHandlers(grabHandle: HTMLElement, swimlaneRow: HTMLElement, swimlaneKey: string): void {
+    grabHandle.addEventListener('dragstart', (e: DragEvent) => {
+      e.stopPropagation();
+      this.draggedSwimlane = swimlaneRow;
+      this.draggedSwimlaneKey = swimlaneKey;
+      swimlaneRow.classList.add('planner-kanban-swimlane--dragging');
+      e.dataTransfer?.setData('text/plain', `swimlane:${swimlaneKey}`);
+      e.dataTransfer!.effectAllowed = 'move';
+    });
+
+    // Handle edge scrolling during swimlane drag
+    grabHandle.addEventListener('drag', (e: DragEvent) => {
+      if (!this.boardEl || !e.clientX) return;
+      this.handleEdgeScroll(e.clientX, e.clientY);
+    });
+
+    grabHandle.addEventListener('dragend', () => {
+      if (this.draggedSwimlane) {
+        this.draggedSwimlane.classList.remove('planner-kanban-swimlane--dragging');
+      }
+      this.draggedSwimlane = null;
+      this.draggedSwimlaneKey = null;
+      this.stopAutoScroll(); // Stop any auto-scrolling
+      // Remove all drop indicators
+      document.querySelectorAll('.planner-kanban-swimlane--drop-above, .planner-kanban-swimlane--drop-below').forEach(el => {
+        el.classList.remove('planner-kanban-swimlane--drop-above', 'planner-kanban-swimlane--drop-below');
+      });
+    });
+
+    // Setup drop handlers on the swimlane row itself
+    swimlaneRow.addEventListener('dragover', (e: DragEvent) => {
+      // Only handle swimlane drops
+      if (!this.draggedSwimlane || this.draggedSwimlane === swimlaneRow) return;
+      e.preventDefault();
+      e.dataTransfer!.dropEffect = 'move';
+
+      // Determine drop position (top or bottom half)
+      const rect = swimlaneRow.getBoundingClientRect();
+      const midpoint = rect.top + rect.height / 2;
+      swimlaneRow.classList.remove('planner-kanban-swimlane--drop-above', 'planner-kanban-swimlane--drop-below');
+      if (e.clientY < midpoint) {
+        swimlaneRow.classList.add('planner-kanban-swimlane--drop-above');
+      } else {
+        swimlaneRow.classList.add('planner-kanban-swimlane--drop-below');
+      }
+    });
+
+    swimlaneRow.addEventListener('dragleave', () => {
+      swimlaneRow.classList.remove('planner-kanban-swimlane--drop-above', 'planner-kanban-swimlane--drop-below');
+    });
+
+    swimlaneRow.addEventListener('drop', (e: DragEvent) => {
+      if (!this.draggedSwimlane || !this.draggedSwimlaneKey || this.draggedSwimlane === swimlaneRow) return;
+      e.preventDefault();
+
+      const rect = swimlaneRow.getBoundingClientRect();
+      const midpoint = rect.top + rect.height / 2;
+      const insertBefore = e.clientY < midpoint;
+
+      // Reorder swimlanes
+      this.reorderSwimlanes(this.draggedSwimlaneKey, swimlaneKey, insertBefore);
+
+      swimlaneRow.classList.remove('planner-kanban-swimlane--drop-above', 'planner-kanban-swimlane--drop-below');
+    });
+  }
+
+  private reorderSwimlanes(draggedKey: string, targetKey: string, insertBefore: boolean): void {
+    const swimlaneBy = this.getSwimlaneBy();
+    if (!swimlaneBy) return;
+
+    // Collect current swimlane keys
+    const swimlaneKeys: string[] = [];
+    for (const group of this.data.groupedData) {
+      for (const entry of group.entries) {
+        const value = entry.getValue(swimlaneBy as BasesPropertyId);
+        const key = this.valueToString(value);
+        if (!swimlaneKeys.includes(key)) {
+          swimlaneKeys.push(key);
+        }
+      }
+    }
+
+    // Get current order
+    let currentOrder = this.getOrderedSwimlaneKeys(swimlaneKeys, swimlaneBy);
+
+    // Remove dragged swimlane from current position
+    currentOrder = currentOrder.filter(k => k !== draggedKey);
+
+    // Find target position
+    const targetIndex = currentOrder.indexOf(targetKey);
+    const insertIndex = insertBefore ? targetIndex : targetIndex + 1;
+
+    // Insert at new position
+    currentOrder.splice(insertIndex, 0, draggedKey);
+
+    // Save custom order
+    this.setCustomSwimlaneOrder(currentOrder);
 
     // Re-render
     this.render();
@@ -1004,10 +1404,11 @@ export class BasesKanbanView extends BasesView {
     }
 
     // Clean up the path - remove any wiki link brackets (handle [[path]] and [[path|alias]])
+    // Also handle cases where brackets appear anywhere in the string (not just start/end)
     let cleanPath = path
-      .replace(/^\[\[/, '')      // Remove leading [[
-      .replace(/\]\]$/, '')       // Remove trailing ]]
-      .replace(/\|.*$/, '')       // Remove alias if present (e.g., [[path|alias]] -> path)
+      .replace(/\[\[/g, '')       // Remove all [[ occurrences
+      .replace(/\]\]/g, '')       // Remove all ]] occurrences
+      .replace(/\|.*$/, '')       // Remove alias if present (e.g., path|alias -> path)
       .trim();
 
     // If path doesn't include extension, it might be a wiki link without extension
@@ -1372,8 +1773,8 @@ export class BasesKanbanView extends BasesView {
       const touch = e.changedTouches[0];
       const dropTarget = this.findDropTarget(touch.clientX, touch.clientY);
 
-      if (dropTarget && this.draggedCardPath && this.draggedFromColumn !== dropTarget) {
-        this.handleCardDrop(this.draggedCardPath, dropTarget);
+      if (dropTarget && this.draggedCardPath) {
+        this.handleCardDrop(this.draggedCardPath, dropTarget.group, dropTarget.swimlane);
       }
 
       this.touchDragCard = null;
@@ -1453,13 +1854,17 @@ export class BasesKanbanView extends BasesView {
     }
   }
 
-  private findDropTarget(clientX: number, clientY: number): string | null {
+  private findDropTarget(clientX: number, clientY: number): { group: string; swimlane?: string } | null {
     const target = document.elementFromPoint(clientX, clientY);
     const dropZone = target?.closest('.planner-kanban-cards, .planner-kanban-swimlane-cell, .planner-kanban-column');
-    return dropZone?.getAttribute('data-group') || null;
+    const group = dropZone?.getAttribute('data-group');
+    if (!group) return null;
+
+    const swimlane = dropZone?.getAttribute('data-swimlane') || undefined;
+    return { group, swimlane };
   }
 
-  private setupDropHandlers(container: HTMLElement, groupKey: string): void {
+  private setupDropHandlers(container: HTMLElement, groupKey: string, swimlaneKey?: string): void {
     container.addEventListener('dragover', (e: DragEvent) => {
       e.preventDefault();
       container.classList.add('planner-kanban-cards--dragover');
@@ -1473,21 +1878,27 @@ export class BasesKanbanView extends BasesView {
       e.preventDefault();
       container.classList.remove('planner-kanban-cards--dragover');
 
-      if (this.draggedCardPath && this.draggedFromColumn !== groupKey) {
-        await this.handleCardDrop(this.draggedCardPath, groupKey);
+      if (this.draggedCardPath) {
+        await this.handleCardDrop(this.draggedCardPath, groupKey, swimlaneKey);
       }
     });
   }
 
-  private async handleCardDrop(filePath: string, newGroupValue: string): Promise<void> {
+  private async handleCardDrop(filePath: string, newGroupValue: string, newSwimlaneValue?: string): Promise<void> {
     const groupByField = this.getGroupBy();
     const fieldName = groupByField.replace(/^note\./, '');
+    const swimlaneBy = this.getSwimlaneBy();
+    const swimlaneFieldName = swimlaneBy ? swimlaneBy.replace(/^note\./, '') : null;
 
     const file = this.plugin.app.vault.getAbstractFileByPath(filePath);
     if (!file) return;
 
     await this.plugin.app.fileManager.processFrontMatter(file as any, (fm) => {
       fm[fieldName] = newGroupValue;
+      // Also update swimlane field if swimlanes are enabled and a target swimlane was specified
+      if (swimlaneFieldName && newSwimlaneValue !== undefined) {
+        fm[swimlaneFieldName] = newSwimlaneValue;
+      }
       fm.date_modified = new Date().toISOString();
     });
   }

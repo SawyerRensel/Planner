@@ -2233,6 +2233,19 @@ body.is-mobile .planner-timeline-iframe-container {
   box-shadow: 4px 0 0 var(--interactive-accent) !important;
 }
 
+/* Swimlane dragging states */
+.planner-kanban-swimlane--dragging {
+  opacity: 0.5;
+}
+
+.planner-kanban-swimlane--drop-above {
+  box-shadow: 0 -4px 0 var(--interactive-accent) !important;
+}
+
+.planner-kanban-swimlane--drop-below {
+  box-shadow: 0 4px 0 var(--interactive-accent) !important;
+}
+
 .theme-dark .planner-kanban-card {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
