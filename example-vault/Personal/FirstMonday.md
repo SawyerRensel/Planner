@@ -3,8 +3,7 @@ title: FirstMonday
 summary:
 tags:
   - event
-calendar:
-  - Personal
+calendar: Personal
 context:
 people:
 location:
@@ -12,8 +11,8 @@ related:
 status: To-Do
 priority:
 progress:
-date_created: "2026-01-06T20:28:06.037Z"
-date_modified: "2026-01-06T21:03:39.804Z"
+date_created: 2026-01-06T20:28:06.037Z
+date_modified: 2026-01-10T12:11:26.265Z
 date_start_scheduled: 2026-01-05
 date_start_actual:
 date_end_scheduled: 2026-01-06

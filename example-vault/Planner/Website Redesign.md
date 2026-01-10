@@ -15,7 +15,7 @@ status: In-Progress
 priority: High
 progress: 35
 date_created: 2026-01-10T09:00:00
-date_modified: 2026-01-01T12:32:52.386Z
+date_modified: 2026-01-10T11:55:07.548Z
 date_start_scheduled: 2026-01-15T14:00:00.000Z
 date_start_actual:
 date_end_scheduled: 2026-01-15T22:00:00.000Z
@@ -35,7 +35,7 @@ children:
   - "[[Design Mockups]]"
   - "[[Implement Frontend]]"
 blocked_by:
-cover:
+cover: "[[../notes/Screenshot_20260101-185045.png]]"
 color:
 dateModified: 2026-01-08T20:57:02.181-05:00
 ---

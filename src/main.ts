@@ -17,6 +17,10 @@ import {
   BASES_TIMELINE_VIEW_ID,
   createTimelineViewRegistration,
 } from './views/BasesTimelineView';
+import {
+  BASES_KANBAN_VIEW_ID,
+  createKanbanViewRegistration,
+} from './views/BasesKanbanView';
 
 export default class PlannerPlugin extends Plugin {
   settings: PlannerSettings;
@@ -61,6 +65,10 @@ export default class PlannerPlugin extends Plugin {
       this.activateTimelineView();
     });
 
+    this.addRibbonIcon('kanban', 'Open Planner Kanban', () => {
+      this.activateKanbanView();
+    });
+
     console.log('Planner plugin loaded');
   }
 
@@ -86,7 +94,13 @@ export default class PlannerPlugin extends Plugin {
       createTimelineViewRegistration(this)
     );
 
-    if (taskListRegistered || calendarRegistered || timelineRegistered) {
+    // Register Kanban view for Bases
+    const kanbanRegistered = this.registerBasesView(
+      BASES_KANBAN_VIEW_ID,
+      createKanbanViewRegistration(this)
+    );
+
+    if (taskListRegistered || calendarRegistered || timelineRegistered || kanbanRegistered) {
       console.log('Planner: Registered Bases views');
     } else {
       console.log('Planner: Bases not enabled, skipping Bases view registration');
@@ -193,6 +207,11 @@ export default class PlannerPlugin extends Plugin {
     await this.openBaseFile(basePath, 'Timeline');
   }
 
+  async activateKanbanView() {
+    const basePath = this.baseGeneratorService.getKanbanBasePath();
+    await this.openBaseFile(basePath, 'Kanban');
+  }
+
   /**
    * Open a .base file, creating it if it doesn't exist
    */
@@ -211,6 +230,8 @@ export default class PlannerPlugin extends Plugin {
         created = await this.baseGeneratorService.generateCalendarBase(false);
       } else if (name === 'Timeline') {
         created = await this.baseGeneratorService.generateTimelineBase(false);
+      } else if (name === 'Kanban') {
+        created = await this.baseGeneratorService.generateKanbanBase(false);
       }
 
       if (created) {

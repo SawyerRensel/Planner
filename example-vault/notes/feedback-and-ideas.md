@@ -88,10 +88,31 @@
 ## Kanban View
 
 - [x] Check the PRD to brush up on what you wanted
-- [ ] "Columns by" menu to allow picking how to configure Kanban columns.  
-- [ ] Support for cover images!
-- [ ] clear borders for cards (support colors?)
-- [ ] (Do this after feature parity with TaskNotes' kanban) For frontmatter fields with customized colors in Planner Settings (calendar, status, priority), style those fields like how they are styled in Task List View and the NLP quick capture parser preview.  That is, if the fields are toggled on in the Bases' properties to begin with.  Ask my clarifying questions.
+- [x] "Columns by" menu to allow picking how to configure Kanban columns.  
+- [x] clear borders for cards (support colors?)
+- [x] (Do this after feature parity with TaskNotes' kanban) For frontmatter fields with customized colors in Planner Settings (calendar, status, priority), style those fields like how they are styled in Task List View and the NLP quick capture parser preview.  That is, if the fields are toggled on in the Bases' properties to begin with.  Ask my clarifying questions.
+- [x] Support for cover images!
+- [ ] Bases properties are not driving/controlling the content displayed on the Kanban cards.  If I toggle on tags, I should see tags appear on the Kanban cards, etc.
+	- [ ] There's no recurrence badge even when repeat_frequency is toggled on.  (use repeat_frequency field for the special badge)
+- [ ] Swimlanes aren't working
+- [ ] Cover image not displaying image.   
+- [ ] Let's add another config menu slider to control cover image height when Cover image is set to `banner (top)`
+- [ ] Don't squeeze cards into view.  Allow cards to appear at their normal height.  Allow scrolling down the board. 
+- [ ] Badge icons on cards are too big and extend beyond the size of their respective badges
+
+
+| Working          | Not working     | Partially Working  | Comment                                                                                             |
+| ---------------- | --------------- | ------------------ | --------------------------------------------------------------------------------------------------- |
+| Group by         |                 |                    |                                                                                                     |
+| Color by         |                 |                    |                                                                                                     |
+| Border style     |                 |                    |                                                                                                     |
+|                  |                 | Cover field        | Selecting a value changes card layout, but no image is shown.                                       |
+|                  |                 | Cover display      | Selecting a value changes card layout, but no image is shown.                                       |
+| Date start field |                 |                    |                                                                                                     |
+| Date end field   |                 |                    |                                                                                                     |
+|                  | Badge placement |                    | Has no effect                                                                                       |
+|                  |                 | Hide empty columns | Works when you set it to `Yes`, but when you set it back to `No`, the empty columns don't reappear. |
+
 
 ## Release
 
