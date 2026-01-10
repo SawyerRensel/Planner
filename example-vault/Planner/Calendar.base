@@ -23,4 +23,4 @@ views:
     name: Table
   - type: planner-timeline
     name: Timeline
-    backgroundColor: "#002b36"
+    backgroundColor: "#1e1e1e"

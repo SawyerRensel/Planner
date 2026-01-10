@@ -8,7 +8,7 @@
         "type": "tabs",
         "children": [
           {
-            "id": "a200b43c11a1b48c",
+            "id": "ca4aa4a1612dc5da",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -22,33 +22,43 @@
             }
           },
           {
-            "id": "b2e110b658e28eb1",
+            "id": "e2f19bb7ca449e8f",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "notes/obsidian-planner-prd.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "obsidian-planner-prd"
+            }
+          },
+          {
+            "id": "8d559e545d80e3d6",
             "type": "leaf",
             "state": {
               "type": "bases",
               "state": {
-                "file": "Planner/Timeline.base",
+                "file": "TaskNotes/Views/kanban-default.base",
+                "viewName": "Kanban Board"
+              },
+              "icon": "lucide-layout-list",
+              "title": "kanban-default"
+            }
+          },
+          {
+            "id": "ec2c5eb102e50614",
+            "type": "leaf",
+            "state": {
+              "type": "bases",
+              "state": {
+                "file": "Planner/Calendar.base",
                 "viewName": "Timeline"
               },
               "icon": "square-chart-gantt",
-              "title": "Timeline"
-            }
-          }
-        ],
-        "currentTab": 1
-      },
-      {
-        "id": "9526bee664d81cd6",
-        "type": "tabs",
-        "children": [
-          {
-            "id": "4285a414699f1b18",
-            "type": "leaf",
-            "state": {
-              "type": "empty",
-              "state": {},
-              "icon": "lucide-file",
-              "title": "New tab"
+              "title": "Calendar"
             }
           }
         ]
@@ -108,7 +118,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 232.5
+    "width": 232.5,
+    "collapsed": true
   },
   "right": {
     "id": "ed9ed6ed0a6d4bf8",
@@ -185,13 +196,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Planner/Calendar.base",
+                "file": "notes/feedback-and-ideas.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Calendar"
+              "title": "Outline of feedback-and-ideas"
             }
           },
           {
@@ -209,11 +220,14 @@
       }
     ],
     "direction": "horizontal",
-    "width": 261.5,
-    "collapsed": true
+    "width": 261.5
   },
   "left-ribbon": {
     "hiddenItems": {
+      "markwhen:Create new Markwhen file": false,
+      "planner:Open Planner Task List": false,
+      "planner:Open Planner Calendar": false,
+      "planner:Open Planner Timeline": false,
       "tasknotes:Open mini calendar": false,
       "tasknotes:Open advanced calendar": false,
       "tasknotes:Open task list": false,
@@ -229,59 +243,56 @@
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
       "bases:Create new base": false,
-      "obsidian-full-calendar:Open Full Calendar": false,
-      "markwhen:Create new Markwhen file": false,
-      "planner:Open Planner Task List": false,
-      "planner:Open Planner Calendar": false,
-      "planner:Open Planner Timeline": false
+      "obsidian-full-calendar:Open Full Calendar": false
     }
   },
-  "active": "b2e110b658e28eb1",
+  "active": "ca4aa4a1612dc5da",
   "lastOpenFiles": [
-    "Personal/Treasure Island.md",
-    "Planner/Timeline.base",
-    "Planner/Design Mockups.md",
-    "Treasure Island.md",
+    "notes/obsidian-planner-prd.md.tmp.1205.1768042992844",
+    "notes/obsidian-planner-prd.md.tmp.1205.1768042985546",
+    "notes/obsidian-planner-prd.md.tmp.1205.1768042961318",
+    "notes/obsidian-planner-prd.md.tmp.1205.1768042940103",
+    "notes/obsidian-planner-prd.md.tmp.1205.1768042922699",
+    "notes/obsidian-planner-prd.md.tmp.1205.1768042895450",
+    "notes/obsidian-planner-prd.md.tmp.1205.1768042891688",
+    "notes/obsidian-planner-prd.md.tmp.1205.1768042872383",
+    "notes/obsidian-planner-prd.md.tmp.1205.1768042858366",
+    "notes/obsidian-planner-prd.md.tmp.1205.1768042838969",
+    "notes/obsidian-planner-prd.md.tmp.1205.1768042831144",
+    "notes/obsidian-planner-prd.md",
     "notes/feedback-and-ideas.md",
+    "notes/questions.md",
+    "notes/markwhen-integration-analysis.md",
+    "notes/Screenshot_20260101-185045.png",
+    "notes/Screenshot_20260101-185036.png",
+    "notes/Screenshot_20260101-184811.png",
+    "notes/Screenshot_20260101-184627.png",
+    "notes/Pasted image 20260101091932.png",
+    "notes/Pasted image 20260101091842.png",
+    "Vacation/Vacation.md",
+    "Templates/Daily Note Template.md",
+    "Screenshot_20260108-193249.png",
+    "Screenshot_20260105-200533.png",
+    "Planner/Website Redesign.md",
+    "Planner/Team Meeting.md",
     "Planner/Meeting.md",
+    "Planner/Implement Frontend.md",
+    "Planner/Grocery Shopping.md",
+    "Planner/Fix Login Bug.md",
+    "Planner/Design Mockups.md",
+    "Personal/test.md",
     "Personal/Ongoing Test.md",
     "Personal/FirstMonday.md",
+    "Planner/Vacation.md",
+    "Personal/Treasure Island.md",
+    "Treasure Island.md",
     "Books/Treasure Island.md",
     "Books/Guards! Guards!.md",
     "Books/The Raven King (The Raven Cycle Book 4).md",
     "Books/Atomic Habits.md",
     "Books/Crazy Busy.md",
     "Books/Guns Germs and Steel.md",
-    "Books/Dune.md",
-    "Books/Touching Spirit Bear.md",
-    "Books/Books.md",
-    "Books/Reading.md",
-    "Books/The Sign of the Beaver.md",
-    "Books/My Side of the Mountain.md",
-    "Books/Hunting Whitetails Successfully.md",
-    "Books/Models.md",
-    "Books/The Man's Guide to Women.md",
-    "Books/Supercommunicators/supercommunicators_ref.pur",
-    "Books/Supercommunicators/supercommunicators_mind_map.xmind",
-    "Books/Supercommunicators/supercommunicators_mind_map-wip.xmind",
-    "Books/Supercommunicators",
-    "Books/Me Myself and Bob.md",
-    "Books/The Ragamuffin Gospel.md",
-    "Books/Piranesi/Piranesi.md",
-    "Books/Piranesi",
-    "Books/Practicing the Way/practicing_the_way_companion_guide.pdf",
-    "Books/Practicing the Way",
     "Books/media/Guns Germs and Steel.jpg",
-    "Books/media/The Raven King (The Raven Cycle Book 4).jpg",
-    "Books/media/Treasure island.jpg",
-    "Books/media/Touching Spirit Bear.jpg",
-    "Books/media/The Sign of the Beaver.jpg",
-    "Books/media/Chapterhouse Dune.jpg",
-    "Books/media/Dune (Movie Tie-In).jpg",
-    "Books/media/My Side of the Mountain.jpg",
-    "Books/media/Hunting Whitetails Successfully.jpg",
-    "Books/media/Me Myself and Bob.jpg",
-    "Books/media",
-    "Books"
+    "Books/media/The Raven King (The Raven Cycle Book 4).jpg"
   ]
 }

@@ -78,12 +78,23 @@
 - [x] Planner remove redundant/deprecated settings menus
 - [x] Planner group settings into tabs
 - [x] Planner need to show all properties for date and date and time as options in the date config menus, not just fields that have “date” token in them
-- [ ] Planner Kanban view
-- [ ] Planner Improve performance for Timeline view
 - [x] Fix Item Modal on mobile.  Make it appear centered.  Resize the modal container according to keyboard height when keyboard is activated
-- [ ] Planner when **editing** an existing note (e.g. a book note that has different frontmatter fields) in Item Modal, don’t delete/replace any pre-existing fields in that note.  Merge duplicates, but otherwise append *only append the fields modified in the Edit Item Modal to the frontmatter of that note*.  For example, if I open a book note in the Item Modal to edit, then modify the status, then save, it should only append the status field and value to the book note’s frontmatter.  If I haven’t modified the other fields, don’t add those fields to the frontmatter of that note.
-- [ ] (v0.0.2) What if the Edit Item Modal's expand details dynamically pulls frontmatter content from whatever note is selected?  Right now it's still very tailored to Planner/Calendar users
-- [ ] Planner Timeline add config menu for default zoom and center for Timeline View.
+- [x] Planner when **editing** an existing note (e.g. a book note that has different frontmatter fields) in Item Modal, don’t delete/replace any pre-existing fields in that note.  Merge duplicates, but otherwise append *only append the fields modified in the Edit Item Modal to the frontmatter of that note*.  For example, if I open a book note in the Item Modal to edit, then modify the status, then save, it should only append the status field and value to the book note’s frontmatter.  If I haven’t modified the other fields, don’t add those fields to the frontmatter of that note.
+- [ ] ~~Planner Timeline add config menu for default zoom and center for Timeline View.~~
+	- tried and failed.  Not worth the effort right now.
+- [ ] Planner Improve performance for Timeline view.  Should be snappy fast and buttery smooth like Meridiem.
+
+
+## Kanban View
+
+- [ ] Check the PRD to brush up on what you wanted
+- [ ] "Columns by" menu to allow picking how to configure Kanban columns.  
+- [ ] Support for cover images!
+- [ ] clear borders for cards (support colors?)
+- [ ] (Do this after feature parity with TaskNotes' kanban) For frontmatter fields with customized colors in Planner Settings (calendar, status, priority), style those fields like how they are styled in Task List View and the NLP quick capture parser preview.  That is, if the fields are toggled on in the Bases' properties to begin with.  Ask my clarifying questions.
+
+## Release
+
 - [ ] Planner update PRD with our changes. 
 - [ ] Planner publish 0.0.1
 	- [ ] Docs (Zensical) site (clone repo to ref folder)
@@ -94,15 +105,9 @@
 	- [ ] Readme.md
 	- [ ] License - GPL? or MIT?
 
+Other
 
-## Kanban View
-
-- [ ] 
-
-## Gantt View
-
-## Other
-
+- [ ] (v0.0.2) What if the Edit Item Modal's expand details dynamically pulls frontmatter content from whatever note is selected?  Right now it's still very tailored to Planner/Calendar users
 - [ ] Map View integration in calendar item mobile popup.  
 - [ ] Embed Map View in Calendar template
 	- [ ] Then you could pick a location on the map and copy to frontmatter
