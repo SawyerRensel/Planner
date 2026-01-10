@@ -387,7 +387,11 @@ export class BasesKanbanView extends BasesView {
 
   private valueToString(value: unknown): string {
     if (value === null || value === undefined) return 'None';
-    if (Array.isArray(value)) return value[0]?.toString() ?? 'None';
+    if (Array.isArray(value)) {
+      const filtered = value.filter(v => v !== null && v !== undefined && v !== '' && v !== 'null');
+      if (filtered.length === 0) return 'None';
+      return filtered.join(', ');
+    }
     return String(value);
   }
 
@@ -2186,16 +2190,45 @@ export class BasesKanbanView extends BasesView {
   }
 
   /**
-   * Convert a value for a specific field, handling special cases like tags
+   * Convert a value for a specific field, handling special cases like tags and multi-value properties
    */
   private convertValueForField(fieldName: string, value: string): string | string[] {
-    // Tags should be stored as an array
-    if (fieldName === 'tags') {
-      // Ensure the tag has # prefix for consistency
-      const normalizedTag = value.startsWith('#') ? value : `#${value}`;
-      return [normalizedTag];
+    // Check if this property is a multi-value type in Obsidian's metadata system
+    const isMultiValue = this.isMultiValueProperty(fieldName);
+
+    if (isMultiValue) {
+      // Split comma-separated values into array
+      const values = value.split(',').map(v => v.trim()).filter(v => v.length > 0);
+
+      // For tags, ensure each value has # prefix
+      if (fieldName === 'tags') {
+        return values.map(v => v.startsWith('#') ? v : `#${v}`);
+      }
+
+      return values;
     }
+
     return value;
+  }
+
+  /**
+   * Check if a property should store multiple values (array)
+   */
+  private isMultiValueProperty(fieldName: string): boolean {
+    // Check Obsidian's metadataTypeManager for the property type
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const metadataTypeManager = (this.plugin.app as any).metadataTypeManager;
+    if (metadataTypeManager?.properties) {
+      const propertyInfo = metadataTypeManager.properties[fieldName.toLowerCase()];
+      if (propertyInfo?.type) {
+        // These Obsidian types store arrays
+        return ['multitext', 'tags', 'aliases'].includes(propertyInfo.type);
+      }
+    }
+
+    // Fallback: known multi-value properties
+    const knownMultiValue = ['tags', 'aliases', 'cssclasses'];
+    return knownMultiValue.includes(fieldName.toLowerCase());
   }
 
   /**

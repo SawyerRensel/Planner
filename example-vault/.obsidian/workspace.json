@@ -22,7 +22,7 @@
             }
           },
           {
-            "id": "cfb09815e4224497",
+            "id": "61030a49a8708f5a",
             "type": "leaf",
             "state": {
               "type": "bases",
@@ -63,7 +63,7 @@
               "state": {
                 "file": "Planner/Website Redesign.md",
                 "mode": "source",
-                "source": false
+                "source": true
               },
               "icon": "lucide-file",
               "title": "Website Redesign"
@@ -257,10 +257,10 @@
       "obsidian-full-calendar:Open Full Calendar": false
     }
   },
-  "active": "1353fd93fea9a692",
+  "active": "61030a49a8708f5a",
   "lastOpenFiles": [
-    "Planner/Kanban.base",
     "Planner/Website Redesign.md",
+    "Planner/Kanban.base",
     "notes/feedback-and-ideas.md",
     "Personal/FirstMonday.md",
     "Vacation/Vacation.md",

@@ -2,7 +2,7 @@
 title: Fix Login Bug
 summary: Users can't login with special characters in password
 tags:
-  - task
+  - "#task"
 calendar:
   - Work
 context:
@@ -14,7 +14,7 @@ status: In-Progress
 priority: Urgent
 progress: 50
 date_created: 2026-01-08T09:00:00
-date_modified: 2026-01-10T12:10:05.840Z
+date_modified: 2026-01-10T15:04:13.812Z
 date_start_scheduled: 2026-01-08T14:00:00.000Z
 date_start_actual: 2026-01-08T09:00:00
 date_end_scheduled: 2026-01-08T16:00:00.000-05:00
