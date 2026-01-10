@@ -164,6 +164,8 @@ Screenshot_20260101-185045.png]]:1  Failed to load resource: net::ERR_FILE_NOT_F
 
 - [ ] On mobile, when I tap to scroll and I happen to be over a card, it triggers the card drag, which is jarring.  Let's make sure the card drag trigger only happens with a tap-hold delay on the card.
 
+- [ ] Scrolling with a touchpad is constrained to one axis at a time.  It would be nice to diagonally scroll / scroll both left-right and up-down at the smae time.
+
 ## Release
 
 - [ ] Planner update PRD with our changes. 

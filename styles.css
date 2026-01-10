@@ -2233,6 +2233,13 @@ body.is-mobile .planner-timeline-iframe-container {
   box-shadow: 4px 0 0 var(--interactive-accent) !important;
 }
 
+/* Card hold-ready state (visual feedback before drag starts on mobile) */
+.planner-kanban-card--hold-ready {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
 /* Swimlane dragging states */
 .planner-kanban-swimlane--dragging {
   opacity: 0.5;

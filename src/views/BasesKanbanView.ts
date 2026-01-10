@@ -67,6 +67,10 @@ export class BasesKanbanView extends BasesView {
   private touchStartX: number = 0;
   private touchStartY: number = 0;
   private scrollInterval: number | null = null;
+  private touchHoldTimer: number | null = null;
+  private touchHoldReady: boolean = false;
+  private touchHoldCard: HTMLElement | null = null;
+  private touchHoldEntry: BasesEntry | null = null;
 
   // Column reordering state
   private draggedColumn: HTMLElement | null = null;
@@ -1691,19 +1695,36 @@ export class BasesKanbanView extends BasesView {
       this.handleEdgeScroll(e.clientX, e.clientY);
     });
 
-    // Mobile touch handlers
+    // Mobile touch handlers with tap-hold delay to prevent accidental drags while scrolling
+    const HOLD_DELAY_MS = 200; // Time finger must be held before drag is enabled
+
     card.addEventListener('touchstart', (e: TouchEvent) => {
-      // Only initiate drag on long press (handled by touchmove delay)
       this.touchStartX = e.touches[0].clientX;
       this.touchStartY = e.touches[0].clientY;
+      this.touchHoldReady = false;
+      this.touchHoldCard = card;
+      this.touchHoldEntry = entry;
+
+      // Start hold timer - drag only enabled after delay
+      this.touchHoldTimer = window.setTimeout(() => {
+        this.touchHoldReady = true;
+        // Add visual feedback that card is ready to drag
+        card.classList.add('planner-kanban-card--hold-ready');
+      }, HOLD_DELAY_MS);
     }, { passive: true });
 
     card.addEventListener('touchmove', (e: TouchEvent) => {
-      if (!this.touchDragCard && !this.touchDragClone) {
-        // Check if we've moved enough to start dragging
-        const dx = Math.abs(e.touches[0].clientX - this.touchStartX);
-        const dy = Math.abs(e.touches[0].clientY - this.touchStartY);
+      const dx = Math.abs(e.touches[0].clientX - this.touchStartX);
+      const dy = Math.abs(e.touches[0].clientY - this.touchStartY);
 
+      // If moved before hold timer completed, cancel and allow normal scrolling
+      if (!this.touchHoldReady && (dx > 10 || dy > 10)) {
+        this.cancelTouchHold();
+        return; // Allow default scroll behavior
+      }
+
+      // Only start drag if hold delay completed and we're not already dragging
+      if (this.touchHoldReady && !this.touchDragCard && !this.touchDragClone) {
         if (dx > 10 || dy > 10) {
           this.startTouchDrag(card, entry, e);
         }
@@ -1714,10 +1735,42 @@ export class BasesKanbanView extends BasesView {
     }, { passive: false });
 
     card.addEventListener('touchend', (e: TouchEvent) => {
+      this.cancelTouchHold();
       if (this.touchDragCard) {
         this.endTouchDrag(e);
       }
     });
+
+    card.addEventListener('touchcancel', () => {
+      this.cancelTouchHold();
+      if (this.touchDragCard) {
+        // Clean up drag state on cancel
+        if (this.touchDragClone) {
+          this.touchDragClone.remove();
+          this.touchDragClone = null;
+        }
+        if (this.touchDragCard) {
+          this.touchDragCard.classList.remove('planner-kanban-card--dragging');
+          this.touchDragCard = null;
+        }
+        this.draggedCardPath = null;
+        this.draggedFromColumn = null;
+        this.stopAutoScroll();
+      }
+    });
+  }
+
+  private cancelTouchHold(): void {
+    if (this.touchHoldTimer) {
+      clearTimeout(this.touchHoldTimer);
+      this.touchHoldTimer = null;
+    }
+    if (this.touchHoldCard) {
+      this.touchHoldCard.classList.remove('planner-kanban-card--hold-ready');
+    }
+    this.touchHoldReady = false;
+    this.touchHoldCard = null;
+    this.touchHoldEntry = null;
   }
 
   private startTouchDrag(card: HTMLElement, entry: BasesEntry, e: TouchEvent): void {
