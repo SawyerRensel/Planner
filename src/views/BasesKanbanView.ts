@@ -2193,10 +2193,11 @@ export class BasesKanbanView extends BasesView {
    * Convert a value for a specific field, handling special cases like tags and multi-value properties
    */
   private convertValueForField(fieldName: string, value: string): string | string[] {
-    // Check if this property is a multi-value type in Obsidian's metadata system
-    const isMultiValue = this.isMultiValueProperty(fieldName);
+    // If the value contains a comma, it was joined from an array by valueToString
+    // and should be split back into an array
+    const hasMultipleValues = value.includes(',');
 
-    if (isMultiValue) {
+    if (hasMultipleValues) {
       // Split comma-separated values into array
       const values = value.split(',').map(v => v.trim()).filter(v => v.length > 0);
 
@@ -2208,27 +2209,13 @@ export class BasesKanbanView extends BasesView {
       return values;
     }
 
-    return value;
-  }
-
-  /**
-   * Check if a property should store multiple values (array)
-   */
-  private isMultiValueProperty(fieldName: string): boolean {
-    // Check Obsidian's metadataTypeManager for the property type
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const metadataTypeManager = (this.plugin.app as any).metadataTypeManager;
-    if (metadataTypeManager?.properties) {
-      const propertyInfo = metadataTypeManager.properties[fieldName.toLowerCase()];
-      if (propertyInfo?.type) {
-        // These Obsidian types store arrays
-        return ['multitext', 'tags', 'aliases'].includes(propertyInfo.type);
-      }
+    // Single value - check if it should still be an array (for tags)
+    if (fieldName === 'tags') {
+      const normalizedTag = value.startsWith('#') ? value : `#${value}`;
+      return [normalizedTag];
     }
 
-    // Fallback: known multi-value properties
-    const knownMultiValue = ['tags', 'aliases', 'cssclasses'];
-    return knownMultiValue.includes(fieldName.toLowerCase());
+    return value;
   }
 
   /**
