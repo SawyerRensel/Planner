@@ -163,10 +163,10 @@ Screenshot_20260101-185045.png]]:1  Failed to load resource: net::ERR_FILE_NOT_F
 ```
 
 - [x] On mobile, when I tap to scroll and I happen to be over a card, it triggers the card drag, which is jarring.  Let's make sure the card drag trigger only happens with a tap-hold delay on the card.
-- [ ] On mobile, tap holding a swimlane and dragging to the very edge of the screen should scroll vertically.  Right now I can drag a swimlane to an adjacent swimlane already in view, but I can't go beyond that.
+- [x] On mobile, tap holding a swimlane and dragging to the very edge of the screen should scroll vertically.  Right now I can drag a swimlane to an adjacent swimlane already in view, but I can't go beyond that.
 
-- [ ] Title config menu
-- [ ] Bases sort should sort cards
+- [x] Title config menu
+- [x] Bases sort should sort cards
 - [x] When `Group by` or `Swimlanes by` menus are set to `folder` or `tags`, for example, and I try to drag a card into another folder or tag column or swimlane, it doesn't work.  We need to support updating all property fields when a card is moved to another column or swimlane, including or moving Item Notes to the respective folder when applicable.  Any questions.
 - [ ] Should  "Add new" plus buttons in the bottom of the column (and column + swimlane) areas to add a new Item that auto-populates the New Item Modal according to the column and/or swimlane.  There should also be a new dropdown menu in the Kanban View Bases config menu called "Show add new buttons"  that allows the user to toggle whether they want these buttons to appear on the board.  For example, let's say `Group by` is set to "status" and `Swimlanes by` is set to "calendar".  If I click the plus button in the "To-Do" column and "Personal" swimlane, it should open the New Item Modal with status already set to "To-Do" and calendar set to "Personal".  Any questions?
 

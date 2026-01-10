@@ -6,6 +6,7 @@
       {
         "id": "b2dc0969ff3b1ea5",
         "type": "tabs",
+        "dimension": 60.26170798898072,
         "children": [
           {
             "id": "ca4aa4a1612dc5da",
@@ -22,7 +23,7 @@
             }
           },
           {
-            "id": "a703d2fee6fb1158",
+            "id": "53e5651b0bb3bdc4",
             "type": "leaf",
             "state": {
               "type": "bases",
@@ -34,11 +35,13 @@
               "title": "Kanban"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       },
       {
         "id": "ffadc583d30ecc8d",
         "type": "tabs",
+        "dimension": 39.73829201101928,
         "children": [
           {
             "id": "bce01986a328a147",
@@ -256,11 +259,11 @@
       "obsidian-full-calendar:Open Full Calendar": false
     }
   },
-  "active": "ca4aa4a1612dc5da",
+  "active": "53e5651b0bb3bdc4",
   "lastOpenFiles": [
+    "notes/feedback-and-ideas.md",
     "Planner/Kanban.base",
     "Planner/Website Redesign.md",
-    "notes/feedback-and-ideas.md",
     "Personal/FirstMonday.md",
     "Vacation/Vacation.md",
     "Planner/Grocery Shopping.md",

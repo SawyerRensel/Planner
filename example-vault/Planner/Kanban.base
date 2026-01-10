@@ -34,9 +34,6 @@ views:
     filters:
       and:
         - file.hasProperty("status")
-    groupBy:
-      property: status
-      direction: ASC
     order:
       - title
       - priority
@@ -45,6 +42,7 @@ views:
       - calendar
       - summary
       - tags
+    sort: []
     colorBy: file.folder
     borderStyle: left-accent
     badgePlacement: properties-section
@@ -55,6 +53,8 @@ views:
     columnOrder: '["Idea","To-Do","In-Progress","In-Review","Done","Cancelled","in-progress","open","null"]'
     columnWidth: "280"
     swimlaneOrder: '["Personal","Vacation","Work","null"]'
-    swimlaneBy: note.tags
+    titleBy: note.title
+    summaryField: note.summary
+    swimlaneBy: note.priority
   - type: table
     name: Table

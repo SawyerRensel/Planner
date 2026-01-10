@@ -106,6 +106,11 @@ export class BasesKanbanView extends BasesView {
     return value || 'note.calendar';
   }
 
+  private getTitleBy(): string {
+    const value = this.config.get('titleBy') as string | undefined;
+    return value || 'note.title';
+  }
+
   private getBorderStyle(): BorderStyle {
     const value = this.config.get('borderStyle') as string | undefined;
     return (value as BorderStyle) || 'left-accent';
@@ -1457,7 +1462,8 @@ export class BasesKanbanView extends BasesView {
     }
 
     // Title
-    const title = entry.getValue('note.title' as BasesPropertyId) || entry.file.basename;
+    const titleField = this.getTitleBy();
+    const title = entry.getValue(titleField as BasesPropertyId) || entry.file.basename;
     const titleEl = titleRow.createSpan({ cls: 'planner-kanban-card-title', text: String(title) });
     titleEl.style.cssText = 'font-weight: 500;';
 
@@ -2285,6 +2291,15 @@ export function createKanbanViewRegistration(plugin: PlannerPlugin): BasesViewRe
         placeholder: 'Select property',
         filter: (propId: BasesPropertyId) =>
           PropertyTypeService.isCategoricalProperty(propId, plugin.app),
+      },
+      {
+        type: 'property',
+        key: 'titleBy',
+        displayName: 'Title by',
+        default: 'note.title',
+        placeholder: 'Select property',
+        filter: (propId: BasesPropertyId) =>
+          PropertyTypeService.isTextProperty(propId, plugin.app),
       },
       {
         type: 'dropdown',
