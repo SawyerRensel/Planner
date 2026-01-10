@@ -1,0 +1,26 @@
+source: Planner/
+properties:
+  note.title:
+    width: 200
+  note.date_start:
+    width: 150
+  note.date_due:
+    width: 150
+  note.calendar:
+    width: 120
+  note.status:
+    width: 100
+views:
+  - type: planner-calendar
+    name: Calendar
+    order:
+      - title
+    sort: []
+    colorBy: note.calendar
+    titleField: note.title
+    dateStartField: note.date_start_scheduled
+  - type: table
+    name: Table
+  - type: planner-timeline
+    name: Timeline
+    backgroundColor: "#002b36"

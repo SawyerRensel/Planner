@@ -4,38 +4,54 @@
     "type": "split",
     "children": [
       {
-        "id": "03de4eaf1f27fda2",
+        "id": "b2dc0969ff3b1ea5",
         "type": "tabs",
         "children": [
           {
-            "id": "17d10671f0f6c09a",
-            "type": "leaf",
-            "state": {
-              "type": "bases",
-              "state": {
-                "file": "TaskNotes/Views/calendar-default.base",
-                "viewName": "Calendar"
-              },
-              "icon": "lucide-layout-list",
-              "title": "calendar-default"
-            }
-          },
-          {
-            "id": "dbdbc63a1614a29b",
+            "id": "a200b43c11a1b48c",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "notes/obsidian-planner-prd.md",
+                "file": "notes/feedback-and-ideas.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "obsidian-planner-prd"
+              "title": "feedback-and-ideas"
+            }
+          },
+          {
+            "id": "b2e110b658e28eb1",
+            "type": "leaf",
+            "state": {
+              "type": "bases",
+              "state": {
+                "file": "Planner/Timeline.base",
+                "viewName": "Timeline"
+              },
+              "icon": "square-chart-gantt",
+              "title": "Timeline"
             }
           }
         ],
         "currentTab": 1
+      },
+      {
+        "id": "9526bee664d81cd6",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "4285a414699f1b18",
+            "type": "leaf",
+            "state": {
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "New tab"
+            }
+          }
+        ]
       }
     ],
     "direction": "vertical"
@@ -92,7 +108,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 232.5
   },
   "right": {
     "id": "ed9ed6ed0a6d4bf8",
@@ -108,6 +124,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "notes/obsidian-planner-prd.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -117,7 +134,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks"
+              "title": "Backlinks for obsidian-planner-prd"
             }
           },
           {
@@ -168,66 +185,103 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Welcome.md",
+                "file": "Planner/Calendar.base",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Welcome"
+              "title": "Outline of Calendar"
+            }
+          },
+          {
+            "id": "22d5d266f7c7d00c",
+            "type": "leaf",
+            "state": {
+              "type": "planner-task-list",
+              "state": {},
+              "icon": "lucide-ghost",
+              "title": "planner-task-list"
             }
           }
-        ]
+        ],
+        "currentTab": 4
       }
     ],
     "direction": "horizontal",
-    "width": 300,
+    "width": 261.5,
     "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
+      "tasknotes:Open mini calendar": false,
+      "tasknotes:Open advanced calendar": false,
+      "tasknotes:Open task list": false,
+      "tasknotes:Open agenda": false,
+      "tasknotes:Open kanban board": false,
+      "tasknotes:Open pomodoro": false,
+      "tasknotes:Open pomodoro stats": false,
+      "tasknotes:Create new task": false,
       "switcher:Open quick switcher": false,
       "graph:Open graph view": false,
       "canvas:Create new canvas": false,
       "daily-notes:Open today's daily note": false,
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
-      "bases:Create new base": false
+      "bases:Create new base": false,
+      "obsidian-full-calendar:Open Full Calendar": false,
+      "markwhen:Create new Markwhen file": false,
+      "planner:Open Planner Task List": false,
+      "planner:Open Planner Calendar": false,
+      "planner:Open Planner Timeline": false
     }
   },
-  "active": "dbdbc63a1614a29b",
+  "active": "b2e110b658e28eb1",
   "lastOpenFiles": [
-    "Full Calendar/2025-12-27 Full Calendar Example Event.md",
-    "notes/obsidian-planner-prd.md",
-    "notes/Notes.md",
-    "notes",
-    "Full Calendar/2025-12-28 Full Calendar Example Task.md",
-    "media/gantt_view_mockup_example.png",
-    "Planner/Items/test3.md",
-    "Planner/Items/time task.md",
-    "Planner/Items/test2.md",
-    "Planner/Items/test1.md",
-    "TaskNotes/Tasks/TaskNotes Example Dependency.md",
-    "TaskNotes/Tasks/groceries.md",
-    "TaskNotes/Views/calendar-default.base",
-    "Planner/Views/gantt-default.base",
-    "Planner/Views/calendar-default.base",
-    "Planner/Views/kanban-status.base",
-    "Planner/Views/items-today.base",
-    "Planner/Items/test.md.tmp.32868.1767075941227",
-    "2025-12-29.md",
-    "2025-12-30.md",
-    "Planner/Items",
-    "Planner/Views/relationships.base",
-    "Planner/Views/items-all.base",
-    "TaskNotes/Tasks/TaskNotes Example Recurring Task.md",
-    "TaskNotes/Tasks/TaskNotes Example Task with Specific Time.md",
-    "TaskNotes/Tasks/TaskNotes Example Task.md",
-    "Planner/test.md",
-    "Notes.md",
-    "TaskNotes/Tasks/vacation.md",
-    "TaskNotes/Tasks/test.md",
-    "create a link.md",
-    "Welcome.md"
+    "Personal/Treasure Island.md",
+    "Planner/Timeline.base",
+    "Planner/Design Mockups.md",
+    "Treasure Island.md",
+    "notes/feedback-and-ideas.md",
+    "Planner/Meeting.md",
+    "Personal/Ongoing Test.md",
+    "Personal/FirstMonday.md",
+    "Books/Treasure Island.md",
+    "Books/Guards! Guards!.md",
+    "Books/The Raven King (The Raven Cycle Book 4).md",
+    "Books/Atomic Habits.md",
+    "Books/Crazy Busy.md",
+    "Books/Guns Germs and Steel.md",
+    "Books/Dune.md",
+    "Books/Touching Spirit Bear.md",
+    "Books/Books.md",
+    "Books/Reading.md",
+    "Books/The Sign of the Beaver.md",
+    "Books/My Side of the Mountain.md",
+    "Books/Hunting Whitetails Successfully.md",
+    "Books/Models.md",
+    "Books/The Man's Guide to Women.md",
+    "Books/Supercommunicators/supercommunicators_ref.pur",
+    "Books/Supercommunicators/supercommunicators_mind_map.xmind",
+    "Books/Supercommunicators/supercommunicators_mind_map-wip.xmind",
+    "Books/Supercommunicators",
+    "Books/Me Myself and Bob.md",
+    "Books/The Ragamuffin Gospel.md",
+    "Books/Piranesi/Piranesi.md",
+    "Books/Piranesi",
+    "Books/Practicing the Way/practicing_the_way_companion_guide.pdf",
+    "Books/Practicing the Way",
+    "Books/media/Guns Germs and Steel.jpg",
+    "Books/media/The Raven King (The Raven Cycle Book 4).jpg",
+    "Books/media/Treasure island.jpg",
+    "Books/media/Touching Spirit Bear.jpg",
+    "Books/media/The Sign of the Beaver.jpg",
+    "Books/media/Chapterhouse Dune.jpg",
+    "Books/media/Dune (Movie Tie-In).jpg",
+    "Books/media/My Side of the Mountain.jpg",
+    "Books/media/Hunting Whitetails Successfully.jpg",
+    "Books/media/Me Myself and Bob.jpg",
+    "Books/media",
+    "Books"
   ]
 }

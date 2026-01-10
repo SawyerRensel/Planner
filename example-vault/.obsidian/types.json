@@ -5,10 +5,23 @@
     "tags": "tags",
     "date_end": "datetime",
     "date_started": "datetime",
-    "date_due": "date",
+    "date_due": "datetime",
     "date_eta": "datetime",
     "date_finished": "datetime",
-    "repeat_frequency": "datetime",
-    "date_scheduled": "date"
+    "repeat_frequency": "text",
+    "date_scheduled": "date",
+    "date_created": "datetime",
+    "date_modified": "datetime",
+    "date_start": "datetime",
+    "date_completed": "datetime",
+    "date_start_scheduled": "datetime",
+    "date_start_actual": "datetime",
+    "date_end_scheduled": "datetime",
+    "date_end_actual": "datetime",
+    "repeat_until": "datetime",
+    "people": "multitext",
+    "repeat_completed_dates": "multitext",
+    "finished": "date",
+    "started": "date"
   }
 }

@@ -1,0 +1,36 @@
+source: Planner/
+properties:
+  note.title:
+    width: 250
+  note.date_start_scheduled:
+    width: 120
+  note.date_end_scheduled:
+    width: 120
+  note.progress:
+    width: 80
+  note.calendar:
+    width: 120
+  note.status:
+    width: 100
+  note.blocked_by:
+    width: 150
+views:
+  - type: planner-gantt
+    name: Gantt
+    order:
+      - note.title
+      - note.date_start_scheduled
+      - note.date_end_scheduled
+      - note.progress
+    sort:
+      - property: date_start_scheduled
+        direction: ASC
+    defaultZoom: month
+    colorBy: note.calendar
+    showProgress: true
+    showDependencies: true
+    autoScrollToday: true
+    showGanttTable: true
+    ganttTableWidth: 350
+  - type: table
+    name: Table
