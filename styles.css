@@ -2199,6 +2199,40 @@ body.is-mobile .planner-timeline-iframe-container {
   padding: 2px 6px !important;
 }
 
+/* Column grab handle */
+.planner-kanban-column-grab {
+  cursor: grab;
+  opacity: 0.4;
+  transition: opacity 0.15s ease;
+}
+
+.planner-kanban-column-grab:hover {
+  opacity: 1;
+}
+
+.planner-kanban-column-grab:active {
+  cursor: grabbing;
+}
+
+.planner-kanban-column-grab svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Column dragging states */
+.planner-kanban-column--dragging {
+  opacity: 0.5;
+  box-shadow: none !important;
+}
+
+.planner-kanban-column--drop-left {
+  box-shadow: -4px 0 0 var(--interactive-accent) !important;
+}
+
+.planner-kanban-column--drop-right {
+  box-shadow: 4px 0 0 var(--interactive-accent) !important;
+}
+
 .theme-dark .planner-kanban-card {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }

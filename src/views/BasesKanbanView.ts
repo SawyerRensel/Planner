@@ -61,6 +61,17 @@ export class BasesKanbanView extends BasesView {
   private draggedCardPath: string | null = null;
   private draggedFromColumn: string | null = null;
 
+  // Mobile touch drag state
+  private touchDragCard: HTMLElement | null = null;
+  private touchDragClone: HTMLElement | null = null;
+  private touchStartX: number = 0;
+  private touchStartY: number = 0;
+  private scrollInterval: number | null = null;
+
+  // Column reordering state
+  private draggedColumn: HTMLElement | null = null;
+  private draggedColumnKey: string | null = null;
+
   // Configuration getters
   private getGroupBy(): string {
     const value = this.config.get('groupBy') as string | undefined;
@@ -92,6 +103,11 @@ export class BasesKanbanView extends BasesView {
     return (value as CoverDisplay) || 'banner';
   }
 
+  private getSummaryField(): string | null {
+    const value = this.config.get('summaryField') as string | undefined;
+    return value || null;
+  }
+
   private getDateStartField(): string {
     const value = this.config.get('dateStartField') as string | undefined;
     return value || 'note.date_start_scheduled';
@@ -108,7 +124,10 @@ export class BasesKanbanView extends BasesView {
   }
 
   private getColumnWidth(): number {
-    const value = this.config.get('columnWidth') as number | undefined;
+    const value = this.config.get('columnWidth') as string | number | undefined;
+    if (typeof value === 'string') {
+      return parseInt(value, 10) || 280;
+    }
     return value || 280;
   }
 
@@ -127,6 +146,20 @@ export class BasesKanbanView extends BasesView {
       return value === 'true';
     }
     return value ?? false;
+  }
+
+  private getCustomColumnOrder(): string[] {
+    const value = this.config.get('columnOrder') as string | undefined;
+    if (!value) return [];
+    try {
+      return JSON.parse(value);
+    } catch {
+      return [];
+    }
+  }
+
+  private setCustomColumnOrder(order: string[]): void {
+    this.config.set('columnOrder', JSON.stringify(order));
   }
 
   private getCoverHeight(): number {
@@ -327,27 +360,47 @@ export class BasesKanbanView extends BasesView {
   }
 
   /**
-   * Get ordered column keys based on the groupBy field
+   * Get ordered column keys based on the groupBy field and custom order
    */
   private getColumnKeys(groups: Map<string, BasesEntry[]>): string[] {
     const groupByField = this.getGroupBy();
     const propName = groupByField.replace(/^note\./, '');
+    const customOrder = this.getCustomColumnOrder();
 
-    let columnKeys: string[];
+    let defaultKeys: string[];
     if (propName === 'status') {
-      columnKeys = this.plugin.settings.statuses.map(s => s.name);
+      defaultKeys = this.plugin.settings.statuses.map(s => s.name);
       for (const key of groups.keys()) {
-        if (!columnKeys.includes(key)) columnKeys.push(key);
+        if (!defaultKeys.includes(key)) defaultKeys.push(key);
       }
     } else if (propName === 'priority') {
-      columnKeys = this.plugin.settings.priorities.map(p => p.name);
+      defaultKeys = this.plugin.settings.priorities.map(p => p.name);
       for (const key of groups.keys()) {
-        if (!columnKeys.includes(key)) columnKeys.push(key);
+        if (!defaultKeys.includes(key)) defaultKeys.push(key);
       }
     } else {
-      columnKeys = Array.from(groups.keys()).sort();
+      defaultKeys = Array.from(groups.keys()).sort();
     }
-    return columnKeys;
+
+    // If we have a custom order, use it (but include any new keys that weren't in the saved order)
+    if (customOrder.length > 0) {
+      const orderedKeys: string[] = [];
+      // First, add keys in custom order that still exist
+      for (const key of customOrder) {
+        if (defaultKeys.includes(key)) {
+          orderedKeys.push(key);
+        }
+      }
+      // Then add any new keys that weren't in custom order
+      for (const key of defaultKeys) {
+        if (!orderedKeys.includes(key)) {
+          orderedKeys.push(key);
+        }
+      }
+      return orderedKeys;
+    }
+
+    return defaultKeys;
   }
 
   /**
@@ -414,6 +467,8 @@ export class BasesKanbanView extends BasesView {
       padding-bottom: 8px;
     `;
 
+    const groupByProp = groupByField.replace(/^note\./, '');
+
     for (const columnKey of columnKeys) {
       const headerCell = document.createElement('div');
       headerCell.style.cssText = `
@@ -423,9 +478,36 @@ export class BasesKanbanView extends BasesView {
         padding: 8px 12px;
         background: var(--background-secondary);
         border-radius: 6px;
-        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
       `;
-      headerCell.textContent = columnKey;
+
+      // Add icon for status/priority columns
+      if (groupByProp === 'status') {
+        const config = getStatusConfig(this.plugin.settings, columnKey);
+        if (config) {
+          const iconEl = document.createElement('span');
+          iconEl.className = 'planner-kanban-column-icon';
+          setIcon(iconEl, config.icon || 'circle');
+          iconEl.style.color = config.color;
+          headerCell.appendChild(iconEl);
+        }
+      } else if (groupByProp === 'priority') {
+        const config = getPriorityConfig(this.plugin.settings, columnKey);
+        if (config) {
+          const iconEl = document.createElement('span');
+          iconEl.className = 'planner-kanban-column-icon';
+          setIcon(iconEl, config.icon || 'signal');
+          iconEl.style.color = config.color;
+          headerCell.appendChild(iconEl);
+        }
+      }
+
+      const titleSpan = document.createElement('span');
+      titleSpan.textContent = columnKey;
+      headerCell.appendChild(titleSpan);
       headerRow.appendChild(headerCell);
     }
     swimlaneContainer.appendChild(headerRow);
@@ -466,7 +548,14 @@ export class BasesKanbanView extends BasesView {
         if (hideEmpty && entries.length === 0) {
           // Add empty placeholder to maintain grid alignment
           const placeholder = document.createElement('div');
-          placeholder.style.cssText = `width: ${columnWidth}px; min-width: ${columnWidth}px;`;
+          placeholder.style.cssText = `
+            width: ${columnWidth}px;
+            min-width: ${columnWidth}px;
+            min-height: 60px;
+            background: var(--background-secondary);
+            border-radius: 6px;
+            opacity: 0.5;
+          `;
           swimlaneRow.appendChild(placeholder);
         } else {
           const cell = this.createSwimlaneCell(columnKey, entries, columnWidth);
@@ -489,6 +578,7 @@ export class BasesKanbanView extends BasesView {
     cell.style.cssText = `
       width: ${width}px;
       min-width: ${width}px;
+      min-height: 60px;
       background: var(--background-secondary);
       border-radius: 6px;
       padding: 8px;
@@ -542,8 +632,8 @@ export class BasesKanbanView extends BasesView {
     `;
     column.setAttribute('data-group', groupKey);
 
-    // Column header
-    const header = this.createColumnHeader(groupKey, entries.length);
+    // Column header (pass column for drag handlers)
+    const header = this.createColumnHeader(groupKey, entries.length, column);
     column.appendChild(header);
 
     // Cards container
@@ -572,7 +662,7 @@ export class BasesKanbanView extends BasesView {
     return column;
   }
 
-  private createColumnHeader(groupKey: string, count: number): HTMLElement {
+  private createColumnHeader(groupKey: string, count: number, column: HTMLElement): HTMLElement {
     const header = document.createElement('div');
     header.className = 'planner-kanban-column-header';
     header.style.cssText = `
@@ -583,6 +673,27 @@ export class BasesKanbanView extends BasesView {
       gap: 8px;
       border-bottom: 1px solid var(--background-modifier-border);
     `;
+
+    // Grab handle for column reordering
+    const grabHandle = header.createSpan({ cls: 'planner-kanban-column-grab' });
+    grabHandle.style.cssText = `
+      cursor: grab;
+      opacity: 0.4;
+      transition: opacity 0.15s ease;
+      display: flex;
+      align-items: center;
+    `;
+    setIcon(grabHandle, 'grip-vertical');
+    grabHandle.addEventListener('mouseenter', () => {
+      grabHandle.style.opacity = '1';
+    });
+    grabHandle.addEventListener('mouseleave', () => {
+      grabHandle.style.opacity = '0.4';
+    });
+
+    // Make the grab handle draggable for column reordering
+    grabHandle.setAttribute('draggable', 'true');
+    this.setupColumnDragHandlers(grabHandle, column, groupKey);
 
     // Icon for status/priority
     const groupByField = this.getGroupBy();
@@ -619,6 +730,87 @@ export class BasesKanbanView extends BasesView {
     `;
 
     return header;
+  }
+
+  private setupColumnDragHandlers(grabHandle: HTMLElement, column: HTMLElement, groupKey: string): void {
+    grabHandle.addEventListener('dragstart', (e: DragEvent) => {
+      e.stopPropagation(); // Don't trigger card drag
+      this.draggedColumn = column;
+      this.draggedColumnKey = groupKey;
+      column.classList.add('planner-kanban-column--dragging');
+      e.dataTransfer?.setData('text/plain', `column:${groupKey}`);
+      e.dataTransfer!.effectAllowed = 'move';
+    });
+
+    grabHandle.addEventListener('dragend', () => {
+      if (this.draggedColumn) {
+        this.draggedColumn.classList.remove('planner-kanban-column--dragging');
+      }
+      this.draggedColumn = null;
+      this.draggedColumnKey = null;
+      // Remove all drop indicators
+      document.querySelectorAll('.planner-kanban-column--drop-left, .planner-kanban-column--drop-right').forEach(el => {
+        el.classList.remove('planner-kanban-column--drop-left', 'planner-kanban-column--drop-right');
+      });
+    });
+
+    // Setup drop handlers on the column itself
+    column.addEventListener('dragover', (e: DragEvent) => {
+      // Only handle column drops, not card drops
+      if (!this.draggedColumn || this.draggedColumn === column) return;
+      e.preventDefault();
+      e.dataTransfer!.dropEffect = 'move';
+
+      // Determine drop position (left or right half of column)
+      const rect = column.getBoundingClientRect();
+      const midpoint = rect.left + rect.width / 2;
+      column.classList.remove('planner-kanban-column--drop-left', 'planner-kanban-column--drop-right');
+      if (e.clientX < midpoint) {
+        column.classList.add('planner-kanban-column--drop-left');
+      } else {
+        column.classList.add('planner-kanban-column--drop-right');
+      }
+    });
+
+    column.addEventListener('dragleave', () => {
+      column.classList.remove('planner-kanban-column--drop-left', 'planner-kanban-column--drop-right');
+    });
+
+    column.addEventListener('drop', (e: DragEvent) => {
+      if (!this.draggedColumn || !this.draggedColumnKey || this.draggedColumn === column) return;
+      e.preventDefault();
+
+      const rect = column.getBoundingClientRect();
+      const midpoint = rect.left + rect.width / 2;
+      const insertBefore = e.clientX < midpoint;
+
+      // Reorder columns
+      this.reorderColumns(this.draggedColumnKey, groupKey, insertBefore);
+
+      column.classList.remove('planner-kanban-column--drop-left', 'planner-kanban-column--drop-right');
+    });
+  }
+
+  private reorderColumns(draggedKey: string, targetKey: string, insertBefore: boolean): void {
+    // Get current column order
+    const groups = this.groupEntriesByField();
+    let currentOrder = this.getColumnKeys(groups);
+
+    // Remove dragged column from current position
+    currentOrder = currentOrder.filter(k => k !== draggedKey);
+
+    // Find target position
+    const targetIndex = currentOrder.indexOf(targetKey);
+    const insertIndex = insertBefore ? targetIndex : targetIndex + 1;
+
+    // Insert at new position
+    currentOrder.splice(insertIndex, 0, draggedKey);
+
+    // Save custom order
+    this.setCustomColumnOrder(currentOrder);
+
+    // Re-render
+    this.render();
   }
 
   private renderCards(container: HTMLElement, entries: BasesEntry[]): void {
@@ -695,20 +887,32 @@ export class BasesKanbanView extends BasesView {
       this.renderBadges(titleRow, entry);
     }
 
-    // Summary if present
-    const summary = entry.getValue('note.summary' as BasesPropertyId);
-    if (summary) {
-      const summaryEl = content.createDiv({ cls: 'planner-kanban-card-summary', text: String(summary) });
-      summaryEl.style.cssText = `
-        font-size: 12px;
-        color: var(--text-muted);
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        margin-top: 4px;
-      `;
+    // Summary - only show if configured and visible
+    const summaryField = this.getSummaryField();
+    const visibleProps = this.getVisibleProperties();
+    const summaryFieldProp = summaryField ? summaryField.replace(/^note\./, '') : 'summary';
+    const isSummaryVisible = visibleProps.some(p =>
+      p === summaryField ||
+      p === `note.${summaryFieldProp}` ||
+      p.endsWith(`.${summaryFieldProp}`)
+    );
+
+    if (isSummaryVisible) {
+      const summarySource = summaryField || 'note.summary';
+      const summary = entry.getValue(summarySource as BasesPropertyId);
+      if (summary && summary !== 'null' && summary !== null) {
+        const summaryEl = content.createDiv({ cls: 'planner-kanban-card-summary', text: String(summary) });
+        summaryEl.style.cssText = `
+          font-size: 12px;
+          color: var(--text-muted);
+          overflow: hidden;
+          text-overflow: ellipsis;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          margin-top: 4px;
+        `;
+      }
     }
 
     // For properties-section placement, render badges below content
@@ -799,8 +1003,12 @@ export class BasesKanbanView extends BasesView {
       return path;
     }
 
-    // Clean up the path - remove any wiki link brackets
-    let cleanPath = path.replace(/^\[\[|\]\]$/g, '').trim();
+    // Clean up the path - remove any wiki link brackets (handle [[path]] and [[path|alias]])
+    let cleanPath = path
+      .replace(/^\[\[/, '')      // Remove leading [[
+      .replace(/\]\]$/, '')       // Remove trailing ]]
+      .replace(/\|.*$/, '')       // Remove alias if present (e.g., [[path|alias]] -> path)
+      .trim();
 
     // If path doesn't include extension, it might be a wiki link without extension
     // Try to find the file in the vault
@@ -931,18 +1139,22 @@ export class BasesKanbanView extends BasesView {
     for (const propId of visibleProps) {
       const propName = propId.replace(/^note\./, '');
 
-      // Skip properties already handled above
+      // Skip properties already handled above or that shouldn't be shown as badges
       if (['title', 'summary', 'status', 'priority', 'calendar', 'repeat_frequency'].includes(propName)) continue;
       if (propName === dateStartProp || propName === dateEndProp) continue;
       if (propName === groupByProp) continue;
+      // Skip cover field - it's for images, not badges
+      const coverField = this.getCoverField();
+      if (coverField && propId === coverField) continue;
 
       const value = entry.getValue(propId as BasesPropertyId);
-      if (value !== null && value !== undefined && value !== '') {
-        // Render as generic badge
-        const displayValue = Array.isArray(value) ? value.join(', ') : String(value);
-        if (displayValue) {
-          this.createGenericBadge(badgeContainer, propName, displayValue);
-        }
+      // Skip null, undefined, empty, and "null" string values
+      if (value === null || value === undefined || value === '' || value === 'null') continue;
+
+      // Render as generic badge
+      const displayValue = Array.isArray(value) ? value.filter(v => v && v !== 'null').join(', ') : String(value);
+      if (displayValue && displayValue !== 'null') {
+        this.createGenericBadge(badgeContainer, propName, displayValue);
       }
     }
 
@@ -1056,9 +1268,11 @@ export class BasesKanbanView extends BasesView {
   }
 
   private setupCardDragHandlers(card: HTMLElement, entry: BasesEntry): void {
+    // Desktop drag handlers
     card.addEventListener('dragstart', (e: DragEvent) => {
       this.draggedCardPath = entry.file.path;
-      this.draggedFromColumn = card.closest('.planner-kanban-column')?.getAttribute('data-group') || null;
+      this.draggedFromColumn = card.closest('.planner-kanban-column')?.getAttribute('data-group') ||
+                               card.closest('.planner-kanban-swimlane-cell')?.getAttribute('data-group') || null;
       card.classList.add('planner-kanban-card--dragging');
       e.dataTransfer?.setData('text/plain', entry.file.path);
     });
@@ -1067,7 +1281,182 @@ export class BasesKanbanView extends BasesView {
       card.classList.remove('planner-kanban-card--dragging');
       this.draggedCardPath = null;
       this.draggedFromColumn = null;
+      this.stopAutoScroll();
     });
+
+    // Desktop dragover for edge scrolling
+    card.addEventListener('drag', (e: DragEvent) => {
+      if (!this.boardEl || !e.clientX) return;
+      this.handleEdgeScroll(e.clientX, e.clientY);
+    });
+
+    // Mobile touch handlers
+    card.addEventListener('touchstart', (e: TouchEvent) => {
+      // Only initiate drag on long press (handled by touchmove delay)
+      this.touchStartX = e.touches[0].clientX;
+      this.touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    card.addEventListener('touchmove', (e: TouchEvent) => {
+      if (!this.touchDragCard && !this.touchDragClone) {
+        // Check if we've moved enough to start dragging
+        const dx = Math.abs(e.touches[0].clientX - this.touchStartX);
+        const dy = Math.abs(e.touches[0].clientY - this.touchStartY);
+
+        if (dx > 10 || dy > 10) {
+          this.startTouchDrag(card, entry, e);
+        }
+      } else if (this.touchDragClone) {
+        e.preventDefault();
+        this.updateTouchDrag(e);
+      }
+    }, { passive: false });
+
+    card.addEventListener('touchend', (e: TouchEvent) => {
+      if (this.touchDragCard) {
+        this.endTouchDrag(e);
+      }
+    });
+  }
+
+  private startTouchDrag(card: HTMLElement, entry: BasesEntry, e: TouchEvent): void {
+    this.touchDragCard = card;
+    this.draggedCardPath = entry.file.path;
+    this.draggedFromColumn = card.closest('.planner-kanban-column')?.getAttribute('data-group') ||
+                             card.closest('.planner-kanban-swimlane-cell')?.getAttribute('data-group') || null;
+
+    // Create a clone for visual feedback
+    this.touchDragClone = card.cloneNode(true) as HTMLElement;
+    this.touchDragClone.style.cssText = `
+      position: fixed;
+      pointer-events: none;
+      z-index: 1000;
+      opacity: 0.8;
+      transform: rotate(2deg) scale(1.02);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      width: ${card.offsetWidth}px;
+    `;
+    document.body.appendChild(this.touchDragClone);
+
+    card.classList.add('planner-kanban-card--dragging');
+
+    this.updateTouchDrag(e);
+  }
+
+  private updateTouchDrag(e: TouchEvent): void {
+    if (!this.touchDragClone || !this.boardEl) return;
+
+    const touch = e.touches[0];
+    this.touchDragClone.style.left = `${touch.clientX - 50}px`;
+    this.touchDragClone.style.top = `${touch.clientY - 20}px`;
+
+    // Handle edge scrolling
+    this.handleEdgeScroll(touch.clientX, touch.clientY);
+
+    // Highlight drop target
+    this.highlightDropTarget(touch.clientX, touch.clientY);
+  }
+
+  private endTouchDrag(e: TouchEvent): void {
+    this.stopAutoScroll();
+
+    if (this.touchDragClone) {
+      this.touchDragClone.remove();
+      this.touchDragClone = null;
+    }
+
+    if (this.touchDragCard) {
+      this.touchDragCard.classList.remove('planner-kanban-card--dragging');
+
+      // Find drop target
+      const touch = e.changedTouches[0];
+      const dropTarget = this.findDropTarget(touch.clientX, touch.clientY);
+
+      if (dropTarget && this.draggedCardPath && this.draggedFromColumn !== dropTarget) {
+        this.handleCardDrop(this.draggedCardPath, dropTarget);
+      }
+
+      this.touchDragCard = null;
+    }
+
+    this.draggedCardPath = null;
+    this.draggedFromColumn = null;
+
+    // Clear all dragover highlights
+    document.querySelectorAll('.planner-kanban-cards--dragover').forEach(el => {
+      el.classList.remove('planner-kanban-cards--dragover');
+    });
+  }
+
+  private handleEdgeScroll(clientX: number, clientY: number): void {
+    if (!this.boardEl) return;
+
+    const rect = this.boardEl.getBoundingClientRect();
+    const edgeThreshold = 60;
+    const scrollSpeed = 15;
+
+    let scrollX = 0;
+    let scrollY = 0;
+
+    // Check horizontal edges
+    if (clientX < rect.left + edgeThreshold) {
+      scrollX = -scrollSpeed;
+    } else if (clientX > rect.right - edgeThreshold) {
+      scrollX = scrollSpeed;
+    }
+
+    // Check vertical edges
+    if (clientY < rect.top + edgeThreshold) {
+      scrollY = -scrollSpeed;
+    } else if (clientY > rect.bottom - edgeThreshold) {
+      scrollY = scrollSpeed;
+    }
+
+    if (scrollX !== 0 || scrollY !== 0) {
+      this.startAutoScroll(scrollX, scrollY);
+    } else {
+      this.stopAutoScroll();
+    }
+  }
+
+  private startAutoScroll(scrollX: number, scrollY: number): void {
+    if (this.scrollInterval) {
+      clearInterval(this.scrollInterval);
+    }
+
+    this.scrollInterval = window.setInterval(() => {
+      if (this.boardEl) {
+        this.boardEl.scrollLeft += scrollX;
+        this.boardEl.scrollTop += scrollY;
+      }
+    }, 16);
+  }
+
+  private stopAutoScroll(): void {
+    if (this.scrollInterval) {
+      clearInterval(this.scrollInterval);
+      this.scrollInterval = null;
+    }
+  }
+
+  private highlightDropTarget(clientX: number, clientY: number): void {
+    // Clear previous highlights
+    document.querySelectorAll('.planner-kanban-cards--dragover').forEach(el => {
+      el.classList.remove('planner-kanban-cards--dragover');
+    });
+
+    // Find and highlight current target
+    const target = document.elementFromPoint(clientX, clientY);
+    const dropZone = target?.closest('.planner-kanban-cards, .planner-kanban-swimlane-cell');
+    if (dropZone) {
+      dropZone.classList.add('planner-kanban-cards--dragover');
+    }
+  }
+
+  private findDropTarget(clientX: number, clientY: number): string | null {
+    const target = document.elementFromPoint(clientX, clientY);
+    const dropZone = target?.closest('.planner-kanban-cards, .planner-kanban-swimlane-cell, .planner-kanban-column');
+    return dropZone?.getAttribute('data-group') || null;
   }
 
   private setupDropHandlers(container: HTMLElement, groupKey: string): void {
@@ -1192,11 +1581,23 @@ export function createKanbanViewRegistration(plugin: PlannerPlugin): BasesViewRe
         displayName: 'Cover height (banner)',
         default: '120',
         options: {
+          '60': 'Extra small (60px)',
           '80': 'Small (80px)',
+          '100': 'Medium-small (100px)',
           '120': 'Medium (120px)',
-          '160': 'Large (160px)',
+          '150': 'Medium-large (150px)',
+          '180': 'Large (180px)',
           '200': 'Extra large (200px)',
         },
+      },
+      {
+        type: 'property',
+        key: 'summaryField',
+        displayName: 'Summary field',
+        default: 'note.summary',
+        placeholder: 'None',
+        filter: (propId: BasesPropertyId) =>
+          PropertyTypeService.isTextProperty(propId, plugin.app),
       },
       {
         type: 'property',
@@ -1224,6 +1625,20 @@ export function createKanbanViewRegistration(plugin: PlannerPlugin): BasesViewRe
         options: {
           'inline': 'Inline',
           'properties-section': 'Properties section',
+        },
+      },
+      {
+        type: 'dropdown',
+        key: 'columnWidth',
+        displayName: 'Column width',
+        default: '280',
+        options: {
+          '200': 'Narrow (200px)',
+          '240': 'Medium-narrow (240px)',
+          '280': 'Medium (280px)',
+          '320': 'Medium-wide (320px)',
+          '360': 'Wide (360px)',
+          '400': 'Extra wide (400px)',
         },
       },
       {

@@ -92,13 +92,13 @@
 - [x] clear borders for cards (support colors?)
 - [x] (Do this after feature parity with TaskNotes' kanban) For frontmatter fields with customized colors in Planner Settings (calendar, status, priority), style those fields like how they are styled in Task List View and the NLP quick capture parser preview.  That is, if the fields are toggled on in the Bases' properties to begin with.  Ask my clarifying questions.
 - [x] Support for cover images!
-- [ ] Bases properties are not driving/controlling the content displayed on the Kanban cards.  If I toggle on tags, I should see tags appear on the Kanban cards, etc.
-	- [ ] There's no recurrence badge even when repeat_frequency is toggled on.  (use repeat_frequency field for the special badge)
-- [ ] Swimlanes aren't working
+- [x] Bases properties are not driving/controlling the content displayed on the Kanban cards.  If I toggle on tags, I should see tags appear on the Kanban cards, etc.
+	- [x] There's no recurrence badge even when repeat_frequency is toggled on.  (use repeat_frequency field for the special badge)
+- [x] Swimlanes aren't working
 - [ ] Cover image not displaying image.   
-- [ ] Let's add another config menu slider to control cover image height when Cover image is set to `banner (top)`
-- [ ] Don't squeeze cards into view.  Allow cards to appear at their normal height.  Allow scrolling down the board. 
-- [ ] Badge icons on cards are too big and extend beyond the size of their respective badges
+- [x] Let's add another config menu slider to control cover image height when Cover image is set to `banner (top)`
+- [x] Don't squeeze cards into view.  Allow cards to appear at their normal height.  Allow scrolling down the board. 
+- [x] Badge icons on cards are too big and extend beyond the size of their respective badges
 
 
 | Working          | Not working     | Partially Working  | Comment                                                                                             |
@@ -112,8 +112,8 @@
 | Date end field   |                 |                    |                                                                                                     |
 |                  | Badge placement |                    | Has no effect                                                                                       |
 |                  |                 | Hide empty columns | Works when you set it to `Yes`, but when you set it back to `No`, the empty columns don't reappear. |
-- [ ] Don't show null values for properties on cards.  If null, don't display
-- [ ] `summary` field is always displaying.  This needs to be driven by whether the summary field is toggled on in Bases properties.  Additionally, let's add a `Summary by` config menu for selecting which text-type field displays as a summary in Kanban cards
+- [x] Don't show null values for properties on cards.  If null, don't display
+- [x] `summary` field is always displaying.  This needs to be driven by whether the summary field is toggled on in Bases properties.  Additionally, let's add a `Summary by` config menu for selecting which text-type field displays as a summary in Kanban cards
 - [ ] Swimlanes are partially working.  We need to make sure the columns containers extend fully even when they are empty.  Additionally, the column styling is being affected by adding swimlanes.  For instance, when Group by is set to status without swimlanes, it shows the colored icons for statuses in the columns.  When swimlanes are toggled on, those icons disappear. 
 - [ ] Cover display is failing
 
@@ -136,7 +136,14 @@ Screenshot_20260101-185045.png]]:1  Failed to load resource: net::ERR_FILE_NOT_F
 ```
 
 - [ ] Cover height config menu should be a slider, not a dropdown menu.  Additionally, it should only appear when the Cover field menu is not empty/none.
-- [ ] Let's add an config slider to control Kanban Column width
+- [x] Let's add an config slider to control Kanban Column width
+- [x] Let's add grab icon to Kanban columns and enable the ability to manually rearrange their order.
+- [x] On mobile, tap holding a card and moving to very edge of screen should scroll sideways.  Right now I can drag a card to an adjacent column already in view, but I can't go beyond that.
+
+- [ ] Columns areas/containers are still not extending the full height of the tallest relative column (due to having the most cards) when swimlanes are enabled.
+- [ ] When swimlanes are enabled, dragging a card into another column and swimlane only places the card in a the target column, but not also in the swimlane. 
+- [ ] When swimlanes are enabled, we lose the ability to rearrange columns (icon disappears).  We should also add the ability to manually rearrange swimlanes in the same way that we do with columns
+- [ ] On mobile, tap holding a column and moving to the very edge of the screen should scroll sideways.  Right now I can drag a column to an adjacent column already in view, but I can't go beyond that.
 
 ## Release
 

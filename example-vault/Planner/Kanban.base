@@ -39,18 +39,20 @@ views:
       direction: ASC
     order:
       - title
-      - repeat_frequency
-      - file.tags
       - priority
       - status
       - date_start_scheduled
       - calendar
+      - summary
     colorBy: note.calendar
     borderStyle: left-accent
     badgePlacement: properties-section
     dateStartField: note.date_start_scheduled
     hideEmptyColumns: "false"
-    coverDisplay: none
-    coverHeight: "120"
+    coverDisplay: banner
+    coverHeight: "100"
+    columnOrder: '["Idea","To-Do","In-Progress","In-Review","Done","Cancelled","in-progress","open","null"]'
+    coverField: note.cover
+    columnWidth: "280"
   - type: table
     name: Table
