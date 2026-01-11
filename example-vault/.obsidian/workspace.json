@@ -49,7 +49,7 @@
             }
           }
         ],
-        "currentTab": 2
+        "currentTab": 1
       },
       {
         "id": "1c23e21e81d03238",
@@ -244,10 +244,11 @@
       "planner:Open Planner Kanban": false
     }
   },
-  "active": "7590a842cb82c1de",
+  "active": "57d46bb061878ebe",
   "lastOpenFiles": [
-    "Untitled.md",
+    "notes/obsidian-planner-prd.md",
     "Planner/Task List.base",
+    "Untitled.md",
     "Planner/Calendar.base",
     "notes/feedback-and-ideas.md",
     "Templates/Planner Template.md",
@@ -266,7 +267,6 @@
     "Templates/Daily Note Template.md",
     "Untitled.base",
     "TaskNotes/Views/mini-calendar-default.base",
-    "notes/obsidian-planner-prd.md",
     "Planner/Tasks.base",
     "What it should look like.base",
     "notes/feedback-and-ideas.md.tmp.1248.1768136759376",

@@ -20,6 +20,16 @@ Planner is a powerful Obsidian plugin that brings together calendar visualizatio
 - **Keyboard Navigation** - Full keyboard support including vim-style shortcuts (h/j/k/l)
 - **Customizable** - Configure statuses, priorities, colors, icons, and more
 
+## Who It's For
+
+**The Life Planner** — You want to see *everything* in one place. Work deadlines, doctor appointments, social events, hobby projects—your calendar and timeline show the full picture of your life, past, present, and future. Planner gives you that bird's-eye view while keeping every detail accessible.
+
+**The Casual Planner** — You just need a simple, beautiful calendar that lives in your vault. No complex setup, no external accounts. Create events with natural language, set up recurring reminders, and get on with your day.
+
+**The Hobby Project Manager** — That novel you're writing, the woodworking project in the garage, the app you're building on weekends—they all deserve proper planning. Use the Timeline to visualize milestones and the hierarchy features to break big dreams into actionable steps.
+
+**The Power Organizer** — You live in Kanban boards and thrive on dependencies. Block tasks until prerequisites are done, track progress percentages, and use every view to slice your work differently. Planner scales with your complexity.
+
 ## Views
 
 ### Calendar View

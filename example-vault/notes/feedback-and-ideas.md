@@ -197,6 +197,9 @@ Screenshot_20260101-185045.png]]:1  Failed to load resource: net::ERR_FILE_NOT_F
 
 
 - [x] Planner update PRD with our changes. 
+
+## Release
+
 - [ ] Planner publish 0.1.0
 	- [ ] Docs (Zensical) site (clone repo to ref folder)
 	- [ ] Issue Templates
@@ -206,8 +209,9 @@ Screenshot_20260101-185045.png]]:1  Failed to load resource: net::ERR_FILE_NOT_F
 	- [ ] Readme.md
 	- [ ] License - GPL? or MIT?
 
-Other
+## Other
 
+- [ ] Show progress bars in all views using the `progress` frontmatter field if the `progress` property is enabled in Bases properties.
 - [ ] (v0.0.2) What if the Edit Item Modal's expand details dynamically pulls frontmatter content from whatever note is selected?  Right now it's still very tailored to Planner/Calendar users
 - [ ] Add a color (pallette) icon to Item Modal that allows users to assign custom hex colors from a color picker
 - [ ] Map View integration in calendar item mobile popup.  
