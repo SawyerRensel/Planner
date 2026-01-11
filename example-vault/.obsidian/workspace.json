@@ -22,7 +22,7 @@
             }
           },
           {
-            "id": "1f0a157d43fd7b6a",
+            "id": "7590a842cb82c1de",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -36,16 +36,16 @@
             }
           },
           {
-            "id": "01baa71e28801faa",
+            "id": "c3e1c47fc60fd006",
             "type": "leaf",
             "state": {
               "type": "bases",
               "state": {
-                "file": "Planner/Calendar.base",
-                "viewName": "Calendar"
+                "file": "Planner/Kanban.base",
+                "viewName": "Kanban"
               },
-              "icon": "calendar-range",
-              "title": "Calendar"
+              "icon": "square-kanban",
+              "title": "Kanban"
             }
           }
         ],
@@ -224,20 +224,21 @@
       "planner:Open Planner Kanban": false
     }
   },
-  "active": "01baa71e28801faa",
+  "active": "c3e1c47fc60fd006",
   "lastOpenFiles": [
+    "Planner/Timeline.base",
     "Planner/Kanban.base",
     "Planner/Task List.base",
-    "Planner/Timeline.base",
-    "Planner/Calendar.base",
     "notes/feedback-and-ideas.md",
+    "Untitled.base",
+    "Planner/Calendar.base",
+    "TaskNotes/Views/mini-calendar-default.base",
     "notes/obsidian-planner-prd.md",
+    "Untitled.md",
     "Planner/Tasks.base",
     "What it should look like.base",
     "notes/feedback-and-ideas.md.tmp.1248.1768136759376",
     "notes/obsidian-planner-prd.md.tmp.609.1768134391692",
-    "notes/obsidian-planner-prd.md.tmp.609.1768134390646",
-    "notes/obsidian-planner-prd.md.tmp.609.1768134389601",
     "Full Calendar/2025-12-27 Full Calendar Example Event.md",
     "Personal/FirstMonday.md",
     "Planner/Website Redesign.md",
@@ -259,7 +260,6 @@
     "Planner/test.md",
     "Personal/test 1.md",
     "Personal/test.md",
-    "Untitled.md",
     "Vacation/Vacation.md",
     "un.md",
     "notes/questions.md",

@@ -1,0 +1,5 @@
+views:
+  - type: table
+    name: Table
+  - type: planner-calendar
+    name: View
