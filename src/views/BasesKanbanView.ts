@@ -949,6 +949,17 @@ export class BasesKanbanView extends BasesView {
     const hideEmpty = this.getHideEmptyColumns();
     const columnKeys = this.getColumnKeys(groups);
 
+    // Create a wrapper container (similar to swimlanes) that expands to fit content
+    const columnsContainer = document.createElement('div');
+    columnsContainer.className = 'planner-kanban-columns-container';
+    columnsContainer.style.cssText = `
+      display: flex;
+      align-items: stretch;
+      gap: 12px;
+      min-width: fit-content;
+      min-height: fit-content;
+    `;
+
     for (const columnKey of columnKeys) {
       const entries = groups.get(columnKey) || [];
 
@@ -956,8 +967,10 @@ export class BasesKanbanView extends BasesView {
       if (hideEmpty && entries.length === 0) continue;
 
       const column = this.createColumn(columnKey, entries, columnWidth);
-      this.boardEl.appendChild(column);
+      columnsContainer.appendChild(column);
     }
+
+    this.boardEl.appendChild(columnsContainer);
   }
 
   private createColumn(groupKey: string, entries: BasesEntry[], width: number): HTMLElement {
@@ -978,12 +991,11 @@ export class BasesKanbanView extends BasesView {
     const header = this.createColumnHeader(groupKey, entries.length, column);
     column.appendChild(header);
 
-    // Cards container
+    // Cards container - fills column, no internal scrolling so content expands column
     const cardsContainer = document.createElement('div');
     cardsContainer.className = 'planner-kanban-cards';
     cardsContainer.style.cssText = `
       flex: 1;
-      overflow-y: auto;
       padding: 8px;
       display: flex;
       flex-direction: column;

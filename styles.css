@@ -2072,14 +2072,18 @@ body.is-mobile .planner-timeline-iframe-container {
   font-weight: 500;
 }
 
-/* Cards container */
+/* Cards container - fills column height, content expands column */
 .planner-kanban-cards {
   flex: 1;
-  overflow-y: auto;
   padding: 8px;
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+/* Push add button to bottom of column */
+.planner-kanban-cards > .planner-kanban-add-button {
+  margin-top: auto;
 }
 
 .planner-kanban-cards::-webkit-scrollbar {
