@@ -1994,8 +1994,17 @@ body.is-mobile .planner-timeline-iframe-container {
    ========================================================================== */
 
 /* Ensure Bases view wrapper fills available space */
+.workspace-leaf-content:has(.planner-bases-kanban) {
+  padding: 0;
+}
+
+.view-content:has(.planner-bases-kanban) {
+  padding: 0;
+}
+
 .bases-view.planner-bases-kanban {
   padding: 0;
+  scrollbar-gutter: auto;
 }
 
 .planner-bases-kanban {

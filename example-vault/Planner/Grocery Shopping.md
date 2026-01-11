@@ -14,15 +14,15 @@ status: To-Do
 priority: Medium
 progress:
 date_created:
-date_modified: "2026-01-07T00:44:09.581Z"
-date_start_scheduled: "2026-01-13T10:00:00"
+date_modified: 2026-01-11T02:42:34.726Z
+date_start_scheduled: 2026-01-13T10:00:00
 date_start_actual:
-date_end_scheduled: "2026-01-13T18:00:00"
+date_end_scheduled: 2026-01-13T18:00:00
 date_end_actual:
 all_day: false
 repeat_frequency: weekly
 repeat_interval: 2
-repeat_until: "2026-03-13T23:59:59"
+repeat_until: 2026-03-13T23:59:59
 repeat_count:
 repeat_byday:
   - TU
