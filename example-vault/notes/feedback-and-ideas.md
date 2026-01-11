@@ -193,10 +193,10 @@ Screenshot_20260101-185045.png]]:1  Failed to load resource: net::ERR_FILE_NOT_F
 7. [x] Template + NLP in title - NLP values override template
 8. [x] Template with custom fields - custom fields preserved in created item
 9. [x] Invalid template path - graceful fallback
-10. [ ] Template has date_created - ignored (auto-set)
+10. [x] Template has date_created - ignored (auto-set)
 
 
-- [ ] Planner update PRD with our changes. 
+- [x] Planner update PRD with our changes. 
 - [ ] Planner publish 0.1.0
 	- [ ] Docs (Zensical) site (clone repo to ref folder)
 	- [ ] Issue Templates

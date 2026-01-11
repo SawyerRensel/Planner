@@ -4,7 +4,7 @@ A powerful task and project management plugin for Obsidian.
 
 <div class="grid cards" markdown>
 
--   :material-calendar: **Calendar View**
+-   :lucide-calendar-range: **Calendar View**
 
     ---
 
@@ -12,7 +12,7 @@ A powerful task and project management plugin for Obsidian.
 
     [:octicons-arrow-right-24: Learn more](views/calendar.md)
 
--   :material-view-column: **Kanban Board**
+-   :lucide-square-kanban: **Kanban Board**
 
     ---
 
@@ -20,7 +20,7 @@ A powerful task and project management plugin for Obsidian.
 
     [:octicons-arrow-right-24: Learn more](views/kanban.md)
 
--   :material-chart-timeline: **Timeline View**
+-   :lucide-square-chart-gantt: **Timeline View**
 
     ---
 
@@ -28,7 +28,7 @@ A powerful task and project management plugin for Obsidian.
 
     [:octicons-arrow-right-24: Learn more](views/timeline.md)
 
--   :material-format-list-checks: **Task List**
+-   :lucide-list-checks: **Task List**
 
     ---
 

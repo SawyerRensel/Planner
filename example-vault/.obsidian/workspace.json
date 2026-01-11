@@ -49,7 +49,7 @@
             }
           }
         ],
-        "currentTab": 2
+        "currentTab": 1
       },
       {
         "id": "1c23e21e81d03238",
@@ -244,13 +244,13 @@
       "planner:Open Planner Kanban": false
     }
   },
-  "active": "bb8be35b5713e0ba",
+  "active": "57d46bb061878ebe",
   "lastOpenFiles": [
+    "Templates/Planner Template.md",
     "Planner/Calendar.base",
     "Personal/test.md",
     "Planner/test.md",
     "DailyNotes/2026-01-09.md",
-    "Templates/Planner Template.md",
     "notes/feedback-and-ideas.md",
     "notes/Template with body only - body appears in Note Content.md",
     "Planner/Timeline.base",

@@ -26,10 +26,10 @@ The parser automatically extracts dates, times, and recurrence from your input.
 
 Click the ribbon icons on the left sidebar:
 
-- :material-format-list-checks: **Task List** - Table view of all items
-- :material-calendar: **Calendar** - Calendar view
-- :material-chart-timeline: **Timeline** - Timeline visualization
-- :material-view-column: **Kanban** - Kanban board
+- :lucide-list-checks: **Task List** - Table view of all items
+- :lucide-calendar-range: **Calendar** - Calendar view
+- :lucide-square-chart-gantt: **Timeline** - Timeline visualization
+- :lucide-square-kanban: **Kanban** - Kanban board
 
 ### Command Palette
 

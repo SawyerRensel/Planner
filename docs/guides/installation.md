@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Obsidian v1.4.0 or higher
+- Obsidian v1.10.0 or higher
 - Obsidian Bases enabled (built into Obsidian)
 
 ## Installing from Community Plugins
@@ -25,10 +25,10 @@ After installation, you'll see four new ribbon icons:
 
 | Icon | View |
 |------|------|
-| :material-format-list-checks: | Task List |
-| :material-calendar: | Calendar |
-| :material-chart-timeline: | Timeline |
-| :material-view-column: | Kanban |
+| :lucide-list-checks: | Task List |
+| :lucide-calendar-range: | Calendar |
+| :lucide-square-chart-gantt: | Timeline |
+| :lucide-square-kanban: | Kanban |
 
 Click any icon to create and open your first view.
 
