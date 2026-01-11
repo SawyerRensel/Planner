@@ -182,7 +182,19 @@ Screenshot_20260101-185045.png]]:1  Failed to load resource: net::ERR_FILE_NOT_F
 - [x] When Planner is installed and enabled, Planner should automatically generate new bases files in the default ("Planner") folder.  
 	- Nah, this happens when the user first clicks on the Planner icons in the ribbon or activates them via the command pallette.
 - [x] When Planner is installed and enabled, and its Bases files are generated automatically, each generated base view should include a filter for "All Views" where `file` `in folder` `Planner`.   After this initial installation/generation, If the user changes the default Planner folder in settings and/or adds new calendars with custom folders per calendar in settings, and then the user clicks "Generate Bases" button in settings, the "All Views" filter for each View should update to include the additional/changed values for the folder(s).  The goal here is to create sensible defaults and to prevent the views from lagging or appearing instantly cluttered on load for users with large vaults (many notes) that may have some of the frontmatter that we use in our schema (such as "status").  
-- [ ] Item Template path in settings is not working
+
+- [x] Item Template path in settings is not working
+1. [x] No template configured - normal creation
+2. [x] Template with frontmatter only - fields pre-populated
+3. [x] Template with body only - body appears in Note Content
+4. [x] Template with both - both applied
+5. [x] Template + Kanban column click - Kanban status overrides template
+6. [x] Template + Calendar click - Calendar dates override template
+7. [x] Template + NLP in title - NLP values override template
+8. [x] Template with custom fields - custom fields preserved in created item
+9. [x] Invalid template path - graceful fallback
+10. [ ] Template has date_created - ignored (auto-set)
+
 
 - [ ] Planner update PRD with our changes. 
 - [ ] Planner publish 0.1.0
@@ -197,6 +209,7 @@ Screenshot_20260101-185045.png]]:1  Failed to load resource: net::ERR_FILE_NOT_F
 Other
 
 - [ ] (v0.0.2) What if the Edit Item Modal's expand details dynamically pulls frontmatter content from whatever note is selected?  Right now it's still very tailored to Planner/Calendar users
+- [ ] Add a color (pallette) icon to Item Modal that allows users to assign custom hex colors from a color picker
 - [ ] Map View integration in calendar item mobile popup.  
 - [ ] Embed Map View in Calendar template
 	- [ ] Then you could pick a location on the map and copy to frontmatter

@@ -2,12 +2,12 @@
 title:
 summary:
 tags:
-calendar:
+calendar: Personal
 context:
 people:
 location:
 related:
-status:
+status: Idea
 priority:
 progress:
 date_created:
@@ -31,7 +31,6 @@ children:
 blocked_by:
 cover:
 color:
-test:
 ---
 
-## Template test
+##  Template Test

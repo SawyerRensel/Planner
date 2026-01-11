@@ -15,12 +15,16 @@ import {
 import { CustomRecurrenceModal } from './CustomRecurrenceModal';
 import { FileLinkSuggest, TagSuggest, ContextSuggest, convertToSimpleWikilinks, convertWikilinksToRelativePaths } from './suggests';
 import { isOngoing } from '../utils/dateUtils';
+import { readItemTemplate } from '../utils/templateUtils';
 
 interface ItemModalOptions {
   mode: 'create' | 'edit';
   item?: PlannerItem;
   prePopulate?: Partial<ItemFrontmatter>;
   targetFolder?: string;
+  templateFrontmatter?: Partial<ItemFrontmatter>;
+  templateBody?: string;
+  templateCustomFields?: Record<string, unknown>;
 }
 
 interface ParsedNLP {
@@ -96,7 +100,7 @@ export class ItemModal extends Modal {
   }
 
   private initializeFromOptions(): void {
-    const { mode, item, prePopulate } = this.options;
+    const { mode, item, prePopulate, templateFrontmatter, templateBody } = this.options;
 
     if (mode === 'edit' && item) {
       // Load from existing item
@@ -155,7 +159,16 @@ export class ItemModal extends Modal {
       };
     }
 
-    // Apply pre-population (overrides loaded values)
+    // Apply template values for create mode (before prePopulate so prePopulate overrides template)
+    if (mode === 'create' && templateFrontmatter) {
+      this.applyTemplateFrontmatter(templateFrontmatter);
+    }
+    // Store template body content for create mode
+    if (mode === 'create' && templateBody) {
+      this.details = templateBody;
+    }
+
+    // Apply pre-population (overrides template and loaded values)
     if (prePopulate) {
       if (prePopulate.title) this.title = prePopulate.title;
       if (prePopulate.summary) this.summary = prePopulate.summary;
@@ -169,7 +182,7 @@ export class ItemModal extends Modal {
       if (prePopulate.tags) this.tags = prePopulate.tags;
     }
 
-    // Apply defaults for create mode
+    // Apply defaults for create mode (only if not already set by template or prePopulate)
     if (mode === 'create') {
       if (!this.status) {
         this.status = this.plugin.settings.quickCaptureDefaultStatus;
@@ -185,6 +198,47 @@ export class ItemModal extends Modal {
           this.tags = ['event'];
         }
       }
+    }
+  }
+
+  /**
+   * Apply template frontmatter values to modal state.
+   * Called before prePopulate so that prePopulate values take precedence.
+   */
+  private applyTemplateFrontmatter(fm: Partial<ItemFrontmatter>): void {
+    if (fm.title) this.title = fm.title;
+    if (fm.summary) this.summary = fm.summary;
+    if (fm.date_start_scheduled) this.dateStart = fm.date_start_scheduled;
+    if (fm.date_end_scheduled) this.dateEnd = fm.date_end_scheduled;
+    if (fm.all_day !== undefined) this.allDay = fm.all_day;
+    if (fm.status) this.status = fm.status;
+    if (fm.priority) this.priority = fm.priority;
+    if (fm.calendar && fm.calendar.length > 0) this.calendars = fm.calendar;
+    if (fm.context && fm.context.length > 0) {
+      this.context = convertToSimpleWikilinks(fm.context) as string[];
+    }
+    if (fm.people && fm.people.length > 0) {
+      this.people = convertToSimpleWikilinks(fm.people) as string[];
+    }
+    if (fm.parent) {
+      this.parent = convertToSimpleWikilinks(fm.parent) as string | null;
+    }
+    if (fm.blocked_by && fm.blocked_by.length > 0) {
+      this.blockedBy = convertToSimpleWikilinks(fm.blocked_by) as string[];
+    }
+    if (fm.tags && fm.tags.length > 0) this.tags = fm.tags;
+
+    // Load recurrence data from template
+    if (fm.repeat_frequency) {
+      this.recurrence = {
+        repeat_frequency: fm.repeat_frequency,
+        repeat_interval: fm.repeat_interval,
+        repeat_byday: fm.repeat_byday,
+        repeat_bymonthday: fm.repeat_bymonthday,
+        repeat_bysetpos: fm.repeat_bysetpos,
+        repeat_until: fm.repeat_until,
+        repeat_count: fm.repeat_count,
+      };
     }
   }
 
@@ -1343,8 +1397,14 @@ export class ItemModal extends Modal {
 
         new Notice(`Updated: ${title}`);
       } else {
-        // Create new item
-        const item = await this.plugin.itemService.createItem(title, frontmatter, this.details, this.options.targetFolder);
+        // Create new item (pass template custom fields if available)
+        const item = await this.plugin.itemService.createItem(
+          title,
+          frontmatter,
+          this.details,
+          this.options.targetFolder,
+          this.options.templateCustomFields
+        );
         new Notice(`Created: ${title}`);
 
         if (this.plugin.settings.quickCaptureOpenAfterCreate && item) {
@@ -1584,11 +1644,32 @@ export class ItemModal extends Modal {
 }
 
 // Helper function to open the modal from other parts of the plugin
-export function openItemModal(
+export async function openItemModal(
   plugin: PlannerPlugin,
   options: Omit<ItemModalOptions, 'mode'> & { mode?: 'create' | 'edit' }
-): void {
+): Promise<void> {
   const mode = options.item ? 'edit' : (options.mode || 'create');
-  const modal = new ItemModal(plugin, { ...options, mode });
+
+  let templateFrontmatter: Partial<ItemFrontmatter> | undefined;
+  let templateBody: string | undefined;
+  let templateCustomFields: Record<string, unknown> | undefined;
+
+  // Load template for create mode if configured
+  if (mode === 'create' && plugin.settings.itemTemplate) {
+    const template = await readItemTemplate(plugin.app, plugin.settings.itemTemplate);
+    if (template) {
+      templateFrontmatter = template.frontmatter;
+      templateBody = template.body;
+      templateCustomFields = template.customFields;
+    }
+  }
+
+  const modal = new ItemModal(plugin, {
+    ...options,
+    mode,
+    templateFrontmatter,
+    templateBody,
+    templateCustomFields,
+  });
   modal.open();
 }

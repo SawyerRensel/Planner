@@ -143,7 +143,8 @@ export class ItemService {
     filename: string,
     frontmatter: Partial<ItemFrontmatter>,
     content: string = '',
-    overrideFolder?: string
+    overrideFolder?: string,
+    customFields?: Record<string, unknown>
   ): Promise<PlannerItem> {
     try {
       const settings = this.getSettings();
@@ -181,12 +182,13 @@ export class ItemService {
         throw new ItemServiceError(`Too many files with name "${safeName}"`, 'CREATE_FAILED');
       }
 
-      // Set auto-generated dates
+      // Set auto-generated dates (always override template values for these)
       const now = getLocalISOString();
-      const itemFrontmatter: Partial<ItemFrontmatter> = {
+      const itemFrontmatter: Record<string, unknown> = {
         ...frontmatter,
-        date_created: frontmatter.date_created ?? now,
-        date_modified: now,
+        ...customFields, // Merge custom fields from template
+        date_created: now, // Always set to current time
+        date_modified: now, // Always set to current time
       };
 
       // Apply defaults
