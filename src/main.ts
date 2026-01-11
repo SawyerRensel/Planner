@@ -57,7 +57,7 @@ export default class PlannerPlugin extends Plugin {
       this.activateTaskListView();
     });
 
-    this.addRibbonIcon('calendar-fold', 'Open Planner Calendar', () => {
+    this.addRibbonIcon('calendar-range', 'Open Planner Calendar', () => {
       this.activateCalendarView();
     });
 
@@ -65,7 +65,7 @@ export default class PlannerPlugin extends Plugin {
       this.activateTimelineView();
     });
 
-    this.addRibbonIcon('kanban', 'Open Planner Kanban', () => {
+    this.addRibbonIcon('square-kanban', 'Open Planner Kanban', () => {
       this.activateKanbanView();
     });
 

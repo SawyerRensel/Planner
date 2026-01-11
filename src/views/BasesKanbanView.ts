@@ -2364,7 +2364,7 @@ export class BasesKanbanView extends BasesView {
 export function createKanbanViewRegistration(plugin: PlannerPlugin): BasesViewRegistration {
   return {
     name: 'Kanban',
-    icon: 'kanban',
+    icon: 'square-kanban',
     factory: (controller: QueryController, containerEl: HTMLElement) => {
       return new BasesKanbanView(controller, containerEl, plugin);
     },

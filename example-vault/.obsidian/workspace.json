@@ -22,7 +22,7 @@
             }
           },
           {
-            "id": "3d06975fda734aa7",
+            "id": "ec7db8f93f8bc4e1",
             "type": "leaf",
             "state": {
               "type": "bases",
@@ -30,7 +30,7 @@
                 "file": "Planner/Kanban.base",
                 "viewName": "Kanban"
               },
-              "icon": "kanban",
+              "icon": "square-kanban",
               "title": "Kanban"
             }
           }
@@ -198,14 +198,14 @@
   "left-ribbon": {
     "hiddenItems": {
       "planner:Open Planner Kanban": false,
-      "markwhen:Create new Markwhen file": false,
-      "planner:Open Planner Task List": false,
       "planner:Open Planner Calendar": false,
       "planner:Open Planner Timeline": false,
+      "planner:Open Planner Task List": false,
       "tasknotes:Open mini calendar": false,
       "tasknotes:Open advanced calendar": false,
       "tasknotes:Open task list": false,
       "tasknotes:Open agenda": false,
+      "markwhen:Create new Markwhen file": false,
       "tasknotes:Open kanban board": false,
       "tasknotes:Open pomodoro": false,
       "tasknotes:Open pomodoro stats": false,
@@ -220,7 +220,7 @@
       "obsidian-full-calendar:Open Full Calendar": false
     }
   },
-  "active": "3d06975fda734aa7",
+  "active": "ec7db8f93f8bc4e1",
   "lastOpenFiles": [
     "notes/feedback-and-ideas.md",
     "Planner/Kanban.base",

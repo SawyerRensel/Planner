@@ -1267,7 +1267,7 @@ export class BasesCalendarView extends BasesView {
 export function createCalendarViewRegistration(plugin: PlannerPlugin): BasesViewRegistration {
   return {
     name: 'Calendar',
-    icon: 'calendar-fold',
+    icon: 'calendar-range',
     factory: (controller: QueryController, containerEl: HTMLElement) => {
       return new BasesCalendarView(controller, containerEl, plugin);
     },
