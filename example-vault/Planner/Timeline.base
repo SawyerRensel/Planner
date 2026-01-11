@@ -1,4 +1,8 @@
 source: Planner/
+filters:
+  and:
+    - file.inFolder("Planner")
+    - file.ext == "md"
 properties:
   note.title:
     width: 250
@@ -43,16 +47,12 @@ properties:
 views:
   - type: planner-timeline
     name: Timeline
-    groupBy:
-      property: calendar
-      direction: ASC
     order:
       - title
       - date_start_scheduled
       - date_end_scheduled
-    sort:
-      - property: date_start_scheduled
-        direction: ASC
+    sort: []
     colorBy: note.calendar
+    sectionsBy: note.calendar
   - type: table
     name: Table

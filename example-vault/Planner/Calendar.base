@@ -1,13 +1,15 @@
 source: Planner/
+filters:
+  and:
+    - file.inFolder("Planner")
+    - file.ext == "md"
 properties:
-  # Text/Title properties
   note.title:
     width: 200
   note.summary:
     width: 200
   file.basename:
     width: 150
-  # Categorical properties
   note.status:
     width: 100
   note.priority:
@@ -26,7 +28,6 @@ properties:
     width: 120
   note.color:
     width: 80
-  # Date properties
   note.date_start_scheduled:
     width: 120
   note.date_start_actual:
@@ -45,7 +46,7 @@ views:
   - type: planner-calendar
     name: Calendar
     order:
-      - note.title
+      - title
     sort: []
     colorBy: note.calendar
   - type: table

@@ -36,16 +36,16 @@
             }
           },
           {
-            "id": "87032fb9f5930c97",
+            "id": "01baa71e28801faa",
             "type": "leaf",
             "state": {
               "type": "bases",
               "state": {
-                "file": "Planner/Kanban.base",
-                "viewName": "Kanban"
+                "file": "Planner/Calendar.base",
+                "viewName": "Calendar"
               },
-              "icon": "square-kanban",
-              "title": "Kanban"
+              "icon": "calendar-range",
+              "title": "Calendar"
             }
           }
         ],
@@ -190,16 +190,6 @@
               "icon": "lucide-list",
               "title": "Outline"
             }
-          },
-          {
-            "id": "22d5d266f7c7d00c",
-            "type": "leaf",
-            "state": {
-              "type": "planner-task-list",
-              "state": {},
-              "icon": "lucide-ghost",
-              "title": "planner-task-list"
-            }
           }
         ],
         "currentTab": 4
@@ -211,10 +201,6 @@
   },
   "left-ribbon": {
     "hiddenItems": {
-      "planner:Open Planner Kanban": false,
-      "planner:Open Planner Calendar": false,
-      "planner:Open Planner Timeline": false,
-      "planner:Open Planner Task List": false,
       "tasknotes:Open mini calendar": false,
       "tasknotes:Open advanced calendar": false,
       "tasknotes:Open task list": false,
@@ -231,20 +217,24 @@
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
       "bases:Create new base": false,
-      "obsidian-full-calendar:Open Full Calendar": false
+      "obsidian-full-calendar:Open Full Calendar": false,
+      "planner:Open Planner Task List": false,
+      "planner:Open Planner Calendar": false,
+      "planner:Open Planner Timeline": false,
+      "planner:Open Planner Kanban": false
     }
   },
-  "active": "87032fb9f5930c97",
+  "active": "01baa71e28801faa",
   "lastOpenFiles": [
-    "Planner/Timeline.base",
     "Planner/Kanban.base",
     "Planner/Task List.base",
+    "Planner/Timeline.base",
     "Planner/Calendar.base",
     "notes/feedback-and-ideas.md",
+    "notes/obsidian-planner-prd.md",
     "Planner/Tasks.base",
     "What it should look like.base",
     "notes/feedback-and-ideas.md.tmp.1248.1768136759376",
-    "notes/obsidian-planner-prd.md",
     "notes/obsidian-planner-prd.md.tmp.609.1768134391692",
     "notes/obsidian-planner-prd.md.tmp.609.1768134390646",
     "notes/obsidian-planner-prd.md.tmp.609.1768134389601",

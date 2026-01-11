@@ -1,13 +1,15 @@
 source: Planner/
+filters:
+  and:
+    - file.inFolder("Planner")
+    - file.ext == "md"
 properties:
-  # Text/Title properties
   note.title:
     width: 200
   note.summary:
     width: 200
   file.basename:
     width: 150
-  # Categorical properties
   note.status:
     width: 100
   note.priority:
@@ -24,7 +26,6 @@ properties:
     width: 100
   note.cover:
     width: 200
-  # Date properties
   note.date_start_scheduled:
     width: 120
   note.date_end_scheduled:
@@ -35,14 +36,16 @@ views:
   - type: planner-kanban
     name: Kanban
     order:
-      - note.title
-      - note.status
-      - note.priority
-      - note.calendar
-      - note.date_start_scheduled
-    groupBy:
-      property: status
-      direction: ASC
+      - title
+      - status
+      - priority
+      - calendar
+      - tags
+      - summary
+      - date_end_scheduled
+    sort:
+      - property: date_end_scheduled
+        direction: DESC
     colorBy: note.calendar
     borderStyle: left-accent
     badgePlacement: properties-section

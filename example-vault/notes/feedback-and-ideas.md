@@ -177,12 +177,14 @@ Screenshot_20260101-185045.png]]:1  Failed to load resource: net::ERR_FILE_NOT_F
 
 ## Release
 
-- [ ] Regenerate Bases should include all views.  Currently it only includes (or says that it includes) Calendar.base and Task List.base. 
+- [x] Regenerate Bases should include all views.  Currently it only includes (or says that it includes) Calendar.base and Task List.base. 
 - [ ] Sensible defaults for enabled properties and filters for every view.  (Show Claude these defaults).  Installation of Planner and clickign the generate Bases button in settings should create these Bases file using these defaults.  
+- [ ] When enabled, Planner should automatically generate new bases files in the default ("Planner") folder.  
 - [ ] When Planner is installed and its Bases files are generated automatically, each generated base view should include a filter for "All Views" where `file` `in folder` `Planner`.   After this initial installation/generation, If the user changes the default Planner folder in settings and/or adds new calendars with custom folders per calendar in settings, and then the user clicks "Generate Bases" button in settings, the "All Views" filter for each View should update to include the additional/changed values for the folder(s).  The goal here is to create sensible defaults and to prevent the views from lagging or appearing instantly cluttered on load for users with large vaults (many notes) that may have some of the frontmatter that we use in our schema (such as "status").  
+- [ ] Item Template path in settings is not working
 
 - [ ] Planner update PRD with our changes. 
-- [ ] Planner publish 0.0.1
+- [ ] Planner publish 0.1.0
 	- [ ] Docs (Zensical) site (clone repo to ref folder)
 	- [ ] Issue Templates
 	- [ ] Project board
