@@ -163,6 +163,15 @@ export default class PlannerPlugin extends Plugin {
       },
     });
 
+    // Open Kanban view
+    this.addCommand({
+      id: 'open-kanban',
+      name: 'Open Kanban',
+      callback: () => {
+        this.activateKanbanView();
+      },
+    });
+
     // Create new item command (opens Item Modal)
     this.addCommand({
       id: 'create-item',
@@ -178,6 +187,34 @@ export default class PlannerPlugin extends Plugin {
       name: 'Quick capture',
       callback: () => {
         openItemModal(this, { mode: 'create' });
+      },
+    });
+
+    // Navigate to today in calendar
+    this.addCommand({
+      id: 'calendar-today',
+      name: 'Calendar: Go to today',
+      callback: () => {
+        // Dispatch custom event that calendar view listens for
+        window.dispatchEvent(new CustomEvent('planner:calendar-today'));
+      },
+    });
+
+    // Navigate forward in calendar
+    this.addCommand({
+      id: 'calendar-next',
+      name: 'Calendar: Go to next period',
+      callback: () => {
+        window.dispatchEvent(new CustomEvent('planner:calendar-next'));
+      },
+    });
+
+    // Navigate backward in calendar
+    this.addCommand({
+      id: 'calendar-prev',
+      name: 'Calendar: Go to previous period',
+      callback: () => {
+        window.dispatchEvent(new CustomEvent('planner:calendar-prev'));
       },
     });
 

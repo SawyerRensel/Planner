@@ -85,6 +85,9 @@ export class BasesCalendarView extends BasesView {
     return value || 'note.date_end_scheduled';
   }
 
+  // Keyboard navigation event handlers
+  private keyboardEventHandlers: { event: string; handler: EventListener }[] = [];
+
   constructor(
     controller: QueryController,
     containerEl: HTMLElement,
@@ -95,6 +98,40 @@ export class BasesCalendarView extends BasesView {
     this.containerEl = containerEl;
     this.setupContainer();
     this.setupResizeObserver();
+    this.setupKeyboardNavigation();
+  }
+
+  /**
+   * Setup keyboard navigation event listeners
+   */
+  private setupKeyboardNavigation(): void {
+    const todayHandler = () => {
+      if (this.calendar) {
+        this.calendar.today();
+      }
+    };
+
+    const nextHandler = () => {
+      if (this.calendar) {
+        this.calendar.next();
+      }
+    };
+
+    const prevHandler = () => {
+      if (this.calendar) {
+        this.calendar.prev();
+      }
+    };
+
+    window.addEventListener('planner:calendar-today', todayHandler);
+    window.addEventListener('planner:calendar-next', nextHandler);
+    window.addEventListener('planner:calendar-prev', prevHandler);
+
+    this.keyboardEventHandlers = [
+      { event: 'planner:calendar-today', handler: todayHandler },
+      { event: 'planner:calendar-next', handler: nextHandler },
+      { event: 'planner:calendar-prev', handler: prevHandler },
+    ];
   }
 
   private setupContainer(): void {
@@ -132,6 +169,11 @@ export class BasesCalendarView extends BasesView {
       this.calendar.destroy();
       this.calendar = null;
     }
+    // Clean up keyboard navigation event listeners
+    for (const { event, handler } of this.keyboardEventHandlers) {
+      window.removeEventListener(event, handler);
+    }
+    this.keyboardEventHandlers = [];
     // Clean up styles and classes added to the shared container
     this.containerEl.removeClass('planner-bases-calendar');
     this.containerEl.style.cssText = '';

@@ -1,4 +1,4 @@
-import { App, TFile, TFolder, normalizePath } from 'obsidian';
+import { App, TFile, TFolder, normalizePath, Notice } from 'obsidian';
 import {
   PlannerItem,
   ItemFrontmatter,
@@ -7,6 +7,20 @@ import {
 } from '../types/item';
 import { PlannerSettings, isCompletedStatus, getCalendarFolder } from '../types/settings';
 import { isOngoing } from '../utils/dateUtils';
+
+/**
+ * Custom error class for ItemService operations
+ */
+export class ItemServiceError extends Error {
+  constructor(
+    message: string,
+    public readonly code: 'FILE_NOT_FOUND' | 'CREATE_FAILED' | 'UPDATE_FAILED' | 'DELETE_FAILED' | 'MOVE_FAILED' | 'FOLDER_CREATE_FAILED',
+    public readonly cause?: unknown
+  ) {
+    super(message);
+    this.name = 'ItemServiceError';
+  }
+}
 
 /**
  * Get current local time in ISO 8601 format
@@ -123,6 +137,7 @@ export class ItemService {
 
   /**
    * Create a new item
+   * @throws {ItemServiceError} If file creation fails
    */
   async createItem(
     filename: string,
@@ -130,150 +145,205 @@ export class ItemService {
     content: string = '',
     overrideFolder?: string
   ): Promise<PlannerItem> {
-    const settings = this.getSettings();
+    try {
+      const settings = this.getSettings();
 
-    // Determine folder: use override if provided, then calendar-specific folder, otherwise global itemsFolder
-    let folder: string;
-    if (overrideFolder) {
-      folder = overrideFolder;
-    } else {
-      const calendarName = frontmatter.calendar?.[0];
-      folder = calendarName
-        ? getCalendarFolder(settings, calendarName)
-        : settings.itemsFolder;
+      // Determine folder: use override if provided, then calendar-specific folder, otherwise global itemsFolder
+      let folder: string;
+      if (overrideFolder) {
+        folder = overrideFolder;
+      } else {
+        const calendarName = frontmatter.calendar?.[0];
+        folder = calendarName
+          ? getCalendarFolder(settings, calendarName)
+          : settings.itemsFolder;
+      }
+
+      // Ensure folder exists
+      await this.ensureFolderExists(folder);
+
+      // Generate unique filename if needed
+      const safeName = this.sanitizeFilename(filename);
+      if (!safeName) {
+        throw new ItemServiceError('Invalid filename provided', 'CREATE_FAILED');
+      }
+
+      let filePath = normalizePath(`${folder}/${safeName}.md`);
+      let counter = 1;
+      const maxAttempts = 100;
+
+      while (this.app.vault.getAbstractFileByPath(filePath) && counter < maxAttempts) {
+        filePath = normalizePath(`${folder}/${safeName} ${counter}.md`);
+        counter++;
+      }
+
+      if (counter >= maxAttempts) {
+        throw new ItemServiceError(`Too many files with name "${safeName}"`, 'CREATE_FAILED');
+      }
+
+      // Set auto-generated dates
+      const now = getLocalISOString();
+      const itemFrontmatter: Partial<ItemFrontmatter> = {
+        ...frontmatter,
+        date_created: frontmatter.date_created ?? now,
+        date_modified: now,
+      };
+
+      // Apply defaults
+      if (!itemFrontmatter.calendar && settings.defaultCalendar) {
+        itemFrontmatter.calendar = [settings.defaultCalendar];
+      }
+
+      // Build file content
+      const fileContent = this.buildFileContent(itemFrontmatter, content);
+
+      // Create file
+      await this.app.vault.create(filePath, fileContent);
+
+      const item = await this.getItem(filePath);
+      if (!item) {
+        throw new ItemServiceError('Failed to read created item', 'CREATE_FAILED');
+      }
+
+      return item;
+    } catch (error) {
+      if (error instanceof ItemServiceError) {
+        throw error;
+      }
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Planner: Failed to create item:', error);
+      throw new ItemServiceError(`Failed to create item: ${message}`, 'CREATE_FAILED', error);
     }
-
-    // Ensure folder exists
-    await this.ensureFolderExists(folder);
-
-    // Generate unique filename if needed
-    const safeName = this.sanitizeFilename(filename);
-    let filePath = normalizePath(`${folder}/${safeName}.md`);
-    let counter = 1;
-
-    while (this.app.vault.getAbstractFileByPath(filePath)) {
-      filePath = normalizePath(`${folder}/${safeName} ${counter}.md`);
-      counter++;
-    }
-
-    // Set auto-generated dates
-    const now = getLocalISOString();
-    const itemFrontmatter: Partial<ItemFrontmatter> = {
-      ...frontmatter,
-      date_created: frontmatter.date_created ?? now,
-      date_modified: now,
-    };
-
-    // Apply defaults
-    if (!itemFrontmatter.calendar && settings.defaultCalendar) {
-      itemFrontmatter.calendar = [settings.defaultCalendar];
-    }
-
-    // Build file content
-    const fileContent = this.buildFileContent(itemFrontmatter, content);
-
-    // Create file
-    await this.app.vault.create(filePath, fileContent);
-
-    return this.getItem(filePath) as Promise<PlannerItem>;
   }
 
   /**
    * Update an existing item
+   * @throws {ItemServiceError} If file update fails
    */
   async updateItem(
     path: string,
     updates: Partial<ItemFrontmatter>
   ): Promise<PlannerItem | null> {
-    const file = this.app.vault.getAbstractFileByPath(path);
-    if (!(file instanceof TFile)) {
-      return null;
-    }
-
-    const settings = this.getSettings();
-    const content = await this.app.vault.read(file);
-    const { body } = this.parseFrontmatter(content);
-
-    // Get existing frontmatter from Obsidian's metadata cache
-    const cache = this.app.metadataCache.getFileCache(file);
-    const rawFrontmatter = cache?.frontmatter ?? {};
-
-    // Filter out internal Obsidian properties (like 'position') that shouldn't be written back
-    const existingFrontmatter: Record<string, unknown> = {};
-    for (const key of Object.keys(rawFrontmatter)) {
-      if (key !== 'position') {
-        existingFrontmatter[key] = rawFrontmatter[key];
+    try {
+      const file = this.app.vault.getAbstractFileByPath(path);
+      if (!(file instanceof TFile)) {
+        console.warn(`Planner: File not found for update: ${path}`);
+        return null;
       }
+
+      const settings = this.getSettings();
+      const content = await this.app.vault.read(file);
+      const { body } = this.parseFrontmatter(content);
+
+      // Get existing frontmatter from Obsidian's metadata cache
+      const cache = this.app.metadataCache.getFileCache(file);
+      const rawFrontmatter = cache?.frontmatter ?? {};
+
+      // Filter out internal Obsidian properties (like 'position') that shouldn't be written back
+      const existingFrontmatter: Record<string, unknown> = {};
+      for (const key of Object.keys(rawFrontmatter)) {
+        if (key !== 'position') {
+          existingFrontmatter[key] = rawFrontmatter[key];
+        }
+      }
+
+      // Apply updates - only merge in fields that are explicitly set in updates
+      const updatedFrontmatter: Record<string, unknown> = {
+        ...existingFrontmatter,
+        ...updates,
+        date_modified: getLocalISOString(),
+      };
+
+      // Auto-set date_end_actual when status changes to completed
+      if (updates.status && isCompletedStatus(settings, updates.status) && !existingFrontmatter.date_end_actual) {
+        updatedFrontmatter.date_end_actual = getLocalISOString();
+      }
+
+      // Build new file content - pass false to only include existing fields, not all template fields
+      const newContent = this.buildFileContent(updatedFrontmatter, body, false);
+
+      // Update file
+      await this.app.vault.modify(file, newContent);
+
+      return this.getItem(path);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`Planner: Failed to update item ${path}:`, error);
+      throw new ItemServiceError(`Failed to update item: ${message}`, 'UPDATE_FAILED', error);
     }
-
-    // Apply updates - only merge in fields that are explicitly set in updates
-    const updatedFrontmatter: Record<string, unknown> = {
-      ...existingFrontmatter,
-      ...updates,
-      date_modified: getLocalISOString(),
-    };
-
-    // Auto-set date_end_actual when status changes to completed
-    if (updates.status && isCompletedStatus(settings, updates.status) && !existingFrontmatter.date_end_actual) {
-      updatedFrontmatter.date_end_actual = getLocalISOString();
-    }
-
-    // Build new file content - pass false to only include existing fields, not all template fields
-    const newContent = this.buildFileContent(updatedFrontmatter, body, false);
-
-    // Update file
-    await this.app.vault.modify(file, newContent);
-
-    return this.getItem(path);
   }
 
   /**
    * Delete an item
+   * @throws {ItemServiceError} If file deletion fails
    */
   async deleteItem(path: string): Promise<boolean> {
-    const file = this.app.vault.getAbstractFileByPath(path);
-    if (!(file instanceof TFile)) {
-      return false;
-    }
+    try {
+      const file = this.app.vault.getAbstractFileByPath(path);
+      if (!(file instanceof TFile)) {
+        console.warn(`Planner: File not found for deletion: ${path}`);
+        return false;
+      }
 
-    await this.app.vault.delete(file);
-    return true;
+      await this.app.vault.delete(file);
+      return true;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`Planner: Failed to delete item ${path}:`, error);
+      throw new ItemServiceError(`Failed to delete item: ${message}`, 'DELETE_FAILED', error);
+    }
   }
 
   /**
    * Move an item to a different folder
    * Returns the new path if successful, null if failed
+   * @throws {ItemServiceError} If file move fails
    */
   async moveItem(path: string, targetFolder: string): Promise<string | null> {
-    const file = this.app.vault.getAbstractFileByPath(path);
-    if (!(file instanceof TFile)) {
-      return null;
+    try {
+      const file = this.app.vault.getAbstractFileByPath(path);
+      if (!(file instanceof TFile)) {
+        console.warn(`Planner: File not found for move: ${path}`);
+        return null;
+      }
+
+      // Ensure target folder exists
+      await this.ensureFolderExists(targetFolder);
+
+      // Build new path
+      const normalizedFolder = normalizePath(targetFolder);
+      let newPath = normalizePath(`${normalizedFolder}/${file.name}`);
+
+      // Handle filename conflicts
+      let counter = 1;
+      const baseName = file.basename;
+      const ext = file.extension;
+      const maxAttempts = 100;
+      while (this.app.vault.getAbstractFileByPath(newPath) && newPath !== path && counter < maxAttempts) {
+        newPath = normalizePath(`${normalizedFolder}/${baseName} ${counter}.${ext}`);
+        counter++;
+      }
+
+      if (counter >= maxAttempts) {
+        throw new ItemServiceError(`Too many files with name "${baseName}" in target folder`, 'MOVE_FAILED');
+      }
+
+      // Don't move if already in the target folder
+      if (newPath === path) {
+        return path;
+      }
+
+      // Move the file
+      await this.app.fileManager.renameFile(file, newPath);
+      return newPath;
+    } catch (error) {
+      if (error instanceof ItemServiceError) {
+        throw error;
+      }
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`Planner: Failed to move item ${path}:`, error);
+      throw new ItemServiceError(`Failed to move item: ${message}`, 'MOVE_FAILED', error);
     }
-
-    // Ensure target folder exists
-    await this.ensureFolderExists(targetFolder);
-
-    // Build new path
-    const normalizedFolder = normalizePath(targetFolder);
-    let newPath = normalizePath(`${normalizedFolder}/${file.name}`);
-
-    // Handle filename conflicts
-    let counter = 1;
-    const baseName = file.basename;
-    const ext = file.extension;
-    while (this.app.vault.getAbstractFileByPath(newPath) && newPath !== path) {
-      newPath = normalizePath(`${normalizedFolder}/${baseName} ${counter}.${ext}`);
-      counter++;
-    }
-
-    // Don't move if already in the target folder
-    if (newPath === path) {
-      return path;
-    }
-
-    // Move the file
-    await this.app.fileManager.renameFile(file, newPath);
-    return newPath;
   }
 
   /**

@@ -3,6 +3,7 @@ import * as chrono from 'chrono-node';
 import type PlannerPlugin from '../main';
 import type { ItemFrontmatter, PlannerItem, RepeatFrequency, DayOfWeek } from '../types/item';
 import { getCalendarFolder } from '../types/settings';
+import { ItemServiceError } from '../services/ItemService';
 import {
   DateContextMenu,
   StatusContextMenu,
@@ -1352,7 +1353,11 @@ export class ItemModal extends Modal {
       }
     } catch (error) {
       console.error('Failed to save item:', error);
-      new Notice('Failed to save item');
+      if (error instanceof ItemServiceError) {
+        new Notice(`Failed to save: ${error.message}`);
+      } else {
+        new Notice('Failed to save item. Check console for details.');
+      }
       return; // Don't close if save failed
     }
 
@@ -1375,7 +1380,11 @@ export class ItemModal extends Modal {
         new Notice(`Deleted: ${this.options.item.title}`);
       } catch (error) {
         console.error('Failed to delete item:', error);
-        new Notice('Failed to delete item');
+        if (error instanceof ItemServiceError) {
+          new Notice(`Failed to delete: ${error.message}`);
+        } else {
+          new Notice('Failed to delete item. Check console for details.');
+        }
         return; // Don't close if delete failed
       }
       this.safeClose();

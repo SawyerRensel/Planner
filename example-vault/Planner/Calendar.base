@@ -30,3 +30,4 @@ views:
     image: note.cover
   - type: planner-kanban
     name: Kanban
+    swimlaneBy: note.calendar

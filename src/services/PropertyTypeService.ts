@@ -6,6 +6,21 @@ import { App } from 'obsidian';
 export type PropertyCategory = 'date' | 'categorical' | 'text' | 'unknown';
 
 /**
+ * Memoization cache for property category lookups
+ * Key format: "propId|vaultPath" to handle multiple vaults
+ */
+const propertyCategoryCache = new Map<string, PropertyCategory>();
+const CACHE_MAX_SIZE = 500;
+
+/**
+ * Clear the property category cache
+ * Call this when property types might have changed
+ */
+export function clearPropertyCategoryCache(): void {
+  propertyCategoryCache.clear();
+}
+
+/**
  * Service for determining property types and filtering properties for configuration menus.
  * Uses Obsidian's metadataTypeManager when available, with fallback inference.
  */
@@ -111,12 +126,23 @@ export class PropertyTypeService {
 
   /**
    * Determine property category using Obsidian types with fallback inference.
+   * Results are memoized for performance.
    *
    * @param propId - Property ID
    * @param app - Obsidian App instance
    * @returns Property category
    */
   static getPropertyCategory(propId: string, app: App): PropertyCategory {
+    // Check cache first
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const cacheKey = `${propId}|${(app.vault as any).adapter?.basePath || 'default'}`;
+    const cached = propertyCategoryCache.get(cacheKey);
+    if (cached !== undefined) {
+      return cached;
+    }
+
+    // Compute category
+    let category: PropertyCategory;
     const obsidianType = this.getObsidianPropertyType(propId, app);
 
     if (obsidianType) {
@@ -124,24 +150,38 @@ export class PropertyTypeService {
       switch (obsidianType) {
         case 'date':
         case 'datetime':
-          return 'date';
+          category = 'date';
+          break;
         case 'text':
-          return 'text';
+          category = 'text';
+          break;
         case 'multitext':
         case 'tags':
         case 'aliases':
-          return 'categorical';
+          category = 'categorical';
+          break;
         case 'number':
         case 'checkbox':
           // Numbers and checkboxes don't fit well in any menu category
-          return 'unknown';
+          category = 'unknown';
+          break;
         default:
-          return this.inferPropertyCategory(propId);
+          category = this.inferPropertyCategory(propId);
       }
+    } else {
+      // Fall back to inference
+      category = this.inferPropertyCategory(propId);
     }
 
-    // Fall back to inference
-    return this.inferPropertyCategory(propId);
+    // Store in cache (with size limit)
+    if (propertyCategoryCache.size >= CACHE_MAX_SIZE) {
+      // Clear oldest entries (simple approach: clear half the cache)
+      const keysToDelete = Array.from(propertyCategoryCache.keys()).slice(0, CACHE_MAX_SIZE / 2);
+      keysToDelete.forEach(key => propertyCategoryCache.delete(key));
+    }
+    propertyCategoryCache.set(cacheKey, category);
+
+    return category;
   }
 
   /**

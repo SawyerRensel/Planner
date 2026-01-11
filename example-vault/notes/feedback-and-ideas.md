@@ -177,6 +177,9 @@ Screenshot_20260101-185045.png]]:1  Failed to load resource: net::ERR_FILE_NOT_F
 
 ## Release
 
+- [ ] Regenerate Bases should include all views.  Currently it only includes (or says that it includes) Calendar.base and Tasks.base
+- [ ] Sensible defaults for enabled properties and filters for every view.  Regenerate Bases button in settings should use these defaults.  
+
 - [ ] Planner update PRD with our changes. 
 - [ ] Planner publish 0.0.1
 	- [ ] Docs (Zensical) site (clone repo to ref folder)

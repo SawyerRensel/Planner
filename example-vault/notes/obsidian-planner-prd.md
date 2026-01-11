@@ -1312,16 +1312,16 @@ appState: {
 
 **Deliverable:** Can manage tasks in a Kanban board.
 
-### Phase 6: Polish & Optimization
+### Phase 6: Polish & Optimization ✅
 
 **Goal:** Production-ready quality
 
-- [x] Mobile optimization (Calendar toolbar, Item Modal responsive width)
-- [ ] Virtual scrolling for large datasets
-- [ ] Keyboard navigation
-- [ ] Error handling and edge cases
-- [ ] Documentation
-- [ ] Performance profiling and optimization
+- [x] Mobile optimization (touch handling, viewport adjustments)
+- [x] Virtual scrolling for large datasets (Kanban 15+ cards, Task List 50+ rows)
+- [x] Keyboard navigation (arrow keys, vim-style h/j/k/l, commands)
+- [x] Error handling and edge cases (ItemServiceError, user-friendly notices)
+- [x] Documentation (MkDocs Material site with guides and reference)
+- [x] Performance profiling and optimization (memoization, render debouncing)
 
 **Deliverable:** Plugin ready for public release.
 
