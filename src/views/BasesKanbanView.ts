@@ -121,7 +121,7 @@ export class BasesKanbanView extends BasesView {
 
   private getCoverField(): string | null {
     const value = this.config.get('coverField') as string | undefined;
-    return value || null;
+    return value || 'note.cover';
   }
 
   private getCoverDisplay(): CoverDisplay {
@@ -184,12 +184,12 @@ export class BasesKanbanView extends BasesView {
 
   private getFreezeHeaders(): FreezeHeaders {
     const value = this.config.get('freezeHeaders') as string | undefined;
-    return (value as FreezeHeaders) || 'off';
+    return (value as FreezeHeaders) || 'both';
   }
 
   private getSwimHeaderDisplay(): SwimHeaderDisplay {
     const value = this.config.get('swimHeaderDisplay') as string | undefined;
-    return (value as SwimHeaderDisplay) || 'horizontal';
+    return (value as SwimHeaderDisplay) || 'vertical';
   }
 
   private getCustomColumnOrder(): string[] {
@@ -223,9 +223,9 @@ export class BasesKanbanView extends BasesView {
   private getCoverHeight(): number {
     const value = this.config.get('coverHeight') as string | number | undefined;
     if (typeof value === 'string') {
-      return parseInt(value, 10) || 120;
+      return parseInt(value, 10) || 100;
     }
-    return value || 120;
+    return value || 100;
   }
 
   /**
@@ -2637,7 +2637,7 @@ export function createKanbanViewRegistration(plugin: PlannerPlugin): BasesViewRe
         type: 'property',
         key: 'coverField',
         displayName: 'Cover field',
-        default: '',
+        default: 'note.cover',
         placeholder: 'None',
         filter: (propId: BasesPropertyId) =>
           PropertyTypeService.isTextProperty(propId, plugin.app),
@@ -2659,7 +2659,7 @@ export function createKanbanViewRegistration(plugin: PlannerPlugin): BasesViewRe
         type: 'dropdown',
         key: 'coverHeight',
         displayName: 'Cover height (banner)',
-        default: '120',
+        default: '100',
         options: {
           '60': 'Extra small (60px)',
           '80': 'Small (80px)',
@@ -2745,7 +2745,7 @@ export function createKanbanViewRegistration(plugin: PlannerPlugin): BasesViewRe
         type: 'dropdown',
         key: 'freezeHeaders',
         displayName: 'Freeze headers',
-        default: 'off',
+        default: 'both',
         options: {
           'off': 'Off',
           'columns': 'Columns',
@@ -2757,7 +2757,7 @@ export function createKanbanViewRegistration(plugin: PlannerPlugin): BasesViewRe
         type: 'dropdown',
         key: 'swimHeaderDisplay',
         displayName: 'Swimlane header display',
-        default: 'horizontal',
+        default: 'vertical',
         options: {
           'horizontal': 'Horizontal',
           'vertical': 'Vertical',
