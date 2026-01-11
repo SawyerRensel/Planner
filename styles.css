@@ -1993,6 +1993,11 @@ body.is-mobile .planner-timeline-iframe-container {
    KANBAN VIEW STYLES
    ========================================================================== */
 
+/* Ensure Bases view wrapper fills available space */
+.bases-view.planner-bases-kanban {
+  padding: 0;
+}
+
 .planner-bases-kanban {
   height: 100%;
   display: flex;
@@ -2004,7 +2009,7 @@ body.is-mobile .planner-timeline-iframe-container {
   flex: 1;
   display: flex;
   gap: 12px;
-  padding: 12px;
+  padding: 6px;
   overflow: auto;
 }
 
@@ -2313,7 +2318,7 @@ body.is-mobile .planner-timeline-iframe-container {
 /* Mobile responsive */
 @media (max-width: 768px) {
   .planner-kanban-board {
-    padding: 8px;
+    padding: 4px;
     gap: 8px;
   }
 

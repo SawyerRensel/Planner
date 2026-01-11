@@ -171,8 +171,7 @@ Screenshot_20260101-185045.png]]:1  Failed to load resource: net::ERR_FILE_NOT_F
 - [x] Should  "Add new" plus buttons in the bottom of the column (and column + swimlane) areas to add a new Item that auto-populates the New Item Modal according to the column and/or swimlane.  There should also be a new dropdown menu in the Kanban View Bases config menu called "Show add new buttons"  that allows the user to toggle whether they want these buttons to appear on the board.  For example, let's say `Group by` is set to "status" and `Swimlanes by` is set to "calendar".  If I click the plus button in the "To-Do" column and "Personal" swimlane, it should open the New Item Modal with status already set to "To-Do" and calendar set to "Personal".  Any questions?
 - [x] Still doesn't move notes when dragging into a different folder area
 - [x] Cover images still aren't working.  Need to support all kinds of frontmatter link types (driven by Obsidian's "Files and Links" >  "New Link Format" settings (relative, absolute, shortest)).  I suspect this might be the issue.  See the console log for details.
-
-- [ ] Scrolling with a touchpad is constrained to one axis at a time.  It would be nice to diagonally scroll / scroll both left-right and up-down at the smae time.
+- [x] Scrolling with a touchpad is constrained to one axis at a time.  It would be nice to diagonally scroll / scroll both left-right and up-down at the smae time.
 - [ ] Let's have an option in the Kanban View Bases config menu for "freezing" the Column and Swimlane titles when scrolling (like how you can "freeze panes" in Excel)
 
 ## Release

@@ -341,7 +341,7 @@ export class BasesKanbanView extends BasesView {
       display: flex;
       align-items: flex-start;
       gap: 12px;
-      padding: 12px;
+      padding: 6px;
       overflow: auto;
       min-height: 0;
     `;
