@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "notes/feedback-and-ideas.md",
+                "file": "notes/obsidian-planner-prd.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "feedback-and-ideas"
+              "title": "obsidian-planner-prd"
             }
           },
           {
@@ -41,14 +41,13 @@
               "type": "bases",
               "state": {
                 "file": "Planner/Calendar.base",
-                "viewName": "kanban"
+                "viewName": "Kanban"
               },
               "icon": "square-kanban",
               "title": "Calendar"
             }
           }
-        ],
-        "currentTab": 2
+        ]
       }
     ],
     "direction": "vertical"
@@ -233,12 +232,15 @@
       "obsidian-full-calendar:Open Full Calendar": false
     }
   },
-  "active": "9976bff532089859",
+  "active": "0ff4c6f34d9aa8a8",
   "lastOpenFiles": [
-    "What it should look like.base",
-    "Planner/Calendar.base",
-    "Full Calendar/2025-12-27 Full Calendar Example Event.md",
+    "notes/obsidian-planner-prd.md.tmp.609.1768134391692",
+    "notes/obsidian-planner-prd.md.tmp.609.1768134390646",
+    "notes/obsidian-planner-prd.md.tmp.609.1768134389601",
     "notes/feedback-and-ideas.md",
+    "Planner/Calendar.base",
+    "What it should look like.base",
+    "Full Calendar/2025-12-27 Full Calendar Example Event.md",
     "Planner/Timeline.base",
     "Planner/Kanban.base",
     "Personal/FirstMonday.md",
@@ -255,9 +257,7 @@
     "Plannerrrrr rrrrrrrrrrr/Website Redesign.md",
     "Plannerrrrr rrrrrrrrrrr/Timeline.base",
     "Plannerrrrr rrrrrrrrrrr/Team Meeting.md",
-    "Plannerrrrr rrrrrrrrrrr/Tasks.base",
     "Plannerrrrr rrrrrrrrrrr/Meeting.md",
-    "Plannerrrrr rrrrrrrrrrr/Kanban.base",
     "Plannerrrrr rrrrrrrrrrr/Implement Frontend.md",
     "Plannerrrrr rrrrrrrrrrr/Grocery Shopping.md",
     "Plannerrrrr rrrrrrrrrrr/Fix Login Bug.md",

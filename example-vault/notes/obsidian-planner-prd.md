@@ -1,7 +1,7 @@
 # Planner - Product Requirements Document
 
-> **Version:** 2.6.0
-> **Last Updated:** 2026-01-10
+> **Version:** 2.7.0
+> **Last Updated:** 2026-01-11
 > **Author:** Claude and Sawyer Rensel
 > **Status:** Active
 
@@ -1293,16 +1293,22 @@ appState: {
 
 **Deliverable:** Can create and manage recurring items.
 
-### Phase 5: Kanban View
+### Phase 5: Kanban View ✅
 
 **Goal:** Board-based task management
 
-- [ ] Kanban component
-- [ ] Drag-and-drop between columns
-- [ ] Configurable column field
-- [ ] Card customization (properties shown)
-- [ ] Cover images
-- [ ] Swimlanes
+- [x] Kanban component
+- [x] Drag-and-drop between columns
+- [x] Configurable column field
+- [x] Card customization (properties shown)
+- [x] Cover images
+- [x] Swimlanes
+- [x] Styled field badges (status, priority, calendar, dates)
+- [x] Configurable border styles (none, left-accent, full-border)
+- [x] Search bar
+- [x] Virtual scrolling for large columns
+- [x] Hide empty columns option
+- [x] Configurable column width
 
 **Deliverable:** Can manage tasks in a Kanban board.
 
@@ -1436,6 +1442,7 @@ Common patterns:
 | 2.4.0 | 2026-01-08 | Claude & Sawyer | Timeline View implementation completed. All Phase 7 tasks marked complete. |
 | 2.5.0 | 2026-01-10 | Claude & Sawyer | Removed Gantt View feature from PRD. Simplified roadmap to focus on Calendar, Timeline, and Kanban views. Renumbered phases. |
 | 2.6.0 | 2026-01-10 | Claude & Sawyer | **Kanban View enhancements**: Added Bases Configuration Menu Options (Group By, Swimlane By, Color By, Border Style, Cover Field, Cover Display, Date Start/End Fields, Badge Placement, Column Width, Hide Empty Columns, Enable Search). Added styled field badges for status, priority, calendar, and dates with custom colors and Lucide icons. Added card anatomy diagram. Added virtual scrolling for 15+ cards. |
+| 2.7.0 | 2026-01-11 | Claude & Sawyer | **Kanban View implementation completed**: Phase 5 marked complete. All Kanban features now implemented including drag-and-drop, swimlanes, cover images, styled badges, configurable columns, search, and virtual scrolling. |
 
 ---
 

@@ -20,13 +20,13 @@ views:
     titleField: note.title
     dateStartField: note.date_start_scheduled
   - type: table
-    name: What it currently looks like
+    name: Table
     sort: []
   - type: planner-timeline
     name: Timeline
     backgroundColor: "#1e1e1e"
   - type: cards
-    name: View
+    name: Cards
     image: note.cover
   - type: planner-kanban
-    name: kanban
+    name: Kanban
