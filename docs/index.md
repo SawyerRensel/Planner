@@ -1,4 +1,4 @@
-# Planner
+# Obsidian Planner
 
 A powerful task and project management plugin for Obsidian.
 
