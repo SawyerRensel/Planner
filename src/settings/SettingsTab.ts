@@ -3,6 +3,7 @@ import type PlannerPlugin from '../main';
 import { PlannerSettings, StatusConfig, PriorityConfig, DEFAULT_SETTINGS, OpenBehavior, getNextCalendarColor } from '../types/settings';
 import { BaseGeneratorService } from '../services/BaseGeneratorService';
 import { FolderSuggest } from '../components/suggests/FolderSuggest';
+import { FileSuggest } from '../components/suggests/FileSuggest';
 
 /**
  * Tab configuration
@@ -29,7 +30,7 @@ class RegenerateBasesModal extends Modal {
 
     contentEl.createEl('h2', { text: 'Regenerate Base Files' });
     contentEl.createEl('p', {
-      text: 'This will overwrite your existing Tasks.base and Calendar.base files. Any customizations you have made to these files will be lost.',
+      text: 'This will overwrite your existing Task List.base, Calendar.base, Timeline.base, and Kanban.base files. Any customizations you have made to these files will be lost.',
       cls: 'planner-modal-warning'
     });
     contentEl.createEl('p', {
@@ -159,13 +160,16 @@ export class PlannerSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName('Item template')
       .setDesc('Template file path for new items (optional)')
-      .addText(text => text
-        .setPlaceholder('Templates/planner-item.md')
-        .setValue(this.plugin.settings.itemTemplate)
-        .onChange(async (value) => {
-          this.plugin.settings.itemTemplate = value;
-          await this.plugin.saveSettings();
-        }));
+      .addText(text => {
+        text
+          .setPlaceholder('Templates/planner-item.md')
+          .setValue(this.plugin.settings.itemTemplate)
+          .onChange(async (value) => {
+            this.plugin.settings.itemTemplate = value;
+            await this.plugin.saveSettings();
+          });
+        new FileSuggest(this.app, text.inputEl);
+      });
 
     new Setting(containerEl)
       .setName('Date format')
@@ -229,7 +233,7 @@ export class PlannerSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName('Bases folder')
-      .setDesc('Where to save the Tasks.base and Calendar.base files')
+      .setDesc('Where to save the Base view files (Task List, Calendar, Timeline, Kanban)')
       .addText(text => {
         text
           .setPlaceholder('Planner/')
@@ -243,15 +247,17 @@ export class PlannerSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName('Generate Base files')
-      .setDesc('Create or regenerate Tasks.base and Calendar.base files')
+      .setDesc('Create or regenerate Task List, Calendar, Timeline, and Kanban Base files')
       .addButton(button => button
         .setButtonText('Generate')
         .onClick(async () => {
           const baseGenerator = new BaseGeneratorService(this.app, () => this.plugin.settings);
           const tasksExists = await baseGenerator.tasksBaseExists();
           const calendarExists = await baseGenerator.calendarBaseExists();
+          const timelineExists = await baseGenerator.timelineBaseExists();
+          const kanbanExists = await baseGenerator.kanbanBaseExists();
 
-          if (tasksExists || calendarExists) {
+          if (tasksExists || calendarExists || timelineExists || kanbanExists) {
             new RegenerateBasesModal(this.app, async () => {
               await this.regenerateBases(baseGenerator);
             }).open();
@@ -550,12 +556,14 @@ export class PlannerSettingTab extends PluginSettingTab {
     try {
       const result = await baseGenerator.generateAllBases(true);
 
-      if (result.tasks && result.calendar) {
-        new Notice('Tasks.base and Calendar.base files have been generated.');
-      } else if (result.tasks) {
-        new Notice('Tasks.base file has been generated.');
-      } else if (result.calendar) {
-        new Notice('Calendar.base file has been generated.');
+      const generated: string[] = [];
+      if (result.tasks) generated.push('Task List');
+      if (result.calendar) generated.push('Calendar');
+      if (result.timeline) generated.push('Timeline');
+      if (result.kanban) generated.push('Kanban');
+
+      if (generated.length > 0) {
+        new Notice(`${generated.join(', ')}.base file${generated.length > 1 ? 's have' : ' has'} been generated.`);
       } else {
         new Notice('Base files were already up to date.');
       }

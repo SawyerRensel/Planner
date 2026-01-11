@@ -2242,6 +2242,24 @@ body.is-mobile .planner-timeline-iframe-container {
   transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
+/* Card keyboard focus state */
+.planner-kanban-card--focused {
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(var(--interactive-accent-rgb), 0.2);
+}
+
+/* Virtual scroll placeholder */
+.planner-kanban-card-placeholder {
+  background: var(--background-secondary);
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.planner-kanban-card-placeholder.planner-kanban-card-rendered {
+  background: transparent;
+}
+
 /* Swimlane dragging states */
 .planner-kanban-swimlane--dragging {
   opacity: 0.5;

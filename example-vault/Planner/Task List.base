@@ -43,11 +43,19 @@ properties:
   note.date_due:
     width: 120
 views:
-  - type: planner-calendar
-    name: Calendar
+  - type: planner-task-list
+    name: Task List
     order:
       - title
-    sort: []
-    colorBy: note.calendar
+      - calendar
+      - status
+      - priority
+      - date_start_scheduled
+      - date_end_scheduled
+    sort:
+      - property: date_end_scheduled
+        direction: DESC
+      - property: priority
+        direction: ASC
   - type: table
     name: Table

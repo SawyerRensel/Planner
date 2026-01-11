@@ -1,0 +1,104 @@
+# Planner Documentation
+# Built with MkDocs Material (https://zensical.org)
+
+# Project information
+site_name: Planner
+site_url: https://sawyerrensel.github.io/planner/
+site_description: >-
+  A powerful task and project management plugin for Obsidian with Calendar,
+  Kanban, Timeline, and Task List views built on Obsidian Bases.
+
+# Repository
+repo_name: SawyerRensel/Planner
+repo_url: https://github.com/SawyerRensel/Planner
+edit_uri: edit/main/docs/
+
+# Copyright
+copyright: "&copy; 2025 Sawyer Rensel"
+
+# Configuration
+theme:
+  name: material
+  features:
+    - content.action.edit
+    - content.code.copy
+    - content.code.select
+    - content.tabs.link
+    - navigation.footer
+    - navigation.indexes
+    - navigation.sections
+    - navigation.tabs
+    - navigation.top
+    - search.highlight
+  palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep-purple
+      accent: deep-purple
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep-purple
+      accent: orange
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+  icon:
+    repo: fontawesome/brands/github
+
+# Plugins
+plugins:
+  - search
+
+# Extensions
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+
+# Navigation
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: guides/installation.md
+    - Quick Start: guides/quick-start.md
+    - Configuration: guides/configuration.md
+  - Views:
+    - Overview: views/index.md
+    - Calendar: views/calendar.md
+    - Kanban: views/kanban.md
+    - Timeline: views/timeline.md
+    - Task List: views/task-list.md
+  - Guides:
+    - Creating Items: guides/creating-items.md
+    - Recurring Events: guides/recurring-events.md
+    - Keyboard Shortcuts: guides/keyboard-shortcuts.md
+  - Reference:
+    - Item Properties: reference/properties.md
+    - Settings: reference/settings.md
+    - Commands: reference/commands.md

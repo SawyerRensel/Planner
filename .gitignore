@@ -10,6 +10,7 @@ node_modules
 
 # Environment variables (contains OAuth client IDs)
 .env
+venv
 
 # Don't include the compiled main.js file in the repo.
 # They should be uploaded to GitHub releases instead.
@@ -31,3 +32,6 @@ data.json
 
 # Reference files
 ref
+
+# Docs builds
+site

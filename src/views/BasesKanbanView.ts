@@ -7,6 +7,7 @@ import {
   setIcon,
   TFile,
   TFolder,
+  Notice,
 } from 'obsidian';
 import type PlannerPlugin from '../main';
 import type { ItemFrontmatter } from '../types/item';
@@ -92,6 +93,14 @@ export class BasesKanbanView extends BasesView {
   private touchSwimlaneStartY: number = 0;
   private touchSwimlaneHoldTimer: number | null = null;
   private touchSwimlaneHoldReady: boolean = false;
+
+  // Keyboard navigation state
+  private focusedCardIndex: number = -1;
+  private keyboardHandler: ((e: KeyboardEvent) => void) | null = null;
+
+  // Render debouncing
+  private renderDebounceTimer: number | null = null;
+  private static readonly RENDER_DEBOUNCE_MS = 50;
 
   // Configuration getters
   private getGroupBy(): string {
@@ -340,6 +349,185 @@ export class BasesKanbanView extends BasesView {
     this.containerEl = containerEl;
     this.setupContainer();
     this.setupResizeObserver();
+    this.setupKeyboardNavigation();
+  }
+
+  /**
+   * Setup keyboard navigation for the Kanban board
+   * Allows navigating between cards with arrow keys
+   */
+  private setupKeyboardNavigation(): void {
+    this.keyboardHandler = (e: KeyboardEvent) => {
+      // Only handle if board is focused or a card is focused
+      if (!this.boardEl?.contains(document.activeElement) &&
+          document.activeElement !== this.containerEl) {
+        return;
+      }
+
+      const cards = this.getAllCards();
+      if (cards.length === 0) return;
+
+      switch (e.key) {
+        case 'ArrowDown':
+        case 'j': // vim-style
+          e.preventDefault();
+          this.navigateCards(cards, 'down');
+          break;
+        case 'ArrowUp':
+        case 'k': // vim-style
+          e.preventDefault();
+          this.navigateCards(cards, 'up');
+          break;
+        case 'ArrowRight':
+        case 'l': // vim-style
+          e.preventDefault();
+          this.navigateCards(cards, 'right');
+          break;
+        case 'ArrowLeft':
+        case 'h': // vim-style
+          e.preventDefault();
+          this.navigateCards(cards, 'left');
+          break;
+        case 'Enter':
+        case ' ':
+          e.preventDefault();
+          this.activateFocusedCard();
+          break;
+        case 'Escape':
+          e.preventDefault();
+          this.clearCardFocus();
+          break;
+      }
+    };
+
+    this.containerEl.addEventListener('keydown', this.keyboardHandler);
+    // Make container focusable
+    this.containerEl.setAttribute('tabindex', '0');
+  }
+
+  /**
+   * Get all card elements in the board
+   */
+  private getAllCards(): HTMLElement[] {
+    if (!this.boardEl) return [];
+    return Array.from(this.boardEl.querySelectorAll('.planner-kanban-card')) as HTMLElement[];
+  }
+
+  /**
+   * Navigate between cards using arrow keys
+   */
+  private navigateCards(cards: HTMLElement[], direction: 'up' | 'down' | 'left' | 'right'): void {
+    const currentFocused = this.boardEl?.querySelector('.planner-kanban-card--focused') as HTMLElement | null;
+    let currentIndex = currentFocused ? cards.indexOf(currentFocused) : -1;
+
+    if (currentIndex === -1) {
+      // No card focused, focus first card
+      this.focusCard(cards[0]);
+      return;
+    }
+
+    // Get cards organized by columns for left/right navigation
+    if (direction === 'left' || direction === 'right') {
+      const columnCards = this.getCardsByColumn();
+      const currentCard = cards[currentIndex];
+      const currentColumn = currentCard.closest('[data-group]') as HTMLElement;
+      const currentGroup = currentColumn?.getAttribute('data-group');
+
+      if (!currentGroup) return;
+
+      const columnKeys = Array.from(columnCards.keys());
+      const currentColumnIndex = columnKeys.indexOf(currentGroup);
+      const targetColumnIndex = direction === 'right'
+        ? Math.min(currentColumnIndex + 1, columnKeys.length - 1)
+        : Math.max(currentColumnIndex - 1, 0);
+
+      const targetColumnKey = columnKeys[targetColumnIndex];
+      const targetColumnCards = columnCards.get(targetColumnKey) || [];
+
+      if (targetColumnCards.length > 0) {
+        // Find card at same position in target column, or last card
+        const currentColumnCards = columnCards.get(currentGroup) || [];
+        const positionInColumn = currentColumnCards.indexOf(currentCard);
+        const targetCard = targetColumnCards[Math.min(positionInColumn, targetColumnCards.length - 1)];
+        this.focusCard(targetCard);
+      }
+    } else {
+      // Up/down navigation within column
+      const currentCard = cards[currentIndex];
+      const currentColumn = currentCard.closest('[data-group]') as HTMLElement;
+      const cardsInColumn = Array.from(currentColumn?.querySelectorAll('.planner-kanban-card') || []) as HTMLElement[];
+      const positionInColumn = cardsInColumn.indexOf(currentCard);
+
+      let targetIndex: number;
+      if (direction === 'down') {
+        targetIndex = Math.min(positionInColumn + 1, cardsInColumn.length - 1);
+      } else {
+        targetIndex = Math.max(positionInColumn - 1, 0);
+      }
+
+      this.focusCard(cardsInColumn[targetIndex]);
+    }
+  }
+
+  /**
+   * Get cards organized by column
+   */
+  private getCardsByColumn(): Map<string, HTMLElement[]> {
+    const result = new Map<string, HTMLElement[]>();
+    if (!this.boardEl) return result;
+
+    const columns = this.boardEl.querySelectorAll('[data-group]');
+    columns.forEach(column => {
+      const group = column.getAttribute('data-group');
+      if (group) {
+        const cards = Array.from(column.querySelectorAll('.planner-kanban-card')) as HTMLElement[];
+        if (cards.length > 0) {
+          result.set(group, cards);
+        }
+      }
+    });
+
+    return result;
+  }
+
+  /**
+   * Focus a specific card
+   */
+  private focusCard(card: HTMLElement | null): void {
+    if (!card) return;
+
+    // Remove focus from all cards
+    this.boardEl?.querySelectorAll('.planner-kanban-card--focused').forEach(el => {
+      el.classList.remove('planner-kanban-card--focused');
+    });
+
+    // Add focus to target card
+    card.classList.add('planner-kanban-card--focused');
+    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    // Update focus index
+    const cards = this.getAllCards();
+    this.focusedCardIndex = cards.indexOf(card);
+  }
+
+  /**
+   * Activate (click) the currently focused card
+   */
+  private activateFocusedCard(): void {
+    const focused = this.boardEl?.querySelector('.planner-kanban-card--focused') as HTMLElement | null;
+    if (focused) {
+      focused.click();
+    }
+  }
+
+  /**
+   * Clear card focus
+   */
+  private clearCardFocus(): void {
+    this.boardEl?.querySelectorAll('.planner-kanban-card--focused').forEach(el => {
+      el.classList.remove('planner-kanban-card--focused');
+    });
+    this.focusedCardIndex = -1;
   }
 
   private setupContainer(): void {
@@ -367,7 +555,14 @@ export class BasesKanbanView extends BasesView {
   }
 
   onDataUpdated(): void {
-    this.render();
+    // Debounce rapid data updates to prevent performance issues
+    if (this.renderDebounceTimer !== null) {
+      window.clearTimeout(this.renderDebounceTimer);
+    }
+    this.renderDebounceTimer = window.setTimeout(() => {
+      this.renderDebounceTimer = null;
+      this.render();
+    }, BasesKanbanView.RENDER_DEBOUNCE_MS);
   }
 
   onunload(): void {
@@ -375,12 +570,28 @@ export class BasesKanbanView extends BasesView {
       this.resizeObserver.disconnect();
       this.resizeObserver = null;
     }
+    // Clean up debounce timer
+    if (this.renderDebounceTimer !== null) {
+      window.clearTimeout(this.renderDebounceTimer);
+      this.renderDebounceTimer = null;
+    }
+    // Clean up virtual scroll observers
+    this.cleanupVirtualScroll();
+    // Clean up keyboard navigation
+    if (this.keyboardHandler) {
+      this.containerEl.removeEventListener('keydown', this.keyboardHandler);
+      this.keyboardHandler = null;
+    }
+    this.containerEl.removeAttribute('tabindex');
     // Clean up styles and classes added to the shared container
     this.containerEl.removeClass('planner-bases-kanban');
     this.containerEl.style.cssText = '';
   }
 
   private render(): void {
+    // Clean up virtual scroll observers before re-render
+    this.cleanupVirtualScroll();
+
     if (!this.boardEl || !this.boardEl.isConnected) {
       this.setupContainer();
     }
@@ -1709,10 +1920,96 @@ export class BasesKanbanView extends BasesView {
     }
   }
 
+  /**
+   * Virtual scroll state for columns with many cards
+   */
+  private virtualScrollObservers: Map<HTMLElement, IntersectionObserver> = new Map();
+  private renderedCardRanges: Map<HTMLElement, { start: number; end: number }> = new Map();
+
+  /**
+   * Render cards with virtual scrolling for performance
+   * Only renders visible cards + a buffer for smooth scrolling
+   */
   private renderVirtualCards(container: HTMLElement, entries: BasesEntry[]): void {
-    // For now, render all cards - virtual scrolling can be added later
-    // This is a placeholder for the virtual scroll implementation
-    this.renderCards(container, entries);
+    const BUFFER_SIZE = 5; // Cards to render above/below viewport
+    const ESTIMATED_CARD_HEIGHT = 100; // px - used for placeholder sizing
+
+    // Create a wrapper to hold placeholders and cards
+    const wrapper = document.createElement('div');
+    wrapper.className = 'planner-kanban-virtual-wrapper';
+    wrapper.style.cssText = 'position: relative;';
+
+    // Create placeholder elements for all entries
+    const placeholders: HTMLElement[] = [];
+    entries.forEach((entry, index) => {
+      const placeholder = document.createElement('div');
+      placeholder.className = 'planner-kanban-card-placeholder';
+      placeholder.setAttribute('data-index', String(index));
+      placeholder.setAttribute('data-path', entry.file.path);
+      placeholder.style.cssText = `min-height: ${ESTIMATED_CARD_HEIGHT}px;`;
+      placeholders.push(placeholder);
+      wrapper.appendChild(placeholder);
+    });
+
+    container.appendChild(wrapper);
+
+    // Track which cards are rendered
+    const renderedCards = new Set<number>();
+
+    // Create IntersectionObserver to detect visible placeholders
+    const observer = new IntersectionObserver(
+      (observerEntries) => {
+        for (const observerEntry of observerEntries) {
+          const placeholder = observerEntry.target as HTMLElement;
+          const index = parseInt(placeholder.getAttribute('data-index') || '-1', 10);
+
+          if (index < 0 || index >= entries.length) continue;
+
+          if (observerEntry.isIntersecting && !renderedCards.has(index)) {
+            // Render this card and buffer cards around it
+            const start = Math.max(0, index - BUFFER_SIZE);
+            const end = Math.min(entries.length, index + BUFFER_SIZE + 1);
+
+            for (let i = start; i < end; i++) {
+              if (!renderedCards.has(i)) {
+                renderedCards.add(i);
+                const entry = entries[i];
+                const card = this.createCard(entry);
+                const targetPlaceholder = placeholders[i];
+
+                // Replace placeholder content with actual card
+                targetPlaceholder.innerHTML = '';
+                targetPlaceholder.style.minHeight = '';
+                targetPlaceholder.appendChild(card);
+                targetPlaceholder.classList.add('planner-kanban-card-rendered');
+              }
+            }
+          }
+        }
+      },
+      {
+        root: this.boardEl,
+        rootMargin: '200px 0px', // Load cards 200px before they enter viewport
+        threshold: 0
+      }
+    );
+
+    // Observe all placeholders
+    placeholders.forEach(placeholder => observer.observe(placeholder));
+
+    // Store observer for cleanup
+    this.virtualScrollObservers.set(container, observer);
+  }
+
+  /**
+   * Clean up virtual scroll observers when view is destroyed
+   */
+  private cleanupVirtualScroll(): void {
+    for (const [, observer] of this.virtualScrollObservers) {
+      observer.disconnect();
+    }
+    this.virtualScrollObservers.clear();
+    this.renderedCardRanges.clear();
   }
 
   private createCard(entry: BasesEntry): HTMLElement {
@@ -2456,58 +2753,63 @@ export class BasesKanbanView extends BasesView {
   }
 
   private async handleCardDrop(filePath: string, newGroupValue: string, newSwimlaneValue?: string): Promise<void> {
-    const groupByField = this.getGroupBy();
-    const fieldName = groupByField.replace(/^(note|file)\./, '');
-    const swimlaneBy = this.getSwimlaneBy();
-    const swimlaneFieldName = swimlaneBy ? swimlaneBy.replace(/^(note|file)\./, '') : null;
+    try {
+      const groupByField = this.getGroupBy();
+      const fieldName = groupByField.replace(/^(note|file)\./, '');
+      const swimlaneBy = this.getSwimlaneBy();
+      const swimlaneFieldName = swimlaneBy ? swimlaneBy.replace(/^(note|file)\./, '') : null;
 
-    const file = this.plugin.app.vault.getAbstractFileByPath(filePath);
-    if (!(file instanceof TFile)) return;
+      const file = this.plugin.app.vault.getAbstractFileByPath(filePath);
+      if (!(file instanceof TFile)) return;
 
-    // Check if we need to handle folder moves
-    const isFolderGroupBy = this.isFolderProperty(groupByField);
-    const isFolderSwimlane = swimlaneBy ? this.isFolderProperty(swimlaneBy) : false;
+      // Check if we need to handle folder moves
+      const isFolderGroupBy = this.isFolderProperty(groupByField);
+      const isFolderSwimlane = swimlaneBy ? this.isFolderProperty(swimlaneBy) : false;
 
-    // Determine target folder from either groupBy or swimlane (folder takes priority)
-    let targetFolder: string | null = null;
-    if (isFolderGroupBy && newGroupValue && newGroupValue !== 'None') {
-      targetFolder = this.findFolderPath(newGroupValue);
-    } else if (isFolderSwimlane && newSwimlaneValue && newSwimlaneValue !== 'None') {
-      targetFolder = this.findFolderPath(newSwimlaneValue);
-    }
+      // Determine target folder from either groupBy or swimlane (folder takes priority)
+      let targetFolder: string | null = null;
+      if (isFolderGroupBy && newGroupValue && newGroupValue !== 'None') {
+        targetFolder = this.findFolderPath(newGroupValue);
+      } else if (isFolderSwimlane && newSwimlaneValue && newSwimlaneValue !== 'None') {
+        targetFolder = this.findFolderPath(newSwimlaneValue);
+      }
 
-    // Move file if folder changed
-    let newFilePath = filePath;
-    if (targetFolder !== null) {
-      const currentFolder = file.parent?.path || '';
-      if (targetFolder !== currentFolder) {
-        const movedPath = await this.plugin.itemService.moveItem(filePath, targetFolder);
-        if (movedPath) {
-          newFilePath = movedPath;
+      // Move file if folder changed
+      let newFilePath = filePath;
+      if (targetFolder !== null) {
+        const currentFolder = file.parent?.path || '';
+        if (targetFolder !== currentFolder) {
+          const movedPath = await this.plugin.itemService.moveItem(filePath, targetFolder);
+          if (movedPath) {
+            newFilePath = movedPath;
+          }
         }
       }
-    }
 
-    // Now update frontmatter for non-folder properties
-    const needsFrontmatterUpdate =
-      (!isFolderGroupBy && newGroupValue !== undefined) ||
-      (!isFolderSwimlane && swimlaneFieldName && newSwimlaneValue !== undefined);
+      // Now update frontmatter for non-folder properties
+      const needsFrontmatterUpdate =
+        (!isFolderGroupBy && newGroupValue !== undefined) ||
+        (!isFolderSwimlane && swimlaneFieldName && newSwimlaneValue !== undefined);
 
-    if (needsFrontmatterUpdate) {
-      const fileToUpdate = this.plugin.app.vault.getAbstractFileByPath(newFilePath);
-      if (!fileToUpdate) return;
+      if (needsFrontmatterUpdate) {
+        const fileToUpdate = this.plugin.app.vault.getAbstractFileByPath(newFilePath);
+        if (!fileToUpdate) return;
 
-      await this.plugin.app.fileManager.processFrontMatter(fileToUpdate as TFile, (fm) => {
-        // Update groupBy field (if not folder)
-        if (!isFolderGroupBy) {
-          fm[fieldName] = this.convertValueForField(fieldName, newGroupValue);
-        }
-        // Update swimlane field (if not folder)
-        if (!isFolderSwimlane && swimlaneFieldName && newSwimlaneValue !== undefined) {
-          fm[swimlaneFieldName] = this.convertValueForField(swimlaneFieldName, newSwimlaneValue);
-        }
-        fm.date_modified = new Date().toISOString();
-      });
+        await this.plugin.app.fileManager.processFrontMatter(fileToUpdate as TFile, (fm) => {
+          // Update groupBy field (if not folder)
+          if (!isFolderGroupBy) {
+            fm[fieldName] = this.convertValueForField(fieldName, newGroupValue);
+          }
+          // Update swimlane field (if not folder)
+          if (!isFolderSwimlane && swimlaneFieldName && newSwimlaneValue !== undefined) {
+            fm[swimlaneFieldName] = this.convertValueForField(swimlaneFieldName, newSwimlaneValue);
+          }
+          fm.date_modified = new Date().toISOString();
+        });
+      }
+    } catch (error) {
+      console.error('Planner: Failed to update card:', error);
+      new Notice('Failed to move card. Check console for details.');
     }
   }
 

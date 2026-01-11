@@ -8,46 +8,48 @@
         "type": "tabs",
         "children": [
           {
-            "id": "0ff4c6f34d9aa8a8",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "notes/obsidian-planner-prd.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "obsidian-planner-prd"
-            }
-          },
-          {
-            "id": "8060252067f30061",
-            "type": "leaf",
-            "state": {
-              "type": "bases",
-              "state": {
-                "file": "What it should look like.base",
-                "viewName": "Cards"
-              },
-              "icon": "lucide-layout-grid",
-              "title": "What it should look like"
-            }
-          },
-          {
-            "id": "9976bff532089859",
+            "id": "7590a842cb82c1de",
             "type": "leaf",
             "state": {
               "type": "bases",
               "state": {
                 "file": "Planner/Calendar.base",
-                "viewName": "Kanban"
+                "viewName": "Calendar"
               },
-              "icon": "square-kanban",
+              "icon": "calendar-range",
               "title": "Calendar"
             }
+          },
+          {
+            "id": "976417bf17d4240b",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Ideas.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Ideas"
+            }
+          },
+          {
+            "id": "b4e9e28b148dcd24",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Obsidian Planner PRD.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Obsidian Planner PRD"
+            }
           }
-        ]
+        ],
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -188,16 +190,6 @@
               "icon": "lucide-list",
               "title": "Outline"
             }
-          },
-          {
-            "id": "22d5d266f7c7d00c",
-            "type": "leaf",
-            "state": {
-              "type": "planner-task-list",
-              "state": {},
-              "icon": "lucide-ghost",
-              "title": "planner-task-list"
-            }
           }
         ],
         "currentTab": 4
@@ -209,10 +201,6 @@
   },
   "left-ribbon": {
     "hiddenItems": {
-      "planner:Open Planner Kanban": false,
-      "planner:Open Planner Calendar": false,
-      "planner:Open Planner Timeline": false,
-      "planner:Open Planner Task List": false,
       "tasknotes:Open mini calendar": false,
       "tasknotes:Open advanced calendar": false,
       "tasknotes:Open task list": false,
@@ -229,49 +217,53 @@
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
       "bases:Create new base": false,
-      "obsidian-full-calendar:Open Full Calendar": false
+      "obsidian-full-calendar:Open Full Calendar": false,
+      "planner:Open Planner Task List": false,
+      "planner:Open Planner Calendar": false,
+      "planner:Open Planner Timeline": false,
+      "planner:Open Planner Kanban": false
     }
   },
-  "active": "0ff4c6f34d9aa8a8",
+  "active": "b4e9e28b148dcd24",
   "lastOpenFiles": [
-    "notes/obsidian-planner-prd.md.tmp.609.1768134391692",
-    "notes/obsidian-planner-prd.md.tmp.609.1768134390646",
-    "notes/obsidian-planner-prd.md.tmp.609.1768134389601",
-    "notes/feedback-and-ideas.md",
+    "Ideas.md",
+    "Obsidian Planner PRD.md",
     "Planner/Calendar.base",
-    "What it should look like.base",
-    "Full Calendar/2025-12-27 Full Calendar Example Event.md",
-    "Planner/Timeline.base",
+    "Planner/Task List.base",
     "Planner/Kanban.base",
-    "Personal/FirstMonday.md",
+    "Planner/Timeline.base",
+    "TaskNotes/Views/relationships.base",
+    "TaskNotes/Views/agenda-default.base",
+    "TaskNotes/Views/calendar-default.base",
+    "TaskNotes/Views/tasks-default.base",
+    "TaskNotes/Views/kanban-default.base",
+    "TaskNotes/Views/mini-calendar-default.base",
+    "notes/feedback-and-ideas.md",
+    "notes/obsidian-planner-prd.md",
+    "Templates/Planner Template.md",
+    "Personal/test.md",
+    "Planner/test.md",
+    "DailyNotes/2026-01-09.md",
+    "notes/Template with body only - body appears in Note Content.md",
+    "Planner/Test.md",
+    "Planner/test 1.md",
     "Planner/Website Redesign.md",
     "Planner/Team Meeting.md",
-    "Planner/Tasks.base",
+    "Planner/Fix Login Bug.md",
     "Planner/Meeting.md",
+    "Templates/Daily Note Template.md",
+    "Full Calendar/2025-12-27 Full Calendar Example Event.md",
+    "Personal/FirstMonday.md",
     "Planner/Implement Frontend.md",
     "Planner/Grocery Shopping.md",
-    "Planner/Gantt.base",
-    "Planner/Fix Login Bug.md",
     "Planner/Design Mockups.md",
-    "Planner",
     "Plannerrrrr rrrrrrrrrrr/Website Redesign.md",
-    "Plannerrrrr rrrrrrrrrrr/Timeline.base",
     "Plannerrrrr rrrrrrrrrrr/Team Meeting.md",
     "Plannerrrrr rrrrrrrrrrr/Meeting.md",
     "Plannerrrrr rrrrrrrrrrr/Implement Frontend.md",
     "Plannerrrrr rrrrrrrrrrr/Grocery Shopping.md",
-    "Plannerrrrr rrrrrrrrrrr/Fix Login Bug.md",
-    "Plannerrrrr rrrrrrrrrrr/Design Mockups.md",
     "Screenshot_20260105-200533.png",
     "Screenshot_20260108-193249.png",
-    "Planner/test.md",
-    "Personal/test 1.md",
-    "Personal/test.md",
-    "Untitled.md",
-    "Vacation/Vacation.md",
-    "notes/obsidian-planner-prd.md",
-    "un.md",
-    "notes/questions.md",
     "notes/Screenshot_20260101-185045.png",
     "notes/Screenshot_20260101-185036.png",
     "notes/Screenshot_20260101-184811.png",

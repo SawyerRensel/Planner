@@ -16,11 +16,17 @@ export const BASES_TASK_LIST_VIEW_ID = 'planner-task-list';
  * Task List view for Obsidian Bases
  * Displays items in a sortable table format
  */
+/**
+ * Virtual scroll threshold - enables virtual scrolling when table has 50+ rows
+ */
+const VIRTUAL_SCROLL_THRESHOLD = 50;
+
 export class BasesTaskListView extends BasesView {
   type = BASES_TASK_LIST_VIEW_ID;
   private plugin: PlannerPlugin;
   private containerEl: HTMLElement;
   private tableEl: HTMLElement | null = null;
+  private virtualScrollObserver: IntersectionObserver | null = null;
 
   constructor(
     controller: QueryController,
@@ -30,6 +36,16 @@ export class BasesTaskListView extends BasesView {
     super(controller);
     this.plugin = plugin;
     this.containerEl = containerEl;
+  }
+
+  /**
+   * Clean up resources when view is unloaded
+   */
+  onunload(): void {
+    if (this.virtualScrollObserver) {
+      this.virtualScrollObserver.disconnect();
+      this.virtualScrollObserver = null;
+    }
   }
 
   /**
@@ -71,12 +87,46 @@ export class BasesTaskListView extends BasesView {
   private renderBody(): void {
     if (!this.tableEl) return;
 
+    // Clean up previous observer
+    if (this.virtualScrollObserver) {
+      this.virtualScrollObserver.disconnect();
+      this.virtualScrollObserver = null;
+    }
+
     const tbody = this.tableEl.createEl('tbody');
     const groupedData = this.data.groupedData;
 
-    // Handle grouped data
+    // Count total entries
+    let totalEntries = 0;
     for (const group of groupedData) {
-      // If there's a group key, render group header
+      totalEntries += group.entries.length;
+    }
+
+    // Use virtual scrolling for large datasets
+    const useVirtualScroll = totalEntries >= VIRTUAL_SCROLL_THRESHOLD;
+
+    if (useVirtualScroll) {
+      this.renderBodyVirtual(tbody, groupedData);
+    } else {
+      this.renderBodyDirect(tbody, groupedData);
+    }
+
+    // Empty state
+    if (groupedData.length === 0 || groupedData.every(g => g.entries.length === 0)) {
+      const emptyRow = tbody.createEl('tr');
+      const emptyCell = emptyRow.createEl('td', {
+        attr: { colspan: String(this.getPropertyCount()) },
+        cls: 'planner-empty'
+      });
+      emptyCell.createSpan({ text: 'No items found' });
+    }
+  }
+
+  /**
+   * Direct rendering for small datasets
+   */
+  private renderBodyDirect(tbody: HTMLElement, groupedData: any[]): void {
+    for (const group of groupedData) {
       if (group.hasKey()) {
         const groupRow = tbody.createEl('tr', { cls: 'planner-group-row' });
         const groupCell = groupRow.createEl('td', {
@@ -88,20 +138,121 @@ export class BasesTaskListView extends BasesView {
         });
       }
 
-      // Render entries in this group
       for (const entry of group.entries) {
         this.renderEntryRow(tbody, entry);
       }
     }
+  }
 
-    // Empty state
-    if (groupedData.length === 0 || groupedData.every(g => g.entries.length === 0)) {
-      const emptyRow = tbody.createEl('tr');
-      const emptyCell = emptyRow.createEl('td', {
-        attr: { colspan: String(this.getPropertyCount()) },
-        cls: 'planner-empty'
-      });
-      emptyCell.createSpan({ text: 'No items found' });
+  /**
+   * Virtual scroll rendering for large datasets
+   * Only renders visible rows + buffer for smooth scrolling
+   */
+  private renderBodyVirtual(tbody: HTMLElement, groupedData: any[]): void {
+    const BUFFER_SIZE = 10;
+    const ESTIMATED_ROW_HEIGHT = 40; // px
+
+    // Flatten entries with group info
+    const flatEntries: Array<{ type: 'group' | 'entry'; data: any; groupKey?: string }> = [];
+
+    for (const group of groupedData) {
+      if (group.hasKey()) {
+        flatEntries.push({ type: 'group', data: null, groupKey: String(group.key?.toString() ?? 'Ungrouped') });
+      }
+      for (const entry of group.entries) {
+        flatEntries.push({ type: 'entry', data: entry });
+      }
+    }
+
+    // Create placeholder rows
+    const placeholders: HTMLElement[] = [];
+    const renderedRows = new Set<number>();
+
+    flatEntries.forEach((item, index) => {
+      const row = tbody.createEl('tr', { cls: 'planner-row-placeholder' });
+      row.setAttribute('data-index', String(index));
+      row.style.height = `${ESTIMATED_ROW_HEIGHT}px`;
+      placeholders.push(row);
+    });
+
+    // Create IntersectionObserver
+    this.virtualScrollObserver = new IntersectionObserver(
+      (observerEntries) => {
+        for (const observerEntry of observerEntries) {
+          if (!observerEntry.isIntersecting) continue;
+
+          const row = observerEntry.target as HTMLElement;
+          const index = parseInt(row.getAttribute('data-index') || '-1', 10);
+
+          if (index < 0 || renderedRows.has(index)) continue;
+
+          // Render this row and buffer rows
+          const start = Math.max(0, index - BUFFER_SIZE);
+          const end = Math.min(flatEntries.length, index + BUFFER_SIZE + 1);
+
+          for (let i = start; i < end; i++) {
+            if (renderedRows.has(i)) continue;
+            renderedRows.add(i);
+
+            const item = flatEntries[i];
+            const placeholder = placeholders[i];
+            placeholder.style.height = '';
+            placeholder.classList.remove('planner-row-placeholder');
+
+            if (item.type === 'group') {
+              placeholder.classList.add('planner-group-row');
+              const groupCell = placeholder.createEl('td', {
+                attr: { colspan: String(this.getPropertyCount()) }
+              });
+              groupCell.createSpan({
+                text: item.groupKey || 'Ungrouped',
+                cls: 'planner-group-label'
+              });
+            } else {
+              this.populateEntryRow(placeholder, item.data);
+            }
+          }
+        }
+      },
+      {
+        root: this.containerEl,
+        rootMargin: '100px 0px',
+        threshold: 0
+      }
+    );
+
+    // Observe all placeholders
+    placeholders.forEach(placeholder => this.virtualScrollObserver?.observe(placeholder));
+  }
+
+  /**
+   * Populate an existing row element with entry data
+   */
+  private populateEntryRow(row: HTMLElement, entry: BasesEntry): void {
+    row.classList.add('planner-row');
+
+    row.addEventListener('click', async () => {
+      const item = await this.plugin.itemService.getItem(entry.file.path);
+      if (item) {
+        openItemModal(this.plugin, { mode: 'edit', item });
+      } else {
+        this.app.workspace.openLinkText(entry.file.path, '', false);
+      }
+    });
+
+    row.addEventListener('contextmenu', (e) => {
+      this.showContextMenu(e, entry);
+    });
+
+    const orderedProps = this.config.getOrder();
+    const propsToShow = orderedProps.length > 0 ? orderedProps : this.getDefaultProperties();
+
+    for (const propId of propsToShow) {
+      const td = row.createEl('td');
+      const value = entry.getValue(propId);
+      if (value !== null) {
+        this.renderValue(td, propId, value);
+      }
     }
   }
 

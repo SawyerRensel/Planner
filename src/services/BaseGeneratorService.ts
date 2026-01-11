@@ -14,11 +14,11 @@ export class BaseGeneratorService {
   }
 
   /**
-   * Get the path to the Tasks.base file
+   * Get the path to the Task List.base file
    */
   getTasksBasePath(): string {
     const folder = this.getSettings().basesFolder.replace(/\/$/, '');
-    return normalizePath(`${folder}/Tasks.base`);
+    return normalizePath(`${folder}/Task List.base`);
   }
 
   /**
@@ -46,7 +46,7 @@ export class BaseGeneratorService {
   }
 
   /**
-   * Check if the Tasks.base file exists
+   * Check if the Task List.base file exists
    */
   async tasksBaseExists(): Promise<boolean> {
     const path = this.getTasksBasePath();
@@ -78,22 +78,22 @@ export class BaseGeneratorService {
   }
 
   /**
-   * Generate the Tasks.base file content
+   * Generate the Task List.base file content
    */
   private generateTasksBaseContent(): string {
     const settings = this.getSettings();
-    const sourceFolder = settings.itemsFolder.replace(/\/$/, '') + '/';
+    const sourceFolder = settings.basesFolder.replace(/\/$/, '') + '/';
+    const filters = this.generateFiltersSection();
 
     return `source: ${sourceFolder}
+${filters}
 properties:
-  # Text/Title properties
   note.title:
     width: 200
   note.summary:
     width: 200
   file.basename:
     width: 150
-  # Categorical properties
   note.status:
     width: 100
   note.priority:
@@ -112,7 +112,6 @@ properties:
     width: 120
   note.color:
     width: 80
-  # Date properties
   note.date_start_scheduled:
     width: 120
   note.date_start_actual:
@@ -130,16 +129,16 @@ properties:
 views:
   - type: planner-task-list
     name: Task List
-    groupBy:
-      property: calendar
-      direction: ASC
     order:
-      - note.title
-      - note.priority
-      - note.status
-      - note.date_due
-      - note.calendar
+      - title
+      - calendar
+      - status
+      - priority
+      - date_start_scheduled
+      - date_end_scheduled
     sort:
+      - property: date_end_scheduled
+        direction: DESC
       - property: priority
         direction: ASC
   - type: table
@@ -152,18 +151,18 @@ views:
    */
   private generateCalendarBaseContent(): string {
     const settings = this.getSettings();
-    const sourceFolder = settings.itemsFolder.replace(/\/$/, '') + '/';
+    const sourceFolder = settings.basesFolder.replace(/\/$/, '') + '/';
+    const filters = this.generateFiltersSection();
 
     return `source: ${sourceFolder}
+${filters}
 properties:
-  # Text/Title properties
   note.title:
     width: 200
   note.summary:
     width: 200
   file.basename:
     width: 150
-  # Categorical properties
   note.status:
     width: 100
   note.priority:
@@ -182,7 +181,6 @@ properties:
     width: 120
   note.color:
     width: 80
-  # Date properties
   note.date_start_scheduled:
     width: 120
   note.date_start_actual:
@@ -201,7 +199,7 @@ views:
   - type: planner-calendar
     name: Calendar
     order:
-      - note.title
+      - title
     sort: []
     colorBy: note.calendar
   - type: table
@@ -214,18 +212,18 @@ views:
    */
   private generateTimelineBaseContent(): string {
     const settings = this.getSettings();
-    const sourceFolder = settings.itemsFolder.replace(/\/$/, '') + '/';
+    const sourceFolder = settings.basesFolder.replace(/\/$/, '') + '/';
+    const filters = this.generateFiltersSection();
 
     return `source: ${sourceFolder}
+${filters}
 properties:
-  # Text/Title properties
   note.title:
     width: 250
   note.summary:
     width: 200
   file.basename:
     width: 150
-  # Categorical properties
   note.status:
     width: 100
   note.priority:
@@ -246,7 +244,6 @@ properties:
     width: 80
   note.progress:
     width: 80
-  # Date properties
   note.date_start_scheduled:
     width: 120
   note.date_start_actual:
@@ -265,16 +262,12 @@ views:
   - type: planner-timeline
     name: Timeline
     order:
-      - note.title
-      - note.date_start_scheduled
-      - note.date_end_scheduled
-    sort:
-      - property: date_start_scheduled
-        direction: ASC
-    groupBy:
-      property: calendar
-      direction: ASC
+      - title
+      - date_start_scheduled
+      - date_end_scheduled
+    sort: []
     colorBy: note.calendar
+    sectionsBy: note.calendar
   - type: table
     name: Table
 `;
@@ -285,18 +278,18 @@ views:
    */
   private generateKanbanBaseContent(): string {
     const settings = this.getSettings();
-    const sourceFolder = settings.itemsFolder.replace(/\/$/, '') + '/';
+    const sourceFolder = settings.basesFolder.replace(/\/$/, '') + '/';
+    const filters = this.generateFiltersSection();
 
     return `source: ${sourceFolder}
+${filters}
 properties:
-  # Text/Title properties
   note.title:
     width: 200
   note.summary:
     width: 200
   file.basename:
     width: 150
-  # Categorical properties
   note.status:
     width: 100
   note.priority:
@@ -313,7 +306,6 @@ properties:
     width: 100
   note.cover:
     width: 200
-  # Date properties
   note.date_start_scheduled:
     width: 120
   note.date_end_scheduled:
@@ -324,20 +316,61 @@ views:
   - type: planner-kanban
     name: Kanban
     order:
-      - note.title
-      - note.status
-      - note.priority
-      - note.calendar
-      - note.date_start_scheduled
-    groupBy:
-      property: status
-      direction: ASC
+      - title
+      - status
+      - priority
+      - calendar
+      - tags
+      - summary
+      - date_end_scheduled
+    sort:
+      - property: date_end_scheduled
+        direction: DESC
     colorBy: note.calendar
     borderStyle: left-accent
     badgePlacement: properties-section
   - type: table
     name: Table
 `;
+  }
+
+  /**
+   * Generate the filters section based on itemsFolder and calendar folders
+   * Includes all unique folders where Planner items might exist
+   */
+  private generateFiltersSection(): string {
+    const settings = this.getSettings();
+    const itemsFolder = settings.itemsFolder.replace(/\/$/, '');
+
+    // Collect all unique folders (itemsFolder + any custom calendar folders)
+    const folders = new Set<string>();
+    folders.add(itemsFolder);
+
+    for (const calendar of Object.values(settings.calendars)) {
+      if (calendar.folder) {
+        folders.add(calendar.folder.replace(/\/$/, ''));
+      }
+    }
+
+    const folderArray = Array.from(folders);
+
+    if (folderArray.length === 1) {
+      // Single folder - simple filter
+      return `filters:
+  and:
+    - file.inFolder("${folderArray[0]}")
+    - file.ext == "md"`;
+    } else {
+      // Multiple folders - use OR for folders
+      const folderConditions = folderArray
+        .map(folder => `      - file.inFolder("${folder}")`)
+        .join('\n');
+      return `filters:
+  and:
+    - or:
+${folderConditions}
+    - file.ext == "md"`;
+    }
   }
 
   /**
@@ -353,7 +386,7 @@ views:
   }
 
   /**
-   * Generate the Tasks.base file
+   * Generate the Task List.base file
    * @param overwrite If true, overwrite existing file
    * @returns true if file was created/updated, false if skipped
    */

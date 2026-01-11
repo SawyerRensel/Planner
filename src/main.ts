@@ -136,34 +136,43 @@ export default class PlannerPlugin extends Plugin {
   }
 
   private registerCommands() {
-    // Open task list view
+    // Open Task List View
     this.addCommand({
       id: 'open-task-list',
-      name: 'Open task list',
+      name: 'Open task list view',
       callback: () => {
         this.activateTaskListView();
       },
     });
 
-    // Open calendar view
+    // Open Calendar View
     this.addCommand({
       id: 'open-calendar',
-      name: 'Open calendar',
+      name: 'Open calendar view',
       callback: () => {
         this.activateCalendarView();
       },
     });
 
-    // Open Timeline view
+    // Open Timeline View
     this.addCommand({
       id: 'open-timeline',
-      name: 'Open Timeline',
+      name: 'Open timeline view',
       callback: () => {
         this.activateTimelineView();
       },
     });
 
-    // Create new item command (opens Item Modal)
+    // Open Kanban View
+    this.addCommand({
+      id: 'open-kanban',
+      name: 'Open kanban view',
+      callback: () => {
+        this.activateKanbanView();
+      },
+    });
+
+    // Create New Item command (opens Item Modal)
     this.addCommand({
       id: 'create-item',
       name: 'Create new item',
@@ -172,12 +181,40 @@ export default class PlannerPlugin extends Plugin {
       },
     });
 
-    // Quick capture command (now opens Item Modal with NLP support)
+    // Quick Capture command (opens Item Modal with NLP support)
     this.addCommand({
       id: 'quick-capture',
       name: 'Quick capture',
       callback: () => {
         openItemModal(this, { mode: 'create' });
+      },
+    });
+
+    // Navigate to today in calendar
+    this.addCommand({
+      id: 'calendar-today',
+      name: 'Calendar: Go to today',
+      callback: () => {
+        // Dispatch custom event that calendar view listens for
+        window.dispatchEvent(new CustomEvent('planner:calendar-today'));
+      },
+    });
+
+    // Navigate forward in calendar
+    this.addCommand({
+      id: 'calendar-next',
+      name: 'Calendar: Go to next period',
+      callback: () => {
+        window.dispatchEvent(new CustomEvent('planner:calendar-next'));
+      },
+    });
+
+    // Navigate backward in calendar
+    this.addCommand({
+      id: 'calendar-prev',
+      name: 'Calendar: Go to previous period',
+      callback: () => {
+        window.dispatchEvent(new CustomEvent('planner:calendar-prev'));
       },
     });
 
