@@ -52,9 +52,9 @@ views:
     coverHeight: "100"
     columnOrder: '["Idea","To-Do","In-Progress","In-Review","Done","Cancelled","in-progress","open","null"]'
     columnWidth: "280"
-    swimlaneOrder: '["Personal","Vacation","Work","null"]'
+    swimlaneOrder: '["Urgent","High","Medium","Low","None","null","normal"]'
     titleBy: note.title
     summaryField: note.summary
-    swimlaneBy: note.priority
+    swimlaneBy: file.folder
   - type: table
     name: Table

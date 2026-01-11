@@ -2253,6 +2253,51 @@ body.is-mobile .planner-timeline-iframe-container {
   box-shadow: 0 4px 0 var(--interactive-accent) !important;
 }
 
+/* Kanban Add New Button */
+.planner-kanban-add-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 32px;
+  padding: 4px;
+  margin-top: 4px;
+  border: 1px dashed var(--background-modifier-border);
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-muted);
+  opacity: 0.5;
+  transition: all 0.15s ease;
+}
+
+.planner-kanban-add-button:hover {
+  opacity: 1;
+  background: var(--background-modifier-hover);
+  border-color: var(--interactive-accent);
+  color: var(--interactive-accent);
+}
+
+.planner-kanban-add-button:active {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.planner-kanban-add-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.planner-kanban-add-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.planner-kanban-swimlane-cell .planner-kanban-add-button {
+  min-height: 28px;
+}
+
 .theme-dark .planner-kanban-card {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
@@ -2283,6 +2328,11 @@ body.is-mobile .planner-timeline-iframe-container {
 
   .planner-kanban-card-content {
     padding: 10px;
+  }
+
+  .planner-kanban-add-button {
+    min-height: 40px;
+    opacity: 0.7;
   }
 }
 

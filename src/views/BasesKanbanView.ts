@@ -9,6 +9,7 @@ import {
   TFolder,
 } from 'obsidian';
 import type PlannerPlugin from '../main';
+import type { ItemFrontmatter } from '../types/item';
 import { openItemModal } from '../components/ItemModal';
 import { PropertyTypeService } from '../services/PropertyTypeService';
 import {
@@ -163,6 +164,14 @@ export class BasesKanbanView extends BasesView {
     return value ?? false;
   }
 
+  private getShowAddNewButtons(): boolean {
+    const value = this.config.get('showAddNewButtons') as string | boolean | undefined;
+    if (typeof value === 'string') {
+      return value !== 'false';
+    }
+    return value ?? true;
+  }
+
   private getEnableSearch(): boolean {
     const value = this.config.get('enableSearch') as string | boolean | undefined;
     if (typeof value === 'string') {
@@ -224,6 +233,89 @@ export class BasesKanbanView extends BasesView {
       'note.date_start_scheduled',
       'note.date_end_scheduled',
     ];
+  }
+
+  /**
+   * Build a prePopulate object for creating a new item based on column and swimlane values.
+   */
+  private buildPrePopulateForNewItem(
+    columnValue: string,
+    swimlaneValue?: string
+  ): { prePopulate: Partial<ItemFrontmatter>; targetFolder?: string } {
+    const prePopulate: Partial<ItemFrontmatter> = {};
+    let targetFolder: string | undefined;
+
+    const groupByField = this.getGroupBy();
+    const swimlaneByField = this.getSwimlaneBy();
+
+    // Handle column (groupBy) - check if folder property
+    if (columnValue && columnValue !== 'None') {
+      if (groupByField === 'file.folder') {
+        targetFolder = columnValue;
+      } else {
+        const fieldName = groupByField.replace(/^note\./, '');
+        this.setPrePopulateField(prePopulate, fieldName, columnValue);
+      }
+    }
+
+    // Handle swimlane (swimlaneBy)
+    if (swimlaneValue && swimlaneValue !== 'None' && swimlaneByField) {
+      if (swimlaneByField === 'file.folder') {
+        targetFolder = swimlaneValue;
+      } else {
+        const fieldName = swimlaneByField.replace(/^note\./, '');
+        this.setPrePopulateField(prePopulate, fieldName, swimlaneValue);
+      }
+    }
+
+    return { prePopulate, targetFolder };
+  }
+
+  private setPrePopulateField(
+    prePopulate: Partial<ItemFrontmatter>,
+    fieldName: string,
+    value: string
+  ): void {
+    const arrayFields = ['calendar', 'tags', 'context', 'people', 'related'];
+    if (arrayFields.includes(fieldName)) {
+      (prePopulate as Record<string, unknown>)[fieldName] = [value];
+    } else {
+      (prePopulate as Record<string, unknown>)[fieldName] = value;
+    }
+  }
+
+  /**
+   * Create an "Add New" button for a column or swimlane cell.
+   */
+  private createAddNewButton(groupKey: string, swimlaneKey?: string): HTMLElement {
+    const button = document.createElement('button');
+    button.className = 'planner-kanban-add-button';
+    button.setAttribute('aria-label', 'Add new item');
+
+    const iconSpan = document.createElement('span');
+    iconSpan.className = 'planner-kanban-add-icon';
+    setIcon(iconSpan, 'plus');
+    button.appendChild(iconSpan);
+
+    button.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.handleAddNewClick(groupKey, swimlaneKey);
+    });
+
+    return button;
+  }
+
+  /**
+   * Handle click on the Add New button.
+   */
+  private handleAddNewClick(columnValue: string, swimlaneValue?: string): void {
+    const { prePopulate, targetFolder } = this.buildPrePopulateForNewItem(columnValue, swimlaneValue);
+
+    openItemModal(this.plugin, {
+      mode: 'create',
+      prePopulate,
+      targetFolder,
+    });
   }
 
   constructor(
@@ -841,6 +933,12 @@ export class BasesKanbanView extends BasesView {
       cell.appendChild(card);
     }
 
+    // Add the "Add New" button if enabled
+    if (this.getShowAddNewButtons()) {
+      const addButton = this.createAddNewButton(groupKey, swimlaneKey);
+      cell.appendChild(addButton);
+    }
+
     return cell;
   }
 
@@ -900,6 +998,12 @@ export class BasesKanbanView extends BasesView {
       this.renderVirtualCards(cardsContainer, entries);
     } else {
       this.renderCards(cardsContainer, entries);
+    }
+
+    // Add the "Add New" button if enabled
+    if (this.getShowAddNewButtons()) {
+      const addButton = this.createAddNewButton(groupKey);
+      cardsContainer.appendChild(addButton);
     }
 
     column.appendChild(cardsContainer);
@@ -2408,6 +2512,16 @@ export function createKanbanViewRegistration(plugin: PlannerPlugin): BasesViewRe
         options: {
           'false': 'No',
           'true': 'Yes',
+        },
+      },
+      {
+        type: 'dropdown',
+        key: 'showAddNewButtons',
+        displayName: 'Show add new buttons',
+        default: 'true',
+        options: {
+          'true': 'Show',
+          'false': 'Hide',
         },
       },
     ],

@@ -127,15 +127,21 @@ export class ItemService {
   async createItem(
     filename: string,
     frontmatter: Partial<ItemFrontmatter>,
-    content: string = ''
+    content: string = '',
+    overrideFolder?: string
   ): Promise<PlannerItem> {
     const settings = this.getSettings();
 
-    // Determine folder: use calendar-specific folder if available, otherwise global itemsFolder
-    const calendarName = frontmatter.calendar?.[0];
-    const folder = calendarName
-      ? getCalendarFolder(settings, calendarName)
-      : settings.itemsFolder;
+    // Determine folder: use override if provided, then calendar-specific folder, otherwise global itemsFolder
+    let folder: string;
+    if (overrideFolder) {
+      folder = overrideFolder;
+    } else {
+      const calendarName = frontmatter.calendar?.[0];
+      folder = calendarName
+        ? getCalendarFolder(settings, calendarName)
+        : settings.itemsFolder;
+    }
 
     // Ensure folder exists
     await this.ensureFolderExists(folder);
