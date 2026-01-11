@@ -56,3 +56,6 @@ views:
     sectionsBy: note.calendar
   - type: table
     name: Table
+  - type: cards
+    name: Cards
+    image: note.cover

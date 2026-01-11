@@ -41,15 +41,15 @@
             "state": {
               "type": "bases",
               "state": {
-                "file": "Planner/Calendar.base",
-                "viewName": "Calendar"
+                "file": "Planner/Task List.base",
+                "viewName": "Task List"
               },
-              "icon": "calendar-range",
-              "title": "Calendar"
+              "icon": "list-checks",
+              "title": "Task List"
             }
           }
         ],
-        "currentTab": 1
+        "currentTab": 2
       },
       {
         "id": "1c23e21e81d03238",
@@ -244,14 +244,16 @@
       "planner:Open Planner Kanban": false
     }
   },
-  "active": "57d46bb061878ebe",
+  "active": "7590a842cb82c1de",
   "lastOpenFiles": [
-    "Templates/Planner Template.md",
+    "Untitled.md",
+    "Planner/Task List.base",
     "Planner/Calendar.base",
+    "notes/feedback-and-ideas.md",
+    "Templates/Planner Template.md",
     "Personal/test.md",
     "Planner/test.md",
     "DailyNotes/2026-01-09.md",
-    "notes/feedback-and-ideas.md",
     "notes/Template with body only - body appears in Note Content.md",
     "Planner/Timeline.base",
     "Planner/Kanban.base",
@@ -262,11 +264,9 @@
     "Planner/Fix Login Bug.md",
     "Planner/Meeting.md",
     "Templates/Daily Note Template.md",
-    "Planner/Task List.base",
     "Untitled.base",
     "TaskNotes/Views/mini-calendar-default.base",
     "notes/obsidian-planner-prd.md",
-    "Untitled.md",
     "Planner/Tasks.base",
     "What it should look like.base",
     "notes/feedback-and-ideas.md.tmp.1248.1768136759376",
