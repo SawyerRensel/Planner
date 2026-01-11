@@ -375,6 +375,9 @@ export class BasesKanbanView extends BasesView {
       this.resizeObserver.disconnect();
       this.resizeObserver = null;
     }
+    // Clean up styles and classes added to the shared container
+    this.containerEl.removeClass('planner-bases-kanban');
+    this.containerEl.style.cssText = '';
   }
 
   private render(): void {

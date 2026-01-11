@@ -173,6 +173,7 @@ Screenshot_20260101-185045.png]]:1  Failed to load resource: net::ERR_FILE_NOT_F
 - [x] Cover images still aren't working.  Need to support all kinds of frontmatter link types (driven by Obsidian's "Files and Links" >  "New Link Format" settings (relative, absolute, shortest)).  I suspect this might be the issue.  See the console log for details.
 - [x] Scrolling with a touchpad is constrained to one axis at a time.  It would be nice to diagonally scroll / scroll both left-right and up-down at the smae time.
 - [x] Let's have an option in the Kanban View Bases config menu for "freezing" the Column and Swimlane titles when scrolling (like how you can "freeze panes" in Excel)
+- [ ] Kanban View is causing an issue with Cards View and Table View where I can't scroll in either of the latter views when I have both views in the same base file (see `Calendar.base` in example-vault as an example.) I think it's because we were too aggressive with our styling and didn't remove old styling for the Kanban view and affected higher-level container styling that we didn't need that is now affecting Cards and Table Views.
 
 ## Release
 

@@ -22,20 +22,33 @@
             }
           },
           {
-            "id": "7469008547136307",
+            "id": "8060252067f30061",
             "type": "leaf",
             "state": {
               "type": "bases",
               "state": {
-                "file": "Planner/Kanban.base",
-                "viewName": "Kanban"
+                "file": "What it should look like.base",
+                "viewName": "Cards"
               },
-              "icon": "square-kanban",
-              "title": "Kanban"
+              "icon": "lucide-layout-grid",
+              "title": "What it should look like"
+            }
+          },
+          {
+            "id": "9976bff532089859",
+            "type": "leaf",
+            "state": {
+              "type": "bases",
+              "state": {
+                "file": "Planner/Calendar.base",
+                "viewName": "What it currently looks like"
+              },
+              "icon": "lucide-table",
+              "title": "Calendar"
             }
           }
         ],
-        "currentTab": 1
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -220,13 +233,16 @@
       "obsidian-full-calendar:Open Full Calendar": false
     }
   },
-  "active": "7469008547136307",
+  "active": "9976bff532089859",
   "lastOpenFiles": [
+    "What it should look like.base",
+    "Planner/Calendar.base",
+    "Full Calendar/2025-12-27 Full Calendar Example Event.md",
     "notes/feedback-and-ideas.md",
+    "Planner/Timeline.base",
     "Planner/Kanban.base",
     "Personal/FirstMonday.md",
     "Planner/Website Redesign.md",
-    "Planner/Timeline.base",
     "Planner/Team Meeting.md",
     "Planner/Tasks.base",
     "Planner/Meeting.md",
@@ -235,7 +251,6 @@
     "Planner/Gantt.base",
     "Planner/Fix Login Bug.md",
     "Planner/Design Mockups.md",
-    "Planner/Calendar.base",
     "Planner",
     "Plannerrrrr rrrrrrrrrrr/Website Redesign.md",
     "Plannerrrrr rrrrrrrrrrr/Timeline.base",
@@ -245,7 +260,6 @@
     "Plannerrrrr rrrrrrrrrrr/Kanban.base",
     "Plannerrrrr rrrrrrrrrrr/Implement Frontend.md",
     "Plannerrrrr rrrrrrrrrrr/Grocery Shopping.md",
-    "Plannerrrrr rrrrrrrrrrr/Gantt.base",
     "Plannerrrrr rrrrrrrrrrr/Fix Login Bug.md",
     "Plannerrrrr rrrrrrrrrrr/Design Mockups.md",
     "Screenshot_20260105-200533.png",
@@ -258,7 +272,6 @@
     "notes/obsidian-planner-prd.md",
     "un.md",
     "notes/questions.md",
-    "notes/markwhen-integration-analysis.md",
     "notes/Screenshot_20260101-185045.png",
     "notes/Screenshot_20260101-185036.png",
     "notes/Screenshot_20260101-184811.png",

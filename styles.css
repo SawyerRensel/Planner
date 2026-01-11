@@ -1993,15 +1993,7 @@ body.is-mobile .planner-timeline-iframe-container {
    KANBAN VIEW STYLES
    ========================================================================== */
 
-/* Ensure Bases view wrapper fills available space */
-.workspace-leaf-content:has(.planner-bases-kanban) {
-  padding: 0;
-}
-
-.view-content:has(.planner-bases-kanban) {
-  padding: 0;
-}
-
+/* Kanban-specific padding - only targets the kanban view itself, not shared parent containers */
 .bases-view.planner-bases-kanban {
   padding: 0;
   scrollbar-gutter: auto;

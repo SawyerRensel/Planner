@@ -132,6 +132,9 @@ export class BasesCalendarView extends BasesView {
       this.calendar.destroy();
       this.calendar = null;
     }
+    // Clean up styles and classes added to the shared container
+    this.containerEl.removeClass('planner-bases-calendar');
+    this.containerEl.style.cssText = '';
   }
 
   private render(): void {
