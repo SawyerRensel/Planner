@@ -22,13 +22,19 @@ Planner is a powerful Obsidian plugin that brings together calendar visualizatio
 
 ## Who It's For
 
-**The Life Planner** — You want to see *everything* in one place. Work deadlines, doctor appointments, social events, hobby projects—your calendar and timeline show the full picture of your life, past, present, and future. Planner gives you that bird's-eye view while keeping every detail accessible.
+**The Casual Planner** — You want a simple, beautiful replacement for Google Calendar that lives inside your vault. No external accounts, no complex setup. Type "Dentist appointment next Tuesday at 2pm" and let natural language parsing do the rest. Set up recurring reminders and get on with your day.
 
-**The Casual Planner** — You just need a simple, beautiful calendar that lives in your vault. No complex setup, no external accounts. Create events with natural language, set up recurring reminders, and get on with your day.
+**The Life Planner** — You're a planning enthusiast who wants to track *everything*: habits, hobbies, vacation plans, weekend trips, even articles you've read. Your Calendar and Timeline reveal the full picture of your life—past, present, and future. Multiple color-coded calendars let you see it all or filter down to what matters now.
 
-**The Hobby Project Manager** — That novel you're writing, the woodworking project in the garage, the app you're building on weekends—they all deserve proper planning. Use the Timeline to visualize milestones and the hierarchy features to break big dreams into actionable steps.
+**The Hobby Project Manager** — That novel you're writing, the home renovation, the app you're building on weekends—they all deserve proper planning. Break big dreams into parent tasks and subtasks, visualize the entire journey on a Timeline, and watch your projects take shape one milestone at a time.
 
-**The Power Organizer** — You live in Kanban boards and thrive on dependencies. Block tasks until prerequisites are done, track progress percentages, and use every view to slice your work differently. Planner scales with your complexity.
+**The Content Creator** — You're a YouTuber, blogger, or podcaster managing a content pipeline. Track ideas through scripting, filming, editing, and publication with Kanban boards. See your publish dates on the Calendar and never miss an upload schedule again.
+
+**The Academic Researcher** — You're juggling research projects, paper deadlines, conference submissions, and teaching responsibilities. Track literature review progress, writing milestones, and advisor meetings in one place. Plan multi-year projects with clear dependencies and milestones.
+
+**The Freelancer** — You're managing multiple client projects simultaneously. Keep each client's work in separate calendars, track project milestones on the Timeline, and use Kanban to visualize what's in progress across all your engagements.
+
+**The Power Organizer** — You've outgrown Asana, Trello, and ClickUp—or you just want everything in Obsidian. Kanban boards, dependencies, progress tracking, batch operations: Planner gives you the tools to replicate complex workflows entirely within your vault.
 
 ## Views
 
