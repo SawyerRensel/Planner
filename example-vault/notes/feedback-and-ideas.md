@@ -173,6 +173,7 @@ Screenshot_20260101-185045.png]]:1  Failed to load resource: net::ERR_FILE_NOT_F
 - [ ] Still doesn't move notes when dragging into a different folder area
 
 - [ ] Scrolling with a touchpad is constrained to one axis at a time.  It would be nice to diagonally scroll / scroll both left-right and up-down at the smae time.
+- [ ] Let's have an option in the Kanban View Bases config menu for "freezing" the Column and Swimlane titles when scrolling (like how you can "freeze panes" in Excel)
 
 ## Release
 

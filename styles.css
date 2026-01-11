@@ -2261,7 +2261,7 @@ body.is-mobile .planner-timeline-iframe-container {
   width: 100%;
   min-height: 32px;
   padding: 4px;
-  margin-top: 4px;
+  margin-top: auto;
   border: 1px dashed var(--background-modifier-border);
   border-radius: 6px;
   background: transparent;
@@ -2269,6 +2269,7 @@ body.is-mobile .planner-timeline-iframe-container {
   color: var(--text-muted);
   opacity: 0.5;
   transition: all 0.15s ease;
+  flex-shrink: 0;
 }
 
 .planner-kanban-add-button:hover {
