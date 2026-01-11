@@ -201,7 +201,8 @@ Screenshot_20260101-185045.png]]:1  Failed to load resource: net::ERR_FILE_NOT_F
 ## Release
 
 - [ ] Planner publish 0.1.0
-	- [ ] Docs (Zensical) site (clone repo to ref folder)
+	- [x] Docs (Zensical) site (clone repo to ref folder)
+	- [ ] Add a Changelog page to the docs
 	- [ ] Issue Templates
 	- [ ] Project board
 	- [ ] Generate a lot of examples in `examples` vault per user persona in PRD

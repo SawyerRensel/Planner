@@ -102,3 +102,4 @@ nav:
     - Item Properties: reference/properties.md
     - Settings: reference/settings.md
     - Commands: reference/commands.md
+  - Changelog: changelog.md
