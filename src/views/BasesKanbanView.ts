@@ -2391,7 +2391,7 @@ export function createKanbanViewRegistration(plugin: PlannerPlugin): BasesViewRe
       {
         type: 'property',
         key: 'groupBy',
-        displayName: 'Group by (columns)',
+        displayName: 'Columns by',
         default: 'note.status',
         placeholder: 'Select property',
         filter: (propId: BasesPropertyId) =>
@@ -2400,7 +2400,7 @@ export function createKanbanViewRegistration(plugin: PlannerPlugin): BasesViewRe
       {
         type: 'property',
         key: 'swimlaneBy',
-        displayName: 'Swimlane by',
+        displayName: 'Swimlanes by',
         default: '',
         placeholder: 'None',
         filter: (propId: BasesPropertyId) =>
