@@ -125,8 +125,6 @@ export class BasesTimelineView extends BasesView {
    * Render the timeline view - called internally
    */
   private render(): void {
-    console.log('Timeline: render() called');
-
     // Set up container if needed
     if (!this.iframeContainer || !this.iframeContainer.isConnected) {
       this.setupContainer();
@@ -144,8 +142,6 @@ export class BasesTimelineView extends BasesView {
    * Set up the container with iframe
    */
   private setupContainer(): void {
-    console.log('Timeline: setupContainer() called');
-
     // Clear container
     this.containerEl.empty();
     this.containerEl.addClass('planner-bases-timeline');
@@ -155,15 +151,12 @@ export class BasesTimelineView extends BasesView {
 
     // Set up resize observer
     this.setupResizeObserver();
-
-    console.log('Timeline: container setup complete, iframe exists:', !!this.iframe);
   }
 
   /**
    * Called by Bases when data is updated
    */
   onDataUpdated(): void {
-    console.log('Timeline: onDataUpdated() called');
     this.render();
   }
 
@@ -208,38 +201,32 @@ export class BasesTimelineView extends BasesView {
    */
   private initTimeline(): void {
     if (!this.iframe) {
-      console.log('Timeline: No iframe element');
       return;
     }
-
-    console.log('Timeline: Initializing iframe...');
 
     // Pre-compute state before loading iframe so it's ready for requests
     this.computeState();
 
     // Verify bundled HTML is available
     if (!timelineHtml || timelineHtml.length === 0) {
-      console.error('Timeline: Bundled HTML is empty');
+      console.error('Planner: Timeline HTML is empty');
       this.showError('Timeline HTML not found. Please reinstall the plugin.');
       return;
     }
-    console.log('Timeline: HTML length:', timelineHtml.length);
 
     // Set up error handler
     this.iframe.onerror = (event) => {
-      console.error('Timeline: iframe error:', event);
+      console.error('Planner: Timeline iframe error:', event);
       this.showError('Failed to load Timeline content. Please try reloading.');
     };
 
     // Set up onload handler
     this.iframe.onload = () => {
-      console.log('Timeline: iframe loaded');
       this.isInitialized = true;
 
       // Push initial state to the Timeline after it's loaded
       // The Timeline's useLpc listeners receive state via "request" messages
       if (this.currentMarkwhenState && this.currentAppState) {
-        console.log('Timeline: Pushing initial state to iframe');
         this.lpcHost.sendState(this.currentMarkwhenState, this.currentAppState);
       }
     };
@@ -256,7 +243,6 @@ export class BasesTimelineView extends BasesView {
   private computeState(): void {
     // Get entries from Bases data
     const entries = this.getEntriesFromData();
-    console.log('Timeline: Computing state for', entries.length, 'entries');
 
     // Build adapter options
     const options: AdapterOptions = {
@@ -270,7 +256,6 @@ export class BasesTimelineView extends BasesView {
 
     // Adapt entries to Markwhen format
     const { parseResult, colorMap } = this.adapter.adapt(entries, options);
-    console.log('Timeline: Adapted to', parseResult.events?.children?.length || 0, 'events/groups');
 
     // Cache Markwhen state
     // Note: 'transformed' is required by the Timeline's timelineStore
@@ -292,7 +277,6 @@ export class BasesTimelineView extends BasesView {
    * Update the timeline with current data
    */
   private updateTimeline(): void {
-    console.log('Timeline: updateTimeline called, initialized:', this.isInitialized, 'iframe:', !!this.iframe);
     if (!this.iframe) return;
 
     // Compute and cache state
@@ -300,7 +284,6 @@ export class BasesTimelineView extends BasesView {
 
     // If initialized, push state update to Timeline
     if (this.isInitialized && this.currentMarkwhenState && this.currentAppState) {
-      console.log('Timeline: Pushing state update to iframe');
       this.lpcHost.sendState(this.currentMarkwhenState, this.currentAppState);
     }
   }

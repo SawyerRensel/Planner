@@ -4,37 +4,20 @@
     "type": "split",
     "children": [
       {
-        "id": "67cf914277d5a334",
+        "id": "eadd706cd85a3045",
         "type": "tabs",
         "children": [
           {
-            "id": "9e664d729a290c34",
+            "id": "ac0420ab563067b4",
             "type": "leaf",
             "state": {
-              "type": "bases",
-              "state": {
-                "file": "Personas/Casual-Planner/Kanban.base",
-                "viewName": "Kanban"
-              },
-              "icon": "square-kanban",
-              "title": "Kanban"
-            }
-          },
-          {
-            "id": "06730eea550c2ee3",
-            "type": "leaf",
-            "state": {
-              "type": "bases",
-              "state": {
-                "file": "Personas/Casual-Planner/Calendar.base",
-                "viewName": "Calendar"
-              },
-              "icon": "calendar-range",
-              "title": "Calendar"
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "New tab"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -91,7 +74,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 232.5
+    "width": 232.5,
+    "collapsed": true
   },
   "right": {
     "id": "ed9ed6ed0a6d4bf8",
@@ -168,12 +152,13 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "Personas/Casual-Planner/Calendar.base",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline"
+              "title": "Outline of Calendar"
             }
           }
         ],
@@ -199,12 +184,12 @@
       "planner:Open Planner Kanban": false
     }
   },
-  "active": "06730eea550c2ee3",
+  "active": "ac0420ab563067b4",
   "lastOpenFiles": [
-    "Personas/Casual-Planner/Kanban.base",
+    "Personas/Casual-Planner/Calendar.base",
     "Personas/Casual-Planner/Task List.base",
     "Personas/Casual-Planner/Timeline.base",
-    "Personas/Casual-Planner/Calendar.base",
+    "Personas/Casual-Planner/Kanban.base",
     "Personas/Casual-Planner/Movie Night.md.tmp.15112.1768174076092",
     "Personas/Casual-Planner/Coffee with Rachel.md.tmp.15112.1768174074445",
     "Personas/Casual-Planner/Oil Change.md.tmp.15112.1768174059397",

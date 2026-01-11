@@ -33,6 +33,9 @@ properties:
 views:
   - type: planner-task-list
     name: Task List
+    groupBy:
+      property: status
+      direction: ASC
     order:
       - title
       - calendar
