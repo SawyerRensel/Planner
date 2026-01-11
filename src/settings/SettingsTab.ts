@@ -3,6 +3,7 @@ import type PlannerPlugin from '../main';
 import { PlannerSettings, StatusConfig, PriorityConfig, DEFAULT_SETTINGS, OpenBehavior, getNextCalendarColor } from '../types/settings';
 import { BaseGeneratorService } from '../services/BaseGeneratorService';
 import { FolderSuggest } from '../components/suggests/FolderSuggest';
+import { FileSuggest } from '../components/suggests/FileSuggest';
 
 /**
  * Tab configuration
@@ -159,13 +160,16 @@ export class PlannerSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName('Item template')
       .setDesc('Template file path for new items (optional)')
-      .addText(text => text
-        .setPlaceholder('Templates/planner-item.md')
-        .setValue(this.plugin.settings.itemTemplate)
-        .onChange(async (value) => {
-          this.plugin.settings.itemTemplate = value;
-          await this.plugin.saveSettings();
-        }));
+      .addText(text => {
+        text
+          .setPlaceholder('Templates/planner-item.md')
+          .setValue(this.plugin.settings.itemTemplate)
+          .onChange(async (value) => {
+            this.plugin.settings.itemTemplate = value;
+            await this.plugin.saveSettings();
+          });
+        new FileSuggest(this.app, text.inputEl);
+      });
 
     new Setting(containerEl)
       .setName('Date format')

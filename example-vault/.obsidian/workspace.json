@@ -27,29 +27,16 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "notes/feedback-and-ideas.md",
+                "file": "Templates/Planner Template.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "feedback-and-ideas"
-            }
-          },
-          {
-            "id": "c3e1c47fc60fd006",
-            "type": "leaf",
-            "state": {
-              "type": "bases",
-              "state": {
-                "file": "Planner/Kanban.base",
-                "viewName": "Kanban"
-              },
-              "icon": "square-kanban",
-              "title": "Kanban"
+              "title": "Planner Template"
             }
           }
         ],
-        "currentTab": 2
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -224,14 +211,19 @@
       "planner:Open Planner Kanban": false
     }
   },
-  "active": "c3e1c47fc60fd006",
+  "active": "7590a842cb82c1de",
   "lastOpenFiles": [
+    "Planner/test.md",
     "Planner/Timeline.base",
-    "Planner/Kanban.base",
-    "Planner/Task List.base",
+    "Templates/Planner Template.md",
+    "Planner/Fix Login Bug.md",
+    "Planner/Meeting.md",
+    "Templates/Daily Note Template.md",
     "notes/feedback-and-ideas.md",
-    "Untitled.base",
+    "Planner/Task List.base",
     "Planner/Calendar.base",
+    "Planner/Kanban.base",
+    "Untitled.base",
     "TaskNotes/Views/mini-calendar-default.base",
     "notes/obsidian-planner-prd.md",
     "Untitled.md",
@@ -243,10 +235,8 @@
     "Personal/FirstMonday.md",
     "Planner/Website Redesign.md",
     "Planner/Team Meeting.md",
-    "Planner/Meeting.md",
     "Planner/Implement Frontend.md",
     "Planner/Grocery Shopping.md",
-    "Planner/Fix Login Bug.md",
     "Planner/Design Mockups.md",
     "Plannerrrrr rrrrrrrrrrr/Website Redesign.md",
     "Plannerrrrr rrrrrrrrrrr/Team Meeting.md",
@@ -257,12 +247,9 @@
     "Plannerrrrr rrrrrrrrrrr/Design Mockups.md",
     "Screenshot_20260105-200533.png",
     "Screenshot_20260108-193249.png",
-    "Planner/test.md",
     "Personal/test 1.md",
     "Personal/test.md",
     "Vacation/Vacation.md",
-    "un.md",
-    "notes/questions.md",
     "notes/Screenshot_20260101-185045.png",
     "notes/Screenshot_20260101-185036.png",
     "notes/Screenshot_20260101-184811.png",

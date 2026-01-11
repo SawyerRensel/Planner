@@ -139,7 +139,7 @@ export default class PlannerPlugin extends Plugin {
     // Open Task List View
     this.addCommand({
       id: 'open-task-list',
-      name: 'Open Task List View',
+      name: 'Open task list view',
       callback: () => {
         this.activateTaskListView();
       },
@@ -148,7 +148,7 @@ export default class PlannerPlugin extends Plugin {
     // Open Calendar View
     this.addCommand({
       id: 'open-calendar',
-      name: 'Open Calendar View',
+      name: 'Open calendar view',
       callback: () => {
         this.activateCalendarView();
       },
@@ -157,7 +157,7 @@ export default class PlannerPlugin extends Plugin {
     // Open Timeline View
     this.addCommand({
       id: 'open-timeline',
-      name: 'Open Timeline View',
+      name: 'Open timeline view',
       callback: () => {
         this.activateTimelineView();
       },
@@ -166,7 +166,7 @@ export default class PlannerPlugin extends Plugin {
     // Open Kanban View
     this.addCommand({
       id: 'open-kanban',
-      name: 'Open Kanban View',
+      name: 'Open kanban view',
       callback: () => {
         this.activateKanbanView();
       },
@@ -175,7 +175,7 @@ export default class PlannerPlugin extends Plugin {
     // Create New Item command (opens Item Modal)
     this.addCommand({
       id: 'create-item',
-      name: 'Create New Item',
+      name: 'Create new item',
       callback: () => {
         openItemModal(this, { mode: 'create' });
       },
@@ -184,7 +184,7 @@ export default class PlannerPlugin extends Plugin {
     // Quick Capture command (opens Item Modal with NLP support)
     this.addCommand({
       id: 'quick-capture',
-      name: 'Quick Capture',
+      name: 'Quick capture',
       callback: () => {
         openItemModal(this, { mode: 'create' });
       },
@@ -193,7 +193,7 @@ export default class PlannerPlugin extends Plugin {
     // Navigate to today in calendar
     this.addCommand({
       id: 'calendar-today',
-      name: 'Calendar: Go to Today',
+      name: 'Calendar: Go to today',
       callback: () => {
         // Dispatch custom event that calendar view listens for
         window.dispatchEvent(new CustomEvent('planner:calendar-today'));
@@ -203,7 +203,7 @@ export default class PlannerPlugin extends Plugin {
     // Navigate forward in calendar
     this.addCommand({
       id: 'calendar-next',
-      name: 'Calendar: Go to Next Period',
+      name: 'Calendar: Go to next period',
       callback: () => {
         window.dispatchEvent(new CustomEvent('planner:calendar-next'));
       },
@@ -212,7 +212,7 @@ export default class PlannerPlugin extends Plugin {
     // Navigate backward in calendar
     this.addCommand({
       id: 'calendar-prev',
-      name: 'Calendar: Go to Previous Period',
+      name: 'Calendar: Go to previous period',
       callback: () => {
         window.dispatchEvent(new CustomEvent('planner:calendar-prev'));
       },
@@ -221,7 +221,7 @@ export default class PlannerPlugin extends Plugin {
     // List all items command (for debugging)
     this.addCommand({
       id: 'list-items',
-      name: 'List All Items (Debug)',
+      name: 'List all items (debug)',
       callback: async () => {
         const items = await this.itemService.getAllItems();
         console.log('Planner items:', items);
