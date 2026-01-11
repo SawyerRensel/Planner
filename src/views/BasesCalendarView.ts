@@ -132,6 +132,9 @@ export class BasesCalendarView extends BasesView {
       this.calendar.destroy();
       this.calendar = null;
     }
+    // Clean up styles and classes added to the shared container
+    this.containerEl.removeClass('planner-bases-calendar');
+    this.containerEl.style.cssText = '';
   }
 
   private render(): void {
@@ -1267,7 +1270,7 @@ export class BasesCalendarView extends BasesView {
 export function createCalendarViewRegistration(plugin: PlannerPlugin): BasesViewRegistration {
   return {
     name: 'Calendar',
-    icon: 'calendar-fold',
+    icon: 'calendar-range',
     factory: (controller: QueryController, containerEl: HTMLElement) => {
       return new BasesCalendarView(controller, containerEl, plugin);
     },

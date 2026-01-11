@@ -1,7 +1,7 @@
 # Planner - Product Requirements Document
 
-> **Version:** 2.4.0
-> **Last Updated:** 2026-01-03
+> **Version:** 2.7.0
+> **Last Updated:** 2026-01-11
 > **Author:** Claude and Sawyer Rensel
 > **Status:** Active
 
@@ -32,7 +32,7 @@
 ### 1.2 Design Principles
 
 1. **Modular Metadata**: Every field is independent and optional. Users have full control to edit items in plain text.
-2. **Bases-First**: All views are `.base` files. The plugin extends Bases with custom view types (Calendar, Gantt, Kanban).
+2. **Bases-First**: All views are `.base` files. The plugin extends Bases with custom view types (Calendar, Timeline, Kanban).
 3. **Items, Not Types**: Everything is an "Item". Tags (`#task`, `#event`) differentiate behavior, not separate data models.
 4. **Progressive Complexity**: Simple for basic calendar use, powerful for project management.
 
@@ -43,7 +43,7 @@ The plugin is successful when a user can:
 2. Have frontmatter auto-populated from a template
 3. View all items on Calendar (year/month/week/3-day/day/list layouts)
 4. Filter items using Obsidian Bases query system
-5. Visualize projects on Gantt and Kanban views
+5. Visualize events on Timeline and manage tasks on Kanban views
 
 ### 1.4 Non-Goals (v1.0)
 
@@ -58,11 +58,11 @@ The plugin is successful when a user can:
 
 ### 2.1 Primary Persona: The Life Planner
 
-> "I want to plan out everything: every event, every task. I want to see every aspect of my life on a Calendar and Gantt chart because they give me a big picture of my life—past, present, and future."
+> "I want to plan out everything: every event, every task. I want to see every aspect of my life on a Calendar and Timeline because they give me a big picture of my life—past, present, and future."
 
 **Needs:**
 - Quick event creation from desktop and mobile
-- Year-at-a-glance Gantt roadmap
+- Year-at-a-glance Timeline visualization
 - Multiple calendars with distinct colors
 - All calendar layouts (year, month, week, 3-day, day, list)
 - Project/task management for hobby projects
@@ -74,7 +74,7 @@ The plugin is successful when a user can:
 | Persona | Primary Need | Key Features |
 |---------|--------------|--------------|
 | **Casual Planner** | Simple calendar replacement | Calendar views, quick capture, recurring events |
-| **Hobby Project Manager** | Long-term project visualization | Gantt view, parent/subtask hierarchy |
+| **Hobby Project Manager** | Long-term project visualization | Timeline view, parent/subtask hierarchy |
 | **Power Organizer** | Comprehensive task management | Kanban, dependencies, all views |
 
 ---
@@ -120,7 +120,7 @@ Project (parent)
 - `parent` field links to parent item
 - `children` field lists child item links
 - Nesting depth is unlimited
-- In Gantt: children appear indented under parents
+- In Timeline: children grouped under parents
 - In List: collapsible tree structure
 
 ### 3.4 Dependencies
@@ -357,45 +357,64 @@ Full calendar display using FullCalendar library.
 - **Title Field**: Select which field displays as item text on calendar
 - **Color By**: Select field to color items by (calendar, priority, status, etc.)
 
-### 5.2 Gantt View
+### 5.2 Kanban View
 
-Timeline visualization using DHTMLX Gantt.
-
-**Features:**
-- Configurable bar start/end fields (e.g., `date_start` → `date_due`)
-- Color bars by any field (same as Calendar)
-- Swimlanes: Group by any field (calendar, parent, status)
-- Dependency arrows between items
-- Progress bars (drag to update)
-- Milestones (items where start = end)
-- Zoom levels: day, week, month, quarter, year
-- Today marker with auto-scroll
-
-**Bar Interactions:**
-- Drag ends to adjust dates
-- Drag whole bar to reschedule
-- Click for popup with quick-edit
-- Create dependencies by dragging between bars
-
-**Mobile:**
-- Tap: Open popup
-- Long-press: Initiate drag
-- Pinch: Zoom
-
-### 5.3 Kanban View
-
-Drag-and-drop board with configurable columns.
+Drag-and-drop board with configurable columns and rich card styling.
 
 **Features:**
-- Columns by any field (status, priority, calendar, etc.)
-- Drag cards between columns (updates field value)
-- Card shows: title, summary, dates, tags
-- Cover images via `cover` field
-- Configurable card properties
+- Columns by any categorical Bases property (status, priority, calendar, context, tags, etc.)
+- Swimlanes by any categorical field for additional grouping (2D grid layout)
+- Drag cards between columns and swimlanes (updates field values)
+- Card displays: title, summary, dates, and any property enabled in Bases Properties
+- Cover images via configurable text field (user selects field in Bases config, default: none)
+- Colored card borders based on "Color by" field (configurable border style)
+- Styled field badges with custom colors (status, priority, calendar, date start, date end)
+- Configurable visible properties (Bases)
 - WIP limits per column (optional)
-- Swimlanes for additional grouping
+- Search bar
+- Virtual scrolling for columns with 15+ cards
 
-### 5.4 Task List View
+**Bases Configuration Menu Options:**
+- **Group By (Columns)**: Select categorical property for columns (status, priority, calendar, etc.)
+- **Swimlane By**: Select categorical property for horizontal grouping (optional)
+- **Color By**: Select field to color cards by (applies to border color)
+- **Border Style**: `none`, `left-accent`, `full-border`
+- **Cover Field**: Select text property for cover image (default: none)
+- **Cover Display**: `none`, `banner`, `thumbnail-left`, `thumbnail-right`, `background`
+- **Date Start Field**: Select date property for start date badge (default: `date_start_scheduled`)
+- **Date End Field**: Select date property for end date badge (default: `date_end_scheduled`)
+- **Badge Placement**: `inline`, `properties-section`
+- **Column Width**: Slider (200-500px, default 280px)
+- **Hide Empty Columns**: Toggle to hide columns with no cards
+- **Enable Search**: Toggle search filter bar
+
+**Card Anatomy:**
+```
+┌─────────────────────────────────┐
+│ ▐ (left accent - if enabled)   │
+│ ┌─────────────────────────────┐ │
+│ │ [Cover Image - if enabled]  │ │
+│ ├─────────────────────────────┤ │
+│ │ Task Title                  │ │
+│ │ [badges inline - if enabled]│ │
+│ │ Summary text if present...  │ │
+│ ├─────────────────────────────┤ │
+│ │ [Properties section - if    │ │
+│ │  badge placement = section] │ │
+│ │ 🔵 In-Progress  🟠 High     │ │
+│ │ 📅 1/15/2026  🏁 1/20/2026  │ │
+│ │ ~Personal                   │ │
+│ └─────────────────────────────┘ │
+└─────────────────────────────────┘
+
+Badge styling:
+- Status/Priority: colored bg from settings, Lucide icon
+- Calendar: colored bg from settings
+- Date Start: 📅 (calendar icon), accent color bg
+- Date End: 🏁 (calendar-check icon), accent color bg
+```
+
+### 5.3 Task List View
 
 Table/list view with sortable columns.
 
@@ -407,16 +426,16 @@ Table/list view with sortable columns.
 - Nested subtasks (collapsible tree)
 - Quick status toggle
 
-### 5.5 Timeline View
+### 5.4 Timeline View
 
 Beautiful chronological timeline visualization powered by [Markwhen](https://markwhen.com/).
 
 **Overview:**
-Unlike the Gantt View (which focuses on project management with dependencies, progress bars, and hierarchies), the Timeline View provides an elegant, narrative-style visualization of events over time. It's ideal for:
+The Timeline View provides an elegant, narrative-style visualization of events over time. It's ideal for:
 - Life timelines and personal history
 - Project milestones and roadmaps
 - Historical event visualization
-- Event-centric planning (vs. task-centric Gantt)
+- Event-centric planning
 
 **Architecture:**
 The Timeline View adapts the Markwhen Timeline component to work with Obsidian Planner's frontmatter schema. Instead of parsing Markwhen's text syntax, we transform frontmatter data into Markwhen's JSON format and communicate via the LPC (Local Procedure Call) protocol.
@@ -427,7 +446,7 @@ Frontmatter (YAML) ←→ Adapter Layer ←→ LPC Messages ←→ Markwhen Time
 
 **Features:**
 - **Grouping**: Group events by `calendar`, `status`, `parent`, `people`, or `priority`
-- **Color By**: Color event bars by any field (same as Calendar/Gantt)
+- **Color By**: Color event bars by any field (same as Calendar)
 - **Drag to Edit**: Drag events to reschedule (updates frontmatter dates)
 - **Click to Edit**: Single-click opens ItemModal for full editing
 - **Create Events**: Click empty space to create new event via ItemModal
@@ -459,23 +478,6 @@ Frontmatter (YAML) ←→ Adapter Layer ←→ LPC Messages ←→ Markwhen Time
 | Click empty space | Create new event via ItemModal (date pre-filled) |
 | Scroll/pinch | Zoom in/out (Markwhen built-in) |
 | Pan | Navigate timeline (Markwhen built-in) |
-
-**Differences from Gantt View:**
-
-| Feature | Gantt View | Timeline View |
-|---------|------------|---------------|
-| Library | DHTMLX Gantt | Markwhen Timeline |
-| Focus | Project management | Event visualization |
-| Dependencies | ✅ Arrows between tasks | ❌ Not supported |
-| Progress bars | ✅ Drag to update | ✅ Display only |
-| Hierarchy | ✅ Parent/child indentation | ❌ Flat (groups only) |
-| Milestones | ✅ Diamond markers | Regular events |
-| Grid/Table | ✅ Configurable columns | ❌ No table |
-| Aesthetic | Functional/dense | Clean/narrative |
-
-**When to Use:**
-- **Timeline View**: For visualizing life events, historical timelines, or when you want a clean, beautiful overview
-- **Gantt View**: For project planning with dependencies, progress tracking, and task hierarchies
 
 ---
 
@@ -619,7 +621,7 @@ Parent/child relationships for project organization.
 - `parent` links to parent item
 - `children` lists child items
 - Parent shows aggregate progress of children (optional)
-- In Gantt: children indented under parent
+- In Timeline: children grouped under parent
 - In List: collapsible tree
 - Completion rules configurable (e.g., parent can't complete until children done)
 
@@ -632,7 +634,6 @@ Block items based on other items.
 - `blocking` computed at runtime (reverse lookup)
 - Blocked items show indicator in views
 - Optional: Prevent status change if blocked
-- Gantt shows dependency arrows
 
 ### 6.5 Batch Operations
 
@@ -888,35 +889,7 @@ Unified modal for creating and editing items with icon-based action bar.
 └─────────────────────────────────┘
 ```
 
-### 8.4 Gantt View
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  Gantt                                 [Month ▼]  [+ New]   │
-├─────────────────────────────────────────────────────────────┤
-│  Start: [date_start ▼]  End: [date_due ▼]  Group: [None ▼]  │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│            │ Jan 6 │ Jan 13│ Jan 20│ Jan 27│ Feb 3 │        │
-│  ──────────┼───────┼───────┼───────┼───────┼───────┤        │
-│            │       │       │       │       │       │        │
-│  Website   │ ██████████████│       │       │       │        │
-│  Redesign  │               │       │       │       │        │
-│            │       │       │       │       │       │        │
-│    Design  │  ─────┼──▓▓▓▓▓│       │       │       │        │
-│            │       │       │       │       │       │        │
-│    Frontend│       │ └─────┼▓▓▓▓▓▓▓│       │       │        │
-│            │       │       │       │       │       │        │
-│  Mobile App│       │       │ ░░░░░░░░░░░░░░│       │        │
-│            │       │       │       │       │       │        │
-│  Launch ◆  │       │       │       │   ◆   │       │        │
-│            │       │       │       │       │       │        │
-└─────────────────────────────────────────────────────────────┘
-
-Legend: ██ Done  ▓▓ In-Progress  ░░ To-Do  ◆ Milestone  ─► Dependency
-```
-
-### 8.5 Kanban View
+### 8.4 Kanban View
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -939,7 +912,7 @@ Legend: ██ Done  ▓▓ In-Progress  ░░ To-Do  ◆ Milestone  ─► Dep
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 8.6 Timeline View
+### 8.5 Timeline View
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -993,7 +966,6 @@ Legend: ████ Complete  ▓▓▓▓ In Progress  ░░░░ Scheduled
 | Platform | Obsidian Plugin API | Core integration |
 | Views | Obsidian Bases | View system, filtering, queries |
 | Calendar | FullCalendar | Calendar rendering |
-| Gantt | DHTMLX Gantt | Project timeline visualization |
 | Timeline | Markwhen Timeline | Event timeline visualization |
 | Recurrence | rrule | iCal RRULE parsing |
 | NLP Dates | chrono-node | Natural language parsing |
@@ -1014,7 +986,6 @@ src/
 │   └── DependencyService.ts  # Dependency graph computation
 ├── views/
 │   ├── CalendarView.ts       # FullCalendar integration
-│   ├── GanttView.ts          # DHTMLX Gantt integration
 │   ├── TimelineView.ts       # Markwhen Timeline integration
 │   ├── KanbanView.ts         # Kanban board
 │   └── TaskListView.ts       # Table/list view
@@ -1038,7 +1009,7 @@ The plugin registers custom view types with Obsidian Bases:
 ```typescript
 // Conceptual - actual API TBD
 bases.registerViewType('planner-calendar', CalendarView);
-bases.registerViewType('planner-gantt', GanttView);
+bases.registerViewType('planner-timeline', TimelineView);
 bases.registerViewType('planner-kanban', KanbanView);
 ```
 
@@ -1322,34 +1293,26 @@ appState: {
 
 **Deliverable:** Can create and manage recurring items.
 
-### Phase 5: Gantt View
-
-**Goal:** Project timeline visualization
-
-- [ ] DHTMLX Gantt integration
-- [ ] Configurable bar start/end fields
-- [ ] Swimlanes by field
-- [ ] Dependency arrows
-- [ ] Progress bars
-- [ ] Drag to reschedule
-- [ ] Zoom levels
-
-**Deliverable:** Can visualize projects on a timeline with dependencies.
-
-### Phase 6: Kanban View
+### Phase 5: Kanban View ✅
 
 **Goal:** Board-based task management
 
-- [ ] Kanban component
-- [ ] Drag-and-drop between columns
-- [ ] Configurable column field
-- [ ] Card customization (properties shown)
-- [ ] Cover images
-- [ ] Swimlanes
+- [x] Kanban component
+- [x] Drag-and-drop between columns
+- [x] Configurable column field
+- [x] Card customization (properties shown)
+- [x] Cover images
+- [x] Swimlanes
+- [x] Styled field badges (status, priority, calendar, dates)
+- [x] Configurable border styles (none, left-accent, full-border)
+- [x] Search bar
+- [x] Virtual scrolling for large columns
+- [x] Hide empty columns option
+- [x] Configurable column width
 
 **Deliverable:** Can manage tasks in a Kanban board.
 
-### Phase 7: Polish & Optimization
+### Phase 6: Polish & Optimization
 
 **Goal:** Production-ready quality
 
@@ -1362,11 +1325,11 @@ appState: {
 
 **Deliverable:** Plugin ready for public release.
 
-### Phase 8: Timeline View
+### Phase 7: Timeline View ✅
 
 **Goal:** Beautiful event timeline visualization powered by Markwhen
 
-**Research & Design (Completed):**
+**Research & Design:**
 - [x] Analyze Markwhen ecosystem (Parser, Timeline, View-Client, Obsidian Plugin)
 - [x] Document LPC communication protocol
 - [x] Design frontmatter-to-Markwhen adapter architecture
@@ -1374,37 +1337,37 @@ appState: {
 - [x] Determine interaction patterns (click, drag, create)
 
 **Implementation:**
-- [ ] Create `MarkwhenAdapter` class
-  - [ ] `toEvent()`: Transform `BasesEntry` → Markwhen Event
-  - [ ] `toEventGroup()`: Build groups from `groupBy` field
-  - [ ] `buildPathMap()`: Create path ↔ filePath mapping
-- [ ] Create `LpcHost` class
-  - [ ] Handle `postMessage` communication with iframe
-  - [ ] Implement message type handlers
-  - [ ] Manage appState (dark mode, colors, selection)
-- [ ] Create `BasesTimelineView` class
-  - [ ] Register as Bases view type (`planner-timeline`)
-  - [ ] Build toolbar (minimal - leverage Markwhen's built-in controls)
-  - [ ] Embed Markwhen Timeline iframe
-  - [ ] Handle data refresh on Bases query changes
-- [ ] Implement edit handlers
-  - [ ] `handleEditDateRange()`: Update frontmatter dates
-  - [ ] `handleNewEvent()`: Open ItemModal with pre-filled dates
-  - [ ] `handleEventClick()`: Open ItemModal for editing
-- [ ] Add Bases configuration options
-  - [ ] Group By selector
-  - [ ] Color By selector
-  - [ ] Date Start/End field selectors
-  - [ ] Title field selector
-- [ ] Bundle Markwhen Timeline
-  - [ ] Decide: bundle locally vs. load from CDN
-  - [ ] Configure iframe sandbox permissions
-  - [ ] Handle Obsidian theme sync (dark/light mode)
-- [ ] Testing
-  - [ ] Verify bidirectional sync (edit in Timeline → frontmatter updated)
-  - [ ] Test all groupBy options
-  - [ ] Test colorBy with calendar/priority/status
-  - [ ] Mobile/touch interaction testing
+- [x] Create `MarkwhenAdapter` class
+  - [x] `toEvent()`: Transform `BasesEntry` → Markwhen Event
+  - [x] `toEventGroup()`: Build groups from `groupBy` field
+  - [x] `buildPathMap()`: Create path ↔ filePath mapping
+- [x] Create `LpcHost` class
+  - [x] Handle `postMessage` communication with iframe
+  - [x] Implement message type handlers
+  - [x] Manage appState (dark mode, colors, selection)
+- [x] Create `BasesTimelineView` class
+  - [x] Register as Bases view type (`planner-timeline`)
+  - [x] Build toolbar (minimal - leverage Markwhen's built-in controls)
+  - [x] Embed Markwhen Timeline iframe
+  - [x] Handle data refresh on Bases query changes
+- [x] Implement edit handlers
+  - [x] `handleEditDateRange()`: Update frontmatter dates
+  - [x] `handleNewEvent()`: Open ItemModal with pre-filled dates
+  - [x] `handleEventClick()`: Open ItemModal for editing
+- [x] Add Bases configuration options
+  - [x] Group By selector
+  - [x] Color By selector
+  - [x] Date Start/End field selectors
+  - [x] Title field selector
+- [x] Bundle Markwhen Timeline
+  - [x] Decide: bundle locally vs. load from CDN
+  - [x] Configure iframe sandbox permissions
+  - [x] Handle Obsidian theme sync (dark/light mode)
+- [x] Testing
+  - [x] Verify bidirectional sync (edit in Timeline → frontmatter updated)
+  - [x] Test all groupBy options
+  - [x] Test colorBy with calendar/priority/status
+  - [x] Mobile/touch interaction testing
 
 **Deliverable:** Can visualize events on a beautiful Markwhen timeline with full editing capabilities.
 
@@ -1454,9 +1417,8 @@ Common patterns:
 
 - TaskNotes Plugin: UI/UX inspiration for Calendar and Kanban
 - FullCalendar: https://fullcalendar.io/
-- DHTMLX Gantt: https://docs.dhtmlx.com/gantt/
-- GitHub Projects: Gantt and configurability inspiration
-- Markwhen: https://markwhen.com/ (Timeline View inspiration)
+- GitHub Projects: Kanban and configurability inspiration
+- Markwhen: https://markwhen.com/ (Timeline View)
   - Timeline component: https://github.com/mark-when/timeline
   - Parser: https://github.com/mark-when/parser
   - View Client (LPC): https://github.com/mark-when/view-client
@@ -1476,8 +1438,11 @@ Common patterns:
 | 2.0.0 | 2025-12-30 | Claude & Sawyer | Complete rewrite for ground-up build. Removed task boolean (use tags). Simplified architecture. Clear phased roadmap. Deferred calendar sync, HTTP API, time tracking to v1.1+. |
 | 2.1.0 | 2026-01-01 | Claude & Sawyer | Unified Item Modal feature: merged Quick Capture with Item Edit Modal. Added icon-based action bar, context menus for dates/recurrence/priority/status, collapsible Details section, and action buttons (Open Note, Delete, Cancel, Save). Inspired by TaskNotes UI patterns. |
 | 2.2.0 | 2026-01-03 | Claude & Sawyer | Item Modal enhancements: field autocomplete (Context, People, Parent, Tags, Blocked by), link format support (respects Wikilinks setting), pull existing values when editing, Summary field, Note Content field with markdown preview. Calendar View improvements: fixed drag-and-drop, mobile-optimized toolbar, configurable Bases options (Date Start/End fields, Title field, Default View Mode). Settings additions: Status and Priority icons (Lucide), calendar font size slider, Open Behavior setting. Phases 1-4 completed. |
-| 2.3.0 | 2026-01-03 | Claude & Sawyer | Gantt library decision: Replaced Frappe Gantt with DHTMLX Gantt (GPL v2.0) for better TypeScript support, mobile compatibility, and richer feature set (swimlanes, 4 link types, undo/redo, keyboard navigation). Plugin will be released under GPL license. |
-| 2.4.0 | 2026-01-03 | Claude & Sawyer | **Timeline View**: New view powered by Markwhen Timeline. Provides beautiful chronological event visualization complementing the project-focused Gantt View. Features: iframe-based architecture with LPC bidirectional communication, configurable groupBy (calendar/status/parent/people/priority), colorBy support, drag-to-reschedule with frontmatter sync, click-to-edit via ItemModal, Markwhen's built-in zoom/pan/navigation controls. Added Section 5.5 (Timeline View), Section 8.6 (UI mockup), Section 9.5 (Markwhen integration architecture), and Phase 8 implementation roadmap. |
+| 2.3.0 | 2026-01-03 | Claude & Sawyer | **Timeline View**: New view powered by Markwhen Timeline. Provides beautiful chronological event visualization. Features: iframe-based architecture with LPC bidirectional communication, configurable groupBy (calendar/status/parent/people/priority), colorBy support, drag-to-reschedule with frontmatter sync, click-to-edit via ItemModal, Markwhen's built-in zoom/pan/navigation controls. |
+| 2.4.0 | 2026-01-08 | Claude & Sawyer | Timeline View implementation completed. All Phase 7 tasks marked complete. |
+| 2.5.0 | 2026-01-10 | Claude & Sawyer | Removed Gantt View feature from PRD. Simplified roadmap to focus on Calendar, Timeline, and Kanban views. Renumbered phases. |
+| 2.6.0 | 2026-01-10 | Claude & Sawyer | **Kanban View enhancements**: Added Bases Configuration Menu Options (Group By, Swimlane By, Color By, Border Style, Cover Field, Cover Display, Date Start/End Fields, Badge Placement, Column Width, Hide Empty Columns, Enable Search). Added styled field badges for status, priority, calendar, and dates with custom colors and Lucide icons. Added card anatomy diagram. Added virtual scrolling for 15+ cards. |
+| 2.7.0 | 2026-01-11 | Claude & Sawyer | **Kanban View implementation completed**: Phase 5 marked complete. All Kanban features now implemented including drag-and-drop, swimlanes, cover images, styled badges, configurable columns, search, and virtual scrolling. |
 
 ---
 

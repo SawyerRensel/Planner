@@ -34,7 +34,7 @@ parent: "[[Website Redesign]]"
 children:
 blocked_by:
   - "[[Design Mockups]]"
-cover:
+cover: "[[../Screenshot_20260105-200533.png]]"
 color:
 ---
 

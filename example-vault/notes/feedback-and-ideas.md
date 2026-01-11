@@ -78,12 +78,105 @@
 - [x] Planner remove redundant/deprecated settings menus
 - [x] Planner group settings into tabs
 - [x] Planner need to show all properties for date and date and time as options in the date config menus, not just fields that have “date” token in them
-- [ ] Planner Kanban view
-- [ ] Planner Improve performance for Timeline view
 - [x] Fix Item Modal on mobile.  Make it appear centered.  Resize the modal container according to keyboard height when keyboard is activated
-- [ ] Planner when **editing** an existing note (e.g. a book note that has different frontmatter fields) in Item Modal, don’t delete/replace any pre-existing fields in that note.  Merge duplicates, but otherwise append *only append the fields modified in the Edit Item Modal to the frontmatter of that note*.  For example, if I open a book note in the Item Modal to edit, then modify the status, then save, it should only append the status field and value to the book note’s frontmatter.  If I haven’t modified the other fields, don’t add those fields to the frontmatter of that note.
-- [ ] (v0.0.2) What if the Edit Item Modal's expand details dynamically pulls frontmatter content from whatever note is selected?  Right now it's still very tailored to Planner/Calendar users
-- [ ] Planner Timeline add config menu for default zoom and center for Timeline View.
+- [x] Planner when **editing** an existing note (e.g. a book note that has different frontmatter fields) in Item Modal, don’t delete/replace any pre-existing fields in that note.  Merge duplicates, but otherwise append *only append the fields modified in the Edit Item Modal to the frontmatter of that note*.  For example, if I open a book note in the Item Modal to edit, then modify the status, then save, it should only append the status field and value to the book note’s frontmatter.  If I haven’t modified the other fields, don’t add those fields to the frontmatter of that note.
+- [ ] ~~Planner Timeline add config menu for default zoom and center for Timeline View.~~
+	- tried and failed.  Not worth the effort right now.
+- [ ] Planner Improve performance for Timeline view.  Should be snappy fast and buttery smooth like Meridiem.
+
+
+## Kanban View
+
+- [x] Check the PRD to brush up on what you wanted
+- [x] "Columns by" menu to allow picking how to configure Kanban columns.  
+- [x] clear borders for cards (support colors?)
+- [x] (Do this after feature parity with TaskNotes' kanban) For frontmatter fields with customized colors in Planner Settings (calendar, status, priority), style those fields like how they are styled in Task List View and the NLP quick capture parser preview.  That is, if the fields are toggled on in the Bases' properties to begin with.  Ask my clarifying questions.
+- [x] Support for cover images!
+- [x] Bases properties are not driving/controlling the content displayed on the Kanban cards.  If I toggle on tags, I should see tags appear on the Kanban cards, etc.
+	- [x] There's no recurrence badge even when repeat_frequency is toggled on.  (use repeat_frequency field for the special badge)
+- [x] Swimlanes aren't working
+- [ ] Cover image not displaying image.   
+- [x] Let's add another config menu slider to control cover image height when Cover image is set to `banner (top)`
+- [x] Don't squeeze cards into view.  Allow cards to appear at their normal height.  Allow scrolling down the board. 
+- [x] Badge icons on cards are too big and extend beyond the size of their respective badges
+
+
+| Working          | Not working     | Partially Working  | Comment                                                                                             |
+| ---------------- | --------------- | ------------------ | --------------------------------------------------------------------------------------------------- |
+| Group by         |                 |                    |                                                                                                     |
+| Color by         |                 |                    |                                                                                                     |
+| Border style     |                 |                    |                                                                                                     |
+|                  |                 | Cover field        | Selecting a value changes card layout, but no image is shown.                                       |
+|                  |                 | Cover display      | Selecting a value changes card layout, but no image is shown.                                       |
+| Date start field |                 |                    |                                                                                                     |
+| Date end field   |                 |                    |                                                                                                     |
+|                  | Badge placement |                    | Has no effect                                                                                       |
+|                  |                 | Hide empty columns | Works when you set it to `Yes`, but when you set it back to `No`, the empty columns don't reappear. |
+- [x] Don't show null values for properties on cards.  If null, don't display
+- [x] `summary` field is always displaying.  This needs to be driven by whether the summary field is toggled on in Bases properties.  Additionally, let's add a `Summary by` config menu for selecting which text-type field displays as a summary in Kanban cards
+- [x] Swimlanes are partially working.  We need to make sure the columns containers extend fully even when they are empty.  Additionally, the column styling is being affected by adding swimlanes.  For instance, when Group by is set to status without swimlanes, it shows the colored icons for statuses in the columns.  When swimlanes are toggled on, those icons disappear. 
+- [ ] Cover display is failing
+
+```Obsidian Developer Console
+plugin:planner:450 Loading Planner plugin
+plugin:planner:450 Planner: Registered Bases views
+plugin:planner:450 Planner plugin loaded
+plugin:tasknotes:1850 TaskNotes: Starting early migration check...
+plugin:tasknotes:86 [TaskNotes][Bases] Successfully registered view via public API: tasknotesTaskList
+plugin:tasknotes:86 [TaskNotes][Bases] Successfully registered view via public API: tasknotesKanban
+plugin:tasknotes:86 [TaskNotes][Bases] Successfully registered view via public API: tasknotesCalendar
+plugin:tasknotes:86 [TaskNotes][Bases] Successfully registered view via public API: tasknotesMiniCalendar
+plugin:tasknotes:519 DependencyCache: isFileUsedAsProject called before indexes built, building now...
+isFileUsedAsProject @ plugin:tasknotes:519
+45plugin:obsidian-full-calendar:64623 fileUpdated() called for file notes/feedback-and-ideas.md
+2plugin:obsidian-full-calendar:64623 fileUpdated() called for file Personal/FirstMonday.md
+49plugin:obsidian-full-calendar:64623 fileUpdated() called for file notes/feedback-and-ideas.md
+null:1  Failed to load resource: net::ERR_FILE_NOT_FOUND
+Screenshot_20260101-185045.png]]:1  Failed to load resource: net::ERR_FILE_NOT_FOUND
+```
+
+- [ ] Cover height config menu should be a slider, not a dropdown menu.  Additionally, it should only appear when the Cover field menu is not empty/none.
+- [x] Let's add an config slider to control Kanban Column width
+- [x] Let's add grab icon to Kanban columns and enable the ability to manually rearrange their order.
+- [x] On mobile, tap holding a card and moving to very edge of screen should scroll sideways.  Right now I can drag a card to an adjacent column already in view, but I can't go beyond that.
+
+- [x] Columns areas/containers are still not extending the full height of the tallest relative column (due to having the most cards) when swimlanes are enabled.
+- [x] When swimlanes are enabled, dragging a card into another column and swimlane only places the card in a the target column, but not also in the swimlane. 
+- [x] When swimlanes are enabled, we lose the ability to rearrange columns (icon disappears), and the count total number also disappears.  We should also add the ability to manually rearrange swimlanes in the same way that we do with columns.  Basically, swimlanes should appear and work very similar to their Column-only counterpart.
+- [x] On mobile, tap holding a column and moving to the very edge of the screen should scroll sideways.  Right now I can drag a column to an adjacent column already in view, but I can't go beyond that.
+- [ ] Cover images are failing.  See console log below:
+
+```
+Obsidian Developer Console
+plugin:planner:475 Loading Planner plugin
+plugin:planner:475 Planner: Registered Bases views
+plugin:planner:475 Planner plugin loaded
+plugin:tasknotes:1850 TaskNotes: Starting early migration check...
+plugin:tasknotes:86 [TaskNotes][Bases] Successfully registered view via public API: tasknotesTaskList
+plugin:tasknotes:86 [TaskNotes][Bases] Successfully registered view via public API: tasknotesKanban
+plugin:tasknotes:86 [TaskNotes][Bases] Successfully registered view via public API: tasknotesCalendar
+plugin:tasknotes:86 [TaskNotes][Bases] Successfully registered view via public API: tasknotesMiniCalendar
+plugin:tasknotes:519 DependencyCache: getBlockingTaskPaths called before indexes built, building now...
+getBlockingTaskPaths @ plugin:tasknotes:519
+null:1  Failed to load resource: net::ERR_FILE_NOT_FOUND
+Screenshot_20260101-185045.png]]:1  Failed to load resource: net::ERR_FILE_NOT_FOUND
+```
+
+- [x] On mobile, when I tap to scroll and I happen to be over a card, it triggers the card drag, which is jarring.  Let's make sure the card drag trigger only happens with a tap-hold delay on the card.
+- [x] On mobile, tap holding a swimlane and dragging to the very edge of the screen should scroll vertically.  Right now I can drag a swimlane to an adjacent swimlane already in view, but I can't go beyond that.
+
+- [x] Title config menu
+- [x] Bases sort should sort cards
+- [x] When `Group by` or `Swimlanes by` menus are set to `folder` or `tags`, for example, and I try to drag a card into another folder or tag column or swimlane, it doesn't work.  We need to support updating all property fields when a card is moved to another column or swimlane, including or moving Item Notes to the respective folder when applicable.  Any questions.
+- [x] Should  "Add new" plus buttons in the bottom of the column (and column + swimlane) areas to add a new Item that auto-populates the New Item Modal according to the column and/or swimlane.  There should also be a new dropdown menu in the Kanban View Bases config menu called "Show add new buttons"  that allows the user to toggle whether they want these buttons to appear on the board.  For example, let's say `Group by` is set to "status" and `Swimlanes by` is set to "calendar".  If I click the plus button in the "To-Do" column and "Personal" swimlane, it should open the New Item Modal with status already set to "To-Do" and calendar set to "Personal".  Any questions?
+- [x] Still doesn't move notes when dragging into a different folder area
+- [x] Cover images still aren't working.  Need to support all kinds of frontmatter link types (driven by Obsidian's "Files and Links" >  "New Link Format" settings (relative, absolute, shortest)).  I suspect this might be the issue.  See the console log for details.
+- [x] Scrolling with a touchpad is constrained to one axis at a time.  It would be nice to diagonally scroll / scroll both left-right and up-down at the smae time.
+- [x] Let's have an option in the Kanban View Bases config menu for "freezing" the Column and Swimlane titles when scrolling (like how you can "freeze panes" in Excel)
+- [x] Kanban View is causing an issue with Cards View and Table View where I can't scroll in either of the latter views when I have both views in the same base file (see `Calendar.base` in example-vault as an example.) I think it's because we were too aggressive with our styling and didn't remove old styling for the Kanban view and affected higher-level container styling that we didn't need that is now affecting Cards and Table Views.
+
+## Release
+
 - [ ] Planner update PRD with our changes. 
 - [ ] Planner publish 0.0.1
 	- [ ] Docs (Zensical) site (clone repo to ref folder)
@@ -94,15 +187,9 @@
 	- [ ] Readme.md
 	- [ ] License - GPL? or MIT?
 
+Other
 
-## Kanban View
-
-- [ ] 
-
-## Gantt View
-
-## Other
-
+- [ ] (v0.0.2) What if the Edit Item Modal's expand details dynamically pulls frontmatter content from whatever note is selected?  Right now it's still very tailored to Planner/Calendar users
 - [ ] Map View integration in calendar item mobile popup.  
 - [ ] Embed Map View in Calendar template
 	- [ ] Then you could pick a location on the map and copy to frontmatter

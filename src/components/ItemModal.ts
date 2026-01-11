@@ -19,6 +19,7 @@ interface ItemModalOptions {
   mode: 'create' | 'edit';
   item?: PlannerItem;
   prePopulate?: Partial<ItemFrontmatter>;
+  targetFolder?: string;
 }
 
 interface ParsedNLP {
@@ -1342,7 +1343,7 @@ export class ItemModal extends Modal {
         new Notice(`Updated: ${title}`);
       } else {
         // Create new item
-        const item = await this.plugin.itemService.createItem(title, frontmatter, this.details);
+        const item = await this.plugin.itemService.createItem(title, frontmatter, this.details, this.options.targetFolder);
         new Notice(`Created: ${title}`);
 
         if (this.plugin.settings.quickCaptureOpenAfterCreate && item) {

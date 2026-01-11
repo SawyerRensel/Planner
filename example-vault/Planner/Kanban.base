@@ -1,0 +1,63 @@
+source: Planner/
+properties:
+  note.title:
+    width: 200
+  note.summary:
+    width: 200
+  file.basename:
+    width: 150
+  note.status:
+    width: 100
+  note.priority:
+    width: 100
+  note.calendar:
+    width: 120
+  note.parent:
+    width: 120
+  note.people:
+    width: 120
+  note.tags:
+    width: 120
+  note.context:
+    width: 100
+  note.cover:
+    width: 200
+  note.date_start_scheduled:
+    width: 120
+  note.date_end_scheduled:
+    width: 120
+  note.date_due:
+    width: 120
+views:
+  - type: planner-kanban
+    name: Kanban
+    filters:
+      and:
+        - file.hasProperty("status")
+    order:
+      - title
+      - priority
+      - status
+      - date_start_scheduled
+      - calendar
+      - summary
+      - tags
+    sort: []
+    colorBy: note.calendar
+    borderStyle: left-accent
+    badgePlacement: properties-section
+    dateStartField: note.date_start_scheduled
+    hideEmptyColumns: "false"
+    coverDisplay: banner
+    coverHeight: "100"
+    columnOrder: '["Idea","To-Do","In-Progress","In-Review","Done","Cancelled","in-progress","open","null"]'
+    columnWidth: "280"
+    swimlaneOrder: '["Personal","Vacation","Work","null"]'
+    titleBy: note.title
+    summaryField: note.summary
+    coverField: note.cover
+    showAddNewButtons: "true"
+    freezeHeaders: both
+    swimHeaderDisplay: vertical
+  - type: table
+    name: Table

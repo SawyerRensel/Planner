@@ -1704,7 +1704,6 @@ body.is-mobile .modal:has(.planner-item-modal) {
 }
 
 /* Dark theme adjustments */
-.theme-dark .planner-bases-gantt .gantt_task_line {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
@@ -1782,13 +1781,6 @@ body.is-mobile .modal:has(.planner-item-modal) {
   overflow: hidden;
   background-color: var(--background-primary);
   /* Remove any inherited margin/padding */
-  margin: 0;
-  padding: 0;
-}
-
-/* Ensure Bases view wrapper fills available space */
-.bases-view-container:has(.planner-bases-timeline) {
-  height: 100%;
   margin: 0;
   padding: 0;
 }
@@ -1987,6 +1979,364 @@ body.is-mobile .planner-timeline-iframe-container {
 
 .planner-settings-tab-content.is-active {
   display: block;
+}
+
+
+/* ==========================================================================
+   KANBAN VIEW STYLES
+   ========================================================================== */
+
+/* Kanban-specific padding - only targets the kanban view itself, not shared parent containers */
+.bases-view.planner-bases-kanban {
+  padding: 0;
+  scrollbar-gutter: auto;
+}
+
+.planner-bases-kanban {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.planner-kanban-board {
+  flex: 1;
+  display: flex;
+  gap: 12px;
+  padding: 6px;
+  overflow: auto;
+}
+
+/* Custom scrollbar styling */
+.planner-kanban-board::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.planner-kanban-board::-webkit-scrollbar-track {
+  background: var(--background-modifier-border);
+  border-radius: 4px;
+}
+
+.planner-kanban-board::-webkit-scrollbar-thumb {
+  background: var(--background-modifier-border-hover);
+  border-radius: 4px;
+}
+
+.planner-kanban-board::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Column styles */
+.planner-kanban-column {
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  background: var(--background-secondary);
+  border-radius: 8px;
+}
+
+.planner-kanban-column-header {
+  padding: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--background-modifier-border);
+  flex-shrink: 0;
+}
+
+.planner-kanban-column-icon {
+  display: flex;
+  align-items: center;
+}
+
+.planner-kanban-column-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.planner-kanban-column-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.planner-kanban-column-count {
+  background: var(--background-modifier-border);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Cards container - fills column height, content expands column */
+.planner-kanban-cards {
+  flex: 1;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Push add button to bottom of column */
+.planner-kanban-cards > .planner-kanban-add-button {
+  margin-top: auto;
+}
+
+.planner-kanban-cards::-webkit-scrollbar {
+  width: 6px;
+}
+
+.planner-kanban-cards::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.planner-kanban-cards::-webkit-scrollbar-thumb {
+  background: var(--background-modifier-border);
+  border-radius: 3px;
+}
+
+.planner-kanban-cards::-webkit-scrollbar-thumb:hover {
+  background: var(--background-modifier-border-hover);
+}
+
+/* Drop zone styling */
+.planner-kanban-cards--dragover {
+  background: var(--interactive-accent-hover);
+  border-radius: 4px;
+}
+
+/* Card styles */
+.planner-kanban-card {
+  background: var(--background-primary);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease, transform 0.1s ease;
+  overflow: hidden;
+}
+
+.planner-kanban-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.planner-kanban-card--dragging {
+  opacity: 0.5;
+  transform: rotate(2deg);
+}
+
+.planner-kanban-card-content {
+  padding: 12px;
+}
+
+.planner-kanban-card-title {
+  font-weight: 500;
+  margin-bottom: 4px;
+  word-wrap: break-word;
+}
+
+.planner-kanban-card-summary {
+  font-size: 12px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* Cover image styles */
+.planner-kanban-card-cover {
+  background-size: cover;
+  background-position: center;
+}
+
+/* Badges */
+.planner-kanban-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+/* Dark theme adjustments */
+
+/* Badge icon sizing - constrain SVG icons */
+.planner-kanban-badge-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
+.planner-kanban-badge-icon svg {
+  width: 10px !important;
+  height: 10px !important;
+  max-width: 10px;
+  max-height: 10px;
+}
+
+/* Badge placement styles */
+.planner-kanban-badges--inline {
+  display: inline-flex !important;
+  margin-top: 0 !important;
+  border-top: none !important;
+  padding-top: 0 !important;
+}
+
+.planner-kanban-badges--properties-section {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--background-modifier-border);
+}
+
+/* Kanban badge compact styling */
+.planner-kanban-badge {
+  max-height: 18px;
+  line-height: 1.2;
+  font-size: 10px !important;
+  padding: 2px 6px !important;
+}
+
+/* Column grab handle */
+.planner-kanban-column-grab {
+  cursor: grab;
+  opacity: 0.4;
+  transition: opacity 0.15s ease;
+}
+
+.planner-kanban-column-grab:hover {
+  opacity: 1;
+}
+
+.planner-kanban-column-grab:active {
+  cursor: grabbing;
+}
+
+.planner-kanban-column-grab svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Column dragging states */
+.planner-kanban-column--dragging {
+  opacity: 0.5;
+  box-shadow: none !important;
+}
+
+.planner-kanban-column--drop-left {
+  box-shadow: -4px 0 0 var(--interactive-accent) !important;
+}
+
+.planner-kanban-column--drop-right {
+  box-shadow: 4px 0 0 var(--interactive-accent) !important;
+}
+
+/* Card hold-ready state (visual feedback before drag starts on mobile) */
+.planner-kanban-card--hold-ready {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+/* Swimlane dragging states */
+.planner-kanban-swimlane--dragging {
+  opacity: 0.5;
+}
+
+.planner-kanban-swimlane--drop-above {
+  box-shadow: 0 -4px 0 var(--interactive-accent) !important;
+}
+
+.planner-kanban-swimlane--drop-below {
+  box-shadow: 0 4px 0 var(--interactive-accent) !important;
+}
+
+/* Kanban Add New Button */
+.planner-kanban-add-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 32px;
+  padding: 4px;
+  margin-top: auto;
+  border: 1px dashed var(--background-modifier-border);
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-muted);
+  opacity: 0.5;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.planner-kanban-add-button:hover {
+  opacity: 1;
+  background: var(--background-modifier-hover);
+  border-color: var(--interactive-accent);
+  color: var(--interactive-accent);
+}
+
+.planner-kanban-add-button:active {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.planner-kanban-add-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.planner-kanban-add-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.planner-kanban-swimlane-cell .planner-kanban-add-button {
+  min-height: 28px;
+}
+
+.theme-dark .planner-kanban-card {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.theme-dark .planner-kanban-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .planner-kanban-board {
+    padding: 4px;
+    gap: 8px;
+  }
+
+  .planner-kanban-column {
+    min-width: 260px;
+  }
+
+  .planner-kanban-column-header {
+    padding: 10px;
+  }
+
+  .planner-kanban-cards {
+    padding: 6px;
+    gap: 6px;
+  }
+
+  .planner-kanban-card-content {
+    padding: 10px;
+  }
+
+  .planner-kanban-add-button {
+    min-height: 40px;
+    opacity: 0.7;
+  }
 }
 
 /* === BUNDLED CSS IMPORTS === */
