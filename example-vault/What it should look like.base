@@ -1,9 +1,0 @@
-views:
-  - type: table
-    name: What it should look like
-    sort:
-      - property: file.name
-        direction: DESC
-  - type: cards
-    name: Cards
-    image: note.cover

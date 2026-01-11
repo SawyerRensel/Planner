@@ -8,65 +8,16 @@
         "type": "tabs",
         "children": [
           {
-            "id": "0ff4c6f34d9aa8a8",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "notes/obsidian-planner-prd.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "obsidian-planner-prd"
-            }
-          },
-          {
-            "id": "57d46bb061878ebe",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "notes/feedback-and-ideas.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "feedback-and-ideas"
-            }
-          },
-          {
             "id": "7590a842cb82c1de",
             "type": "leaf",
             "state": {
               "type": "bases",
               "state": {
-                "file": "Planner/Task List.base",
-                "viewName": "Task List"
+                "file": "Planner/Calendar.base",
+                "viewName": "Calendar"
               },
-              "icon": "list-checks",
-              "title": "Task List"
-            }
-          }
-        ],
-        "currentTab": 1
-      },
-      {
-        "id": "1c23e21e81d03238",
-        "type": "tabs",
-        "children": [
-          {
-            "id": "bb8be35b5713e0ba",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Templates/Planner Template.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Planner Template"
+              "icon": "calendar-range",
+              "title": "Calendar"
             }
           }
         ]
@@ -244,20 +195,27 @@
       "planner:Open Planner Kanban": false
     }
   },
-  "active": "57d46bb061878ebe",
+  "active": "7590a842cb82c1de",
   "lastOpenFiles": [
-    "notes/obsidian-planner-prd.md",
     "Planner/Task List.base",
-    "Untitled.md",
+    "Planner/Kanban.base",
+    "Planner/Timeline.base",
     "Planner/Calendar.base",
+    "TaskNotes/Views/relationships.base",
+    "TaskNotes/Views/agenda-default.base",
+    "TaskNotes/Views/calendar-default.base",
+    "TaskNotes/Views/tasks-default.base",
+    "TaskNotes/Views/kanban-default.base",
+    "TaskNotes/Views/mini-calendar-default.base",
+    "TaskNotes/Views",
     "notes/feedback-and-ideas.md",
+    "notes/obsidian-planner-prd.md",
+    "Untitled.md",
     "Templates/Planner Template.md",
     "Personal/test.md",
     "Planner/test.md",
     "DailyNotes/2026-01-09.md",
     "notes/Template with body only - body appears in Note Content.md",
-    "Planner/Timeline.base",
-    "Planner/Kanban.base",
     "Planner/Test.md",
     "Planner/test 1.md",
     "Planner/Website Redesign.md",
@@ -265,12 +223,6 @@
     "Planner/Fix Login Bug.md",
     "Planner/Meeting.md",
     "Templates/Daily Note Template.md",
-    "Untitled.base",
-    "TaskNotes/Views/mini-calendar-default.base",
-    "Planner/Tasks.base",
-    "What it should look like.base",
-    "notes/feedback-and-ideas.md.tmp.1248.1768136759376",
-    "notes/obsidian-planner-prd.md.tmp.609.1768134391692",
     "Full Calendar/2025-12-27 Full Calendar Example Event.md",
     "Personal/FirstMonday.md",
     "Planner/Implement Frontend.md",
