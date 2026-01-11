@@ -24,7 +24,7 @@ All views are powered by **Obsidian Bases**, which means:
 
 When you click a ribbon icon, Planner creates a `.base` file in your vault:
 
-- `Tasks.base` - Task List view
+- `Task List.base` - Task List view
 - `Calendar.base` - Calendar view
 - `Timeline.base` - Timeline view
 - `Kanban.base` - Kanban view

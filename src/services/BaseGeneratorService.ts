@@ -14,11 +14,11 @@ export class BaseGeneratorService {
   }
 
   /**
-   * Get the path to the Tasks.base file
+   * Get the path to the Task List.base file
    */
   getTasksBasePath(): string {
     const folder = this.getSettings().basesFolder.replace(/\/$/, '');
-    return normalizePath(`${folder}/Tasks.base`);
+    return normalizePath(`${folder}/Task List.base`);
   }
 
   /**
@@ -46,7 +46,7 @@ export class BaseGeneratorService {
   }
 
   /**
-   * Check if the Tasks.base file exists
+   * Check if the Task List.base file exists
    */
   async tasksBaseExists(): Promise<boolean> {
     const path = this.getTasksBasePath();
@@ -78,7 +78,7 @@ export class BaseGeneratorService {
   }
 
   /**
-   * Generate the Tasks.base file content
+   * Generate the Task List.base file content
    */
   private generateTasksBaseContent(): string {
     const settings = this.getSettings();
@@ -353,7 +353,7 @@ views:
   }
 
   /**
-   * Generate the Tasks.base file
+   * Generate the Task List.base file
    * @param overwrite If true, overwrite existing file
    * @returns true if file was created/updated, false if skipped
    */

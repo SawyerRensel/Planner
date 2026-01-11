@@ -29,7 +29,7 @@ class RegenerateBasesModal extends Modal {
 
     contentEl.createEl('h2', { text: 'Regenerate Base Files' });
     contentEl.createEl('p', {
-      text: 'This will overwrite your existing Tasks.base and Calendar.base files. Any customizations you have made to these files will be lost.',
+      text: 'This will overwrite your existing Task List.base and Calendar.base files. Any customizations you have made to these files will be lost.',
       cls: 'planner-modal-warning'
     });
     contentEl.createEl('p', {
@@ -229,7 +229,7 @@ export class PlannerSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName('Bases folder')
-      .setDesc('Where to save the Tasks.base and Calendar.base files')
+      .setDesc('Where to save the Task List.base and Calendar.base files')
       .addText(text => {
         text
           .setPlaceholder('Planner/')
@@ -243,7 +243,7 @@ export class PlannerSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName('Generate Base files')
-      .setDesc('Create or regenerate Tasks.base and Calendar.base files')
+      .setDesc('Create or regenerate Task List.base and Calendar.base files')
       .addButton(button => button
         .setButtonText('Generate')
         .onClick(async () => {
@@ -551,9 +551,9 @@ export class PlannerSettingTab extends PluginSettingTab {
       const result = await baseGenerator.generateAllBases(true);
 
       if (result.tasks && result.calendar) {
-        new Notice('Tasks.base and Calendar.base files have been generated.');
+        new Notice('Task List.base and Calendar.base files have been generated.');
       } else if (result.tasks) {
-        new Notice('Tasks.base file has been generated.');
+        new Notice('Task List.base file has been generated.');
       } else if (result.calendar) {
         new Notice('Calendar.base file has been generated.');
       } else {

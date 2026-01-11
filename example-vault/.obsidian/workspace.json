@@ -36,20 +36,7 @@
             }
           },
           {
-            "id": "8060252067f30061",
-            "type": "leaf",
-            "state": {
-              "type": "bases",
-              "state": {
-                "file": "What it should look like.base",
-                "viewName": "Cards"
-              },
-              "icon": "lucide-layout-grid",
-              "title": "What it should look like"
-            }
-          },
-          {
-            "id": "14affaeee64660c3",
+            "id": "87032fb9f5930c97",
             "type": "leaf",
             "state": {
               "type": "bases",
@@ -62,7 +49,7 @@
             }
           }
         ],
-        "currentTab": 3
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -247,29 +234,29 @@
       "obsidian-full-calendar:Open Full Calendar": false
     }
   },
-  "active": "14affaeee64660c3",
+  "active": "87032fb9f5930c97",
   "lastOpenFiles": [
     "notes/feedback-and-ideas.md",
+    "Planner/Task List.base",
+    "Planner/Tasks.base",
     "Planner/Calendar.base",
     "What it should look like.base",
-    "notes/obsidian-planner-prd.md",
+    "notes/feedback-and-ideas.md.tmp.1248.1768136759376",
+    "Planner/Timeline.base",
     "Planner/Kanban.base",
+    "notes/obsidian-planner-prd.md",
     "notes/obsidian-planner-prd.md.tmp.609.1768134391692",
     "notes/obsidian-planner-prd.md.tmp.609.1768134390646",
     "notes/obsidian-planner-prd.md.tmp.609.1768134389601",
     "Full Calendar/2025-12-27 Full Calendar Example Event.md",
-    "Planner/Timeline.base",
     "Personal/FirstMonday.md",
     "Planner/Website Redesign.md",
     "Planner/Team Meeting.md",
-    "Planner/Tasks.base",
     "Planner/Meeting.md",
     "Planner/Implement Frontend.md",
     "Planner/Grocery Shopping.md",
-    "Planner/Gantt.base",
     "Planner/Fix Login Bug.md",
     "Planner/Design Mockups.md",
-    "Planner",
     "Plannerrrrr rrrrrrrrrrr/Website Redesign.md",
     "Plannerrrrr rrrrrrrrrrr/Team Meeting.md",
     "Plannerrrrr rrrrrrrrrrr/Meeting.md",
