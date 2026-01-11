@@ -41,11 +41,11 @@
             "state": {
               "type": "bases",
               "state": {
-                "file": "Planner/Calendar.base",
-                "viewName": "Calendar"
+                "file": "Planner/Kanban.base",
+                "viewName": "Kanban"
               },
-              "icon": "calendar-range",
-              "title": "Calendar"
+              "icon": "square-kanban",
+              "title": "Kanban"
             }
           }
         ],
@@ -236,14 +236,14 @@
   },
   "active": "87032fb9f5930c97",
   "lastOpenFiles": [
-    "notes/feedback-and-ideas.md",
-    "Planner/Task List.base",
-    "Planner/Tasks.base",
-    "Planner/Calendar.base",
-    "What it should look like.base",
-    "notes/feedback-and-ideas.md.tmp.1248.1768136759376",
     "Planner/Timeline.base",
     "Planner/Kanban.base",
+    "Planner/Task List.base",
+    "Planner/Calendar.base",
+    "notes/feedback-and-ideas.md",
+    "Planner/Tasks.base",
+    "What it should look like.base",
+    "notes/feedback-and-ideas.md.tmp.1248.1768136759376",
     "notes/obsidian-planner-prd.md",
     "notes/obsidian-planner-prd.md.tmp.609.1768134391692",
     "notes/obsidian-planner-prd.md.tmp.609.1768134390646",

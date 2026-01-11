@@ -1,13 +1,11 @@
 source: Planner/
 properties:
-  # Text/Title properties
   note.title:
     width: 250
   note.summary:
     width: 200
   file.basename:
     width: 150
-  # Categorical properties
   note.status:
     width: 100
   note.priority:
@@ -28,7 +26,6 @@ properties:
     width: 80
   note.progress:
     width: 80
-  # Date properties
   note.date_start_scheduled:
     width: 120
   note.date_start_actual:
@@ -46,16 +43,16 @@ properties:
 views:
   - type: planner-timeline
     name: Timeline
-    order:
-      - note.title
-      - note.date_start_scheduled
-      - note.date_end_scheduled
-    sort:
-      - property: date_start_scheduled
-        direction: ASC
     groupBy:
       property: calendar
       direction: ASC
+    order:
+      - title
+      - date_start_scheduled
+      - date_end_scheduled
+    sort:
+      - property: date_start_scheduled
+        direction: ASC
     colorBy: note.calendar
   - type: table
     name: Table

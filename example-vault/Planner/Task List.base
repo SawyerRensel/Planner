@@ -1,11 +1,13 @@
 source: Planner/
 properties:
+  # Text/Title properties
   note.title:
     width: 200
   note.summary:
     width: 200
   file.basename:
     width: 150
+  # Categorical properties
   note.status:
     width: 100
   note.priority:
@@ -24,6 +26,7 @@ properties:
     width: 120
   note.color:
     width: 80
+  # Date properties
   note.date_start_scheduled:
     width: 120
   note.date_start_actual:
@@ -45,11 +48,11 @@ views:
       property: calendar
       direction: ASC
     order:
-      - title
-      - priority
-      - status
-      - date_due
-      - calendar
+      - note.title
+      - note.priority
+      - note.status
+      - note.date_due
+      - note.calendar
     sort:
       - property: priority
         direction: ASC
