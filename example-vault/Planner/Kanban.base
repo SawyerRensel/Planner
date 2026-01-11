@@ -55,5 +55,7 @@ views:
     swimlaneOrder: '["Urgent","High","Medium","Low","None","null","normal"]'
     titleBy: note.title
     summaryField: note.summary
+    coverField: note.cover
+    showAddNewButtons: "true"
   - type: table
     name: Table
