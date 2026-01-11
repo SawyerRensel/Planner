@@ -41,9 +41,9 @@
               "type": "bases",
               "state": {
                 "file": "Planner/Calendar.base",
-                "viewName": "What it currently looks like"
+                "viewName": "kanban"
               },
-              "icon": "lucide-table",
+              "icon": "square-kanban",
               "title": "Calendar"
             }
           }

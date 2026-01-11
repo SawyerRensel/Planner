@@ -417,6 +417,14 @@ export class BasesTimelineView extends BasesView {
   }
 
   /**
+   * Called when switching away from this view
+   */
+  onunload(): void {
+    // Clean up styles and classes added to the shared container
+    this.containerEl.removeClass('planner-bases-timeline');
+  }
+
+  /**
    * Clean up resources
    */
   destroy(): void {

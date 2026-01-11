@@ -1785,13 +1785,6 @@ body.is-mobile .modal:has(.planner-item-modal) {
   padding: 0;
 }
 
-/* Ensure Bases view wrapper fills available space */
-.bases-view-container:has(.planner-bases-timeline) {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
-
 /* Toolbar */
 .planner-timeline-toolbar {
   display: flex;
