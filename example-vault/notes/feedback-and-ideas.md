@@ -114,7 +114,7 @@
 |                  |                 | Hide empty columns | Works when you set it to `Yes`, but when you set it back to `No`, the empty columns don't reappear. |
 - [x] Don't show null values for properties on cards.  If null, don't display
 - [x] `summary` field is always displaying.  This needs to be driven by whether the summary field is toggled on in Bases properties.  Additionally, let's add a `Summary by` config menu for selecting which text-type field displays as a summary in Kanban cards
-- [ ] Swimlanes are partially working.  We need to make sure the columns containers extend fully even when they are empty.  Additionally, the column styling is being affected by adding swimlanes.  For instance, when Group by is set to status without swimlanes, it shows the colored icons for statuses in the columns.  When swimlanes are toggled on, those icons disappear. 
+- [x] Swimlanes are partially working.  We need to make sure the columns containers extend fully even when they are empty.  Additionally, the column styling is being affected by adding swimlanes.  For instance, when Group by is set to status without swimlanes, it shows the colored icons for statuses in the columns.  When swimlanes are toggled on, those icons disappear. 
 - [ ] Cover display is failing
 
 ```Obsidian Developer Console
@@ -172,7 +172,7 @@ Screenshot_20260101-185045.png]]:1  Failed to load resource: net::ERR_FILE_NOT_F
 - [x] Still doesn't move notes when dragging into a different folder area
 - [x] Cover images still aren't working.  Need to support all kinds of frontmatter link types (driven by Obsidian's "Files and Links" >  "New Link Format" settings (relative, absolute, shortest)).  I suspect this might be the issue.  See the console log for details.
 - [x] Scrolling with a touchpad is constrained to one axis at a time.  It would be nice to diagonally scroll / scroll both left-right and up-down at the smae time.
-- [ ] Let's have an option in the Kanban View Bases config menu for "freezing" the Column and Swimlane titles when scrolling (like how you can "freeze panes" in Excel)
+- [x] Let's have an option in the Kanban View Bases config menu for "freezing" the Column and Swimlane titles when scrolling (like how you can "freeze panes" in Excel)
 
 ## Release
 

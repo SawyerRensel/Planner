@@ -58,6 +58,6 @@ views:
     coverField: note.cover
     showAddNewButtons: "true"
     freezeHeaders: both
-    swimlaneBy: note.priority
+    swimHeaderDisplay: vertical
   - type: table
     name: Table

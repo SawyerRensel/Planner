@@ -38,6 +38,7 @@ type BorderStyle = 'none' | 'left-accent' | 'full-border';
 type CoverDisplay = 'none' | 'banner' | 'thumbnail-left' | 'thumbnail-right' | 'background';
 type BadgePlacement = 'inline' | 'properties-section';
 type FreezeHeaders = 'off' | 'columns' | 'swimlanes' | 'both';
+type SwimHeaderDisplay = 'horizontal' | 'vertical';
 
 /**
  * Virtual scroll threshold - enables virtual scrolling when column has 15+ cards
@@ -184,6 +185,11 @@ export class BasesKanbanView extends BasesView {
   private getFreezeHeaders(): FreezeHeaders {
     const value = this.config.get('freezeHeaders') as string | undefined;
     return (value as FreezeHeaders) || 'off';
+  }
+
+  private getSwimHeaderDisplay(): SwimHeaderDisplay {
+    const value = this.config.get('swimHeaderDisplay') as string | undefined;
+    return (value as SwimHeaderDisplay) || 'horizontal';
   }
 
   private getCustomColumnOrder(): string[] {
@@ -597,6 +603,8 @@ export class BasesKanbanView extends BasesView {
     const freezeHeaders = this.getFreezeHeaders();
     const freezeColumns = freezeHeaders === 'columns' || freezeHeaders === 'both';
     const freezeSwimlanes = freezeHeaders === 'swimlanes' || freezeHeaders === 'both';
+    const swimHeaderDisplay = this.getSwimHeaderDisplay();
+    const isVerticalSwimHeader = swimHeaderDisplay === 'vertical';
 
     // First, collect all entries and group by swimlane then by column
     const swimlaneGroups = new Map<string, Map<string, BasesEntry[]>>();
@@ -651,10 +659,11 @@ export class BasesKanbanView extends BasesView {
     // Render column headers row first
     const headerRow = document.createElement('div');
     headerRow.className = 'planner-kanban-header-row';
+    const swimLabelWidth = isVerticalSwimHeader ? 48 : 150;
     headerRow.style.cssText = `
       display: flex;
       gap: 12px;
-      padding-left: 150px;
+      padding-left: ${swimLabelWidth}px;
       ${freezeColumns ? 'position: sticky; top: 0; z-index: 10;' : ''}
       background: var(--background-primary);
       padding-bottom: 8px;
@@ -779,27 +788,53 @@ export class BasesKanbanView extends BasesView {
       const swimlaneLabel = document.createElement('div');
       swimlaneLabel.className = 'planner-kanban-swimlane-label';
       swimlaneLabel.setAttribute('data-swimlane', swimlaneKey);
-      swimlaneLabel.style.cssText = `
-        width: 138px;
-        min-width: 138px;
-        font-weight: 600;
-        padding: 8px;
-        background: var(--background-modifier-border);
-        border-radius: 6px;
-        ${freezeSwimlanes ? 'position: sticky; left: 0; z-index: 5;' : ''}
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        min-height: 60px;
-      `;
+
+      if (isVerticalSwimHeader) {
+        swimlaneLabel.style.cssText = `
+          width: 36px;
+          min-width: 36px;
+          font-weight: 600;
+          padding: 8px 4px;
+          background: var(--background-modifier-border);
+          border-radius: 6px;
+          ${freezeSwimlanes ? 'position: sticky; left: 0; z-index: 5;' : ''}
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 8px;
+        `;
+      } else {
+        swimlaneLabel.style.cssText = `
+          width: 138px;
+          min-width: 138px;
+          font-weight: 600;
+          padding: 8px;
+          background: var(--background-modifier-border);
+          border-radius: 6px;
+          ${freezeSwimlanes ? 'position: sticky; left: 0; z-index: 5;' : ''}
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          min-height: 60px;
+        `;
+      }
 
       // Header row with grab handle, icon, and title
       const labelHeader = document.createElement('div');
-      labelHeader.style.cssText = `
-        display: flex;
-        align-items: center;
-        gap: 4px;
-      `;
+      if (isVerticalSwimHeader) {
+        labelHeader.style.cssText = `
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+        `;
+      } else {
+        labelHeader.style.cssText = `
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        `;
+      }
 
       // Grab handle for swimlane reordering
       const grabHandle = document.createElement('span');
@@ -853,7 +888,18 @@ export class BasesKanbanView extends BasesView {
 
       // Title
       const titleSpan = document.createElement('span');
-      titleSpan.style.cssText = 'flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
+      if (isVerticalSwimHeader) {
+        titleSpan.style.cssText = `
+          writing-mode: vertical-rl;
+          text-orientation: mixed;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          max-height: 120px;
+        `;
+      } else {
+        titleSpan.style.cssText = 'flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
+      }
       titleSpan.textContent = swimlaneKey;
       labelHeader.appendChild(titleSpan);
 
@@ -864,14 +910,24 @@ export class BasesKanbanView extends BasesView {
       const countBadge = document.createElement('span');
       countBadge.className = 'planner-kanban-swimlane-count';
       countBadge.textContent = String(count);
-      countBadge.style.cssText = `
-        background: var(--background-primary);
-        padding: 2px 8px;
-        border-radius: 10px;
-        font-size: 11px;
-        font-weight: 500;
-        align-self: flex-start;
-      `;
+      if (isVerticalSwimHeader) {
+        countBadge.style.cssText = `
+          background: var(--background-primary);
+          padding: 2px 6px;
+          border-radius: 10px;
+          font-size: 10px;
+          font-weight: 500;
+        `;
+      } else {
+        countBadge.style.cssText = `
+          background: var(--background-primary);
+          padding: 2px 8px;
+          border-radius: 10px;
+          font-size: 11px;
+          font-weight: 500;
+          align-self: flex-start;
+        `;
+      }
       swimlaneLabel.appendChild(countBadge);
 
       swimlaneRow.appendChild(swimlaneLabel);
@@ -2695,6 +2751,16 @@ export function createKanbanViewRegistration(plugin: PlannerPlugin): BasesViewRe
           'columns': 'Columns',
           'swimlanes': 'Swimlanes',
           'both': 'Both',
+        },
+      },
+      {
+        type: 'dropdown',
+        key: 'swimHeaderDisplay',
+        displayName: 'Swimlane header display',
+        default: 'horizontal',
+        options: {
+          'horizontal': 'Horizontal',
+          'vertical': 'Vertical',
         },
       },
     ],
