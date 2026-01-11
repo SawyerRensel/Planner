@@ -4,7 +4,7 @@ summary: Board game night at Jake's place
 tags:
   - event
 calendar:
-  - Personal
+  - Friends
 context:
   - social
 people:

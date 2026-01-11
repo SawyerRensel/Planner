@@ -4,7 +4,7 @@ summary: Annual state inspection due next month
 tags:
   - task
 calendar:
-  - Personal
+  - Chores
 context:
   - phone
 people:

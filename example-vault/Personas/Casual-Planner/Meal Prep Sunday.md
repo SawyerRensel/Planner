@@ -4,7 +4,7 @@ summary: Prepare meals for the week ahead
 tags:
   - task
 calendar:
-  - Personal
+  - Chores
 context:
   - home
 people:

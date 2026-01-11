@@ -4,7 +4,7 @@ summary: Catch up lunch with old college friend
 tags:
   - event
 calendar:
-  - Personal
+  - Friends
 context:
   - social
 people:

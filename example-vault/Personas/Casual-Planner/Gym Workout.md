@@ -4,7 +4,7 @@ summary: Regular gym session
 tags:
   - task
 calendar:
-  - Personal
+  - Health
 context:
   - fitness
 people:

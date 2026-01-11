@@ -4,7 +4,7 @@ summary: Quick coffee catch-up with Rachel
 tags:
   - event
 calendar:
-  - Personal
+  - Friends
 context:
   - social
 people:

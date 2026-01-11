@@ -4,7 +4,7 @@ summary: Birthday celebration dinner for Sarah
 tags:
   - event
 calendar:
-  - Personal
+  - Friends
 context:
   - social
 people:

@@ -4,7 +4,7 @@ summary: Return the wrong-sized shoes to Amazon
 tags:
   - task
 calendar:
-  - Personal
+  - Chores
 context:
   - errands
 people:

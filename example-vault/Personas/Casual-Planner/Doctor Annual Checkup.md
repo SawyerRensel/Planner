@@ -4,7 +4,7 @@ summary: Annual physical exam
 tags:
   - event
 calendar:
-  - Personal
+  - Health
 context:
   - health
 people:

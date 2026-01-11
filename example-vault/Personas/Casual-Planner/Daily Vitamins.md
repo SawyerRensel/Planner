@@ -4,7 +4,7 @@ summary: Take morning vitamins with breakfast
 tags:
   - task
 calendar:
-  - Personal
+  - Health
 context:
   - home
 people:

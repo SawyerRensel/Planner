@@ -4,7 +4,7 @@ summary: Water all indoor plants
 tags:
   - task
 calendar:
-  - Personal
+  - Chores
 context:
   - home
 people:

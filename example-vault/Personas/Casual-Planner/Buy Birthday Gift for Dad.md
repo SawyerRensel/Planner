@@ -4,7 +4,7 @@ summary: Dad's birthday is Feb 2nd - need to get a gift
 tags:
   - task
 calendar:
-  - Personal
+  - Family
 context:
   - errands
 people:

@@ -4,7 +4,7 @@ summary: Running low on contact lenses
 tags:
   - task
 calendar:
-  - Personal
+  - Health
 context:
   - home
 people:

@@ -4,7 +4,7 @@ summary: Weekly call to check in with mom
 tags:
   - task
 calendar:
-  - Personal
+  - Family
 context:
   - phone
 people:

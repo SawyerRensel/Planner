@@ -4,7 +4,7 @@ summary: Car is due for oil change
 tags:
   - task
 calendar:
-  - Personal
+  - Chores
 context:
   - errands
 people:

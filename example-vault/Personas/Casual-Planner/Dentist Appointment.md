@@ -4,7 +4,7 @@ summary: 6-month dental checkup and cleaning
 tags:
   - event
 calendar:
-  - Personal
+  - Health
 context:
   - errands
 people:

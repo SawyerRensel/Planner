@@ -3,18 +3,17 @@ title: Clean Apartment
 summary: Weekly deep cleaning of apartment
 tags:
   - task
-calendar:
-  - Personal
+calendar: Chores
 context:
   - home
 people:
 location:
 related:
-status: To-Do
+status: In-Progress
 priority: Low
 progress: 0
 date_created: 2026-01-01T10:00:00
-date_modified: 2026-01-11T10:00:00
+date_modified: 2026-01-11T23:30:28.811Z
 date_start_scheduled: 2026-01-12T10:00:00
 date_start_actual:
 date_end_scheduled: 2026-01-12T12:00:00

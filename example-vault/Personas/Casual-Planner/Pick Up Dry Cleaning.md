@@ -4,7 +4,7 @@ summary: Pick up suits from dry cleaner
 tags:
   - task
 calendar:
-  - Personal
+  - Chores
 context:
   - errands
 people:

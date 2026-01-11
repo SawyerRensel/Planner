@@ -1,0 +1,49 @@
+source: Personas/Casual-Planner/
+filters:
+  and:
+    - file.inFolder("Personas/Casual-Planner")
+    - file.ext == "md"
+properties:
+  note.title:
+    width: 200
+  note.summary:
+    width: 200
+  file.basename:
+    width: 150
+  note.status:
+    width: 100
+  note.priority:
+    width: 100
+  note.calendar:
+    width: 120
+  note.people:
+    width: 120
+  note.tags:
+    width: 120
+  note.context:
+    width: 100
+  note.location:
+    width: 120
+  note.date_start_scheduled:
+    width: 120
+  note.date_end_scheduled:
+    width: 120
+  note.date_due:
+    width: 120
+views:
+  - type: planner-task-list
+    name: Task List
+    order:
+      - title
+      - calendar
+      - status
+      - priority
+      - date_start_scheduled
+      - date_end_scheduled
+    sort:
+      - property: date_end_scheduled
+        direction: DESC
+      - property: priority
+        direction: ASC
+  - type: table
+    name: Table

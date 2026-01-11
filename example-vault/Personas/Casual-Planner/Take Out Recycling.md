@@ -4,7 +4,7 @@ summary: Recycling pickup day is Wednesday
 tags:
   - task
 calendar:
-  - Personal
+  - Chores
 context:
   - home
 people:

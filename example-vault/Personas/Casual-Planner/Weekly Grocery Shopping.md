@@ -4,7 +4,7 @@ summary: Weekly trip to get groceries for the week
 tags:
   - task
 calendar:
-  - Personal
+  - Chores
 context:
   - errands
 people:

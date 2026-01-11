@@ -4,7 +4,7 @@ summary: Annual Super Bowl watch party
 tags:
   - event
 calendar:
-  - Personal
+  - Friends
 context:
   - social
 people:

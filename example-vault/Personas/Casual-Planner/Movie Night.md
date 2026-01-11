@@ -4,7 +4,7 @@ summary: Weekly movie night with friends
 tags:
   - event
 calendar:
-  - Personal
+  - Friends
 context:
   - social
 people:
