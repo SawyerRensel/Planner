@@ -56,26 +56,86 @@ The plugin is successful when a user can:
 
 ## 2. User Personas
 
-### 2.1 Primary Persona: The Life Planner
+### 2.1 The Casual Planner (Novice)
 
-> "I want to plan out everything: every event, every task. I want to see every aspect of my life on a Calendar and Timeline because they give me a big picture of my life—past, present, and future."
+> "I am a novice Obsidian user and want an easy but robust replacement to Google Calendar."
 
-**Needs:**
-- Quick event creation from desktop and mobile
-- Year-at-a-glance Timeline visualization
-- Multiple calendars with distinct colors
-- All calendar layouts (year, month, week, 3-day, day, list)
-- Project/task management for hobby projects
+- **Technical Level**: Beginner
+- **Primary Need**: Simple calendar and task tracking
+- **Key Features**: Calendar view, quick capture, recurring events
+- **Success Metric**: Can create and manage events without reading documentation
 
-**Success Metric:** Can manage entire life (work, personal, hobbies, social) in one system.
+### 2.2 The Power Organizer (Advanced)
 
-### 2.2 Secondary Personas
+> "I am an advanced Obsidian user and want an elegant and powerful replacement to Google Calendar and other personal project management tools I've used in the past like Asana and Trello."
 
-| Persona | Primary Need | Key Features |
-|---------|--------------|--------------|
-| **Casual Planner** | Simple calendar replacement | Calendar views, quick capture, recurring events |
-| **Hobby Project Manager** | Long-term project visualization | Timeline view, parent/subtask hierarchy |
-| **Power Organizer** | Comprehensive task management | Kanban, dependencies, all views |
+- **Technical Level**: Advanced
+- **Primary Need**: Comprehensive task and project management
+- **Key Features**: Kanban, dependencies, time tracking, calendar sync
+- **Success Metric**: Can replicate their Asana/Trello workflows entirely in Obsidian
+
+### 2.3 The Hobby Project Manager
+
+> "I am a very organized person and have a ton of hobby projects I have notes for in Obsidian, but no way to visualize them in a time-based format. It would be nice to plan out my year in a Gantt chart and Calendar."
+
+- **Technical Level**: Intermediate
+- **Primary Need**: Long-term project visualization
+- **Key Features**: Gantt view, parent/subtask hierarchy, date_scheduled → date_eta planning
+- **Success Metric**: Can visualize a year-long project with milestones and dependencies
+
+### 2.4 The Professional PM
+
+> "I am a project manager in a software engineering team and need an alternative to GitHub Projects, Asana, Clickup, Microsoft-Planner, etc. for managing multiple software projects at once."
+
+- **Technical Level**: Advanced
+- **Primary Need**: Multi-project management with team visibility
+- **Key Features**: Configurable Gantt, swimlanes, batch operations, HTTP API
+- **Success Metric**: Can manage 3+ concurrent projects with dependencies across them
+
+### 2.5 The Life Planner (Super-Planner)
+
+> "I am a super organized person and want to track my habits, hobbies, vacation plans, holidays, weekend trips on a Calendar. I am a planning guru. I want to plan out everything: every event, every task. I want to see every news article that I read on a calendar. I love Calendars and Gantt charts because they give me a big picture of my life; past, present, and future."
+
+- **Technical Level**: Advanced
+- **Primary Need**: Comprehensive life tracking and visualization
+- **Key Features**: Multiple calendars with colors, tag-based filtering, all views
+- **Success Metric**: Can track and visualize all life events in a unified system
+
+### 2.6 The Academic Researcher
+
+> "I am a PhD student juggling multiple research projects, paper deadlines, conference submissions, and teaching responsibilities. I need to track my literature review progress, writing milestones, and collaboration meetings with advisors in one place."
+
+- **Technical Level**: Intermediate
+- **Primary Need**: Academic project tracking with deadline management
+- **Key Features**: Gantt for paper timelines, calendar for conferences, dependencies for research phases
+- **Success Metric**: Can plan and track a multi-year research project with clear milestones
+
+### 2.7 The Content Creator
+
+> "I am a YouTuber/blogger/podcaster managing a content calendar. I need to track video ideas, filming schedules, editing deadlines, and publication dates. I want to see my content pipeline at a glance."
+
+- **Technical Level**: Intermediate
+- **Primary Need**: Content pipeline visualization
+- **Key Features**: Kanban for content stages (idea → scripting → filming → editing → published), calendar for publish dates
+- **Success Metric**: Can manage a consistent content schedule with 4+ pieces in the pipeline
+
+### 2.8 The Freelancer
+
+> "I am a freelance consultant managing multiple client projects simultaneously. I need to track billable hours, project milestones, and client meetings while ensuring nothing falls through the cracks."
+
+- **Technical Level**: Intermediate to Advanced
+- **Primary Need**: Multi-client project tracking with time management
+- **Key Features**: Time tracking, Gantt for project timelines, calendar separation by client
+- **Success Metric**: Can manage 5+ concurrent client projects with accurate time tracking
+
+### 2.9 The Event Planner
+
+> "I am organizing a wedding/conference/retreat and need to coordinate dozens of vendors, tasks, and timelines. I need to see what's happening when and ensure all dependencies are met before the big day."
+
+- **Technical Level**: Beginner to Intermediate
+- **Primary Need**: Event countdown with vendor/task coordination
+- **Key Features**: Dependencies, Gantt for planning timeline, calendar for vendor appointments
+- **Success Metric**: Can plan a complex event 6+ months out with all tasks and milestones tracked
 
 ---
 
