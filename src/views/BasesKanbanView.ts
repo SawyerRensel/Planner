@@ -333,17 +333,17 @@ export class BasesKanbanView extends BasesView {
   private setupContainer(): void {
     this.containerEl.empty();
     this.containerEl.addClass('planner-bases-kanban');
-    this.containerEl.style.cssText = 'height: 100%; display: flex; flex-direction: column; overflow: auto;';
+    this.containerEl.style.cssText = 'height: 100%; display: flex; flex-direction: column; overflow: hidden;';
 
     this.boardEl = this.containerEl.createDiv({ cls: 'planner-kanban-board' });
     this.boardEl.style.cssText = `
       flex: 1;
       display: flex;
+      align-items: flex-start;
       gap: 12px;
       padding: 12px;
-      overflow-x: auto;
-      overflow-y: auto;
-      min-height: min-content;
+      overflow: auto;
+      min-height: 0;
     `;
   }
 

@@ -2005,12 +2005,12 @@ body.is-mobile .planner-timeline-iframe-container {
   display: flex;
   gap: 12px;
   padding: 12px;
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: auto;
 }
 
-/* Custom scrollbar for horizontal scrolling */
+/* Custom scrollbar styling */
 .planner-kanban-board::-webkit-scrollbar {
+  width: 8px;
   height: 8px;
 }
 
@@ -2035,7 +2035,6 @@ body.is-mobile .planner-timeline-iframe-container {
   flex-direction: column;
   background: var(--background-secondary);
   border-radius: 8px;
-  max-height: 100%;
 }
 
 .planner-kanban-column-header {

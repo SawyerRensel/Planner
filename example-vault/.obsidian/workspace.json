@@ -22,19 +22,6 @@
             }
           },
           {
-            "id": "ec7db8f93f8bc4e1",
-            "type": "leaf",
-            "state": {
-              "type": "bases",
-              "state": {
-                "file": "Planner/Kanban.base",
-                "viewName": "Kanban"
-              },
-              "icon": "square-kanban",
-              "title": "Kanban"
-            }
-          },
-          {
             "id": "3bafdbb49f2951c5",
             "type": "leaf",
             "state": {
@@ -47,9 +34,22 @@
               "icon": "lucide-file",
               "title": "Implement Frontend"
             }
+          },
+          {
+            "id": "cbe4cdc7af03bfe9",
+            "type": "leaf",
+            "state": {
+              "type": "bases",
+              "state": {
+                "file": "Planner/Kanban.base",
+                "viewName": "Kanban"
+              },
+              "icon": "square-kanban",
+              "title": "Kanban"
+            }
           }
         ],
-        "currentTab": 1
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -234,13 +234,13 @@
       "obsidian-full-calendar:Open Full Calendar": false
     }
   },
-  "active": "ec7db8f93f8bc4e1",
+  "active": "cbe4cdc7af03bfe9",
   "lastOpenFiles": [
     "Planner/Implement Frontend.md",
     "Planner/Kanban.base",
+    "notes/feedback-and-ideas.md",
     "Screenshot_20260105-200533.png",
     "Screenshot_20260108-193249.png",
-    "notes/feedback-and-ideas.md",
     "Planner/test.md",
     "Personal/test 1.md",
     "Personal/test.md",
