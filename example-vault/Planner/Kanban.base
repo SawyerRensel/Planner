@@ -57,5 +57,7 @@ views:
     summaryField: note.summary
     coverField: note.cover
     showAddNewButtons: "true"
+    freezeHeaders: both
+    swimlaneBy: note.priority
   - type: table
     name: Table

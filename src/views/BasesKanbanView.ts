@@ -37,6 +37,7 @@ const SOLARIZED_ACCENT_COLORS = [
 type BorderStyle = 'none' | 'left-accent' | 'full-border';
 type CoverDisplay = 'none' | 'banner' | 'thumbnail-left' | 'thumbnail-right' | 'background';
 type BadgePlacement = 'inline' | 'properties-section';
+type FreezeHeaders = 'off' | 'columns' | 'swimlanes' | 'both';
 
 /**
  * Virtual scroll threshold - enables virtual scrolling when column has 15+ cards
@@ -178,6 +179,11 @@ export class BasesKanbanView extends BasesView {
       return value === 'true';
     }
     return value ?? false;
+  }
+
+  private getFreezeHeaders(): FreezeHeaders {
+    const value = this.config.get('freezeHeaders') as string | undefined;
+    return (value as FreezeHeaders) || 'off';
   }
 
   private getCustomColumnOrder(): string[] {
@@ -588,6 +594,9 @@ export class BasesKanbanView extends BasesView {
     const columnWidth = this.getColumnWidth();
     const hideEmpty = this.getHideEmptyColumns();
     const groupByField = this.getGroupBy();
+    const freezeHeaders = this.getFreezeHeaders();
+    const freezeColumns = freezeHeaders === 'columns' || freezeHeaders === 'both';
+    const freezeSwimlanes = freezeHeaders === 'swimlanes' || freezeHeaders === 'both';
 
     // First, collect all entries and group by swimlane then by column
     const swimlaneGroups = new Map<string, Map<string, BasesEntry[]>>();
@@ -646,10 +655,8 @@ export class BasesKanbanView extends BasesView {
       display: flex;
       gap: 12px;
       padding-left: 150px;
-      position: sticky;
-      top: 0;
+      ${freezeColumns ? 'position: sticky; top: 0; z-index: 10;' : ''}
       background: var(--background-primary);
-      z-index: 10;
       padding-bottom: 8px;
     `;
 
@@ -779,9 +786,7 @@ export class BasesKanbanView extends BasesView {
         padding: 8px;
         background: var(--background-modifier-border);
         border-radius: 6px;
-        position: sticky;
-        left: 0;
-        z-index: 5;
+        ${freezeSwimlanes ? 'position: sticky; left: 0; z-index: 5;' : ''}
         display: flex;
         flex-direction: column;
         gap: 4px;
@@ -948,8 +953,130 @@ export class BasesKanbanView extends BasesView {
     const columnWidth = this.getColumnWidth();
     const hideEmpty = this.getHideEmptyColumns();
     const columnKeys = this.getColumnKeys(groups);
+    const freezeHeaders = this.getFreezeHeaders();
+    const freezeColumns = freezeHeaders === 'columns' || freezeHeaders === 'both';
 
-    // Create a wrapper container (similar to swimlanes) that expands to fit content
+    // Create a wrapper that holds both header row (if sticky) and columns
+    const wrapperContainer = document.createElement('div');
+    wrapperContainer.className = 'planner-kanban-wrapper';
+    wrapperContainer.style.cssText = `
+      display: flex;
+      flex-direction: column;
+      min-width: fit-content;
+      min-height: fit-content;
+    `;
+
+    // If freeze columns is enabled, create a sticky header row
+    if (freezeColumns) {
+      const headerRow = document.createElement('div');
+      headerRow.className = 'planner-kanban-header-row';
+      headerRow.style.cssText = `
+        display: flex;
+        gap: 12px;
+        position: sticky;
+        top: 0;
+        background: var(--background-primary);
+        z-index: 10;
+        padding-bottom: 8px;
+      `;
+
+      const groupByField = this.getGroupBy();
+      const propName = groupByField.replace(/^note\./, '');
+
+      for (const columnKey of columnKeys) {
+        const entries = groups.get(columnKey) || [];
+        if (hideEmpty && entries.length === 0) continue;
+
+        const headerCell = document.createElement('div');
+        headerCell.className = 'planner-kanban-column-header-cell';
+        headerCell.setAttribute('data-group', columnKey);
+        headerCell.style.cssText = `
+          width: ${columnWidth}px;
+          min-width: ${columnWidth}px;
+          font-weight: 600;
+          padding: 8px 12px;
+          background: var(--background-secondary);
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        `;
+
+        // Grab handle for column reordering
+        const grabHandle = document.createElement('span');
+        grabHandle.className = 'planner-kanban-column-grab';
+        grabHandle.style.cssText = `
+          cursor: grab;
+          opacity: 0.4;
+          transition: opacity 0.15s ease;
+          display: flex;
+          align-items: center;
+        `;
+        setIcon(grabHandle, 'grip-vertical');
+        grabHandle.addEventListener('mouseenter', () => {
+          grabHandle.style.opacity = '1';
+        });
+        grabHandle.addEventListener('mouseleave', () => {
+          grabHandle.style.opacity = '0.4';
+        });
+        grabHandle.setAttribute('draggable', 'true');
+        this.setupSwimlaneColumnDragHandlers(grabHandle, headerCell, columnKey);
+        headerCell.appendChild(grabHandle);
+
+        // Add icon for status/priority/calendar columns
+        if (propName === 'status') {
+          const config = getStatusConfig(this.plugin.settings, columnKey);
+          if (config) {
+            const iconEl = document.createElement('span');
+            iconEl.className = 'planner-kanban-column-icon';
+            setIcon(iconEl, config.icon || 'circle');
+            iconEl.style.color = config.color;
+            headerCell.appendChild(iconEl);
+          }
+        } else if (propName === 'priority') {
+          const config = getPriorityConfig(this.plugin.settings, columnKey);
+          if (config) {
+            const iconEl = document.createElement('span');
+            iconEl.className = 'planner-kanban-column-icon';
+            setIcon(iconEl, config.icon || 'signal');
+            iconEl.style.color = config.color;
+            headerCell.appendChild(iconEl);
+          }
+        } else if (propName === 'calendar') {
+          const color = getCalendarColor(this.plugin.settings, columnKey);
+          const iconEl = document.createElement('span');
+          iconEl.className = 'planner-kanban-column-icon';
+          setIcon(iconEl, 'calendar');
+          iconEl.style.color = color;
+          headerCell.appendChild(iconEl);
+        }
+
+        // Title
+        const titleSpan = document.createElement('span');
+        titleSpan.style.flex = '1';
+        titleSpan.textContent = columnKey;
+        headerCell.appendChild(titleSpan);
+
+        // Count badge
+        const countBadge = document.createElement('span');
+        countBadge.className = 'planner-kanban-column-count';
+        countBadge.textContent = String(entries.length);
+        countBadge.style.cssText = `
+          background: var(--background-modifier-border);
+          padding: 2px 8px;
+          border-radius: 10px;
+          font-size: 12px;
+          font-weight: 500;
+        `;
+        headerCell.appendChild(countBadge);
+
+        headerRow.appendChild(headerCell);
+      }
+
+      wrapperContainer.appendChild(headerRow);
+    }
+
+    // Create columns container
     const columnsContainer = document.createElement('div');
     columnsContainer.className = 'planner-kanban-columns-container';
     columnsContainer.style.cssText = `
@@ -966,14 +1093,15 @@ export class BasesKanbanView extends BasesView {
       // Skip empty columns if configured
       if (hideEmpty && entries.length === 0) continue;
 
-      const column = this.createColumn(columnKey, entries, columnWidth);
+      const column = this.createColumn(columnKey, entries, columnWidth, freezeColumns);
       columnsContainer.appendChild(column);
     }
 
-    this.boardEl.appendChild(columnsContainer);
+    wrapperContainer.appendChild(columnsContainer);
+    this.boardEl.appendChild(wrapperContainer);
   }
 
-  private createColumn(groupKey: string, entries: BasesEntry[], width: number): HTMLElement {
+  private createColumn(groupKey: string, entries: BasesEntry[], width: number, skipHeader = false): HTMLElement {
     const column = document.createElement('div');
     column.className = 'planner-kanban-column';
     column.style.cssText = `
@@ -987,9 +1115,11 @@ export class BasesKanbanView extends BasesView {
     `;
     column.setAttribute('data-group', groupKey);
 
-    // Column header (pass column for drag handlers)
-    const header = this.createColumnHeader(groupKey, entries.length, column);
-    column.appendChild(header);
+    // Column header (pass column for drag handlers) - skip if using sticky header row
+    if (!skipHeader) {
+      const header = this.createColumnHeader(groupKey, entries.length, column);
+      column.appendChild(header);
+    }
 
     // Cards container - fills column, no internal scrolling so content expands column
     const cardsContainer = document.createElement('div');
@@ -2553,6 +2683,18 @@ export function createKanbanViewRegistration(plugin: PlannerPlugin): BasesViewRe
         options: {
           'true': 'Show',
           'false': 'Hide',
+        },
+      },
+      {
+        type: 'dropdown',
+        key: 'freezeHeaders',
+        displayName: 'Freeze headers',
+        default: 'off',
+        options: {
+          'off': 'Off',
+          'columns': 'Columns',
+          'swimlanes': 'Swimlanes',
+          'both': 'Both',
         },
       },
     ],
