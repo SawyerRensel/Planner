@@ -7,6 +7,8 @@ Planner is a powerful Obsidian plugin that brings together calendar visualizatio
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Obsidian](https://img.shields.io/badge/Obsidian-1.10.0+-purple)](https://obsidian.md)
 
+![Planner Kanban View](docs/media/planner_persona_hobby_project_manager_kanban.png)
+
 ## Features
 
 - **Four Powerful Views** - Calendar, Kanban, Timeline, and Task List views, all integrated with Obsidian Bases
@@ -36,6 +38,8 @@ Planner is a powerful Obsidian plugin that brings together calendar visualizatio
 
 ### Calendar View
 
+![Calendar View](docs/media/planner_persona_casual_planner_calendar.png)
+
 Full calendar display with six layouts powered by FullCalendar:
 
 - **Year** - Overview of the entire year
@@ -49,6 +53,8 @@ Features include drag-to-reschedule, click-to-create, color coding by any field,
 
 ### Kanban View
 
+![Kanban View](docs/media/planner_persona_casual_planner_kanban.png)
+
 Drag-and-drop board for visual task management:
 
 - Configurable columns by status, priority, calendar, or any property
@@ -59,6 +65,8 @@ Drag-and-drop board for visual task management:
 
 ### Timeline View
 
+![Timeline View](docs/media/planner_persona_casual_planner_timeline.png)
+
 Beautiful chronological visualization powered by [Markwhen](https://markwhen.com/):
 
 - Group events by calendar, status, people, or priority
@@ -68,6 +76,8 @@ Beautiful chronological visualization powered by [Markwhen](https://markwhen.com
 - Color coding by any field
 
 ### Task List View
+
+![Task List View](docs/media/planner_persona_casual_planner_task_list.png)
 
 Table view for managing items:
 
@@ -98,6 +108,8 @@ Table view for managing items:
 1. Press `Ctrl+P` and type "Planner: Quick capture" to open the Item Modal
 2. Enter a title—try natural language: "Team meeting tomorrow at 2pm @work #meeting"
 3. Click **Save**
+
+![Quick Capture](docs/media/planner_quick_capture.png)
 
 ### Open Views
 

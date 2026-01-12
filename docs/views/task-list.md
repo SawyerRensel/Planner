@@ -2,6 +2,8 @@
 
 A powerful table view for managing all your tasks.
 
+![Task List View](../media/planner_persona_hobby_project_manager_task_list.png)
+
 ## Features
 
 - Sortable columns
@@ -28,6 +30,8 @@ Default columns shown:
 ### Column Order
 
 Reorder columns through the Bases view configuration:
+
+![Sort Menu](../media/planner_task_list_sort_menu.png)
 
 1. Click the view settings
 2. Drag columns to reorder
