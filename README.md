@@ -98,7 +98,7 @@ Table view for managing items:
 ### Manual Installation
 
 1. Download the latest release from the [Releases](https://github.com/sawyerrensel/planner/releases) page
-2. Extract `main.js`, `main.css`, and `manifest.json` to your vault's `.obsidian/plugins/planner/` folder
+2. Extract `main.js`, `main.css`, `manifest.json`, and `timeline.html` to your vault's `.obsidian/plugins/planner/` folder
 3. Enable the plugin in **Settings** > **Community Plugins**
 
 ## Quick Start
