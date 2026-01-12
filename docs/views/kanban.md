@@ -2,6 +2,8 @@
 
 Organize tasks with drag-and-drop columns and customizable cards.
 
+![Kanban View](../media/planner_persona_hobby_project_manager_kanban.png)
+
 ## Features
 
 - Drag and drop cards between columns
@@ -15,6 +17,8 @@ Organize tasks with drag-and-drop columns and customizable cards.
 ### Columns By
 
 Group cards into columns by any property:
+
+![Columns By Configuration](../media/planner_kanban_config_menu_columns_by.png)
 
 - **Status** - Default, shows workflow stages
 - **Priority** - Group by importance
@@ -37,12 +41,16 @@ Add horizontal grouping:
 
 How cards are colored:
 
+![Color By Configuration](../media/planner_kanban_config_menu_color.png)
+
 - **Calendar** - By calendar/project color
 - **Status** - By status color
 - **Priority** - By priority color
 - **Custom** - Any categorical property
 
 ### Card Display
+
+![Cover Configuration](../media/planner_kanban_config_menu_cover.png)
 
 | Option | Description |
 |--------|-------------|
@@ -65,6 +73,8 @@ How cards are colored:
 ## Interactions
 
 ### Moving Cards
+
+![Drag and Drop](../media/planner_kanban_drag_n_drop.png)
 
 - **Drag and Drop** - Move cards between columns
 - **Touch Hold** - On mobile, hold 200ms then drag

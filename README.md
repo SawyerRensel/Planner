@@ -1,4 +1,4 @@
-# Planner
+# Obsidian Planner
 
 **Unified calendar, task, and project management for Obsidian.**
 
@@ -6,6 +6,8 @@ Planner is a powerful Obsidian plugin that brings together calendar visualizatio
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Obsidian](https://img.shields.io/badge/Obsidian-1.10.0+-purple)](https://obsidian.md)
+
+![Planner Kanban View](docs/media/planner_persona_hobby_project_manager_kanban.png)
 
 ## Features
 
@@ -24,21 +26,19 @@ Planner is a powerful Obsidian plugin that brings together calendar visualizatio
 
 **The Casual Planner** — You want a simple, beautiful replacement for Google Calendar that lives inside your vault. No external accounts, no complex setup. Type "Dentist appointment next Tuesday at 2pm" and let natural language parsing do the rest. Set up recurring reminders and get on with your day.
 
-**The Life Planner** — You're a planning enthusiast who wants to track *everything*: habits, hobbies, vacation plans, weekend trips, even articles you've read. Your Calendar and Timeline reveal the full picture of your life—past, present, and future. Multiple color-coded calendars let you see it all or filter down to what matters now.
+**The Hobbyist** — That novel you're writing, the home renovation, the app you're building on weekends—they all deserve proper planning. Break big dreams into parent tasks and subtasks, visualize the entire journey on a Timeline, and watch your projects take shape one milestone at a time.
 
-**The Hobby Project Manager** — That novel you're writing, the home renovation, the app you're building on weekends—they all deserve proper planning. Break big dreams into parent tasks and subtasks, visualize the entire journey on a Timeline, and watch your projects take shape one milestone at a time.
-
-**The Content Creator** — You're a YouTuber, blogger, or podcaster managing a content pipeline. Track ideas through scripting, filming, editing, and publication with Kanban boards. See your publish dates on the Calendar and never miss an upload schedule again.
-
-**The Academic Researcher** — You're juggling research projects, paper deadlines, conference submissions, and teaching responsibilities. Track literature review progress, writing milestones, and advisor meetings in one place. Plan multi-year projects with clear dependencies and milestones.
+**The Academic** — You're juggling research projects, paper deadlines, conference submissions, and teaching responsibilities. Track literature review progress, writing milestones, and advisor meetings in one place. Plan multi-year projects with clear dependencies and milestones.
 
 **The Freelancer** — You're managing multiple client projects simultaneously. Keep each client's work in separate calendars, track project milestones on the Timeline, and use Kanban to visualize what's in progress across all your engagements.
 
-**The Power Organizer** — You've outgrown Asana, Trello, and ClickUp—or you just want everything in Obsidian. Kanban boards, dependencies, progress tracking, batch operations: Planner gives you the tools to replicate complex workflows entirely within your vault.
+**The Power Organizer** — You've outgrown Asana, Trello, and ClickUp—or you just want everything in Obsidian. Kanban boards, dependencies, progress tracking: Planner gives you the tools to replicate complex workflows entirely within your vault.
 
 ## Views
 
 ### Calendar View
+
+![Calendar View](docs/media/planner_persona_casual_planner_calendar.png)
 
 Full calendar display with six layouts powered by FullCalendar:
 
@@ -53,6 +53,8 @@ Features include drag-to-reschedule, click-to-create, color coding by any field,
 
 ### Kanban View
 
+![Kanban View](docs/media/planner_persona_casual_planner_kanban.png)
+
 Drag-and-drop board for visual task management:
 
 - Configurable columns by status, priority, calendar, or any property
@@ -63,6 +65,8 @@ Drag-and-drop board for visual task management:
 
 ### Timeline View
 
+![Timeline View](docs/media/planner_persona_casual_planner_timeline.png)
+
 Beautiful chronological visualization powered by [Markwhen](https://markwhen.com/):
 
 - Group events by calendar, status, people, or priority
@@ -72,6 +76,8 @@ Beautiful chronological visualization powered by [Markwhen](https://markwhen.com
 - Color coding by any field
 
 ### Task List View
+
+![Task List View](docs/media/planner_persona_casual_planner_task_list.png)
 
 Table view for managing items:
 
@@ -102,6 +108,8 @@ Table view for managing items:
 1. Press `Ctrl+P` and type "Planner: Quick capture" to open the Item Modal
 2. Enter a title—try natural language: "Team meeting tomorrow at 2pm @work #meeting"
 3. Click **Save**
+
+![Quick Capture](docs/media/planner_quick_capture.png)
 
 ### Open Views
 

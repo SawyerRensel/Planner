@@ -4,24 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "b2dc0969ff3b1ea5",
+        "id": "520e42fa8e412c02",
         "type": "tabs",
         "children": [
           {
-            "id": "7590a842cb82c1de",
-            "type": "leaf",
-            "state": {
-              "type": "bases",
-              "state": {
-                "file": "Planner/Calendar.base",
-                "viewName": "Calendar"
-              },
-              "icon": "calendar-range",
-              "title": "Calendar"
-            }
-          },
-          {
-            "id": "976417bf17d4240b",
+            "id": "40233f1b63465c57",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -33,23 +20,8 @@
               "icon": "lucide-file",
               "title": "Ideas"
             }
-          },
-          {
-            "id": "b4e9e28b148dcd24",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Obsidian Planner PRD.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Obsidian Planner PRD"
-            }
           }
-        ],
-        "currentTab": 2
+        ]
       }
     ],
     "direction": "vertical"
@@ -106,7 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 232.5
+    "width": 321.5
   },
   "right": {
     "id": "ed9ed6ed0a6d4bf8",
@@ -183,12 +155,13 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "Personas/Casual-Planner/Calendar.base",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline"
+              "title": "Outline of Calendar"
             }
           }
         ],
@@ -201,15 +174,6 @@
   },
   "left-ribbon": {
     "hiddenItems": {
-      "tasknotes:Open mini calendar": false,
-      "tasknotes:Open advanced calendar": false,
-      "tasknotes:Open task list": false,
-      "tasknotes:Open agenda": false,
-      "markwhen:Create new Markwhen file": false,
-      "tasknotes:Open kanban board": false,
-      "tasknotes:Open pomodoro": false,
-      "tasknotes:Open pomodoro stats": false,
-      "tasknotes:Create new task": false,
       "switcher:Open quick switcher": false,
       "graph:Open graph view": false,
       "canvas:Create new canvas": false,
@@ -217,59 +181,58 @@
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
       "bases:Create new base": false,
-      "obsidian-full-calendar:Open Full Calendar": false,
       "planner:Open Planner Task List": false,
       "planner:Open Planner Calendar": false,
       "planner:Open Planner Timeline": false,
       "planner:Open Planner Kanban": false
     }
   },
-  "active": "b4e9e28b148dcd24",
+  "active": "40233f1b63465c57",
   "lastOpenFiles": [
+    "Personas/Hobby-Project-Manager/Calendar.base",
+    "Personas/Hobby-Project-Manager/Task List.base",
+    "Personas/Hobby-Project-Manager/Timeline.base",
+    "Personas/Hobby-Project-Manager/Kanban.base",
+    "Personas/Hobby-Project-Manager/Timeline.base.tmp.15112.1768178753692",
+    "Personas/Hobby-Project-Manager/Task List.base.tmp.15112.1768178752081",
+    "Personas/Hobby-Project-Manager/Kanban.base.tmp.15112.1768178750492",
+    "Personas/Hobby-Project-Manager/Calendar.base.tmp.15112.1768178748902",
+    "Personas/Professional-PM/Task List.base",
+    "Personas/Professional-PM/Timeline.base",
     "Ideas.md",
-    "Obsidian Planner PRD.md",
-    "Planner/Calendar.base",
-    "Planner/Task List.base",
-    "Planner/Kanban.base",
-    "Planner/Timeline.base",
-    "TaskNotes/Views/relationships.base",
-    "TaskNotes/Views/agenda-default.base",
-    "TaskNotes/Views/calendar-default.base",
-    "TaskNotes/Views/tasks-default.base",
-    "TaskNotes/Views/kanban-default.base",
-    "TaskNotes/Views/mini-calendar-default.base",
-    "notes/feedback-and-ideas.md",
-    "notes/obsidian-planner-prd.md",
-    "Templates/Planner Template.md",
-    "Personal/test.md",
-    "Planner/test.md",
-    "DailyNotes/2026-01-09.md",
-    "notes/Template with body only - body appears in Note Content.md",
-    "Planner/Test.md",
-    "Planner/test 1.md",
-    "Planner/Website Redesign.md",
-    "Planner/Team Meeting.md",
-    "Planner/Fix Login Bug.md",
-    "Planner/Meeting.md",
-    "Templates/Daily Note Template.md",
-    "Full Calendar/2025-12-27 Full Calendar Example Event.md",
-    "Personal/FirstMonday.md",
-    "Planner/Implement Frontend.md",
-    "Planner/Grocery Shopping.md",
-    "Planner/Design Mockups.md",
-    "Plannerrrrr rrrrrrrrrrr/Website Redesign.md",
-    "Plannerrrrr rrrrrrrrrrr/Team Meeting.md",
-    "Plannerrrrr rrrrrrrrrrr/Meeting.md",
-    "Plannerrrrr rrrrrrrrrrr/Implement Frontend.md",
-    "Plannerrrrr rrrrrrrrrrr/Grocery Shopping.md",
-    "Screenshot_20260105-200533.png",
-    "Screenshot_20260108-193249.png",
+    "Personas/Professional-PM/Calendar.base",
+    "Personas/Event-Planner/Seating Chart.md",
+    "Personas/Event-Planner/Florist Meeting.md",
+    "Personas/Event-Planner/Finalize Guest List.md",
+    "Personas/Professional-PM/Project Alpha - API Redesign.md",
+    "Personas/Professional-PM/Interview - Senior Developer.md",
+    "Personas/Professional-PM/Gamma - Database Optimization.md",
+    "Personas/Professional-PM/Beta - Testing and QA.md",
+    "Personas/Professional-PM/Alpha - Sprint 4 Testing.md",
+    "Personas/Professional-PM/Alpha - Deployment.md",
+    "Personas/Hobby-Project-Manager/Fall Harvest and Cleanup.md",
+    "Personas/Hobby-Project-Manager/Build Cutting Boards.md",
+    "Personas/Hobby-Project-Manager/Build Dining Table.md",
+    "Personas/Hobby-Project-Manager/Build Portfolio Website.md",
+    "Personas/Casual-Planner/Water Plants.md",
+    "Personas/Casual-Planner/Dentist Appointment.md",
+    "Personas/Casual-Planner/Haircut Appointment.md",
+    "Personas/Casual-Planner/Gym Workout.md",
+    "Personas/Casual-Planner/Doctor Annual Checkup.md",
+    "Personas/Casual-Planner/Coffee with Rachel.md",
+    "Personas/Casual-Planner/Cancel Old Subscription.md",
+    "Personas/Casual-Planner/Buy Birthday Gift for Dad.md",
+    "Personas/Casual-Planner/Book Summer Vacation.md",
+    "Personas/Content-Creator/Affiliate Links Audit.md",
+    "Personas/Freelancer/Accountant Meeting.md",
     "notes/Screenshot_20260101-185045.png",
     "notes/Screenshot_20260101-185036.png",
     "notes/Screenshot_20260101-184811.png",
     "notes/Screenshot_20260101-184627.png",
     "notes/Pasted image 20260101091932.png",
     "notes/Pasted image 20260101091842.png",
+    "Screenshot_20260108-193249.png",
+    "Screenshot_20260105-200533.png",
     "Books/media/Guns Germs and Steel.jpg",
     "Books/media/The Raven King (The Raven Cycle Book 4).jpg"
   ]

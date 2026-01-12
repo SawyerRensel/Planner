@@ -2,6 +2,8 @@
 
 View your tasks and events on a beautiful, interactive calendar.
 
+![Calendar View](../media/planner_persona_casual_planner_calendar.png)
+
 ## Features
 
 - Multiple view modes (Day, Week, Month, Year)

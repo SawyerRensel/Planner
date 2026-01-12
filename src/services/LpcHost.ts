@@ -143,7 +143,6 @@ export class LpcHost {
         // Timeline is requesting current state
         if (this.callbacks.getMarkwhenState) {
           const state = this.callbacks.getMarkwhenState();
-          console.log('LpcHost: Responding to markwhenState request with', state ? 'data' : 'null');
           this.sendResponse(message.id, message.type, state ? this.serialize(state) : null);
         } else {
           this.sendResponse(message.id, message.type, null);
@@ -154,7 +153,6 @@ export class LpcHost {
         // Timeline is requesting app state
         if (this.callbacks.getAppState) {
           const state = this.callbacks.getAppState();
-          console.log('LpcHost: Responding to appState request with', state ? 'data' : 'null');
           this.sendResponse(message.id, message.type, state ? this.serialize(state) : null);
         } else {
           this.sendResponse(message.id, message.type, null);
@@ -162,7 +160,8 @@ export class LpcHost {
         break;
 
       default:
-        console.log('LpcHost: Unknown message type:', message.type);
+        // Unknown message types are silently ignored
+        break;
     }
   }
 

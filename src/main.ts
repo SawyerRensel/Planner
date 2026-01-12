@@ -28,8 +28,6 @@ export default class PlannerPlugin extends Plugin {
   baseGeneratorService: BaseGeneratorService;
 
   async onload() {
-    console.log('Loading Planner plugin');
-
     // Load settings
     await this.loadSettings();
 
@@ -68,8 +66,6 @@ export default class PlannerPlugin extends Plugin {
     this.addRibbonIcon('square-kanban', 'Open Planner Kanban', () => {
       this.activateKanbanView();
     });
-
-    console.log('Planner plugin loaded');
   }
 
   /**
@@ -100,15 +96,10 @@ export default class PlannerPlugin extends Plugin {
       createKanbanViewRegistration(this)
     );
 
-    if (taskListRegistered || calendarRegistered || timelineRegistered || kanbanRegistered) {
-      console.log('Planner: Registered Bases views');
-    } else {
-      console.log('Planner: Bases not enabled, skipping Bases view registration');
-    }
   }
 
   onunload() {
-    console.log('Unloading Planner plugin');
+    // Plugin cleanup handled automatically
   }
 
   async loadSettings() {
@@ -127,7 +118,6 @@ export default class PlannerPlugin extends Plugin {
       }
       // Save migrated settings
       await this.saveSettings();
-      console.log('Planner: Migrated calendarColors to calendars format');
     }
   }
 
@@ -218,15 +208,6 @@ export default class PlannerPlugin extends Plugin {
       },
     });
 
-    // List all items command (for debugging)
-    this.addCommand({
-      id: 'list-items',
-      name: 'List all items (debug)',
-      callback: async () => {
-        const items = await this.itemService.getAllItems();
-        console.log('Planner items:', items);
-      },
-    });
   }
 
   async activateTaskListView() {

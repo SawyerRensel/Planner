@@ -200,14 +200,21 @@ Screenshot_20260101-185045.png]]:1  Failed to load resource: net::ERR_FILE_NOT_F
 
 ## Release
 
-- [ ] Planner publish 0.1.0
-	- [ ] Docs (Zensical) site (clone repo to ref folder)
-	- [ ] Issue Templates
-	- [ ] Project board
-	- [ ] Generate a lot of examples in `examples` vault per user persona in PRD
-		- [ ] Add “History Scholar” and “Book Enthusiast” personas
-	- [ ] Readme.md
-	- [ ] License - GPL? or MIT?
+- [x] Planner publish 0.1.0
+	- [x] License - **GPL**? or MIT?
+	- [x] Docs (Zensical) site (clone repo to ref folder)
+	- [x] Readme.md
+- [ ] v0.1.1
+	- [x] Add a Changelog page to the docs
+	- [x] Add auto-folder suggest to calendar folders
+	- [x] Generate a lot of examples in `examples` vault per user persona in PRD
+		- [x] Take screenshots for examples.  
+			- [ ] Find a Laptop|Tablet|Mobile template and use to fill in with screenshots for the Readme and docs.
+
+- [ ] Zip examples and add to release.
+- [ ] Document examples in docs and Add button to download examples 
+- [ ] Issue Templates - ask Claude
+- [ ] Project board
 
 ## Other
 

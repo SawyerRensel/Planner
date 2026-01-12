@@ -2,6 +2,8 @@
 
 Visualize your projects on an interactive timeline.
 
+![Timeline View](../media/planner_persona_casual_planner_timeline.png)
+
 ## Features
 
 - Gantt-style visualization

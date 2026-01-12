@@ -10,6 +10,8 @@ Get up and running with Planner in under 5 minutes.
 2. Type "Planner: Create new item"
 3. Fill in the details in the Item Modal
 
+![Quick Capture](../media/planner_quick_capture.png)
+
 ### Using Natural Language
 
 Planner supports natural language date parsing:
@@ -43,6 +45,8 @@ Click the ribbon icons on the left sidebar:
 ### 1. Create Items
 
 Use the Item Modal to create tasks with:
+
+![Edit Item Modal](../media/planner_edit_item_modal_details.png)
 
 - Title and summary
 - Start and end dates
