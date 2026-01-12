@@ -1,9 +1,9 @@
 {
   "id": "planner",
   "name": "Planner",
-  "version": "0.1.0",
-  "minAppVersion": "1.4.0",
-  "description": "Unified calendar, task, and project management for Obsidian",
+  "version": "0.1.1",
+  "minAppVersion": "1.10.0",
+  "description": "Unified calendar, kanban, timeline, and task list for project and time management",
   "author": "Sawyer Rensel",
   "authorUrl": "https://github.com/sawyerrensel",
   "isDesktopOnly": false
