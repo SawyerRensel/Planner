@@ -1,6 +1,6 @@
 # Obsidian Planner
 
-**Unified calendar, task, and project management for Obsidian.**
+**Unified calendar, kanban, timeline, and task list for project and time management in Obsidian.**
 
 Planner is a powerful Obsidian plugin that brings together calendar visualization, Kanban boards, timeline views, and task lists—all powered by Obsidian's native Bases feature. Your data stays in plain Markdown files with YAML frontmatter, giving you complete ownership and flexibility.
 
@@ -280,7 +280,7 @@ Contributions are welcome! Please:
 
 ## Roadmap
 
-### Current (v0.1.0)
+### Current ([0.1.1](https://github.com/SawyerRensel/Planner/releases/tag/0.1.1))
 - Calendar, Kanban, Timeline, and Task List views
 - Item Modal with NLP parsing
 - Full recurrence support
