@@ -34,7 +34,7 @@ parent:
 children:
 blocked_by:
   - "[[Order Plants and Seeds]]"
-cover:
+cover: https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=800
 color:
 ---
 

@@ -39,7 +39,7 @@ children:
   - "[[Summer Garden Maintenance]]"
   - "[[Fall Harvest and Cleanup]]"
 blocked_by:
-cover:
+cover: https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800
 color:
 ---
 

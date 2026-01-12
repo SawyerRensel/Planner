@@ -37,7 +37,7 @@ children:
   - "[[Edit and Curate Portfolio]]"
   - "[[Build Portfolio Website]]"
 blocked_by:
-cover:
+cover: https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=800
 color:
 ---
 

@@ -10,11 +10,11 @@ context:
 people:
 location:
 related:
-status: To-Do
+status: Idea
 priority: Low
 progress: 20
 date_created: 2026-01-08T10:00:00
-date_modified: 2026-01-11T10:00:00
+date_modified: 2026-01-11T23:52:40.746Z
 date_start_scheduled: 2026-02-01T09:00:00
 date_start_actual:
 date_end_scheduled: 2026-03-31T17:00:00
@@ -33,7 +33,7 @@ repeat_completed_dates:
 parent:
 children:
 blocked_by:
-cover:
+cover: https://images.unsplash.com/photo-1617005082133-548c4dd27f35?w=800
 color:
 ---
 

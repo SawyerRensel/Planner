@@ -33,7 +33,7 @@ repeat_completed_dates:
 parent:
 children:
 blocked_by:
-cover:
+cover: https://images.unsplash.com/photo-1530124566582-a618bc2615dc?w=800
 color:
 ---
 

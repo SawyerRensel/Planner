@@ -4,20 +4,64 @@
     "type": "split",
     "children": [
       {
-        "id": "eadd706cd85a3045",
+        "id": "38871450d7b05cfa",
         "type": "tabs",
         "children": [
           {
-            "id": "ac0420ab563067b4",
+            "id": "ed8dc55195d6a423",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "bases",
+              "state": {
+                "file": "Personas/Professional-PM/Task List.base",
+                "viewName": "Task List"
+              },
+              "icon": "list-checks",
+              "title": "Task List"
+            }
+          },
+          {
+            "id": "46b410dac3132b37",
+            "type": "leaf",
+            "state": {
+              "type": "bases",
+              "state": {
+                "file": "Personas/Professional-PM/Calendar.base",
+                "viewName": "Calendar"
+              },
+              "icon": "calendar-range",
+              "title": "Calendar"
+            }
+          },
+          {
+            "id": "3360a94182a94d2c",
+            "type": "leaf",
+            "state": {
+              "type": "bases",
+              "state": {
+                "file": "Personas/Professional-PM/Timeline.base",
+                "viewName": "Timeline"
+              },
+              "icon": "square-chart-gantt",
+              "title": "Timeline"
+            }
+          },
+          {
+            "id": "811085e433ff7bd8",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Ideas.md",
+                "mode": "source",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "New tab"
+              "title": "Ideas"
             }
           }
-        ]
+        ],
+        "currentTab": 3
       }
     ],
     "direction": "vertical"
@@ -74,8 +118,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 232.5,
-    "collapsed": true
+    "width": 232.5
   },
   "right": {
     "id": "ed9ed6ed0a6d4bf8",
@@ -184,19 +227,31 @@
       "planner:Open Planner Kanban": false
     }
   },
-  "active": "ac0420ab563067b4",
+  "active": "811085e433ff7bd8",
   "lastOpenFiles": [
-    "Personas/Casual-Planner/Calendar.base",
-    "Personas/Casual-Planner/Task List.base",
-    "Personas/Casual-Planner/Timeline.base",
-    "Personas/Casual-Planner/Kanban.base",
-    "Personas/Casual-Planner/Movie Night.md.tmp.15112.1768174076092",
-    "Personas/Casual-Planner/Coffee with Rachel.md.tmp.15112.1768174074445",
-    "Personas/Casual-Planner/Oil Change.md.tmp.15112.1768174059397",
-    "Personas/Casual-Planner/Meal Prep Sunday.md.tmp.15112.1768174057781",
-    "Personas/Casual-Planner/Order Contacts.md.tmp.15112.1768174056160",
-    "Personas/Casual-Planner/Gym Workout.md.tmp.15112.1768174054574",
-    "Personas/Casual-Planner/Doctor Annual Checkup.md.tmp.15112.1768174052977",
+    "Personas/Event-Planner/Seating Chart.md",
+    "Personas/Event-Planner/Florist Meeting.md",
+    "Personas/Event-Planner/Finalize Guest List.md",
+    "Personas/Professional-PM/Kanban.base",
+    "Personas/Professional-PM/Project Alpha - API Redesign.md",
+    "Personas/Professional-PM/Timeline.base",
+    "Personas/Professional-PM/Interview - Senior Developer.md",
+    "Personas/Professional-PM/Calendar.base",
+    "Personas/Professional-PM/Task List.base",
+    "Personas/Professional-PM/Timeline.base.tmp.15112.1768177218058",
+    "Personas/Professional-PM/Task List.base.tmp.15112.1768177216297",
+    "Personas/Professional-PM/Kanban.base.tmp.15112.1768177214605",
+    "Personas/Professional-PM/Calendar.base.tmp.15112.1768177212962",
+    "Personas/Hobby-Project-Manager/Task List.base",
+    "Personas/Hobby-Project-Manager/Calendar.base",
+    "Personas/Professional-PM/Gamma - Database Optimization.md",
+    "Personas/Professional-PM/Beta - Testing and QA.md",
+    "Personas/Professional-PM/Alpha - Sprint 4 Testing.md",
+    "Personas/Professional-PM/Alpha - Deployment.md",
+    "Personas/Hobby-Project-Manager/Fall Harvest and Cleanup.md",
+    "Personas/Hobby-Project-Manager/Build Cutting Boards.md",
+    "Personas/Hobby-Project-Manager/Build Dining Table.md",
+    "Personas/Hobby-Project-Manager/Build Portfolio Website.md",
     "Personas/Casual-Planner/Water Plants.md",
     "Personas/Casual-Planner/Dentist Appointment.md",
     "Personas/Casual-Planner/Haircut Appointment.md",
@@ -209,19 +264,7 @@
     "Ideas.md",
     "Personas/Content-Creator/Affiliate Links Audit.md",
     "Personas/Freelancer/Accountant Meeting.md",
-    "Personas/Event-Planner/Florist Meeting.md",
     "Personas/Event-Planner/Weekly Planning Check-in.md",
-    "Personas/Event-Planner/Wedding Budget Tracker.md",
-    "Personas/Event-Planner/Hair and Makeup Trial.md",
-    "Personas/Event-Planner/Honeymoon Planning.md",
-    "Personas/Event-Planner/Rehearsal Dinner.md",
-    "Personas/Event-Planner/Bridal Shower.md",
-    "Personas/Event-Planner/Engagement Party.md",
-    "Personas/Event-Planner/Bridesmaid Dresses.md",
-    "Personas/Event-Planner/First Dress Fitting.md",
-    "Personas/Event-Planner/Wedding Dress Shopping.md",
-    "Personas/Event-Planner/Wedding Day Timeline.md",
-    "Personas/Event-Planner/Seating Chart.md",
     "notes/Screenshot_20260101-185045.png",
     "notes/Screenshot_20260101-185036.png",
     "notes/Screenshot_20260101-184811.png",

@@ -34,7 +34,7 @@ parent: "[[Photography Portfolio Project]]"
 children:
 blocked_by:
   - "[[Fall Photo Sessions]]"
-cover:
+cover: https://images.unsplash.com/photo-1491002052546-bf38f186af56?w=800
 color:
 ---
 

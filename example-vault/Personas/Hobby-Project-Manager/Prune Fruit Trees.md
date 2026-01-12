@@ -10,11 +10,11 @@ context:
 people:
 location: Backyard
 related:
-status: To-Do
+status: Idea
 priority: Medium
 progress: 0
 date_created: 2026-01-08T10:00:00
-date_modified: 2026-01-11T10:00:00
+date_modified: 2026-01-11T23:52:44.310Z
 date_start_scheduled: 2026-02-01T10:00:00
 date_start_actual:
 date_end_scheduled: 2026-02-01T14:00:00

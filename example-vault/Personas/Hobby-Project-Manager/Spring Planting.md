@@ -35,7 +35,7 @@ children:
 blocked_by:
   - "[[Spring Bed Preparation]]"
   - "[[Order Plants and Seeds]]"
-cover:
+cover: https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?w=800
 color:
 ---
 

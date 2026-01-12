@@ -33,7 +33,7 @@ repeat_completed_dates:
 parent: "[[Build Dining Table]]"
 children:
 blocked_by:
-cover:
+cover: https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=800
 color:
 ---
 

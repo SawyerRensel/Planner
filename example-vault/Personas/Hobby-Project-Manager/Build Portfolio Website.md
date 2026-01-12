@@ -10,11 +10,11 @@ context:
 people:
 location:
 related:
-status: To-Do
+status: Idea
 priority: Medium
 progress: 0
 date_created: 2025-11-30T10:00:00
-date_modified: 2026-01-11T10:00:00
+date_modified: 2026-01-11T23:52:36.985Z
 date_start_scheduled: 2026-05-01T09:00:00
 date_start_actual:
 date_end_scheduled: 2026-06-30T17:00:00

@@ -200,13 +200,13 @@ Screenshot_20260101-185045.png]]:1  Failed to load resource: net::ERR_FILE_NOT_F
 
 ## Release
 
-- [ ] Planner publish 0.1.0
+- [x] Planner publish 0.1.0
 	- [x] License - **GPL**? or MIT?
 	- [x] Docs (Zensical) site (clone repo to ref folder)
 	- [x] Readme.md
 - [ ] v0.1.1
 	- [x] Add a Changelog page to the docs
-	- [ ] Add auto-folder suggest to calendar folders
+	- [x] Add auto-folder suggest to calendar folders
 	- [ ] Generate a lot of examples in `examples` vault per user persona in PRD
 		- [ ] Take screenshots for examples.  
 			- [ ] Find a Laptop|Tablet|Mobile template and use to fill in with screenshots for the Readme and docs.
