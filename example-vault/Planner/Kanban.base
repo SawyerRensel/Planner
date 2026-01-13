@@ -1,7 +1,9 @@
 source: Planner/
 filters:
   and:
-    - file.inFolder("Planner")
+    - or:
+        - file.inFolder("Planner")
+        - file.inFolder("Personas/Hobby-Project-Manager")
     - file.ext == "md"
 properties:
   note.title:

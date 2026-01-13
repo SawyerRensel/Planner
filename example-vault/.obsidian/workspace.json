@@ -34,9 +34,22 @@
               "icon": "lucide-file",
               "title": "PR 9481"
             }
+          },
+          {
+            "id": "bc81868e6e1e938c",
+            "type": "leaf",
+            "state": {
+              "type": "bases",
+              "state": {
+                "file": "Planner/Task List.base",
+                "viewName": "Task List"
+              },
+              "icon": "list-checks",
+              "title": "Task List"
+            }
           }
         ],
-        "currentTab": 1
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -188,23 +201,30 @@
   },
   "left-ribbon": {
     "hiddenItems": {
+      "planner:Open Planner task list": false,
+      "planner:Open Planner calendar": false,
+      "planner:Open Planner timeline": false,
+      "planner:Open Planner kanban": false,
       "switcher:Open quick switcher": false,
       "graph:Open graph view": false,
       "canvas:Create new canvas": false,
       "daily-notes:Open today's daily note": false,
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
-      "bases:Create new base": false,
-      "planner:Open Planner Task List": false,
-      "planner:Open Planner Calendar": false,
-      "planner:Open Planner Timeline": false,
-      "planner:Open Planner Kanban": false
+      "bases:Create new base": false
     }
   },
-  "active": "33fce3f5f88042ae",
+  "active": "bc81868e6e1e938c",
   "lastOpenFiles": [
-    "Ideas.md",
+    "Planner/Kanban.base",
+    "Planner/Timeline.base",
+    "Planner/Calendar.base",
     "PR 9481.md",
+    "Personas/Hobby-Project-Manager/Timeline.base",
+    "Personas/Hobby-Project-Manager/Task List.base",
+    "Personas/Hobby-Project-Manager/Kanban.base",
+    "Personas/Hobby-Project-Manager/Calendar.base",
+    "Ideas.md",
     "Personas/Professional-PM/Update Project Roadmap.md",
     "Personas/Professional-PM/Timeline.base",
     "Personas/Professional-PM/Technical Debt Review.md",
@@ -232,13 +252,6 @@
     "Personas/Professional-PM/Beta - Design Phase.md",
     "Personas/Professional-PM/Beta - Core Development.md",
     "Personas/Professional-PM/Beta - App Store Submission.md",
-    "Personas/Professional-PM/Alpha - Sprint 4 Testing.md",
-    "Personas/Professional-PM",
-    "Personas/Power-Organizer",
-    "Personas/Life-Planner",
-    "Personas/Hobby-Project-Manager/Timeline.base",
-    "Personas/Hobby-Project-Manager/Task List.base",
-    "Personas/Hobby-Project-Manager/Kanban.base",
     "notes/Screenshot_20260101-185045.png",
     "notes/Screenshot_20260101-185036.png",
     "notes/Screenshot_20260101-184811.png",

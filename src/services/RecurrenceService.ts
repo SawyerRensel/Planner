@@ -416,9 +416,10 @@ export class RecurrenceService {
 
     // By day
     if (options.byweekday?.length) {
-      result.repeat_byday = options.byweekday.map(w =>
-        this.reverseMapWeekday(typeof w === 'number' ? w : w.weekday)
-      );
+      result.repeat_byday = options.byweekday.map(w => {
+        const weekdayNum = typeof w === 'number' ? w : (w as { weekday: number }).weekday;
+        return this.reverseMapWeekday(weekdayNum);
+      });
     }
 
     // By month

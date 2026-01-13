@@ -44,19 +44,17 @@ export async function readItemTemplate(
       file = app.vault.getAbstractFileByPath(`${templatePath}.md`);
     }
 
-    if (!file || !(file instanceof Object && 'extension' in file)) {
+    if (!(file instanceof TFile)) {
       // File not found - graceful fallback
       console.warn(`[Planner] Item template not found: ${templatePath}`);
       return null;
     }
 
-    const tFile = file as TFile;
-
     // Read file content
-    const content = await app.vault.read(tFile);
+    const content = await app.vault.read(file);
 
     // Get frontmatter from metadata cache
-    const cache = app.metadataCache.getFileCache(tFile);
+    const cache = app.metadataCache.getFileCache(file);
     const rawFrontmatter = cache?.frontmatter ?? {};
 
     // Separate standard Planner fields from custom fields

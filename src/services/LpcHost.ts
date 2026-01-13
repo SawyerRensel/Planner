@@ -12,9 +12,7 @@ import {
   EditEventDateRangeMessage,
   NewEventMessage,
   EventPath,
-  DisplayScale,
   DateRangeIso,
-  DateFormat,
 } from '../types/markwhen';
 
 /**
@@ -175,7 +173,7 @@ export class LpcHost {
       type,
       response: true,
       id,
-      params: params as any,
+      params: params,
     };
 
     this.iframe.contentWindow.postMessage(message, '*');
@@ -200,7 +198,7 @@ export class LpcHost {
         type,
         request: true,
         id,
-        params: params as any,
+        params: params,
       };
 
       this.iframe.contentWindow.postMessage(message, '*');
@@ -276,14 +274,14 @@ export class LpcHost {
    * Request the Timeline to jump to a specific path
    */
   jumpToPath(path: EventPath): void {
-    this.postRequest('jumpToPath', { path });
+    void this.postRequest('jumpToPath', { path });
   }
 
   /**
    * Request the Timeline to jump to a date range
    */
   jumpToRange(dateRangeIso: DateRangeIso): void {
-    this.postRequest('jumpToRange', { dateRangeIso });
+    void this.postRequest('jumpToRange', { dateRangeIso });
   }
 
   /**

@@ -1,4 +1,4 @@
-import { App, TFile, TFolder, normalizePath } from 'obsidian';
+import { App, TFile, normalizePath } from 'obsidian';
 import type { PlannerSettings } from '../types/settings';
 
 /**
@@ -48,7 +48,7 @@ export class BaseGeneratorService {
   /**
    * Check if the Task List.base file exists
    */
-  async tasksBaseExists(): Promise<boolean> {
+  tasksBaseExists(): boolean {
     const path = this.getTasksBasePath();
     return this.app.vault.getAbstractFileByPath(path) instanceof TFile;
   }
@@ -56,7 +56,7 @@ export class BaseGeneratorService {
   /**
    * Check if the Calendar.base file exists
    */
-  async calendarBaseExists(): Promise<boolean> {
+  calendarBaseExists(): boolean {
     const path = this.getCalendarBasePath();
     return this.app.vault.getAbstractFileByPath(path) instanceof TFile;
   }
@@ -64,7 +64,7 @@ export class BaseGeneratorService {
   /**
    * Check if the Timeline.base file exists
    */
-  async timelineBaseExists(): Promise<boolean> {
+  timelineBaseExists(): boolean {
     const path = this.getTimelineBasePath();
     return this.app.vault.getAbstractFileByPath(path) instanceof TFile;
   }
@@ -72,7 +72,7 @@ export class BaseGeneratorService {
   /**
    * Check if the Kanban.base file exists
    */
-  async kanbanBaseExists(): Promise<boolean> {
+  kanbanBaseExists(): boolean {
     const path = this.getKanbanBasePath();
     return this.app.vault.getAbstractFileByPath(path) instanceof TFile;
   }
@@ -392,7 +392,7 @@ ${folderConditions}
    */
   async generateTasksBase(overwrite: boolean = false): Promise<boolean> {
     const path = this.getTasksBasePath();
-    const exists = await this.tasksBaseExists();
+    const exists = this.tasksBaseExists();
 
     if (exists && !overwrite) {
       return false;
@@ -403,8 +403,10 @@ ${folderConditions}
     const content = this.generateTasksBaseContent();
 
     if (exists) {
-      const file = this.app.vault.getAbstractFileByPath(path) as TFile;
-      await this.app.vault.modify(file, content);
+      const file = this.app.vault.getAbstractFileByPath(path);
+      if (file instanceof TFile) {
+        await this.app.vault.modify(file, content);
+      }
     } else {
       await this.app.vault.create(path, content);
     }
@@ -419,7 +421,7 @@ ${folderConditions}
    */
   async generateCalendarBase(overwrite: boolean = false): Promise<boolean> {
     const path = this.getCalendarBasePath();
-    const exists = await this.calendarBaseExists();
+    const exists = this.calendarBaseExists();
 
     if (exists && !overwrite) {
       return false;
@@ -430,8 +432,10 @@ ${folderConditions}
     const content = this.generateCalendarBaseContent();
 
     if (exists) {
-      const file = this.app.vault.getAbstractFileByPath(path) as TFile;
-      await this.app.vault.modify(file, content);
+      const file = this.app.vault.getAbstractFileByPath(path);
+      if (file instanceof TFile) {
+        await this.app.vault.modify(file, content);
+      }
     } else {
       await this.app.vault.create(path, content);
     }
@@ -446,7 +450,7 @@ ${folderConditions}
    */
   async generateTimelineBase(overwrite: boolean = false): Promise<boolean> {
     const path = this.getTimelineBasePath();
-    const exists = await this.timelineBaseExists();
+    const exists = this.timelineBaseExists();
 
     if (exists && !overwrite) {
       return false;
@@ -457,8 +461,10 @@ ${folderConditions}
     const content = this.generateTimelineBaseContent();
 
     if (exists) {
-      const file = this.app.vault.getAbstractFileByPath(path) as TFile;
-      await this.app.vault.modify(file, content);
+      const file = this.app.vault.getAbstractFileByPath(path);
+      if (file instanceof TFile) {
+        await this.app.vault.modify(file, content);
+      }
     } else {
       await this.app.vault.create(path, content);
     }
@@ -473,7 +479,7 @@ ${folderConditions}
    */
   async generateKanbanBase(overwrite: boolean = false): Promise<boolean> {
     const path = this.getKanbanBasePath();
-    const exists = await this.kanbanBaseExists();
+    const exists = this.kanbanBaseExists();
 
     if (exists && !overwrite) {
       return false;
@@ -484,8 +490,10 @@ ${folderConditions}
     const content = this.generateKanbanBaseContent();
 
     if (exists) {
-      const file = this.app.vault.getAbstractFileByPath(path) as TFile;
-      await this.app.vault.modify(file, content);
+      const file = this.app.vault.getAbstractFileByPath(path);
+      if (file instanceof TFile) {
+        await this.app.vault.modify(file, content);
+      }
     } else {
       await this.app.vault.create(path, content);
     }

@@ -1,4 +1,4 @@
-import { Modal, Setting, Notice } from 'obsidian';
+import { Modal, Notice } from 'obsidian';
 import * as chrono from 'chrono-node';
 import type PlannerPlugin from '../main';
 import { ItemFrontmatter } from '../types/item';
@@ -43,7 +43,7 @@ export class QuickCaptureModal extends Modal {
     contentEl.addClass('planner-quick-capture');
 
     // Title
-    contentEl.createEl('h3', { text: 'Quick Capture' });
+    contentEl.createEl('h3', { text: 'Quick capture' });
 
     // Input field
     const inputContainer = contentEl.createDiv({ cls: 'planner-quick-capture-input' });
@@ -61,7 +61,7 @@ export class QuickCaptureModal extends Modal {
     this.inputEl.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
-        this.createItem();
+        void this.createItem();
       } else if (e.key === 'Escape') {
         this.close();
       }
@@ -75,13 +75,17 @@ export class QuickCaptureModal extends Modal {
     const helpEl = contentEl.createDiv({ cls: 'planner-quick-capture-help' });
     helpEl.createEl('h4', { text: 'Syntax' });
     const helpList = helpEl.createEl('ul');
+    // eslint-disable-next-line obsidianmd/ui/sentence-case -- "Friday", "Jan" are proper nouns (day/month names)
     helpList.createEl('li', { text: 'Dates: "tomorrow", "next Friday at 3pm", "Jan 15"' });
-    helpList.createEl('li', { text: '@context - Add context (e.g., @work, @home)' });
-    helpList.createEl('li', { text: '#tag - Add tags (e.g., #task, #event)' });
-    helpList.createEl('li', { text: '!priority - Set priority (e.g., !urgent, !high)' });
-    helpList.createEl('li', { text: '>status - Set status (e.g., >In-Progress)' });
-    helpList.createEl('li', { text: '+[[Note]] - Set parent item' });
-    helpList.createEl('li', { text: '~calendar - Set calendar (e.g., ~Work, ~Personal)' });
+    helpList.createEl('li', { text: '@context - add context (e.g., @work, @home)' });
+    helpList.createEl('li', { text: '#tag - add tags (e.g., #task, #event)' });
+    helpList.createEl('li', { text: '!priority - set priority (e.g., !urgent, !high)' });
+    // eslint-disable-next-line obsidianmd/ui/sentence-case -- "In-Progress" is an example status value
+    helpList.createEl('li', { text: '>status - set status (e.g., >In-Progress)' });
+    // eslint-disable-next-line obsidianmd/ui/sentence-case -- "Note" is an example link target
+    helpList.createEl('li', { text: '+[[Note]] - set parent item' });
+    // eslint-disable-next-line obsidianmd/ui/sentence-case -- "Work", "Personal" are example calendar names
+    helpList.createEl('li', { text: '~calendar - set calendar (e.g., ~Work, ~Personal)' });
 
     // Buttons
     const buttonContainer = contentEl.createDiv({ cls: 'planner-quick-capture-buttons' });
@@ -90,7 +94,7 @@ export class QuickCaptureModal extends Modal {
       text: 'Create',
       cls: 'planner-btn planner-btn-primary',
     });
-    createBtn.addEventListener('click', () => this.createItem());
+    createBtn.addEventListener('click', () => { void this.createItem(); });
 
     const cancelBtn = buttonContainer.createEl('button', {
       text: 'Cancel',
@@ -195,7 +199,7 @@ export class QuickCaptureModal extends Modal {
 
     // Default title if empty
     if (!parsed.title) {
-      parsed.title = 'New Item';
+      parsed.title = 'New item';
     }
 
     this.parsedInput = parsed;
@@ -297,9 +301,9 @@ export class QuickCaptureModal extends Modal {
 
   private getContrastColor(hexColor: string): string {
     const hex = hexColor.replace('#', '');
-    const r = parseInt(hex.substr(0, 2), 16);
-    const g = parseInt(hex.substr(2, 2), 16);
-    const b = parseInt(hex.substr(4, 2), 16);
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
     const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
     return luminance > 0.5 ? '#000000' : '#ffffff';
   }

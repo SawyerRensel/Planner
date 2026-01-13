@@ -20,13 +20,18 @@ export function isOngoing(value: unknown): boolean {
 	// Obsidian Bases wraps values in objects with a 'data' property or toString()
 	if (typeof value === 'object' && value !== null) {
 		// Check 'data' property (Bases text field wrapper)
-		if ('data' in value && typeof (value as any).data === 'string') {
-			return (value as any).data.toLowerCase() === ONGOING_KEYWORD;
+		const valueWithData = value as { data?: unknown };
+		if ('data' in value && typeof valueWithData.data === 'string') {
+			return valueWithData.data.toLowerCase() === ONGOING_KEYWORD;
 		}
-		// Check toString() result
-		const str = value.toString();
-		if (str && str !== '[object Object]') {
-			return str.toLowerCase() === ONGOING_KEYWORD;
+		// Check toString() result - only call if object has a custom toString
+		// Skip plain objects that would stringify to '[object Object]'
+		if (Object.prototype.toString.call(value) !== '[object Object]') {
+			const objWithToString = value as { toString(): string };
+			const str = objWithToString.toString();
+			if (str && str !== '[object Object]') {
+				return str.toLowerCase() === ONGOING_KEYWORD;
+			}
 		}
 	}
 	return false;

@@ -10,7 +10,6 @@ import { BasesEntry, BasesPropertyId, App } from 'obsidian';
 import {
   Event,
   EventGroup,
-  DateRangeIso,
   ParseResult,
   RangeType,
   TimelineEvent,
@@ -129,7 +128,7 @@ export class MarkwhenAdapter {
   /**
    * Get frontmatter from entry using Obsidian's metadata cache
    */
-  private getFrontmatter(entry: BasesEntry): Record<string, any> | null {
+  private getFrontmatter(entry: BasesEntry): Record<string, unknown> | null {
     try {
       const cache = this.app.metadataCache.getCache(entry.file.path);
       return cache?.frontmatter || null;
@@ -272,11 +271,7 @@ export class MarkwhenAdapter {
   ): TimelineEvent | null {
     const filePath = entry.file.path;
 
-    // Get dates from configured fields
-    const startFieldName = options.dateStartField.replace(/^note\./, '');
-    const endFieldName = options.dateEndField.replace(/^note\./, '');
-    const titleFieldName = options.titleField.replace(/^note\./, '');
-
+    // Get values from configured fields
     const startValue = entry.getValue(options.dateStartField);
     const endValue = entry.getValue(options.dateEndField);
     const titleValue = entry.getValue(options.titleField);

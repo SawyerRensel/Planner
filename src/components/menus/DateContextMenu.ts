@@ -44,7 +44,7 @@ export class DateContextMenu {
     this.menu.addItem((item) => {
       item.setTitle('Weekdays');
       item.setIcon('calendar-days');
-      const submenu = (item as any).setSubmenu();
+      const submenu = (item as { setSubmenu: () => Menu }).setSubmenu();
       this.addWeekdaySubmenu(submenu);
     });
 
@@ -163,28 +163,55 @@ export class DateContextMenu {
     // Create a simple date/time picker modal
     const modal = document.createElement('div');
     modal.className = 'planner-datetime-picker-overlay';
-    modal.innerHTML = `
-      <div class="planner-datetime-picker">
-        <h3>Pick date & time</h3>
-        <div class="planner-datetime-inputs">
-          <label>
-            Date
-            <input type="date" class="planner-date-input" />
-          </label>
-          <label>
-            Time (optional)
-            <input type="time" class="planner-time-input" />
-          </label>
-        </div>
-        <div class="planner-datetime-buttons">
-          <button class="planner-btn" data-action="cancel">Cancel</button>
-          <button class="planner-btn planner-btn-primary" data-action="confirm">Confirm</button>
-        </div>
-      </div>
-    `;
 
-    const dateInput = modal.querySelector('.planner-date-input') as HTMLInputElement;
-    const timeInput = modal.querySelector('.planner-time-input') as HTMLInputElement;
+    const picker = document.createElement('div');
+    picker.className = 'planner-datetime-picker';
+
+    const heading = document.createElement('h3');
+    heading.textContent = 'Pick date & time';
+    picker.appendChild(heading);
+
+    const inputsContainer = document.createElement('div');
+    inputsContainer.className = 'planner-datetime-inputs';
+
+    // Date input
+    const dateLabel = document.createElement('label');
+    dateLabel.textContent = 'Date';
+    const dateInput = document.createElement('input');
+    dateInput.type = 'date';
+    dateInput.className = 'planner-date-input';
+    dateLabel.appendChild(dateInput);
+    inputsContainer.appendChild(dateLabel);
+
+    // Time input
+    const timeLabel = document.createElement('label');
+    timeLabel.textContent = 'Time (optional)';
+    const timeInput = document.createElement('input');
+    timeInput.type = 'time';
+    timeInput.className = 'planner-time-input';
+    timeLabel.appendChild(timeInput);
+    inputsContainer.appendChild(timeLabel);
+
+    picker.appendChild(inputsContainer);
+
+    // Buttons
+    const buttonsContainer = document.createElement('div');
+    buttonsContainer.className = 'planner-datetime-buttons';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'planner-btn';
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.setAttribute('data-action', 'cancel');
+    buttonsContainer.appendChild(cancelBtn);
+
+    const confirmBtn = document.createElement('button');
+    confirmBtn.className = 'planner-btn planner-btn-primary';
+    confirmBtn.textContent = 'Confirm';
+    confirmBtn.setAttribute('data-action', 'confirm');
+    buttonsContainer.appendChild(confirmBtn);
+
+    picker.appendChild(buttonsContainer);
+    modal.appendChild(picker);
 
     // Pre-fill with current value if exists (skip if "ongoing")
     if (this.options.currentValue && !isOngoing(this.options.currentValue)) {
@@ -195,11 +222,11 @@ export class DateContextMenu {
       dateInput.value = this.formatDateForInput(new Date());
     }
 
-    modal.querySelector('[data-action="cancel"]')?.addEventListener('click', () => {
+    cancelBtn.addEventListener('click', () => {
       modal.remove();
     });
 
-    modal.querySelector('[data-action="confirm"]')?.addEventListener('click', () => {
+    confirmBtn.addEventListener('click', () => {
       if (dateInput.value) {
         let dateStr = dateInput.value;
         if (timeInput.value) {
