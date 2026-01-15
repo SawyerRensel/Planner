@@ -6,7 +6,7 @@ import { openItemModal } from '../components/ItemModal';
 
 export const TASK_LIST_VIEW_TYPE = 'planner-task-list';
 
-type SortField = 'title' | 'status' | 'priority' | 'date_start' | 'date_due' | 'calendar';
+type SortField = 'title' | 'status' | 'priority' | 'date_start_scheduled' | 'date_end_scheduled' | 'calendar';
 type SortDirection = 'asc' | 'desc';
 
 interface SortState {
@@ -17,7 +17,7 @@ interface SortState {
 export class TaskListView extends ItemView {
   plugin: PlannerPlugin;
   private items: PlannerItem[] = [];
-  private sortState: SortState = { field: 'date_due', direction: 'asc' };
+  private sortState: SortState = { field: 'date_end_scheduled', direction: 'asc' };
   private filterTasksOnly = true;
   private showCompleted = false;
   private contentEl: HTMLElement;
@@ -138,8 +138,8 @@ export class TaskListView extends ItemView {
       { field: 'title', label: 'Title' },
       { field: 'status', label: 'Status', width: '120px' },
       { field: 'priority', label: 'Priority', width: '100px' },
-      { field: 'date_start', label: 'Start', width: '110px' },
-      { field: 'date_due', label: 'Due', width: '110px' },
+      { field: 'date_start_scheduled', label: 'Start', width: '110px' },
+      { field: 'date_end_scheduled', label: 'Due', width: '110px' },
       { field: 'calendar', label: 'Calendar', width: '120px' },
     ];
 
@@ -225,15 +225,15 @@ export class TaskListView extends ItemView {
 
     // Date Start
     const startCell = row.createEl('td', { cls: 'planner-cell-date' });
-    if (item.date_start) {
-      startCell.setText(this.formatDate(item.date_start));
+    if (item.date_start_scheduled) {
+      startCell.setText(this.formatDate(item.date_start_scheduled));
     }
 
     // Date Due
     const dueCell = row.createEl('td', { cls: 'planner-cell-date' });
-    if (item.date_due) {
-      const isOverdue = new Date(item.date_due) < new Date() && !this.isCompleted(item);
-      dueCell.setText(this.formatDate(item.date_due));
+    if (item.date_end_scheduled) {
+      const isOverdue = new Date(item.date_end_scheduled) < new Date() && !this.isCompleted(item);
+      dueCell.setText(this.formatDate(item.date_end_scheduled));
       if (isOverdue) {
         dueCell.addClass('planner-overdue');
       }
@@ -291,10 +291,10 @@ export class TaskListView extends ItemView {
         const config = getPriorityConfig(this.plugin.settings, item.priority ?? '');
         return config?.weight ?? -1;
       }
-      case 'date_start':
-        return item.date_start ?? null;
-      case 'date_due':
-        return item.date_due ?? null;
+      case 'date_start_scheduled':
+        return item.date_start_scheduled ?? null;
+      case 'date_end_scheduled':
+        return item.date_end_scheduled ?? null;
       case 'calendar':
         return item.calendar?.[0] ?? null;
       default:

@@ -47,9 +47,47 @@
               "icon": "list-checks",
               "title": "Task List"
             }
+          },
+          {
+            "id": "dacd83c515a7fdbb",
+            "type": "leaf",
+            "state": {
+              "type": "bases",
+              "state": {
+                "file": "Planner/Calendar.base",
+                "viewName": "Calendar"
+              },
+              "icon": "calendar-range",
+              "title": "Calendar"
+            }
+          },
+          {
+            "id": "dfdb83adb52c4ece",
+            "type": "leaf",
+            "state": {
+              "type": "bases",
+              "state": {
+                "file": "Planner/Timeline.base",
+                "viewName": "Timeline"
+              },
+              "icon": "square-chart-gantt",
+              "title": "Timeline"
+            }
+          },
+          {
+            "id": "5aff51e970c948dc",
+            "type": "leaf",
+            "state": {
+              "type": "bases",
+              "state": {
+                "file": "Planner/Kanban.base",
+                "viewName": "Kanban"
+              },
+              "icon": "square-kanban",
+              "title": "Kanban"
+            }
           }
-        ],
-        "currentTab": 2
+        ]
       }
     ],
     "direction": "vertical"
@@ -214,11 +252,13 @@
       "bases:Create new base": false
     }
   },
-  "active": "bc81868e6e1e938c",
+  "active": "7590a842cb82c1de",
   "lastOpenFiles": [
     "Planner/Kanban.base",
-    "Planner/Timeline.base",
+    "Planner/Task List.base",
     "Planner/Calendar.base",
+    "Planner/Timeline.base",
+    "News",
     "PR 9481.md",
     "Personas/Hobby-Project-Manager/Timeline.base",
     "Personas/Hobby-Project-Manager/Task List.base",
@@ -238,7 +278,6 @@
     "Personas/Professional-PM/Project Gamma - Infrastructure.md",
     "Personas/Professional-PM/Project Beta - Mobile App.md",
     "Personas/Professional-PM/Project Alpha - API Redesign.md",
-    "Personas/Professional-PM/Kanban.base",
     "Personas/Professional-PM/Interview - Senior Developer.md",
     "Personas/Professional-PM/Gamma - Monitoring Setup.md",
     "Personas/Professional-PM/Gamma - Kubernetes Migration.md",
@@ -246,7 +285,6 @@
     "Personas/Professional-PM/Demo Day Prep.md",
     "Personas/Professional-PM/Daily Standup.md",
     "Personas/Professional-PM/Code Review - Auth Module.md",
-    "Personas/Professional-PM/Calendar.base",
     "Personas/Professional-PM/Beta - Testing and QA.md",
     "Personas/Professional-PM/Beta - Feature Development.md",
     "Personas/Professional-PM/Beta - Design Phase.md",

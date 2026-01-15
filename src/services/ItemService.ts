@@ -453,8 +453,8 @@ export class ItemService {
 
     // First, process fields in FRONTMATTER_FIELD_ORDER (for consistent ordering of Planner fields)
     for (const key of FRONTMATTER_FIELD_ORDER) {
-      const value = frontmatter[key];
-      const hasKey = Object.prototype.hasOwnProperty.call(frontmatter, key);
+      const value: unknown = frontmatter[key];
+      const hasKey = key in frontmatter;
       processedKeys.add(key);
 
       // If not including all fields, skip keys that aren't in the frontmatter object
@@ -561,9 +561,23 @@ export class ItemService {
    */
   private normalizeTags(tags: unknown): string[] | undefined {
     if (!tags) return undefined;
-    if (!Array.isArray(tags)) return [String(tags)];
-    return tags.map(t => {
-      const str = String(t);
+    if (typeof tags === 'string') {
+      return [tags.startsWith('#') ? tags.slice(1) : tags];
+    }
+    if (!Array.isArray(tags)) {
+      // Handle non-string, non-array values by converting to string safely
+      const str = typeof tags === 'object' && tags !== null ? JSON.stringify(tags) : String(tags as string | number | boolean);
+      return [str.startsWith('#') ? str.slice(1) : str];
+    }
+    return tags.map((t: unknown) => {
+      let str: string;
+      if (typeof t === 'string') {
+        str = t;
+      } else if (typeof t === 'object' && t !== null) {
+        str = JSON.stringify(t);
+      } else {
+        str = String(t as string | number | boolean);
+      }
       return str.startsWith('#') ? str.slice(1) : str;
     });
   }

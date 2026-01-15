@@ -56,7 +56,7 @@ export class LpcHost {
     this.iframe = iframe;
 
     // Set up message listener
-    this.messageHandler = this.handleMessage.bind(this);
+    this.messageHandler = (event: MessageEvent) => this.handleMessage(event);
     window.addEventListener('message', this.messageHandler);
   }
 
@@ -217,7 +217,7 @@ export class LpcHost {
    * Serialize data for postMessage (strips functions and non-serializable data)
    */
   private serialize<T>(data: T): T {
-    return JSON.parse(JSON.stringify(data));
+    return JSON.parse(JSON.stringify(data)) as T;
   }
 
   /**

@@ -25,6 +25,25 @@ import type { PlannerSettings } from '../types/settings';
 import type { PlannerItem, DayOfWeek } from '../types/item';
 
 /**
+ * Safely convert any value to a string, handling objects properly
+ * Avoids [object Object] output for complex types
+ */
+function safeToString(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  if (typeof value === 'object') {
+    // Try toString first for objects that implement it meaningfully
+    const objStr = (value as { toString(): string }).toString();
+    if (objStr && objStr !== '[object Object]') return objStr;
+    // Fall back to JSON for plain objects
+    return JSON.stringify(value);
+  }
+  // For any remaining types (symbol, bigint, function), convert via String
+  return String(value as string | number | boolean | bigint);
+}
+
+/**
  * Options for the adapter
  */
 export interface AdapterOptions {
@@ -376,7 +395,7 @@ export class MarkwhenAdapter {
 
     // Handle Bases date objects that have toString() returning ISO strings
     if (typeof value === 'object' && value !== null) {
-      const str = value.toString();
+      const str = safeToString(value);
       if (str && str !== '[object Object]') {
         const date = new Date(str);
         return isNaN(date.getTime()) ? null : date;
@@ -428,10 +447,11 @@ export class MarkwhenAdapter {
     if (!value) return 'Unsectioned';
 
     if (Array.isArray(value)) {
-      return value[0]?.toString().replace(/^#/, '') || 'Unsectioned';
+      const firstVal: unknown = value[0];
+      return firstVal ? safeToString(firstVal).replace(/^#/, '') : 'Unsectioned';
     }
 
-    return value.toString();
+    return safeToString(value);
   }
 
   /**
@@ -466,10 +486,11 @@ export class MarkwhenAdapter {
     if (!value) return 'Ungrouped';
 
     if (Array.isArray(value)) {
-      return value[0]?.toString().replace(/^#/, '') || 'Ungrouped';
+      const firstVal: unknown = value[0];
+      return firstVal ? safeToString(firstVal).replace(/^#/, '') : 'Ungrouped';
     }
 
-    return value.toString();
+    return safeToString(value);
   }
 
   /**
@@ -489,10 +510,11 @@ export class MarkwhenAdapter {
     if (!value) return undefined;
 
     if (Array.isArray(value)) {
-      return value[0]?.toString().replace(/^#/, '');
+      const firstVal: unknown = value[0];
+      return firstVal ? safeToString(firstVal).replace(/^#/, '') : undefined;
     }
 
-    return value.toString();
+    return safeToString(value);
   }
 
   /**
@@ -773,10 +795,13 @@ export class MarkwhenAdapter {
 
         if (value) {
           if (Array.isArray(value)) {
-            const firstVal = value[0]?.toString().replace(/^#/, '');
-            if (firstVal) uniqueValues.add(firstVal);
+            const first: unknown = value[0];
+            if (first) {
+              const firstVal = safeToString(first).replace(/^#/, '');
+              if (firstVal) uniqueValues.add(firstVal);
+            }
           } else {
-            uniqueValues.add(value.toString());
+            uniqueValues.add(safeToString(value));
           }
         }
       }

@@ -216,6 +216,21 @@ Screenshot_20260101-185045.png]]:1  Failed to load resource: net::ERR_FILE_NOT_F
 - [ ] Issue Templates - ask Claude
 - [ ] Project board
 
+## 0.1.2
+
+- Fixing issues for [PR 9481](PR%209481.md)
+	- [ ] Kanban view is broken
+	- [ ] Task List view is broken
+	- [ ] Shrink all day bars more for smaller fonts calendar view
+	- [ ] Fix calendar view time input in iOS closing before input
+	- [ ] Fix Kanban View drag-n-drop on ios
+
+
+
+- [ ] Move timeline view controls to top (mobile is blocking)
+- [ ] Fixed smushed calendar view mode bar on desktop
+- [ ] Add purple circle over current day on calendar view
+
 ## Other
 
 - [ ] Show progress bars in all views using the `progress` frontmatter field if the `progress` property is enabled in Bases properties.

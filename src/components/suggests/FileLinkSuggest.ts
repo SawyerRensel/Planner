@@ -10,17 +10,17 @@ export function convertToSimpleWikilinks(value: string | string[] | null): strin
 
   const convertSingleValue = (val: string): string => {
     // First, convert markdown links [text]("path") or [text](path) to simple wikilinks
-    let result = val.replace(/\[([^\]]+)\]\([^)]+\)/g, (match, displayText) => {
+    let result = val.replace(/\[([^\]]+)\]\([^)]+\)/g, (_match: string, displayText: string) => {
       return `[[${displayText}]]`;
     });
 
     // Then, convert relative path wikilinks [[path|display]] to simple [[display]]
-    result = result.replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, (match, path, displayText) => {
+    result = result.replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, (_match: string, _path: string, displayText: string) => {
       return `[[${displayText}]]`;
     });
 
     // Convert [[path/to/file]] (no display text) to [[filename]]
-    result = result.replace(/\[\[([^\]|]+)\]\]/g, (match, path) => {
+    result = result.replace(/\[\[([^\]|]+)\]\]/g, (_match: string, path: string) => {
       // Extract just the filename from the path
       const parts = path.split('/');
       const filename = parts[parts.length - 1].replace(/\.md$/, '');
@@ -52,22 +52,22 @@ export function convertWikilinksToRelativePaths(
 ): string | string[] | null {
   if (!value) return value;
 
-  // @ts-ignore - getConfig exists but isn't in the type definitions
-  const useMarkdownLinks = app.vault.getConfig('useMarkdownLinks') === true;
+  // Access Obsidian's internal config API (not in public type definitions)
+  const vaultConfig = app.vault as unknown as { getConfig: (key: string) => unknown };
+  const useMarkdownLinks = vaultConfig.getConfig('useMarkdownLinks') === true;
   if (!useMarkdownLinks) {
     return value; // Keep simple wikilinks as-is
   }
 
   // Get the new link format setting: 'shortest', 'relative', or 'absolute'
-  // @ts-ignore - getConfig exists but isn't in the type definitions
-  const newLinkFormat: string = app.vault.getConfig('newLinkFormat') || 'shortest';
+  const newLinkFormat = (vaultConfig.getConfig('newLinkFormat') as string) || 'shortest';
 
   // Normalize items folder path (remove trailing slash)
   const normalizedItemsFolder = itemsFolder.replace(/\/$/, '');
 
   const convertSingleValue = (val: string): string => {
     // Match wikilinks like [[Note Name]] or [[Note Name|Display Text]]
-    return val.replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (match, linkPath, displayText) => {
+    return val.replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (match: string, linkPath: string, displayText: string | undefined) => {
       const display = displayText || linkPath;
       // Try to resolve the file path
       const linkInfo = parseLinktext(linkPath);
