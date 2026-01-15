@@ -25,9 +25,35 @@
             "id": "33fce3f5f88042ae",
             "type": "leaf",
             "state": {
+              "type": "bases",
+              "state": {
+                "file": "Bases/Task List.base",
+                "viewName": "Task List"
+              },
+              "icon": "list-checks",
+              "title": "Task List"
+            }
+          },
+          {
+            "id": "57ee6a4dce05e063",
+            "type": "leaf",
+            "state": {
+              "type": "bases",
+              "state": {
+                "file": "Bases/Calendar.base",
+                "viewName": "Calendar"
+              },
+              "icon": "calendar-range",
+              "title": "Calendar"
+            }
+          },
+          {
+            "id": "08a78c0431d22f85",
+            "type": "leaf",
+            "state": {
               "type": "markdown",
               "state": {
-                "file": "PR 9481.md",
+                "file": "Planner/PR 9481.md",
                 "mode": "source",
                 "source": false
               },
@@ -36,58 +62,20 @@
             }
           },
           {
-            "id": "bc81868e6e1e938c",
+            "id": "205362bbbacda27c",
             "type": "leaf",
             "state": {
               "type": "bases",
               "state": {
-                "file": "Planner/Task List.base",
-                "viewName": "Task List"
-              },
-              "icon": "list-checks",
-              "title": "Task List"
-            }
-          },
-          {
-            "id": "dacd83c515a7fdbb",
-            "type": "leaf",
-            "state": {
-              "type": "bases",
-              "state": {
-                "file": "Planner/Calendar.base",
-                "viewName": "Calendar"
-              },
-              "icon": "calendar-range",
-              "title": "Calendar"
-            }
-          },
-          {
-            "id": "dfdb83adb52c4ece",
-            "type": "leaf",
-            "state": {
-              "type": "bases",
-              "state": {
-                "file": "Planner/Timeline.base",
-                "viewName": "Timeline"
-              },
-              "icon": "square-chart-gantt",
-              "title": "Timeline"
-            }
-          },
-          {
-            "id": "5aff51e970c948dc",
-            "type": "leaf",
-            "state": {
-              "type": "bases",
-              "state": {
-                "file": "Planner/Kanban.base",
+                "file": "Bases/Kanban.base",
                 "viewName": "Kanban"
               },
               "icon": "square-kanban",
               "title": "Kanban"
             }
           }
-        ]
+        ],
+        "currentTab": 3
       }
     ],
     "direction": "vertical"
@@ -252,23 +240,24 @@
       "bases:Create new base": false
     }
   },
-  "active": "7590a842cb82c1de",
+  "active": "08a78c0431d22f85",
   "lastOpenFiles": [
-    "Planner/Kanban.base",
-    "Planner/Task List.base",
+    "Bases/Timeline.base",
+    "Bases/Kanban.base",
+    "Bases/Calendar.base",
+    "Bases/Task List.base",
+    "Planner/PR 9481.md",
+    "Templates/Planner Template.md",
+    "Ideas.md",
+    "PRD",
+    "PRD.md",
     "Planner/Calendar.base",
     "Planner/Timeline.base",
-    "News",
-    "PR 9481.md",
-    "Personas/Hobby-Project-Manager/Timeline.base",
-    "Personas/Hobby-Project-Manager/Task List.base",
-    "Personas/Hobby-Project-Manager/Kanban.base",
-    "Personas/Hobby-Project-Manager/Calendar.base",
-    "Ideas.md",
+    "Bases",
+    "Planner/Task List.base",
+    "Planner/Kanban.base",
     "Personas/Professional-PM/Update Project Roadmap.md",
-    "Personas/Professional-PM/Timeline.base",
     "Personas/Professional-PM/Technical Debt Review.md",
-    "Personas/Professional-PM/Task List.base",
     "Personas/Professional-PM/Stakeholder Update Meeting.md",
     "Personas/Professional-PM/Sprint Retro - Beta.md",
     "Personas/Professional-PM/Sprint Planning - Alpha.md",
@@ -288,8 +277,6 @@
     "Personas/Professional-PM/Beta - Testing and QA.md",
     "Personas/Professional-PM/Beta - Feature Development.md",
     "Personas/Professional-PM/Beta - Design Phase.md",
-    "Personas/Professional-PM/Beta - Core Development.md",
-    "Personas/Professional-PM/Beta - App Store Submission.md",
     "notes/Screenshot_20260101-185045.png",
     "notes/Screenshot_20260101-185036.png",
     "notes/Screenshot_20260101-184811.png",

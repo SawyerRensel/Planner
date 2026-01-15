@@ -1,13 +1,11 @@
-source: Planner/
+source: Bases/
 filters:
   and:
-    - or:
-        - file.inFolder("Planner")
-        - file.inFolder("Personas/Hobby-Project-Manager")
+    - file.inFolder("Planner")
     - file.ext == "md"
 properties:
   note.title:
-    width: 250
+    width: 200
   note.summary:
     width: 200
   file.basename:
@@ -30,8 +28,6 @@ properties:
     width: 120
   note.color:
     width: 80
-  note.progress:
-    width: 80
   note.date_start_scheduled:
     width: 120
   note.date_start_actual:
@@ -47,14 +43,11 @@ properties:
   note.date_due:
     width: 120
 views:
-  - type: planner-timeline
-    name: Timeline
+  - type: planner-calendar
+    name: Calendar
     order:
       - title
-      - date_start_scheduled
-      - date_end_scheduled
     sort: []
     colorBy: note.calendar
-    sectionsBy: note.calendar
   - type: table
     name: Table
