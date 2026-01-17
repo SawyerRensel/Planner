@@ -1,4 +1,4 @@
-	
+
 ## Calendar View
 
 - [x] Improve Calendar view UI.  Conserve "real-estate".  Match the look, sizing and feel of Task Notes "Advanced Calendar" view.
@@ -223,6 +223,7 @@ Screenshot_20260101-185045.png]]:1  Failed to load resource: net::ERR_FILE_NOT_F
 	- [ ] Task List view is broken
 	- [ ] Fix calendar view time input in iOS closing before input
 	- [ ] Fix Kanban View drag-n-drop on ios
+	- [ ] Relative pathing not working - needs an extra `../`
 
 ## 0.2.0
 
@@ -231,9 +232,23 @@ Screenshot_20260101-185045.png]]:1  Failed to load resource: net::ERR_FILE_NOT_F
 - [ ] Fixed smushed calendar view mode bar on desktop
 - [ ] Add purple circle over current day on calendar view
 - [ ] Edit Calendar name after adding.  Add a calendar should just be a button that creates a new row
+- [ ] Allow multiple profiles.  Profiles by folder? by...?
+	- [ ] each profile has it's own set of calendars, statuses, etc
+		- [ ] Each profile has its own custom template
+	- [ ] Rename Calendars to Groups
+	- [ ] Each Profile has a set of Calendars/"Groups"
+		- [ ] Option for each Calendar to use its own custom template
+- [ ] Option to create a default/fallback color scheme (add color, etc.)
+- [ ] Custom `color` picker in Item Modal that inserts hex code in the `color` field of the note.
+- [ ] Option to hide items with null values in all views
+- [ ] Add `location` to Item Modal
+- [ ] Customize what shows up in "Show Details" for Item Modal.  Allow reordering
+	- [ ] Checklist of default frontmatter from schema
+	- [ ] Select from existing frontmatter fields
 
 ## Other
 
+- [ ] Timeline View doesn't work when it's base is linked into a note (e.g. "![Timeline View.base]")
 - [ ] Show progress bars in all views using the `progress` frontmatter field if the `progress` property is enabled in Bases properties.
 - [ ] (v0.0.2) What if the Edit Item Modal's expand details dynamically pulls frontmatter content from whatever note is selected?  Right now it's still very tailored to Planner/Calendar users
 - [ ] Add a color (pallette) icon to Item Modal that allows users to assign custom hex colors from a color picker

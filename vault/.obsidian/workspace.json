@@ -62,7 +62,7 @@
             }
           },
           {
-            "id": "205362bbbacda27c",
+            "id": "6ab715a847a6eef7",
             "type": "leaf",
             "state": {
               "type": "bases",
@@ -75,7 +75,7 @@
             }
           }
         ],
-        "currentTab": 3
+        "currentTab": 4
       }
     ],
     "direction": "vertical"
@@ -240,15 +240,16 @@
       "bases:Create new base": false
     }
   },
-  "active": "08a78c0431d22f85",
+  "active": "6ab715a847a6eef7",
   "lastOpenFiles": [
-    "Bases/Timeline.base",
+    "Planner/PR 9481.md",
     "Bases/Kanban.base",
+    "Planner/test.md",
+    "Bases/Timeline.base",
+    "Ideas.md",
     "Bases/Calendar.base",
     "Bases/Task List.base",
-    "Planner/PR 9481.md",
     "Templates/Planner Template.md",
-    "Ideas.md",
     "PRD",
     "PRD.md",
     "Planner/Calendar.base",
@@ -276,7 +277,6 @@
     "Personas/Professional-PM/Code Review - Auth Module.md",
     "Personas/Professional-PM/Beta - Testing and QA.md",
     "Personas/Professional-PM/Beta - Feature Development.md",
-    "Personas/Professional-PM/Beta - Design Phase.md",
     "notes/Screenshot_20260101-185045.png",
     "notes/Screenshot_20260101-185036.png",
     "notes/Screenshot_20260101-184811.png",

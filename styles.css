@@ -2655,7 +2655,7 @@ body.is-mobile .planner-timeline-iframe-container {
 .planner-kanban-swimlanes {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 0;
   min-width: fit-content;
 }
 
@@ -2665,7 +2665,7 @@ body.is-mobile .planner-timeline-iframe-container {
   gap: 12px;
   background: var(--background-primary);
   padding-bottom: 8px;
-  padding-left: var(--swim-label-width, 150px);
+  padding-left: var(--swim-label-width, 0);
 }
 
 .planner-kanban-header-row--frozen {
@@ -2776,6 +2776,7 @@ body.is-mobile .planner-timeline-iframe-container {
 .planner-kanban-wrapper {
   display: flex;
   flex-direction: column;
+  gap: 0;
   min-width: fit-content;
   min-height: fit-content;
 }
