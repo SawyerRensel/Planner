@@ -1,7 +1,7 @@
 {
   "id": "planner",
   "name": "Planner",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "minAppVersion": "1.10.0",
   "description": "Unified calendar, kanban, timeline, and task list for project and time management.",
   "author": "Sawyer Rensel",
