@@ -1578,6 +1578,13 @@ export class ItemModal extends Modal {
 
     // Handler for viewport/window resize events
     this.viewportResizeHandler = () => {
+      // Skip resize handling if datetime picker is open - iOS native time picker
+      // triggers viewport resize events, and modifying modal height during
+      // picker interaction causes iOS to dismiss the native picker
+      if (document.querySelector('.planner-datetime-picker-overlay')) {
+        return;
+      }
+
       const currentHeight = window.visualViewport?.height ?? window.innerHeight;
       // If viewport is now large (>70% of screen), keyboard must be closed
       if (currentHeight > initialHeight * 0.7) {
@@ -1601,6 +1608,10 @@ export class ItemModal extends Modal {
     // On Android, tapping outside input or pressing back closes keyboard
     // but may not trigger focusout. Listen for touches outside inputs.
     this.touchHandler = (e: TouchEvent) => {
+      // Skip if datetime picker is open
+      if (document.querySelector('.planner-datetime-picker-overlay')) {
+        return;
+      }
       const target = e.target as HTMLElement;
       // If touch is not on an input/textarea and keyboard was open, close it
       if (keyboardOpen && target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
@@ -1630,10 +1641,18 @@ export class ItemModal extends Modal {
 
     // On blur: keyboard is closing, restore modal height
     contentEl.addEventListener('focusout', (e) => {
+      // Skip if datetime picker is open
+      if (document.querySelector('.planner-datetime-picker-overlay')) {
+        return;
+      }
       const target = e.target as HTMLElement;
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
         // Small delay to check if focus moved to another input
         setTimeout(() => {
+          // Re-check in case datetime picker opened during the delay
+          if (document.querySelector('.planner-datetime-picker-overlay')) {
+            return;
+          }
           const activeEl = document.activeElement;
           const isStillInInput = activeEl?.tagName === 'INPUT' || activeEl?.tagName === 'TEXTAREA';
           if (!isStillInInput) {

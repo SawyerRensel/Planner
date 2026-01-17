@@ -41,7 +41,6 @@ views:
       - priority
       - calendar
       - tags
-      - summary
       - date_end_scheduled
     sort:
       - property: date_end_scheduled
