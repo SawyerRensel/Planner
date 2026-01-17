@@ -1,4 +1,4 @@
-import { Menu, Platform } from 'obsidian';
+import { Menu } from 'obsidian';
 import type PlannerPlugin from '../../main';
 import { isOngoing, ONGOING_KEYWORD } from '../../utils/dateUtils';
 
@@ -160,9 +160,6 @@ export class DateContextMenu {
   }
 
   private showDateTimePicker(): void {
-    // Detect iOS - the native time picker is unstable on iOS and closes unexpectedly
-    const isIOS = Platform.isIosApp;
-
     // Create a simple date/time picker modal
     const modal = document.createElement('div');
     modal.className = 'planner-datetime-picker-overlay';
@@ -186,155 +183,13 @@ export class DateContextMenu {
     dateLabel.appendChild(dateInput);
     inputsContainer.appendChild(dateLabel);
 
-    // Time input - use custom select-based picker on iOS to avoid native picker issues
+    // Time input
     const timeLabel = document.createElement('label');
     timeLabel.textContent = 'Time (optional)';
-
-    let timeInput: HTMLInputElement | null = null;
-
-    // Track time values for iOS custom picker
-    let hourValue = -1; // -1 means no time set
-    let minuteValue = -1;
-
-    if (isIOS) {
-      // iOS: Use fully custom button-based time picker (no native pickers)
-      const timePickerContainer = document.createElement('div');
-      timePickerContainer.className = 'planner-ios-time-picker';
-
-      // Hour spinner
-      const hourSpinner = document.createElement('div');
-      hourSpinner.className = 'planner-time-spinner';
-
-      const hourUpBtn = document.createElement('button');
-      hourUpBtn.type = 'button';
-      hourUpBtn.className = 'planner-time-spinner-btn';
-      hourUpBtn.textContent = '▲';
-
-      const hourDisplay = document.createElement('div');
-      hourDisplay.className = 'planner-time-display';
-      hourDisplay.textContent = '--';
-
-      const hourDownBtn = document.createElement('button');
-      hourDownBtn.type = 'button';
-      hourDownBtn.className = 'planner-time-spinner-btn';
-      hourDownBtn.textContent = '▼';
-
-      hourSpinner.appendChild(hourUpBtn);
-      hourSpinner.appendChild(hourDisplay);
-      hourSpinner.appendChild(hourDownBtn);
-
-      // Separator
-      const timeSeparator = document.createElement('span');
-      timeSeparator.className = 'planner-time-separator';
-      timeSeparator.textContent = ':';
-
-      // Minute spinner
-      const minuteSpinner = document.createElement('div');
-      minuteSpinner.className = 'planner-time-spinner';
-
-      const minuteUpBtn = document.createElement('button');
-      minuteUpBtn.type = 'button';
-      minuteUpBtn.className = 'planner-time-spinner-btn';
-      minuteUpBtn.textContent = '▲';
-
-      const minuteDisplay = document.createElement('div');
-      minuteDisplay.className = 'planner-time-display';
-      minuteDisplay.textContent = '--';
-
-      const minuteDownBtn = document.createElement('button');
-      minuteDownBtn.type = 'button';
-      minuteDownBtn.className = 'planner-time-spinner-btn';
-      minuteDownBtn.textContent = '▼';
-
-      minuteSpinner.appendChild(minuteUpBtn);
-      minuteSpinner.appendChild(minuteDisplay);
-      minuteSpinner.appendChild(minuteDownBtn);
-
-      // Clear time button
-      const clearTimeBtn = document.createElement('button');
-      clearTimeBtn.type = 'button';
-      clearTimeBtn.className = 'planner-time-clear-btn';
-      clearTimeBtn.textContent = '✕';
-      clearTimeBtn.title = 'Clear time';
-
-      // Update display helper
-      const updateTimeDisplay = () => {
-        hourDisplay.textContent = hourValue >= 0 ? String(hourValue).padStart(2, '0') : '--';
-        minuteDisplay.textContent = minuteValue >= 0 ? String(minuteValue).padStart(2, '0') : '--';
-      };
-
-      // Hour controls
-      hourUpBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (hourValue < 0) {
-          hourValue = 0;
-          if (minuteValue < 0) minuteValue = 0;
-        } else {
-          hourValue = (hourValue + 1) % 24;
-        }
-        updateTimeDisplay();
-      });
-
-      hourDownBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (hourValue < 0) {
-          hourValue = 23;
-          if (minuteValue < 0) minuteValue = 0;
-        } else {
-          hourValue = (hourValue - 1 + 24) % 24;
-        }
-        updateTimeDisplay();
-      });
-
-      // Minute controls
-      minuteUpBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (minuteValue < 0) {
-          minuteValue = 0;
-          if (hourValue < 0) hourValue = 0;
-        } else {
-          minuteValue = (minuteValue + 1) % 60;
-        }
-        updateTimeDisplay();
-      });
-
-      minuteDownBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (minuteValue < 0) {
-          minuteValue = 0;
-          if (hourValue < 0) hourValue = 0;
-        } else {
-          minuteValue = (minuteValue - 1 + 60) % 60;
-        }
-        updateTimeDisplay();
-      });
-
-      // Clear time
-      clearTimeBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        hourValue = -1;
-        minuteValue = -1;
-        updateTimeDisplay();
-      });
-
-      timePickerContainer.appendChild(hourSpinner);
-      timePickerContainer.appendChild(timeSeparator);
-      timePickerContainer.appendChild(minuteSpinner);
-      timePickerContainer.appendChild(clearTimeBtn);
-      timeLabel.appendChild(timePickerContainer);
-    } else {
-      // Non-iOS: Use standard time input
-      timeInput = document.createElement('input');
-      timeInput.type = 'time';
-      timeInput.className = 'planner-time-input';
-      timeLabel.appendChild(timeInput);
-    }
-
+    const timeInput = document.createElement('input');
+    timeInput.type = 'time';
+    timeInput.className = 'planner-time-input';
+    timeLabel.appendChild(timeInput);
     inputsContainer.appendChild(timeLabel);
 
     picker.appendChild(inputsContainer);
@@ -362,18 +217,7 @@ export class DateContextMenu {
     if (this.options.currentValue && !isOngoing(this.options.currentValue)) {
       const current = new Date(this.options.currentValue);
       dateInput.value = this.formatDateForInput(current);
-      if (isIOS) {
-        // Set the spinner values - they'll be displayed via the hourValue/minuteValue
-        hourValue = current.getHours();
-        minuteValue = current.getMinutes();
-        // Update the displays (find them in the DOM)
-        const hourDisplay = picker.querySelector('.planner-time-spinner:first-child .planner-time-display');
-        const minuteDisplay = picker.querySelector('.planner-time-spinner:last-of-type .planner-time-display');
-        if (hourDisplay) hourDisplay.textContent = String(hourValue).padStart(2, '0');
-        if (minuteDisplay) minuteDisplay.textContent = String(minuteValue).padStart(2, '0');
-      } else if (timeInput) {
-        timeInput.value = this.formatTimeForInput(current);
-      }
+      timeInput.value = this.formatTimeForInput(current);
     } else {
       dateInput.value = this.formatDateForInput(new Date());
     }
@@ -385,19 +229,8 @@ export class DateContextMenu {
     confirmBtn.addEventListener('click', () => {
       if (dateInput.value) {
         let dateStr = dateInput.value;
-
-        // Get time value based on input type
-        let timeValue = '';
-        if (isIOS) {
-          if (hourValue >= 0 && minuteValue >= 0) {
-            timeValue = `${String(hourValue).padStart(2, '0')}:${String(minuteValue).padStart(2, '0')}`;
-          }
-        } else if (timeInput) {
-          timeValue = timeInput.value;
-        }
-
-        if (timeValue) {
-          dateStr += `T${timeValue}:00`;
+        if (timeInput.value) {
+          dateStr += `T${timeInput.value}:00`;
         } else {
           dateStr += 'T00:00:00';
         }

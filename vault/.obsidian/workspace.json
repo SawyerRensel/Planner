@@ -50,7 +50,7 @@
             }
           },
           {
-            "id": "7004f51b58b37906",
+            "id": "f15259ef616702c5",
             "type": "leaf",
             "state": {
               "type": "bases",
@@ -116,7 +116,8 @@
               "title": "Bookmarks"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -228,14 +229,13 @@
       "bases:Create new base": false
     }
   },
-  "active": "7004f51b58b37906",
+  "active": "f15259ef616702c5",
   "lastOpenFiles": [
-    "Planner/PR 9481.md",
-    "ios_item_modal_time_input.png",
-    "Bases/Calendar.base",
-    "Bases/Kanban.base",
     "Bases/Timeline.base",
+    "Bases/Calendar.base",
     "Bases/Task List.base",
+    "Bases/Kanban.base",
+    "Planner/PR 9481.md",
     "Planner/test.md",
     "Planner/Calendar.base",
     "Planner/Task List.base",
@@ -274,6 +274,7 @@
     "notes/Pasted image 20260101091842.png",
     "Screenshot_20260108-193249.png",
     "Screenshot_20260105-200533.png",
-    "Books/media/Guns Germs and Steel.jpg"
+    "Books/media/Guns Germs and Steel.jpg",
+    "Books/media/The Raven King (The Raven Cycle Book 4).jpg"
   ]
 }
