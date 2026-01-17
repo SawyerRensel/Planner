@@ -76,11 +76,15 @@ export class BasesKanbanView extends BasesView {
   private touchDragClone: HTMLElement | null = null;
   private touchStartX: number = 0;
   private touchStartY: number = 0;
+  private lastTouchX: number = 0;
+  private lastTouchY: number = 0;
   private scrollInterval: number | null = null;
   private touchHoldTimer: number | null = null;
   private touchHoldReady: boolean = false;
   private touchHoldCard: HTMLElement | null = null;
   private touchHoldEntry: BasesEntry | null = null;
+  // Context menu blocker for iOS (prevents long-press menu during drag)
+  private boundContextMenuBlocker = (e: Event): void => { e.preventDefault(); e.stopPropagation(); };
 
   // Column reordering state
   private draggedColumn: HTMLElement | null = null;
@@ -1280,6 +1284,7 @@ export class BasesKanbanView extends BasesView {
     // Cards container - fills column, no internal scrolling so content expands column (CSS class handles styles)
     const cardsContainer = document.createElement('div');
     cardsContainer.className = 'planner-kanban-cards';
+    cardsContainer.setAttribute('data-group', groupKey);
 
     // Setup drop handlers on cards container
     this.setupDropHandlers(cardsContainer, groupKey);
@@ -2263,6 +2268,9 @@ export class BasesKanbanView extends BasesView {
     const HOLD_DELAY_MS = 200; // Time finger must be held before drag is enabled
 
     card.addEventListener('touchstart', (e: TouchEvent) => {
+      // Clear any previous touch state (important after scrolling on iOS)
+      this.cancelTouchHold();
+
       this.touchStartX = e.touches[0].clientX;
       this.touchStartY = e.touches[0].clientY;
       this.touchHoldReady = false;
@@ -2290,10 +2298,11 @@ export class BasesKanbanView extends BasesView {
       // Only start drag if hold delay completed and we're not already dragging
       if (this.touchHoldReady && !this.touchDragCard && !this.touchDragClone) {
         if (dx > 10 || dy > 10) {
+          e.preventDefault(); // Prevent scroll on drag start
           this.startTouchDrag(card, entry, e);
         }
       } else if (this.touchDragClone) {
-        e.preventDefault();
+        e.preventDefault(); // Prevent scroll during drag
         this.updateTouchDrag(e);
       }
     }, { passive: false });
@@ -2308,17 +2317,24 @@ export class BasesKanbanView extends BasesView {
     card.addEventListener('touchcancel', () => {
       this.cancelTouchHold();
       if (this.touchDragCard) {
+        const doc = this.containerEl.ownerDocument;
+        // Remove context menu blocker
+        doc.removeEventListener('contextmenu', this.boundContextMenuBlocker, true);
         // Clean up drag state on cancel
         if (this.touchDragClone) {
           this.touchDragClone.remove();
           this.touchDragClone = null;
         }
         if (this.touchDragCard) {
+          // Remove all drag-related classes
           this.touchDragCard.classList.remove('planner-kanban-card--dragging');
+          this.touchDragCard.classList.remove('planner-kanban-card--hold-ready');
           this.touchDragCard = null;
         }
         this.draggedCardPath = null;
         this.draggedFromColumn = null;
+        this.lastTouchX = 0;
+        this.lastTouchY = 0;
         this.stopAutoScroll();
       }
     });
@@ -2338,17 +2354,25 @@ export class BasesKanbanView extends BasesView {
   }
 
   private startTouchDrag(card: HTMLElement, entry: BasesEntry, e: TouchEvent): void {
+    const doc = this.containerEl.ownerDocument;
+
     this.touchDragCard = card;
     this.draggedCardPath = entry.file.path;
     this.draggedFromColumn = card.closest('.planner-kanban-column')?.getAttribute('data-group') ||
                              card.closest('.planner-kanban-swimlane-cell')?.getAttribute('data-group') || null;
 
+    // Block context menu during drag (critical for iOS long-press)
+    doc.addEventListener('contextmenu', this.boundContextMenuBlocker, true);
+
     // Create a clone for visual feedback
     this.touchDragClone = card.cloneNode(true) as HTMLElement;
     this.touchDragClone.className = 'planner-kanban-drag-clone';
     this.touchDragClone.setCssProps({ '--clone-width': `${card.offsetWidth}px` });
-    document.body.appendChild(this.touchDragClone);
+    doc.body.appendChild(this.touchDragClone);
 
+    // Remove hold-ready class (has touch-action: none which must not persist)
+    // and add dragging class
+    card.classList.remove('planner-kanban-card--hold-ready');
     card.classList.add('planner-kanban-card--dragging');
 
     this.updateTouchDrag(e);
@@ -2361,6 +2385,10 @@ export class BasesKanbanView extends BasesView {
     this.touchDragClone.style.left = `${touch.clientX - 50}px`;
     this.touchDragClone.style.top = `${touch.clientY - 20}px`;
 
+    // Store last touch position for iOS fallback (touchend coordinates can be unreliable)
+    this.lastTouchX = touch.clientX;
+    this.lastTouchY = touch.clientY;
+
     // Handle edge scrolling
     this.handleEdgeScroll(touch.clientX, touch.clientY);
 
@@ -2369,7 +2397,25 @@ export class BasesKanbanView extends BasesView {
   }
 
   private endTouchDrag(e: TouchEvent): void {
+    const doc = this.containerEl.ownerDocument;
+
     this.stopAutoScroll();
+
+    // Remove context menu blocker
+    doc.removeEventListener('contextmenu', this.boundContextMenuBlocker, true);
+
+    // Find drop target BEFORE removing clone (iOS Safari needs this timing)
+    // The clone has pointer-events: none, so elementFromPoint sees through it
+    let dropTarget: { group: string; swimlane?: string } | null = null;
+    if (this.touchDragCard) {
+      const touch = e.changedTouches[0];
+      // Try touchend coordinates first, fall back to last stored position from touchmove
+      // (iOS touchend coordinates can be unreliable)
+      dropTarget = this.findDropTarget(touch.clientX, touch.clientY);
+      if (!dropTarget && (this.lastTouchX !== 0 || this.lastTouchY !== 0)) {
+        dropTarget = this.findDropTarget(this.lastTouchX, this.lastTouchY);
+      }
+    }
 
     if (this.touchDragClone) {
       this.touchDragClone.remove();
@@ -2377,11 +2423,9 @@ export class BasesKanbanView extends BasesView {
     }
 
     if (this.touchDragCard) {
+      // Remove all drag-related classes (hold-ready has touch-action: none which must not persist)
       this.touchDragCard.classList.remove('planner-kanban-card--dragging');
-
-      // Find drop target
-      const touch = e.changedTouches[0];
-      const dropTarget = this.findDropTarget(touch.clientX, touch.clientY);
+      this.touchDragCard.classList.remove('planner-kanban-card--hold-ready');
 
       if (dropTarget && this.draggedCardPath) {
         void this.handleCardDrop(this.draggedCardPath, dropTarget.group, dropTarget.swimlane);
@@ -2392,9 +2436,11 @@ export class BasesKanbanView extends BasesView {
 
     this.draggedCardPath = null;
     this.draggedFromColumn = null;
+    this.lastTouchX = 0;
+    this.lastTouchY = 0;
 
     // Clear all dragover highlights
-    document.querySelectorAll('.planner-kanban-cards--dragover').forEach(el => {
+    doc.querySelectorAll('.planner-kanban-cards--dragover').forEach(el => {
       el.classList.remove('planner-kanban-cards--dragover');
     });
   }
@@ -2464,13 +2510,22 @@ export class BasesKanbanView extends BasesView {
   }
 
   private highlightDropTarget(clientX: number, clientY: number): void {
+    const doc = this.containerEl.ownerDocument;
+
     // Clear previous highlights
-    document.querySelectorAll('.planner-kanban-cards--dragover').forEach(el => {
+    doc.querySelectorAll('.planner-kanban-cards--dragover').forEach(el => {
       el.classList.remove('planner-kanban-cards--dragover');
     });
 
+    // Hide ghost before elementFromPoint (critical for iOS Safari)
+    if (this.touchDragClone) this.touchDragClone.classList.add('planner-kanban-drag-clone--hidden');
+
     // Find and highlight current target
-    const target = document.elementFromPoint(clientX, clientY);
+    const target = doc.elementFromPoint(clientX, clientY);
+
+    // Restore ghost visibility
+    if (this.touchDragClone) this.touchDragClone.classList.remove('planner-kanban-drag-clone--hidden');
+
     const dropZone = target?.closest('.planner-kanban-cards, .planner-kanban-swimlane-cell');
     if (dropZone) {
       dropZone.classList.add('planner-kanban-cards--dragover');
@@ -2478,7 +2533,16 @@ export class BasesKanbanView extends BasesView {
   }
 
   private findDropTarget(clientX: number, clientY: number): { group: string; swimlane?: string } | null {
-    const target = document.elementFromPoint(clientX, clientY);
+    const doc = this.containerEl.ownerDocument;
+
+    // Hide ghost before elementFromPoint (critical for iOS Safari)
+    if (this.touchDragClone) this.touchDragClone.classList.add('planner-kanban-drag-clone--hidden');
+
+    const target = doc.elementFromPoint(clientX, clientY);
+
+    // Restore ghost visibility
+    if (this.touchDragClone) this.touchDragClone.classList.remove('planner-kanban-drag-clone--hidden');
+
     const dropZone = target?.closest('.planner-kanban-cards, .planner-kanban-swimlane-cell, .planner-kanban-column');
     const group = dropZone?.getAttribute('data-group');
     if (!group) return null;

@@ -2072,6 +2072,8 @@ body.is-mobile .planner-timeline-iframe-container {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  /* iOS scroll behavior - prevent scroll chaining after scroll gesture */
+  overscroll-behavior: contain;
 }
 
 .planner-kanban-board {
@@ -2080,6 +2082,9 @@ body.is-mobile .planner-timeline-iframe-container {
   gap: 12px;
   padding: 6px;
   overflow: auto;
+  /* iOS scroll behavior - prevent scroll chaining after scroll gesture */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 /* Custom scrollbar styling */
@@ -2193,6 +2198,11 @@ body.is-mobile .planner-timeline-iframe-container {
   cursor: pointer;
   transition: box-shadow 0.15s ease, transform 0.1s ease;
   overflow: hidden;
+  /* iOS touch support */
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .planner-kanban-card:hover {
@@ -2202,6 +2212,13 @@ body.is-mobile .planner-timeline-iframe-container {
 .planner-kanban-card--dragging {
   opacity: 0.5;
   transform: rotate(2deg);
+}
+
+/* Touch device specific - ensure dragged card doesn't interfere with drop detection */
+@media (pointer: coarse) {
+  .planner-kanban-card--dragging {
+    pointer-events: none;
+  }
 }
 
 .planner-kanban-card-content {
@@ -2335,6 +2352,8 @@ body.is-mobile .planner-timeline-iframe-container {
   transform: scale(1.02);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
   transition: transform 0.1s ease, box-shadow 0.1s ease;
+  /* Prevent browser from taking over with scroll once card is ready to drag */
+  touch-action: none;
 }
 
 /* Card keyboard focus state */
@@ -2725,6 +2744,8 @@ body.is-mobile .planner-timeline-iframe-container {
   flex-direction: column;
   gap: 0;
   min-width: fit-content;
+  /* iOS scroll behavior - prevent scroll chaining after scroll gesture */
+  overscroll-behavior: contain;
 }
 
 /* Add margin between consecutive swimlane rows */
@@ -2765,6 +2786,8 @@ body.is-mobile .planner-timeline-iframe-container {
   display: flex;
   gap: 12px;
   align-items: stretch;
+  /* iOS touch support */
+  touch-action: pan-x pan-y;
 }
 
 /* Swimlane label - vertical orientation */
@@ -2843,6 +2866,8 @@ body.is-mobile .planner-timeline-iframe-container {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  /* iOS touch support - allow manipulation but prevent interference with card drag */
+  touch-action: pan-x pan-y;
 }
 
 /* Wrapper container */
@@ -2876,6 +2901,11 @@ body.is-mobile .planner-timeline-iframe-container {
   transform: rotate(2deg) scale(1.02);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   width: var(--clone-width, 280px);
+}
+
+/* Hidden state for elementFromPoint detection on iOS */
+.planner-kanban-drag-clone--hidden {
+  display: none;
 }
 
 /* Swimlane drag clone */

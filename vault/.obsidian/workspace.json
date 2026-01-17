@@ -230,6 +230,8 @@
   },
   "active": "7004f51b58b37906",
   "lastOpenFiles": [
+    "Planner/Fix calendar view time input in iOS closing before input.md",
+    "Bases/Kanban.base",
     "TaskNotes/Views/tasks-default.base",
     "TaskNotes/Views/relationships.base",
     "TaskNotes/Views/mini-calendar-default.base",
@@ -242,8 +244,6 @@
     "IMG_0234.png",
     "Planner/PR 9481.md",
     "Bases/Calendar.base",
-    "Bases/Kanban.base",
-    "Bases/Timeline.base",
     "Planner/test.md",
     "Ideas.md",
     "Templates/Planner Template.md",
