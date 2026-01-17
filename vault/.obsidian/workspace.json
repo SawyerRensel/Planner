@@ -61,9 +61,23 @@
               "icon": "square-kanban",
               "title": "Kanban"
             }
+          },
+          {
+            "id": "f14d328505c6548e",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Planner/Fix Kanban View drag-n-drop on ios.md",
+                "mode": "source",
+                "source": true
+              },
+              "icon": "lucide-file",
+              "title": "Fix Kanban View drag-n-drop on ios"
+            }
           }
         ],
-        "currentTab": 3
+        "currentTab": 4
       }
     ],
     "direction": "vertical"
@@ -228,10 +242,14 @@
       "bases:Create new base": false
     }
   },
-  "active": "7004f51b58b37906",
+  "active": "f14d328505c6548e",
   "lastOpenFiles": [
-    "Planner/Fix calendar view time input in iOS closing before input.md",
     "Bases/Kanban.base",
+    "Planner/Fix Kanban View drag-n-drop on ios.md",
+    "Ideas.md",
+    "Planner/Relative pathing not working - needs an extra up-folder.md",
+    "Templates/Untitled",
+    "Planner/Fix calendar view time input in iOS closing before input.md",
     "TaskNotes/Views/tasks-default.base",
     "TaskNotes/Views/relationships.base",
     "TaskNotes/Views/mini-calendar-default.base",
@@ -243,9 +261,7 @@
     "ios_item_modal_time_input.png",
     "IMG_0234.png",
     "Planner/PR 9481.md",
-    "Bases/Calendar.base",
     "Planner/test.md",
-    "Ideas.md",
     "Templates/Planner Template.md",
     "PRD.md",
     "Personas/Professional-PM/Update Project Roadmap.md",
@@ -265,9 +281,6 @@
     "Personas/Professional-PM/Gamma - Database Optimization.md",
     "Personas/Professional-PM/Demo Day Prep.md",
     "Personas/Professional-PM/Daily Standup.md",
-    "Personas/Professional-PM/Code Review - Auth Module.md",
-    "Personas/Professional-PM/Beta - Testing and QA.md",
-    "Personas/Professional-PM/Beta - Feature Development.md",
     "notes/Screenshot_20260101-185045.png",
     "notes/Screenshot_20260101-185036.png",
     "notes/Screenshot_20260101-184811.png",

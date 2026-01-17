@@ -221,7 +221,7 @@ Screenshot_20260101-185045.png]]:1  Failed to load resource: net::ERR_FILE_NOT_F
 - Fixing issues for [PR 9481](Planner/PR%209481.md)
 	- [x] Kanban view is broken
 	- [x] Task List view is broken
-	- [ ] Fix calendar view time input in iOS closing before input
+	- [x] Fix calendar view time input in iOS closing before input
 	- [ ] Fix Kanban View drag-n-drop on ios
 	- [ ] Relative pathing not working - needs an extra `../`
 

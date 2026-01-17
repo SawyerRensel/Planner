@@ -9,14 +9,14 @@ context:
 people:
 location:
 related:
-status: In-Progress
+status: Done
 priority: High
 progress:
-date_created: 2026-01-17T05:59:50.879Z
-date_modified: 2026-01-17T18:08:48.656Z
-date_start_scheduled: 2026-01-17T10:59:45.456Z
+date_created: "2026-01-17T05:59:50.879Z"
+date_modified: "2026-01-17T13:16:37.717Z"
+date_start_scheduled: "2026-01-17T10:59:45.456Z"
 date_start_actual:
-date_end_scheduled: 2026-01-17T10:59:46.911Z
+date_end_scheduled: "2026-01-17T13:17:00-05:00"
 date_end_actual:
 all_day: false
 repeat_frequency:

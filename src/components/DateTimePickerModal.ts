@@ -121,9 +121,31 @@ export class DateTimePickerModal extends Modal {
       } else {
         dateStr += 'T00:00:00';
       }
-      this.options.onSelect(new Date(dateStr).toISOString());
+      const date = new Date(dateStr);
+      this.options.onSelect(this.toLocalISOString(date));
     }
     this.close();
+  }
+
+  /**
+   * Converts a Date to an ISO 8601 string with local timezone offset.
+   * This preserves the local time as entered by the user.
+   */
+  private toLocalISOString(date: Date): string {
+    const tzOffset = date.getTimezoneOffset();
+    const offsetHours = Math.abs(Math.floor(tzOffset / 60));
+    const offsetMinutes = Math.abs(tzOffset % 60);
+    const offsetSign = tzOffset <= 0 ? '+' : '-';
+    const offsetStr = `${offsetSign}${String(offsetHours).padStart(2, '0')}:${String(offsetMinutes).padStart(2, '0')}`;
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}${offsetStr}`;
   }
 
   private formatDateForInput(date: Date): string {
