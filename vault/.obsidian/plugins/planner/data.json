@@ -1,8 +1,8 @@
 {
   "itemsFolder": "Planner/",
-  "basesFolder": "Planner/",
+  "basesFolder": "Bases/",
   "itemTemplate": "Templates/Planner Template.md",
-  "defaultCalendar": "Personal",
+  "defaultCalendar": "Feature",
   "dateFormat": "YYYY-MM-DD",
   "timeFormat": "24h",
   "weekStartsOn": "monday",
@@ -77,16 +77,20 @@
     }
   ],
   "calendars": {
-    "Woodworking": {
-      "color": "#af722c",
-      "folder": "Personas/Hobby-Project-Manager"
+    "Feature": {
+      "color": "#859900"
     },
-    "Photography": {
-      "color": "#4b8fd8",
-      "folder": "Personas/Hobby-Project-Manager"
+    "Optimization": {
+      "color": "#268bd2"
     },
-    "test": {
+    "Bugfix": {
       "color": "#dc322f"
+    },
+    "Research": {
+      "color": "#d33682"
+    },
+    "Documentation": {
+      "color": "#6c71c4"
     }
   },
   "calendarFontSize": 10,

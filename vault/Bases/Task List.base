@@ -45,16 +45,13 @@ properties:
 views:
   - type: planner-task-list
     name: Task List
-    groupBy:
-      property: calendar
-      direction: ASC
     order:
       - title
       - calendar
       - status
       - priority
-      - tags
-      - file.backlinks
+      - date_start_scheduled
+      - date_end_scheduled
     sort:
       - property: date_end_scheduled
         direction: DESC
@@ -62,7 +59,3 @@ views:
         direction: ASC
   - type: table
     name: Table
-    order:
-      - file.name
-      - tags
-      - file.backlinks

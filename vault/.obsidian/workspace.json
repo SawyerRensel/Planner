@@ -48,9 +48,22 @@
               "icon": "lucide-file",
               "title": "PR 9481"
             }
+          },
+          {
+            "id": "f15259ef616702c5",
+            "type": "leaf",
+            "state": {
+              "type": "bases",
+              "state": {
+                "file": "Bases/Kanban.base",
+                "viewName": "Kanban"
+              },
+              "icon": "square-kanban",
+              "title": "Kanban"
+            }
           }
         ],
-        "currentTab": 2
+        "currentTab": 3
       }
     ],
     "direction": "vertical"
@@ -216,19 +229,19 @@
       "bases:Create new base": false
     }
   },
-  "active": "40145a8631a96686",
+  "active": "f15259ef616702c5",
   "lastOpenFiles": [
+    "Bases/Timeline.base",
+    "Bases/Calendar.base",
+    "Bases/Task List.base",
+    "Bases/Kanban.base",
+    "Planner/PR 9481.md",
     "Planner/test.md",
     "Planner/Calendar.base",
     "Planner/Task List.base",
-    "Planner/PR 9481.md",
-    "Bases/Kanban.base",
-    "Bases/Task List.base",
     "Planner/Kanban.base",
     "Planner/Timeline.base",
     "Ideas.md",
-    "Bases/Timeline.base",
-    "Bases/Calendar.base",
     "Templates/Planner Template.md",
     "PRD",
     "PRD.md",
