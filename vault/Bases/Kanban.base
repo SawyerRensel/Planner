@@ -50,7 +50,5 @@ views:
     borderStyle: left-accent
     badgePlacement: properties-section
     swimlaneBy: note.priority
-    swimHeaderDisplay: vertical
-    groupBy: note.status
   - type: table
     name: Table

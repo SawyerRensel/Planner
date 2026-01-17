@@ -22,32 +22,6 @@
             }
           },
           {
-            "id": "33fce3f5f88042ae",
-            "type": "leaf",
-            "state": {
-              "type": "bases",
-              "state": {
-                "file": "Bases/Task List.base",
-                "viewName": "Task List"
-              },
-              "icon": "list-checks",
-              "title": "Task List"
-            }
-          },
-          {
-            "id": "57ee6a4dce05e063",
-            "type": "leaf",
-            "state": {
-              "type": "bases",
-              "state": {
-                "file": "Bases/Calendar.base",
-                "viewName": "Calendar"
-              },
-              "icon": "calendar-range",
-              "title": "Calendar"
-            }
-          },
-          {
             "id": "08a78c0431d22f85",
             "type": "leaf",
             "state": {
@@ -62,7 +36,34 @@
             }
           },
           {
-            "id": "9bd54b54fcd16f71",
+            "id": "40145a8631a96686",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Planner/PR 9481.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "PR 9481"
+            }
+          },
+          {
+            "id": "ef17080a1c13146e",
+            "type": "leaf",
+            "state": {
+              "type": "bases",
+              "state": {
+                "file": "Bases/Task List.base",
+                "viewName": "Task List"
+              },
+              "icon": "list-checks",
+              "title": "Task List"
+            }
+          },
+          {
+            "id": "1929f7b1f6ad3471",
             "type": "leaf",
             "state": {
               "type": "bases",
@@ -75,7 +76,7 @@
             }
           }
         ],
-        "currentTab": 4
+        "currentTab": 3
       }
     ],
     "direction": "vertical"
@@ -128,7 +129,8 @@
               "title": "Bookmarks"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -240,15 +242,15 @@
       "bases:Create new base": false
     }
   },
-  "active": "9bd54b54fcd16f71",
+  "active": "ef17080a1c13146e",
   "lastOpenFiles": [
-    "Planner/test.md",
-    "Planner/PR 9481.md",
     "Bases/Kanban.base",
-    "Bases/Timeline.base",
-    "Ideas.md",
-    "Bases/Calendar.base",
+    "Planner/test.md",
     "Bases/Task List.base",
+    "Ideas.md",
+    "Planner/PR 9481.md",
+    "Bases/Timeline.base",
+    "Bases/Calendar.base",
     "Templates/Planner Template.md",
     "PRD",
     "PRD.md",

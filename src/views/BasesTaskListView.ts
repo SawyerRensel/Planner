@@ -308,17 +308,77 @@ export class BasesTaskListView extends BasesView {
     }
   }
 
+  /**
+   * Safely convert an unknown value to a displayable string.
+   * Handles primitives, arrays, and objects with toString methods.
+   */
+  private toDisplayString(value: unknown): string {
+    if (value === null || value === undefined) {
+      return '';
+    }
+    if (typeof value === 'string') {
+      return value;
+    }
+    if (typeof value === 'number' || typeof value === 'boolean') {
+      return String(value);
+    }
+    if (value instanceof Date) {
+      return value.toISOString();
+    }
+    if (Array.isArray(value) && value.length > 0) {
+      return this.toDisplayString(value[0]);
+    }
+    // For objects, check for common properties used by Obsidian
+    if (typeof value === 'object') {
+      // Handle Bases wrapper objects with 'date' property (date/datetime values)
+      if ('date' in value && value.date instanceof Date) {
+        return value.date.toISOString();
+      }
+      // Handle Bases wrapper objects with 'data' property (text, arrays, etc.)
+      if ('data' in value) {
+        return this.toDisplayString(value.data);
+      }
+      // Handle Luxon DateTime objects
+      if ('toISO' in value && typeof value.toISO === 'function') {
+        const iso = (value as { toISO: () => string | null }).toISO();
+        return iso ?? '';
+      }
+      // Handle objects with ts (timestamp) property (Luxon DateTime)
+      if ('ts' in value && typeof value.ts === 'number') {
+        return new Date(value.ts).toISOString();
+      }
+      // Handle objects with display property (common in Obsidian for links)
+      if ('display' in value && typeof value.display === 'string') {
+        return value.display;
+      }
+      // Handle objects with path property (file links)
+      if ('path' in value && typeof value.path === 'string') {
+        return value.path;
+      }
+      // Handle objects with name property
+      if ('name' in value && typeof value.name === 'string') {
+        return value.name;
+      }
+      // Handle objects with value property (some Bases property types)
+      if ('value' in value && (typeof value.value === 'string' || typeof value.value === 'number')) {
+        return String(value.value);
+      }
+    }
+    return '';
+  }
+
   private renderValue(cell: HTMLElement, propId: BasesPropertyId, value: unknown): void {
     const propName = propId.split('.')[1];
 
     // Special rendering for known properties
     if (propName === 'status' || propName === 'priority') {
+      const valueStr = this.toDisplayString(value);
       const config = propName === 'status'
-        ? this.plugin.settings.statuses.find(s => s.name === String(value))
-        : this.plugin.settings.priorities.find(p => p.name === String(value));
+        ? this.plugin.settings.statuses.find(s => s.name === valueStr)
+        : this.plugin.settings.priorities.find(p => p.name === valueStr);
 
       if (config) {
-        const badge = cell.createSpan({ cls: 'planner-badge', text: String(value) });
+        const badge = cell.createSpan({ cls: 'planner-badge', text: valueStr });
         badge.style.backgroundColor = config.color;
         badge.style.color = this.getContrastColor(config.color);
         return;
@@ -326,9 +386,7 @@ export class BasesTaskListView extends BasesView {
     }
 
     if (propName === 'calendar' && value) {
-      const calendarName = Array.isArray(value)
-        ? String(value[0])
-        : (typeof value === 'string' || typeof value === 'number' ? String(value) : '');
+      const calendarName = this.toDisplayString(value);
       if (calendarName) {
         const calendarConfig = this.plugin.settings.calendars[calendarName] as { color?: string } | undefined;
         const color = calendarConfig?.color ?? '#6b7280';
@@ -348,13 +406,13 @@ export class BasesTaskListView extends BasesView {
     }
 
     // Date fields
-    if (propName?.startsWith('date_') && value && (typeof value === 'string' || typeof value === 'number' || value instanceof Date)) {
-      const dateStr = typeof value === 'string' ? value : (value instanceof Date ? value.toISOString() : String(value));
+    if (propName?.startsWith('date_') && value) {
+      const dateStr = this.toDisplayString(value);
       cell.addClass('planner-cell-date');
       cell.setText(this.formatDate(dateStr));
 
       // Check for overdue
-      if (propName === 'date_due') {
+      if (propName === 'date_due' || propName === 'date_end_scheduled') {
         const dueDate = new Date(dateStr);
         if (dueDate < new Date()) {
           cell.addClass('planner-overdue');
@@ -364,8 +422,8 @@ export class BasesTaskListView extends BasesView {
     }
 
     // Default: just show the value
-    if (value !== null && value !== undefined && (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean')) {
-      cell.setText(String(value));
+    if (value !== null && value !== undefined) {
+      cell.setText(this.toDisplayString(value));
     }
   }
 
