@@ -49,7 +49,7 @@ views:
     colorBy: note.calendar
     borderStyle: left-accent
     badgePlacement: properties-section
-    swimlaneBy: note.calendar
-    columnOrder: '["Idea","To-Do","In-Progress","In-Review","Done","Cancelled","None"]'
+    swimlaneBy: note.priority
+    groupBy: note.status
   - type: table
     name: Table

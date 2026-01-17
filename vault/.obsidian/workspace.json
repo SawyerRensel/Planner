@@ -62,7 +62,7 @@
             }
           },
           {
-            "id": "6ab715a847a6eef7",
+            "id": "8886fd0ef1613e89",
             "type": "leaf",
             "state": {
               "type": "bases",
@@ -240,7 +240,7 @@
       "bases:Create new base": false
     }
   },
-  "active": "6ab715a847a6eef7",
+  "active": "8886fd0ef1613e89",
   "lastOpenFiles": [
     "Planner/PR 9481.md",
     "Bases/Kanban.base",

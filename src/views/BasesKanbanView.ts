@@ -627,7 +627,7 @@ export class BasesKanbanView extends BasesView {
     const groupedData = this.data.groupedData as BasesGroupedData[];
     for (const group of groupedData) {
       for (const entry of group.entries) {
-        const value = entry.getValue(colorByField as BasesPropertyId);
+        const value = this.getEntryValue(entry, colorByField);
         if (value) {
           const strValue = Array.isArray(value) ? String(value[0]) : String(value);
           if (strValue) uniqueValues.add(strValue);
@@ -644,7 +644,7 @@ export class BasesKanbanView extends BasesView {
   private getEntryColor(entry: BasesEntry): string {
     const colorByField = this.getColorBy();
     const propName = colorByField.replace(/^note\./, '');
-    const value = entry.getValue(colorByField as BasesPropertyId);
+    const value = this.getEntryValue(entry, colorByField);
 
     if (!value) return '#6b7280';
 
@@ -675,7 +675,7 @@ export class BasesKanbanView extends BasesView {
 
     for (const group of this.data.groupedData) {
       for (const entry of group.entries) {
-        const value = entry.getValue(groupByField as BasesPropertyId);
+        const value = this.getEntryValue(entry, groupByField);
         const groupKey = this.valueToString(value);
 
         if (!groups.has(groupKey)) {
@@ -704,6 +704,10 @@ export class BasesKanbanView extends BasesView {
     return groups;
   }
 
+  /**
+   * Convert any value to a string for grouping/display
+   * Uses type assertions to satisfy ESLint no-base-to-string rule
+   */
   private valueToString(value: unknown): string {
     if (value === null || value === undefined) return 'None';
     if (Array.isArray(value)) {
@@ -711,10 +715,71 @@ export class BasesKanbanView extends BasesView {
       if (filtered.length === 0) return 'None';
       return filtered.join(', ');
     }
-    if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-      return String(value);
+    // Handle primitives directly
+    if (typeof value === 'string') return value || 'None';
+    if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+    // Handle objects - try toString() for objects that implement it meaningfully
+    if (typeof value === 'object') {
+      const objStr = (value as { toString(): string }).toString();
+      // Check for meaningful toString result
+      if (objStr && objStr !== '[object Object]') return objStr || 'None';
+      // Fall back to JSON for plain objects
+      try {
+        const json = JSON.stringify(value);
+        return json || 'None';
+      } catch {
+        return 'None';
+      }
     }
-    return 'None';
+    // For remaining types (symbol, bigint, function), use String with type assertion
+    return String(value as string | number | boolean | bigint) || 'None';
+  }
+
+  /**
+   * Get frontmatter directly from Obsidian's metadata cache (bypasses Bases getValue)
+   * This is needed because Bases getValue may not return custom frontmatter properties
+   */
+  private getFrontmatter(entry: BasesEntry): Record<string, unknown> | undefined {
+    const file = entry.file;
+    const cache = this.plugin.app.metadataCache.getFileCache(file);
+    return cache?.frontmatter;
+  }
+
+  /**
+   * Get a property value from an entry, trying Bases getValue first, then falling back to frontmatter
+   */
+  private getEntryValue(entry: BasesEntry, propId: string): unknown {
+    // Try Bases getValue first
+    const basesValue = entry.getValue(propId as BasesPropertyId);
+    // Check for valid value - not null, undefined, or empty string
+    if (basesValue !== null && basesValue !== undefined && basesValue !== '') {
+      return basesValue;
+    }
+
+    // Fall back to reading frontmatter directly
+    const propName = propId.replace(/^(note|file)\./, '');
+
+    // Handle special file properties
+    if (propId.startsWith('file.')) {
+      if (propName === 'folder') {
+        const folderPath = entry.file.parent?.path || '/';
+        return folderPath === '/' ? 'Root' : entry.file.parent?.name || 'Root';
+      }
+      if (propName === 'basename') {
+        return entry.file.basename;
+      }
+      if (propName === 'path') {
+        return entry.file.path;
+      }
+    }
+
+    // Get from frontmatter
+    const frontmatter = this.getFrontmatter(entry);
+    if (frontmatter) {
+      return frontmatter[propName];
+    }
+
+    return undefined;
   }
 
   /**
@@ -825,10 +890,10 @@ export class BasesKanbanView extends BasesView {
 
     for (const group of this.data.groupedData) {
       for (const entry of group.entries) {
-        const swimlaneValue = entry.getValue(swimlaneBy as BasesPropertyId);
+        const swimlaneValue = this.getEntryValue(entry, swimlaneBy);
         const swimlaneKey = this.valueToString(swimlaneValue);
 
-        const columnValue = entry.getValue(groupByField as BasesPropertyId);
+        const columnValue = this.getEntryValue(entry, groupByField);
         const columnKey = this.valueToString(columnValue);
 
         allColumnKeys.add(columnKey);
@@ -1666,7 +1731,7 @@ export class BasesKanbanView extends BasesView {
     const swimlaneKeys: string[] = [];
     for (const group of this.data.groupedData) {
       for (const entry of group.entries) {
-        const value = entry.getValue(swimlaneBy as BasesPropertyId);
+        const value = this.getEntryValue(entry, swimlaneBy);
         const key = this.valueToString(value);
         if (!swimlaneKeys.includes(key)) {
           swimlaneKeys.push(key);
@@ -1817,7 +1882,7 @@ export class BasesKanbanView extends BasesView {
     const coverField = this.getCoverField();
     const coverDisplay = this.getCoverDisplay();
     if (coverField && coverDisplay !== 'none') {
-      const coverValue = entry.getValue(coverField as BasesPropertyId);
+      const coverValue = this.getEntryValue(entry, coverField);
       if (coverValue) {
         this.renderCover(card, String(coverValue), coverDisplay);
       }
@@ -1836,7 +1901,7 @@ export class BasesKanbanView extends BasesView {
 
     // Title (CSS class handles font-weight)
     const titleField = this.getTitleBy();
-    const title = entry.getValue(titleField as BasesPropertyId) || entry.file.basename;
+    const title = this.getEntryValue(entry, titleField) || entry.file.basename;
     titleRow.createSpan({ cls: 'planner-kanban-card-title', text: String(title) });
 
     // For inline placement, render badges in title row
@@ -1856,7 +1921,7 @@ export class BasesKanbanView extends BasesView {
 
     if (isSummaryVisible) {
       const summarySource = summaryField || 'note.summary';
-      const summary = entry.getValue(summarySource as BasesPropertyId);
+      const summary = this.getEntryValue(entry, summarySource);
       if (summary && summary !== 'null' && summary !== null) {
         content.createDiv({ cls: 'planner-kanban-card-summary', text: String(summary) });
       }
@@ -2007,7 +2072,7 @@ export class BasesKanbanView extends BasesView {
 
     // Status badge (skip if grouping by status)
     if (groupByProp !== 'status' && isVisible('status')) {
-      const status = entry.getValue('note.status' as BasesPropertyId);
+      const status = this.getEntryValue(entry, 'note.status');
       if (status) {
         const config = getStatusConfig(this.plugin.settings, String(status));
         if (config) {
@@ -2018,7 +2083,7 @@ export class BasesKanbanView extends BasesView {
 
     // Priority badge (skip if grouping by priority)
     if (groupByProp !== 'priority' && isVisible('priority')) {
-      const priority = entry.getValue('note.priority' as BasesPropertyId);
+      const priority = this.getEntryValue(entry, 'note.priority');
       if (priority) {
         const config = getPriorityConfig(this.plugin.settings, String(priority));
         if (config) {
@@ -2029,7 +2094,7 @@ export class BasesKanbanView extends BasesView {
 
     // Calendar badge (skip if grouping by calendar)
     if (groupByProp !== 'calendar' && isVisible('calendar')) {
-      const calendar = entry.getValue('note.calendar' as BasesPropertyId);
+      const calendar = this.getEntryValue(entry, 'note.calendar');
       if (calendar) {
         const calendarName = Array.isArray(calendar) ? String(calendar[0]) : String(calendar);
         const color = getCalendarColor(this.plugin.settings, calendarName);
@@ -2039,7 +2104,7 @@ export class BasesKanbanView extends BasesView {
 
     // Recurrence badge
     if (isVisible('repeat_frequency')) {
-      const repeatFreq = entry.getValue('note.repeat_frequency' as BasesPropertyId);
+      const repeatFreq = this.getEntryValue(entry, 'note.repeat_frequency');
       if (repeatFreq) {
         this.createBadge(badgeContainer, String(repeatFreq), '#6c71c4', 'repeat');
       }
@@ -2052,14 +2117,14 @@ export class BasesKanbanView extends BasesView {
     const dateEndProp = dateEndField.replace(/^note\./, '');
 
     if (isVisible(dateStartProp)) {
-      const dateStart = entry.getValue(dateStartField as BasesPropertyId);
+      const dateStart = this.getEntryValue(entry, dateStartField);
       if (dateStart) {
         this.createDateBadge(badgeContainer, dateStart, 'calendar');
       }
     }
 
     if (isVisible(dateEndProp)) {
-      const dateEnd = entry.getValue(dateEndField as BasesPropertyId);
+      const dateEnd = this.getEntryValue(entry, dateEndField);
       if (dateEnd) {
         this.createDateBadge(badgeContainer, dateEnd, 'calendar-check');
       }
@@ -2077,7 +2142,7 @@ export class BasesKanbanView extends BasesView {
       const coverField = this.getCoverField();
       if (coverField && propId === coverField) continue;
 
-      const value = entry.getValue(propId as BasesPropertyId);
+      const value = this.getEntryValue(entry, propId);
       // Skip null, undefined, empty, and "null" string values
       if (value === null || value === undefined || value === '' || value === 'null') continue;
 
