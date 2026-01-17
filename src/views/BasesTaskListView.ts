@@ -140,9 +140,7 @@ export class BasesTaskListView extends BasesView {
         const groupCell = groupRow.createEl('td', {
           attr: { colspan: String(this.getPropertyCount()) }
         });
-        const keyText = group.key != null && (typeof group.key === 'string' || typeof group.key === 'number')
-          ? String(group.key)
-          : 'Ungrouped';
+        const keyText = this.toDisplayString(group.key) || 'Ungrouped';
         groupCell.createSpan({
           text: keyText,
           cls: 'planner-group-label'
@@ -168,9 +166,7 @@ export class BasesTaskListView extends BasesView {
 
     for (const group of groupedData) {
       if (group.hasKey()) {
-        const keyText = group.key != null && (typeof group.key === 'string' || typeof group.key === 'number')
-          ? String(group.key)
-          : 'Ungrouped';
+        const keyText = this.toDisplayString(group.key) || 'Ungrouped';
         flatEntries.push({ type: 'group', data: null, groupKey: keyText });
       }
       for (const entry of group.entries) {

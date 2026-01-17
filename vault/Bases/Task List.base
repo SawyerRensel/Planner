@@ -54,6 +54,7 @@ views:
       - status
       - priority
       - tags
+      - file.backlinks
     sort:
       - property: date_end_scheduled
         direction: DESC
