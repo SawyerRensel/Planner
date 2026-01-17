@@ -4,11 +4,19 @@ import {
   BasesEntry,
   BasesPropertyId,
   QueryController,
-  setIcon,
   Menu,
 } from 'obsidian';
 import type PlannerPlugin from '../main';
 import { openItemModal } from '../components/ItemModal';
+
+/**
+ * Type interface for BasesView grouped data entries
+ */
+interface BasesGroupedData {
+  entries: BasesEntry[];
+  key?: unknown;
+  hasKey(): boolean;
+}
 
 export const BASES_TASK_LIST_VIEW_ID = 'planner-task-list';
 
@@ -94,7 +102,7 @@ export class BasesTaskListView extends BasesView {
     }
 
     const tbody = this.tableEl.createEl('tbody');
-    const groupedData = this.data.groupedData;
+    const groupedData = this.data.groupedData as BasesGroupedData[];
 
     // Count total entries
     let totalEntries = 0;
@@ -125,15 +133,16 @@ export class BasesTaskListView extends BasesView {
   /**
    * Direct rendering for small datasets
    */
-  private renderBodyDirect(tbody: HTMLElement, groupedData: any[]): void {
+  private renderBodyDirect(tbody: HTMLElement, groupedData: BasesGroupedData[]): void {
     for (const group of groupedData) {
       if (group.hasKey()) {
         const groupRow = tbody.createEl('tr', { cls: 'planner-group-row' });
         const groupCell = groupRow.createEl('td', {
           attr: { colspan: String(this.getPropertyCount()) }
         });
+        const keyText = this.toDisplayString(group.key) || 'Ungrouped';
         groupCell.createSpan({
-          text: String(group.key?.toString() ?? 'Ungrouped'),
+          text: keyText,
           cls: 'planner-group-label'
         });
       }
@@ -148,16 +157,17 @@ export class BasesTaskListView extends BasesView {
    * Virtual scroll rendering for large datasets
    * Only renders visible rows + buffer for smooth scrolling
    */
-  private renderBodyVirtual(tbody: HTMLElement, groupedData: any[]): void {
+  private renderBodyVirtual(tbody: HTMLElement, groupedData: BasesGroupedData[]): void {
     const BUFFER_SIZE = 10;
     const ESTIMATED_ROW_HEIGHT = 40; // px
 
     // Flatten entries with group info
-    const flatEntries: Array<{ type: 'group' | 'entry'; data: any; groupKey?: string }> = [];
+    const flatEntries: Array<{ type: 'group' | 'entry'; data: BasesEntry | null; groupKey?: string }> = [];
 
     for (const group of groupedData) {
       if (group.hasKey()) {
-        flatEntries.push({ type: 'group', data: null, groupKey: String(group.key?.toString() ?? 'Ungrouped') });
+        const keyText = this.toDisplayString(group.key) || 'Ungrouped';
+        flatEntries.push({ type: 'group', data: null, groupKey: keyText });
       }
       for (const entry of group.entries) {
         flatEntries.push({ type: 'entry', data: entry });
@@ -171,7 +181,7 @@ export class BasesTaskListView extends BasesView {
     flatEntries.forEach((item, index) => {
       const row = tbody.createEl('tr', { cls: 'planner-row-placeholder' });
       row.setAttribute('data-index', String(index));
-      row.style.height = `${ESTIMATED_ROW_HEIGHT}px`;
+      row.setCssProps({ '--row-height': `${ESTIMATED_ROW_HEIGHT}px` });
       placeholders.push(row);
     });
 
@@ -196,7 +206,8 @@ export class BasesTaskListView extends BasesView {
 
             const item = flatEntries[i];
             const placeholder = placeholders[i];
-            placeholder.style.height = '';
+            // CSS class handles height reset for rendered rows
+            placeholder.classList.add('planner-row-rendered');
             placeholder.classList.remove('planner-row-placeholder');
 
             if (item.type === 'group') {
@@ -208,7 +219,7 @@ export class BasesTaskListView extends BasesView {
                 text: item.groupKey || 'Ungrouped',
                 cls: 'planner-group-label'
               });
-            } else {
+            } else if (item.data) {
               this.populateEntryRow(placeholder, item.data);
             }
           }
@@ -231,13 +242,15 @@ export class BasesTaskListView extends BasesView {
   private populateEntryRow(row: HTMLElement, entry: BasesEntry): void {
     row.classList.add('planner-row');
 
-    row.addEventListener('click', async () => {
-      const item = await this.plugin.itemService.getItem(entry.file.path);
-      if (item) {
-        openItemModal(this.plugin, { mode: 'edit', item });
-      } else {
-        this.app.workspace.openLinkText(entry.file.path, '', false);
-      }
+    row.addEventListener('click', () => {
+      void (async () => {
+        const item = await this.plugin.itemService.getItem(entry.file.path);
+        if (item) {
+          void openItemModal(this.plugin, { mode: 'edit', item });
+        } else {
+          void this.app.workspace.openLinkText(entry.file.path, '', false);
+        }
+      })();
     });
 
     row.addEventListener('contextmenu', (e) => {
@@ -260,14 +273,16 @@ export class BasesTaskListView extends BasesView {
     const row = tbody.createEl('tr', { cls: 'planner-row' });
 
     // Click to open ItemModal for editing
-    row.addEventListener('click', async () => {
-      const item = await this.plugin.itemService.getItem(entry.file.path);
-      if (item) {
-        openItemModal(this.plugin, { mode: 'edit', item });
-      } else {
-        // Fallback to opening the file
-        this.app.workspace.openLinkText(entry.file.path, '', false);
-      }
+    row.addEventListener('click', () => {
+      void (async () => {
+        const item = await this.plugin.itemService.getItem(entry.file.path);
+        if (item) {
+          void openItemModal(this.plugin, { mode: 'edit', item });
+        } else {
+          // Fallback to opening the file
+          void this.app.workspace.openLinkText(entry.file.path, '', false);
+        }
+      })();
     });
 
     // Context menu
@@ -289,17 +304,77 @@ export class BasesTaskListView extends BasesView {
     }
   }
 
-  private renderValue(cell: HTMLElement, propId: BasesPropertyId, value: any): void {
+  /**
+   * Safely convert an unknown value to a displayable string.
+   * Handles primitives, arrays, and objects with toString methods.
+   */
+  private toDisplayString(value: unknown): string {
+    if (value === null || value === undefined) {
+      return '';
+    }
+    if (typeof value === 'string') {
+      return value;
+    }
+    if (typeof value === 'number' || typeof value === 'boolean') {
+      return String(value);
+    }
+    if (value instanceof Date) {
+      return value.toISOString();
+    }
+    if (Array.isArray(value) && value.length > 0) {
+      return this.toDisplayString(value[0]);
+    }
+    // For objects, check for common properties used by Obsidian
+    if (typeof value === 'object') {
+      // Handle Bases wrapper objects with 'date' property (date/datetime values)
+      if ('date' in value && value.date instanceof Date) {
+        return value.date.toISOString();
+      }
+      // Handle Bases wrapper objects with 'data' property (text, arrays, etc.)
+      if ('data' in value) {
+        return this.toDisplayString(value.data);
+      }
+      // Handle Luxon DateTime objects
+      if ('toISO' in value && typeof value.toISO === 'function') {
+        const iso = (value as { toISO: () => string | null }).toISO();
+        return iso ?? '';
+      }
+      // Handle objects with ts (timestamp) property (Luxon DateTime)
+      if ('ts' in value && typeof value.ts === 'number') {
+        return new Date(value.ts).toISOString();
+      }
+      // Handle objects with display property (common in Obsidian for links)
+      if ('display' in value && typeof value.display === 'string') {
+        return value.display;
+      }
+      // Handle objects with path property (file links)
+      if ('path' in value && typeof value.path === 'string') {
+        return value.path;
+      }
+      // Handle objects with name property
+      if ('name' in value && typeof value.name === 'string') {
+        return value.name;
+      }
+      // Handle objects with value property (some Bases property types)
+      if ('value' in value && (typeof value.value === 'string' || typeof value.value === 'number')) {
+        return String(value.value);
+      }
+    }
+    return '';
+  }
+
+  private renderValue(cell: HTMLElement, propId: BasesPropertyId, value: unknown): void {
     const propName = propId.split('.')[1];
 
     // Special rendering for known properties
     if (propName === 'status' || propName === 'priority') {
+      const valueStr = this.toDisplayString(value);
       const config = propName === 'status'
-        ? this.plugin.settings.statuses.find(s => s.name === String(value))
-        : this.plugin.settings.priorities.find(p => p.name === String(value));
+        ? this.plugin.settings.statuses.find(s => s.name === valueStr)
+        : this.plugin.settings.priorities.find(p => p.name === valueStr);
 
       if (config) {
-        const badge = cell.createSpan({ cls: 'planner-badge', text: String(value) });
+        const badge = cell.createSpan({ cls: 'planner-badge', text: valueStr });
         badge.style.backgroundColor = config.color;
         badge.style.color = this.getContrastColor(config.color);
         return;
@@ -307,30 +382,33 @@ export class BasesTaskListView extends BasesView {
     }
 
     if (propName === 'calendar' && value) {
-      const calendarName = Array.isArray(value) ? value[0] : String(value);
-      const color = this.plugin.settings.calendars[calendarName]?.color ?? '#6b7280';
-      const badge = cell.createSpan({ cls: 'planner-badge', text: calendarName });
-      badge.style.backgroundColor = color;
-      badge.style.color = this.getContrastColor(color);
+      const calendarName = this.toDisplayString(value);
+      if (calendarName) {
+        const calendarConfig = this.plugin.settings.calendars[calendarName] as { color?: string } | undefined;
+        const color = calendarConfig?.color ?? '#6b7280';
+        const badge = cell.createSpan({ cls: 'planner-badge', text: calendarName });
+        badge.style.backgroundColor = color;
+        badge.style.color = this.getContrastColor(color);
+      }
       return;
     }
 
     if (propName === 'progress' && typeof value === 'number') {
       const progressBar = cell.createDiv({ cls: 'planner-progress-bar' });
       const progressFill = progressBar.createDiv({ cls: 'planner-progress-fill' });
-      progressFill.style.width = `${value}%`;
+      progressFill.setCssProps({ '--progress-width': `${value}%` });
       cell.createSpan({ text: `${value}%`, cls: 'planner-progress-text' });
       return;
     }
 
     // Date fields
     if (propName?.startsWith('date_') && value) {
-      const dateStr = String(value);
+      const dateStr = this.toDisplayString(value);
       cell.addClass('planner-cell-date');
       cell.setText(this.formatDate(dateStr));
 
       // Check for overdue
-      if (propName === 'date_due') {
+      if (propName === 'date_due' || propName === 'date_end_scheduled') {
         const dueDate = new Date(dateStr);
         if (dueDate < new Date()) {
           cell.addClass('planner-overdue');
@@ -341,7 +419,7 @@ export class BasesTaskListView extends BasesView {
 
     // Default: just show the value
     if (value !== null && value !== undefined) {
-      cell.setText(String(value));
+      cell.setText(this.toDisplayString(value));
     }
   }
 
@@ -390,9 +468,9 @@ export class BasesTaskListView extends BasesView {
 
   private getContrastColor(hexColor: string): string {
     const hex = hexColor.replace('#', '');
-    const r = parseInt(hex.substr(0, 2), 16);
-    const g = parseInt(hex.substr(2, 2), 16);
-    const b = parseInt(hex.substr(4, 2), 16);
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
     const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
     return luminance > 0.5 ? '#000000' : '#ffffff';
   }
@@ -406,7 +484,7 @@ export class BasesTaskListView extends BasesView {
         .setTitle('Open')
         .setIcon('file')
         .onClick(() => {
-          this.app.workspace.openLinkText(entry.file.path, '', false);
+          void this.app.workspace.openLinkText(entry.file.path, '', false);
         });
     });
 
@@ -415,7 +493,7 @@ export class BasesTaskListView extends BasesView {
         .setTitle('Open in new tab')
         .setIcon('file-plus')
         .onClick(() => {
-          this.app.workspace.openLinkText(entry.file.path, '', true);
+          void this.app.workspace.openLinkText(entry.file.path, '', true);
         });
     });
 

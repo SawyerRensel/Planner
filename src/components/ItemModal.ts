@@ -1,7 +1,7 @@
 import { Modal, Notice, setIcon, setTooltip, MarkdownRenderer, Component } from 'obsidian';
 import * as chrono from 'chrono-node';
 import type PlannerPlugin from '../main';
-import type { ItemFrontmatter, PlannerItem, RepeatFrequency, DayOfWeek } from '../types/item';
+import type { ItemFrontmatter, PlannerItem } from '../types/item';
 import { getCalendarFolder } from '../types/settings';
 import { ItemServiceError } from '../services/ItemService';
 import {
@@ -266,7 +266,7 @@ export class ItemModal extends Modal {
       });
       setIcon(openNoteBtn, 'external-link');
       openNoteBtn.createSpan({ text: 'Open Note' });
-      openNoteBtn.addEventListener('click', () => this.handleOpenNote());
+      openNoteBtn.addEventListener('click', () => { void this.handleOpenNote(); });
     }
 
     // Title input
@@ -328,7 +328,7 @@ export class ItemModal extends Modal {
     this.titleInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
-        this.handleSave();
+        void this.handleSave();
       }
     });
   }
@@ -711,7 +711,7 @@ export class ItemModal extends Modal {
     this.detailsSection = container.createDiv({ cls: 'planner-details-section' });
 
     // Label (no longer collapsible)
-    this.detailsSection.createEl('label', { text: 'Note Content', cls: 'planner-label' });
+    this.detailsSection.createEl('label', { text: 'Note content', cls: 'planner-label' });
 
     const content = this.detailsSection.createDiv({ cls: 'planner-details-content' });
 
@@ -753,15 +753,15 @@ export class ItemModal extends Modal {
     });
 
     // Blur textarea to show preview
-    this.detailsTextarea.addEventListener('blur', async () => {
-      await this.switchToPreviewMode();
+    this.detailsTextarea.addEventListener('blur', () => {
+      void this.switchToPreviewMode();
     });
 
     // Handle Escape key to exit edit mode
-    this.detailsTextarea.addEventListener('keydown', async (e) => {
+    this.detailsTextarea.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         e.preventDefault();
-        await this.switchToPreviewMode();
+        void this.switchToPreviewMode();
       }
     });
   }
@@ -945,7 +945,7 @@ export class ItemModal extends Modal {
         text: 'Delete',
         cls: 'planner-btn planner-btn-danger',
       });
-      deleteBtn.addEventListener('click', () => this.handleDelete());
+      deleteBtn.addEventListener('click', () => { void this.handleDelete(); });
     }
 
     // Spacer
@@ -963,7 +963,7 @@ export class ItemModal extends Modal {
       text: 'Save',
       cls: 'planner-btn planner-btn-primary',
     });
-    saveBtn.addEventListener('click', () => this.handleSave());
+    saveBtn.addEventListener('click', () => { void this.handleSave(); });
   }
 
   // NLP Parsing (reused from QuickCapture)
@@ -1150,9 +1150,9 @@ export class ItemModal extends Modal {
 
   private getContrastColor(hexColor: string): string {
     const hex = hexColor.replace('#', '');
-    const r = parseInt(hex.substr(0, 2), 16);
-    const g = parseInt(hex.substr(2, 2), 16);
-    const b = parseInt(hex.substr(4, 2), 16);
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
     const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
     return luminance > 0.5 ? '#000000' : '#ffffff';
   }
@@ -1473,7 +1473,7 @@ export class ItemModal extends Modal {
     })();
 
     await leaf.openFile(
-      this.app.vault.getAbstractFileByPath(this.options.item.path) as any
+      this.app.vault.getAbstractFileByPath(this.options.item.path) as unknown
     );
   }
 
@@ -1481,26 +1481,43 @@ export class ItemModal extends Modal {
     return new Promise((resolve) => {
       const modal = document.createElement('div');
       modal.className = 'planner-confirm-overlay';
-      modal.innerHTML = `
-        <div class="planner-confirm-dialog">
-          <h3>${title}</h3>
-          <p>${message}</p>
-          <div class="planner-confirm-buttons">
-            <button class="planner-btn" data-action="cancel">Cancel</button>
-            <button class="planner-btn planner-btn-danger" data-action="confirm">Delete</button>
-          </div>
-        </div>
-      `;
 
-      modal.querySelector('[data-action="cancel"]')?.addEventListener('click', () => {
+      const dialog = document.createElement('div');
+      dialog.className = 'planner-confirm-dialog';
+
+      const heading = document.createElement('h3');
+      heading.textContent = title;
+      dialog.appendChild(heading);
+
+      const paragraph = document.createElement('p');
+      paragraph.textContent = message;
+      dialog.appendChild(paragraph);
+
+      const buttonContainer = document.createElement('div');
+      buttonContainer.className = 'planner-confirm-buttons';
+
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'planner-btn';
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.setAttribute('data-action', 'cancel');
+      cancelBtn.addEventListener('click', () => {
         modal.remove();
         resolve(false);
       });
+      buttonContainer.appendChild(cancelBtn);
 
-      modal.querySelector('[data-action="confirm"]')?.addEventListener('click', () => {
+      const confirmBtn = document.createElement('button');
+      confirmBtn.className = 'planner-btn planner-btn-danger';
+      confirmBtn.textContent = 'Delete';
+      confirmBtn.setAttribute('data-action', 'confirm');
+      confirmBtn.addEventListener('click', () => {
         modal.remove();
         resolve(true);
       });
+      buttonContainer.appendChild(confirmBtn);
+
+      dialog.appendChild(buttonContainer);
+      modal.appendChild(dialog);
 
       modal.addEventListener('click', (e) => {
         if (e.target === modal) {

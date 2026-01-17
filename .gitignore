@@ -27,9 +27,6 @@ src/releaseNotes.ts
 # Exclude sourcemaps
 *.map
 
-# obsidian
-data.json
-
 # Reference files
 ref
 

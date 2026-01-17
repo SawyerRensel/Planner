@@ -11,7 +11,6 @@ import {
   BasesEntry,
   BasesPropertyId,
   QueryController,
-  setIcon,
   TFile,
 } from 'obsidian';
 import type PlannerPlugin from '../main';
@@ -110,10 +109,10 @@ export class BasesTimelineView extends BasesView {
 
     // Set up LPC callbacks
     const callbacks: LpcCallbacks = {
-      onEditEventDateRange: this.handleEditEventDateRange.bind(this),
-      onNewEvent: this.handleNewEvent.bind(this),
-      onSetDetailPath: this.handleSetDetailPath.bind(this),
-      onSetHoveringPath: this.handleSetHoveringPath.bind(this),
+      onEditEventDateRange: (params) => { void this.handleEditEventDateRange(params); },
+      onNewEvent: (params) => this.handleNewEvent(params),
+      onSetDetailPath: (path) => { void this.handleSetDetailPath(path); },
+      onSetHoveringPath: (path) => this.handleSetHoveringPath(path),
       // State providers - called when Timeline requests current state
       getMarkwhenState: () => this.currentMarkwhenState,
       getAppState: () => this.currentAppState,
@@ -170,7 +169,7 @@ export class BasesTimelineView extends BasesView {
     this.iframe = this.iframeContainer.createEl('iframe', {
       cls: 'planner-timeline-iframe',
       attr: {
-        title: 'Markwhen Timeline',
+        title: 'Markwhen timeline',
       },
     });
 
@@ -187,7 +186,7 @@ export class BasesTimelineView extends BasesView {
       cls: 'planner-timeline-error',
     });
     errorDiv.createEl('div', {
-      text: '⚠️ Timeline Error',
+      text: '⚠️ timeline error',
       cls: 'planner-timeline-error-title',
     });
     errorDiv.createEl('div', {
@@ -326,7 +325,7 @@ export class BasesTimelineView extends BasesView {
     const endFieldName = this.getDateEndField().replace(/^note\./, '');
 
     // Update frontmatter
-    await this.plugin.app.fileManager.processFrontMatter(file, (fm) => {
+    await this.plugin.app.fileManager.processFrontMatter(file, (fm: Record<string, unknown>) => {
       fm[startFieldName] = params.range.fromDateTimeIso;
       fm[endFieldName] = params.range.toDateTimeIso;
       fm.date_modified = new Date().toISOString();
@@ -340,7 +339,7 @@ export class BasesTimelineView extends BasesView {
     // Open ItemModal with pre-filled dates
     // Use requestAnimationFrame to break out of postMessage context (same as handleSetDetailPath)
     requestAnimationFrame(() => {
-      openItemModal(this.plugin, {
+      void openItemModal(this.plugin, {
         mode: 'create',
         prePopulate: {
           date_start_scheduled: params.dateRangeIso.fromDateTimeIso,
@@ -364,7 +363,7 @@ export class BasesTimelineView extends BasesView {
       // Opening a Modal from within a postMessage handler causes scope registration
       // issues that make Modal.close() fail with "instanceOf is not a function".
       requestAnimationFrame(() => {
-        openItemModal(this.plugin, { mode: 'edit', item });
+        void openItemModal(this.plugin, { mode: 'edit', item });
       });
     } else {
       // Fallback to opening the file if item can't be loaded

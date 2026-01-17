@@ -1,4 +1,4 @@
-source: Planner/
+source: Bases/
 filters:
   and:
     - file.inFolder("Planner")
@@ -24,30 +24,38 @@ properties:
     width: 120
   note.context:
     width: 100
-  note.cover:
-    width: 200
+  note.location:
+    width: 120
+  note.color:
+    width: 80
   note.date_start_scheduled:
     width: 120
+  note.date_start_actual:
+    width: 120
   note.date_end_scheduled:
+    width: 120
+  note.date_end_actual:
+    width: 120
+  note.date_created:
+    width: 120
+  note.date_modified:
     width: 120
   note.date_due:
     width: 120
 views:
-  - type: planner-kanban
-    name: Kanban
+  - type: planner-task-list
+    name: Task List
     order:
       - title
+      - calendar
       - status
       - priority
-      - calendar
-      - tags
-      - summary
+      - date_start_scheduled
       - date_end_scheduled
     sort:
       - property: date_end_scheduled
         direction: DESC
-    colorBy: note.calendar
-    borderStyle: left-accent
-    badgePlacement: properties-section
+      - property: priority
+        direction: ASC
   - type: table
     name: Table

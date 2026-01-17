@@ -28,8 +28,9 @@ class RegenerateBasesModal extends Modal {
   onOpen(): void {
     const { contentEl } = this;
 
-    contentEl.createEl('h2', { text: 'Regenerate Base Files' });
+    contentEl.createEl('h2', { text: 'Regenerate base files' });
     contentEl.createEl('p', {
+      // eslint-disable-next-line obsidianmd/ui/sentence-case -- File names must be capitalized
       text: 'This will overwrite your existing Task List.base, Calendar.base, Timeline.base, and Kanban.base files. Any customizations you have made to these files will be lost.',
       cls: 'planner-modal-warning'
     });
@@ -140,8 +141,8 @@ export class PlannerSettingTab extends PluginSettingTab {
   }
 
   private renderGeneralTab(containerEl: HTMLElement): void {
-    // General Settings
-    containerEl.createEl('h2', { text: 'General Settings' });
+    // General Settings heading
+    ;
 
     new Setting(containerEl)
       .setName('Items folder')
@@ -175,10 +176,13 @@ export class PlannerSettingTab extends PluginSettingTab {
       .setName('Date format')
       .setDesc('Display format for dates')
       .addDropdown(dropdown => dropdown
-        .addOption('YYYY-MM-DD', 'YYYY-MM-DD')
-        .addOption('MM/DD/YYYY', 'MM/DD/YYYY')
-        .addOption('DD/MM/YYYY', 'DD/MM/YYYY')
-        .addOption('MMM D, YYYY', 'MMM D, YYYY')
+        // eslint-disable-next-line obsidianmd/ui/sentence-case -- Date format strings are technical notation
+        .addOption('YYYY-MM-DD', 'yyyy-mm-dd')
+        // eslint-disable-next-line obsidianmd/ui/sentence-case -- Date format strings are technical notation
+        .addOption('MM/DD/YYYY', 'mm/dd/yyyy')
+        // eslint-disable-next-line obsidianmd/ui/sentence-case -- Date format strings are technical notation
+        .addOption('DD/MM/YYYY', 'dd/mm/yyyy')
+        .addOption('MMM D, YYYY', 'Mmm d, yyyy')
         .setValue(this.plugin.settings.dateFormat)
         .onChange(async (value) => {
           this.plugin.settings.dateFormat = value;
@@ -218,10 +222,10 @@ export class PlannerSettingTab extends PluginSettingTab {
       .setName('Open behavior')
       .setDesc('How to open items and daily notes from the calendar')
       .addDropdown(dropdown => dropdown
-        .addOption('new-tab', 'Open in New Tab')
-        .addOption('same-tab', 'Open in Same Tab')
-        .addOption('split-right', 'Split Right')
-        .addOption('split-down', 'Split Down')
+        .addOption('new-tab', 'Open in new tab')
+        .addOption('same-tab', 'Open in same tab')
+        .addOption('split-right', 'Split right')
+        .addOption('split-down', 'Split down')
         .setValue(this.plugin.settings.openBehavior)
         .onChange(async (value: OpenBehavior) => {
           this.plugin.settings.openBehavior = value;
@@ -229,10 +233,11 @@ export class PlannerSettingTab extends PluginSettingTab {
         }));
 
     // Bases Views section
-    containerEl.createEl('h2', { text: 'Bases Views' });
+    new Setting(containerEl).setName("Bases views").setHeading();
 
     new Setting(containerEl)
       .setName('Bases folder')
+      // eslint-disable-next-line obsidianmd/ui/sentence-case -- File names must be capitalized
       .setDesc('Where to save the Base view files (Task List, Calendar, Timeline, Kanban)')
       .addText(text => {
         text
@@ -246,20 +251,22 @@ export class PlannerSettingTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
+      // eslint-disable-next-line obsidianmd/ui/sentence-case -- "Base" is a product name
       .setName('Generate Base files')
+      // eslint-disable-next-line obsidianmd/ui/sentence-case -- File names must be capitalized
       .setDesc('Create or regenerate Task List, Calendar, Timeline, and Kanban Base files')
       .addButton(button => button
         .setButtonText('Generate')
         .onClick(async () => {
           const baseGenerator = new BaseGeneratorService(this.app, () => this.plugin.settings);
-          const tasksExists = await baseGenerator.tasksBaseExists();
-          const calendarExists = await baseGenerator.calendarBaseExists();
-          const timelineExists = await baseGenerator.timelineBaseExists();
-          const kanbanExists = await baseGenerator.kanbanBaseExists();
+          const tasksExists = baseGenerator.tasksBaseExists();
+          const calendarExists = baseGenerator.calendarBaseExists();
+          const timelineExists = baseGenerator.timelineBaseExists();
+          const kanbanExists = baseGenerator.kanbanBaseExists();
 
           if (tasksExists || calendarExists || timelineExists || kanbanExists) {
-            new RegenerateBasesModal(this.app, async () => {
-              await this.regenerateBases(baseGenerator);
+            new RegenerateBasesModal(this.app, () => {
+              void this.regenerateBases(baseGenerator);
             }).open();
           } else {
             await this.regenerateBases(baseGenerator);
@@ -268,7 +275,7 @@ export class PlannerSettingTab extends PluginSettingTab {
   }
 
   private renderCalendarTab(containerEl: HTMLElement): void {
-    containerEl.createEl('h2', { text: 'Calendar Configuration' });
+    new Setting(containerEl).setName("Calendar configuration").setHeading();
     this.renderCalendarColors(containerEl);
 
     new Setting(containerEl)
@@ -308,8 +315,9 @@ export class PlannerSettingTab extends PluginSettingTab {
 
   private renderStatusPriorityTab(containerEl: HTMLElement): void {
     // Status Configuration
-    containerEl.createEl('h2', { text: 'Status Configuration' });
+    new Setting(containerEl).setName("Status configuration").setHeading();
     containerEl.createEl('p', {
+      // eslint-disable-next-line obsidianmd/ui/sentence-case -- "Lucide" is a library name, "Completed" starts a sentence
       text: 'Define statuses for tasks. Use Lucide icon names (e.g., circle, check-circle, lightbulb). Completed statuses auto-set date_completed.',
       cls: 'setting-item-description'
     });
@@ -317,8 +325,9 @@ export class PlannerSettingTab extends PluginSettingTab {
     this.renderStatusList(containerEl);
 
     // Priority Configuration
-    containerEl.createEl('h2', { text: 'Priority Configuration' });
+    new Setting(containerEl).setName("Priority configuration").setHeading();
     containerEl.createEl('p', {
+      // eslint-disable-next-line obsidianmd/ui/sentence-case -- "Lucide" is a library name
       text: 'Define priorities for tasks. Use Lucide icon names (e.g., alert-triangle, chevrons-up, minus).',
       cls: 'setting-item-description'
     });
@@ -326,7 +335,7 @@ export class PlannerSettingTab extends PluginSettingTab {
   }
 
   private renderQuickCaptureTab(containerEl: HTMLElement): void {
-    containerEl.createEl('h2', { text: 'Quick Capture' });
+    new Setting(containerEl).setName("Quick capture").setHeading();
 
     new Setting(containerEl)
       .setName('Default status')
@@ -569,7 +578,8 @@ export class PlannerSettingTab extends PluginSettingTab {
       }
     } catch (error) {
       console.error('Failed to generate base files:', error);
-      new Notice(`Failed to generate base files: ${error.message}`);
+      const message = error instanceof Error ? error.message : String(error);
+      new Notice(`Failed to generate base files: ${message}`);
     }
   }
 }

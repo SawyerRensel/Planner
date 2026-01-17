@@ -1,4 +1,4 @@
-import { App, TFile, TFolder, normalizePath, Notice } from 'obsidian';
+import { App, TFile, normalizePath } from 'obsidian';
 import {
   PlannerItem,
   ItemFrontmatter,
@@ -77,21 +77,22 @@ export class ItemService {
 
   /**
    * Get a single item by file path
+   * Returns Promise for API compatibility with async callers
    */
-  async getItem(path: string): Promise<PlannerItem | null> {
+  getItem(path: string): Promise<PlannerItem | null> {
     const file = this.app.vault.getAbstractFileByPath(path);
     if (!(file instanceof TFile)) {
-      return null;
+      return Promise.resolve(null);
     }
 
     const cache = this.app.metadataCache.getFileCache(file);
-    const frontmatter = cache?.frontmatter;
+    const frontmatter = cache?.frontmatter as ItemFrontmatter | undefined;
 
     if (!frontmatter) {
-      return { path };
+      return Promise.resolve({ path });
     }
 
-    return {
+    return Promise.resolve({
       path,
       // Identity
       title: frontmatter.title ?? file.basename,
@@ -132,7 +133,7 @@ export class ItemService {
       // Display
       cover: frontmatter.cover,
       color: frontmatter.color,
-    };
+    });
   }
 
   /**
@@ -239,7 +240,7 @@ export class ItemService {
 
       // Get existing frontmatter from Obsidian's metadata cache
       const cache = this.app.metadataCache.getFileCache(file);
-      const rawFrontmatter = cache?.frontmatter ?? {};
+      const rawFrontmatter = (cache?.frontmatter ?? {}) as Record<string, unknown>;
 
       // Filter out internal Obsidian properties (like 'position') that shouldn't be written back
       const existingFrontmatter: Record<string, unknown> = {};
@@ -287,7 +288,7 @@ export class ItemService {
         return false;
       }
 
-      await this.app.vault.delete(file);
+      await this.app.fileManager.trashFile(file);
       return true;
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
@@ -452,8 +453,8 @@ export class ItemService {
 
     // First, process fields in FRONTMATTER_FIELD_ORDER (for consistent ordering of Planner fields)
     for (const key of FRONTMATTER_FIELD_ORDER) {
-      const value = frontmatter[key];
-      const hasKey = Object.prototype.hasOwnProperty.call(frontmatter, key);
+      const value: unknown = frontmatter[key];
+      const hasKey = key in frontmatter;
       processedKeys.add(key);
 
       // If not including all fields, skip keys that aren't in the frontmatter object
@@ -560,9 +561,23 @@ export class ItemService {
    */
   private normalizeTags(tags: unknown): string[] | undefined {
     if (!tags) return undefined;
-    if (!Array.isArray(tags)) return [String(tags)];
-    return tags.map(t => {
-      const str = String(t);
+    if (typeof tags === 'string') {
+      return [tags.startsWith('#') ? tags.slice(1) : tags];
+    }
+    if (!Array.isArray(tags)) {
+      // Handle non-string, non-array values by converting to string safely
+      const str = typeof tags === 'object' && tags !== null ? JSON.stringify(tags) : String(tags as string | number | boolean);
+      return [str.startsWith('#') ? str.slice(1) : str];
+    }
+    return tags.map((t: unknown) => {
+      let str: string;
+      if (typeof t === 'string') {
+        str = t;
+      } else if (typeof t === 'object' && t !== null) {
+        str = JSON.stringify(t);
+      } else {
+        str = String(t as string | number | boolean);
+      }
       return str.startsWith('#') ? str.slice(1) : str;
     });
   }

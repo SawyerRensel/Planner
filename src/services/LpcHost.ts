@@ -12,9 +12,7 @@ import {
   EditEventDateRangeMessage,
   NewEventMessage,
   EventPath,
-  DisplayScale,
   DateRangeIso,
-  DateFormat,
 } from '../types/markwhen';
 
 /**
@@ -58,7 +56,7 @@ export class LpcHost {
     this.iframe = iframe;
 
     // Set up message listener
-    this.messageHandler = this.handleMessage.bind(this);
+    this.messageHandler = (event: MessageEvent) => this.handleMessage(event);
     window.addEventListener('message', this.messageHandler);
   }
 
@@ -175,7 +173,7 @@ export class LpcHost {
       type,
       response: true,
       id,
-      params: params as any,
+      params: params,
     };
 
     this.iframe.contentWindow.postMessage(message, '*');
@@ -200,7 +198,7 @@ export class LpcHost {
         type,
         request: true,
         id,
-        params: params as any,
+        params: params,
       };
 
       this.iframe.contentWindow.postMessage(message, '*');
@@ -219,7 +217,7 @@ export class LpcHost {
    * Serialize data for postMessage (strips functions and non-serializable data)
    */
   private serialize<T>(data: T): T {
-    return JSON.parse(JSON.stringify(data));
+    return JSON.parse(JSON.stringify(data)) as T;
   }
 
   /**
@@ -276,14 +274,14 @@ export class LpcHost {
    * Request the Timeline to jump to a specific path
    */
   jumpToPath(path: EventPath): void {
-    this.postRequest('jumpToPath', { path });
+    void this.postRequest('jumpToPath', { path });
   }
 
   /**
    * Request the Timeline to jump to a date range
    */
   jumpToRange(dateRangeIso: DateRangeIso): void {
-    this.postRequest('jumpToRange', { dateRangeIso });
+    void this.postRequest('jumpToRange', { dateRangeIso });
   }
 
   /**

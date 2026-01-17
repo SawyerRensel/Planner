@@ -6,7 +6,7 @@ import { openItemModal } from '../components/ItemModal';
 
 export const TASK_LIST_VIEW_TYPE = 'planner-task-list';
 
-type SortField = 'title' | 'status' | 'priority' | 'date_start' | 'date_due' | 'calendar';
+type SortField = 'title' | 'status' | 'priority' | 'date_start_scheduled' | 'date_end_scheduled' | 'calendar';
 type SortDirection = 'asc' | 'desc';
 
 interface SortState {
@@ -17,7 +17,7 @@ interface SortState {
 export class TaskListView extends ItemView {
   plugin: PlannerPlugin;
   private items: PlannerItem[] = [];
-  private sortState: SortState = { field: 'date_due', direction: 'asc' };
+  private sortState: SortState = { field: 'date_end_scheduled', direction: 'asc' };
   private filterTasksOnly = true;
   private showCompleted = false;
   private contentEl: HTMLElement;
@@ -32,7 +32,7 @@ export class TaskListView extends ItemView {
   }
 
   getDisplayText(): string {
-    return 'Planner: Task List';
+    return 'Planner: task list';
   }
 
   getIcon(): string {
@@ -49,24 +49,24 @@ export class TaskListView extends ItemView {
     // Listen for file changes
     this.registerEvent(
       this.app.metadataCache.on('changed', () => {
-        this.refresh();
+        void this.refresh();
       })
     );
 
     this.registerEvent(
       this.app.vault.on('create', () => {
-        this.refresh();
+        void this.refresh();
       })
     );
 
     this.registerEvent(
       this.app.vault.on('delete', () => {
-        this.refresh();
+        void this.refresh();
       })
     );
   }
 
-  async onClose() {
+  onClose() {
     this.contentEl.empty();
   }
 
@@ -118,13 +118,13 @@ export class TaskListView extends ItemView {
     const refreshBtn = container.createEl('button', { cls: 'planner-btn' });
     setIcon(refreshBtn, 'refresh-cw');
     refreshBtn.setAttribute('aria-label', 'Refresh');
-    refreshBtn.addEventListener('click', () => this.refresh());
+    refreshBtn.addEventListener('click', () => { void this.refresh(); });
 
     // New item button
     const newBtn = container.createEl('button', { cls: 'planner-btn planner-btn-primary' });
     setIcon(newBtn, 'plus');
     newBtn.createSpan({ text: ' New' });
-    newBtn.addEventListener('click', () => this.createNewItem());
+    newBtn.addEventListener('click', () => { void this.createNewItem(); });
   }
 
   private renderTable(container: HTMLElement) {
@@ -138,14 +138,14 @@ export class TaskListView extends ItemView {
       { field: 'title', label: 'Title' },
       { field: 'status', label: 'Status', width: '120px' },
       { field: 'priority', label: 'Priority', width: '100px' },
-      { field: 'date_start', label: 'Start', width: '110px' },
-      { field: 'date_due', label: 'Due', width: '110px' },
+      { field: 'date_start_scheduled', label: 'Start', width: '110px' },
+      { field: 'date_end_scheduled', label: 'Due', width: '110px' },
       { field: 'calendar', label: 'Calendar', width: '120px' },
     ];
 
     for (const col of columns) {
       const th = headerRow.createEl('th');
-      if (col.width) th.style.width = col.width;
+      if (col.width) th.setCssProps({ '--column-width': col.width });
 
       const headerContent = th.createDiv({ cls: 'planner-th-content' });
       headerContent.createSpan({ text: col.label });
@@ -225,15 +225,15 @@ export class TaskListView extends ItemView {
 
     // Date Start
     const startCell = row.createEl('td', { cls: 'planner-cell-date' });
-    if (item.date_start) {
-      startCell.setText(this.formatDate(item.date_start));
+    if (item.date_start_scheduled) {
+      startCell.setText(this.formatDate(item.date_start_scheduled));
     }
 
     // Date Due
     const dueCell = row.createEl('td', { cls: 'planner-cell-date' });
-    if (item.date_due) {
-      const isOverdue = new Date(item.date_due) < new Date() && !this.isCompleted(item);
-      dueCell.setText(this.formatDate(item.date_due));
+    if (item.date_end_scheduled) {
+      const isOverdue = new Date(item.date_end_scheduled) < new Date() && !this.isCompleted(item);
+      dueCell.setText(this.formatDate(item.date_end_scheduled));
       if (isOverdue) {
         dueCell.addClass('planner-overdue');
       }
@@ -291,10 +291,10 @@ export class TaskListView extends ItemView {
         const config = getPriorityConfig(this.plugin.settings, item.priority ?? '');
         return config?.weight ?? -1;
       }
-      case 'date_start':
-        return item.date_start ?? null;
-      case 'date_due':
-        return item.date_due ?? null;
+      case 'date_start_scheduled':
+        return item.date_start_scheduled ?? null;
+      case 'date_end_scheduled':
+        return item.date_end_scheduled ?? null;
       case 'calendar':
         return item.calendar?.[0] ?? null;
       default:
@@ -342,16 +342,16 @@ export class TaskListView extends ItemView {
 
   private getContrastColor(hexColor: string): string {
     const hex = hexColor.replace('#', '');
-    const r = parseInt(hex.substr(0, 2), 16);
-    const g = parseInt(hex.substr(2, 2), 16);
-    const b = parseInt(hex.substr(4, 2), 16);
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
     const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
     return luminance > 0.5 ? '#000000' : '#ffffff';
   }
 
-  private async openItem(item: PlannerItem) {
+  private openItem(item: PlannerItem) {
     // Open ItemModal for editing
-    openItemModal(this.plugin, { mode: 'edit', item });
+    void openItemModal(this.plugin, { mode: 'edit', item });
   }
 
   private showContextMenu(event: MouseEvent, item: PlannerItem) {
@@ -370,7 +370,7 @@ export class TaskListView extends ItemView {
         .setTitle('Open in new tab')
         .setIcon('file-plus')
         .onClick(() => {
-          this.app.workspace.openLinkText(item.path, '', true);
+          void this.app.workspace.openLinkText(item.path, '', true);
         });
     });
 
@@ -382,9 +382,9 @@ export class TaskListView extends ItemView {
         .setTitle('Set status')
         .setIcon('check-circle');
 
-      const submenu = (menuItem as any).setSubmenu();
+      const submenu = (menuItem as { setSubmenu: () => Menu }).setSubmenu();
       for (const status of this.plugin.settings.statuses) {
-        submenu.addItem((subItem: any) => {
+        submenu.addItem((subItem) => {
           subItem
             .setTitle(status.name)
             .onClick(async () => {
@@ -410,9 +410,9 @@ export class TaskListView extends ItemView {
     menu.showAtMouseEvent(event);
   }
 
-  private async createNewItem() {
+  private createNewItem() {
     // Open ItemModal for creating new task
-    openItemModal(this.plugin, {
+    void openItemModal(this.plugin, {
       mode: 'create',
       prePopulate: {
         tags: ['task'],

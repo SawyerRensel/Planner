@@ -19,6 +19,15 @@ import {
   getCalendarColor,
 } from '../types/settings';
 
+/**
+ * Type interface for BasesView grouped data entries
+ */
+interface BasesGroupedData {
+  entries: BasesEntry[];
+  key?: unknown;
+  hasKey(): boolean;
+}
+
 export const BASES_KANBAN_VIEW_ID = 'planner-kanban';
 
 /**
@@ -47,11 +56,6 @@ type SwimHeaderDisplay = 'horizontal' | 'vertical';
 const VIRTUAL_SCROLL_THRESHOLD = 15;
 
 /**
- * Properties that have special badge rendering (not generic property display)
- */
-const BADGE_PROPERTIES = ['status', 'priority', 'calendar', 'repeat_frequency'];
-
-/**
  * Kanban view for Obsidian Bases
  * Displays items in a drag-and-drop board with configurable columns
  */
@@ -72,11 +76,15 @@ export class BasesKanbanView extends BasesView {
   private touchDragClone: HTMLElement | null = null;
   private touchStartX: number = 0;
   private touchStartY: number = 0;
+  private lastTouchX: number = 0;
+  private lastTouchY: number = 0;
   private scrollInterval: number | null = null;
   private touchHoldTimer: number | null = null;
   private touchHoldReady: boolean = false;
   private touchHoldCard: HTMLElement | null = null;
   private touchHoldEntry: BasesEntry | null = null;
+  // Context menu blocker for iOS (prevents long-press menu during drag)
+  private boundContextMenuBlocker = (e: Event): void => { e.preventDefault(); e.stopPropagation(); };
 
   // Column reordering state
   private draggedColumn: HTMLElement | null = null;
@@ -205,7 +213,8 @@ export class BasesKanbanView extends BasesView {
     const value = this.config.get('columnOrder') as string | undefined;
     if (!value) return [];
     try {
-      return JSON.parse(value);
+      const parsed = JSON.parse(value) as unknown;
+      return Array.isArray(parsed) ? parsed.filter((v): v is string => typeof v === 'string') : [];
     } catch {
       return [];
     }
@@ -219,7 +228,8 @@ export class BasesKanbanView extends BasesView {
     const value = this.config.get('swimlaneOrder') as string | undefined;
     if (!value) return [];
     try {
-      return JSON.parse(value);
+      const parsed = JSON.parse(value) as unknown;
+      return Array.isArray(parsed) ? parsed.filter((v): v is string => typeof v === 'string') : [];
     } catch {
       return [];
     }
@@ -332,7 +342,7 @@ export class BasesKanbanView extends BasesView {
   private handleAddNewClick(columnValue: string, swimlaneValue?: string): void {
     const { prePopulate, targetFolder } = this.buildPrePopulateForNewItem(columnValue, swimlaneValue);
 
-    openItemModal(this.plugin, {
+    void openItemModal(this.plugin, {
       mode: 'create',
       prePopulate,
       targetFolder,
@@ -410,7 +420,7 @@ export class BasesKanbanView extends BasesView {
    */
   private getAllCards(): HTMLElement[] {
     if (!this.boardEl) return [];
-    return Array.from(this.boardEl.querySelectorAll('.planner-kanban-card')) as HTMLElement[];
+    return Array.from(this.boardEl.querySelectorAll('.planner-kanban-card'));
   }
 
   /**
@@ -455,7 +465,7 @@ export class BasesKanbanView extends BasesView {
       // Up/down navigation within column
       const currentCard = cards[currentIndex];
       const currentColumn = currentCard.closest('[data-group]') as HTMLElement;
-      const cardsInColumn = Array.from(currentColumn?.querySelectorAll('.planner-kanban-card') || []) as HTMLElement[];
+      const cardsInColumn = Array.from(currentColumn?.querySelectorAll('.planner-kanban-card') || []);
       const positionInColumn = cardsInColumn.indexOf(currentCard);
 
       let targetIndex: number;
@@ -480,7 +490,7 @@ export class BasesKanbanView extends BasesView {
     columns.forEach(column => {
       const group = column.getAttribute('data-group');
       if (group) {
-        const cards = Array.from(column.querySelectorAll('.planner-kanban-card')) as HTMLElement[];
+        const cards = Array.from(column.querySelectorAll('.planner-kanban-card'));
         if (cards.length > 0) {
           result.set(group, cards);
         }
@@ -533,18 +543,8 @@ export class BasesKanbanView extends BasesView {
   private setupContainer(): void {
     this.containerEl.empty();
     this.containerEl.addClass('planner-bases-kanban');
-    this.containerEl.style.cssText = 'height: 100%; display: flex; flex-direction: column; overflow: hidden;';
 
     this.boardEl = this.containerEl.createDiv({ cls: 'planner-kanban-board' });
-    this.boardEl.style.cssText = `
-      flex: 1;
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 6px;
-      overflow: auto;
-      min-height: 0;
-    `;
   }
 
   private setupResizeObserver(): void {
@@ -585,7 +585,6 @@ export class BasesKanbanView extends BasesView {
     this.containerEl.removeAttribute('tabindex');
     // Clean up styles and classes added to the shared container
     this.containerEl.removeClass('planner-bases-kanban');
-    this.containerEl.style.cssText = '';
   }
 
   private render(): void {
@@ -629,12 +628,13 @@ export class BasesKanbanView extends BasesView {
 
     // Collect unique values and assign Solarized colors
     const uniqueValues = new Set<string>();
-    for (const group of this.data.groupedData) {
+    const groupedData = this.data.groupedData as BasesGroupedData[];
+    for (const group of groupedData) {
       for (const entry of group.entries) {
-        const value = entry.getValue(colorByField as BasesPropertyId);
+        const value = this.getEntryValue(entry, colorByField);
         if (value) {
-          const strValue = Array.isArray(value) ? value[0] : String(value);
-          if (strValue) uniqueValues.add(strValue);
+          const strValue = this.valueToString(Array.isArray(value) ? value[0] : value);
+          if (strValue && strValue !== 'None') uniqueValues.add(strValue);
         }
       }
     }
@@ -648,28 +648,28 @@ export class BasesKanbanView extends BasesView {
   private getEntryColor(entry: BasesEntry): string {
     const colorByField = this.getColorBy();
     const propName = colorByField.replace(/^note\./, '');
-    const value = entry.getValue(colorByField as BasesPropertyId);
+    const value = this.getEntryValue(entry, colorByField);
 
     if (!value) return '#6b7280';
 
     // Handle special properties with predefined colors
     if (propName === 'calendar') {
-      const calendarName = Array.isArray(value) ? value[0] : String(value);
+      const calendarName = this.valueToString(Array.isArray(value) ? value[0] : value);
       return getCalendarColor(this.plugin.settings, calendarName);
     }
 
     if (propName === 'priority') {
-      const config = getPriorityConfig(this.plugin.settings, String(value));
+      const config = getPriorityConfig(this.plugin.settings, this.valueToString(value));
       return config?.color ?? '#6b7280';
     }
 
     if (propName === 'status') {
-      const config = getStatusConfig(this.plugin.settings, String(value));
+      const config = getStatusConfig(this.plugin.settings, this.valueToString(value));
       return config?.color ?? '#6b7280';
     }
 
     // Use cached color for other fields
-    const strValue = Array.isArray(value) ? value[0] : String(value);
+    const strValue = this.valueToString(Array.isArray(value) ? value[0] : value);
     return this.colorMapCache[strValue] ?? '#6b7280';
   }
 
@@ -679,7 +679,7 @@ export class BasesKanbanView extends BasesView {
 
     for (const group of this.data.groupedData) {
       for (const entry of group.entries) {
-        const value = entry.getValue(groupByField as BasesPropertyId);
+        const value = this.getEntryValue(entry, groupByField);
         const groupKey = this.valueToString(value);
 
         if (!groups.has(groupKey)) {
@@ -708,6 +708,10 @@ export class BasesKanbanView extends BasesView {
     return groups;
   }
 
+  /**
+   * Convert any value to a string for grouping/display
+   * Uses type assertions to satisfy ESLint no-base-to-string rule
+   */
   private valueToString(value: unknown): string {
     if (value === null || value === undefined) return 'None';
     if (Array.isArray(value)) {
@@ -715,7 +719,71 @@ export class BasesKanbanView extends BasesView {
       if (filtered.length === 0) return 'None';
       return filtered.join(', ');
     }
-    return String(value);
+    // Handle primitives directly
+    if (typeof value === 'string') return value || 'None';
+    if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+    // Handle objects - try toString() for objects that implement it meaningfully
+    if (typeof value === 'object') {
+      const objStr = (value as { toString(): string }).toString();
+      // Check for meaningful toString result
+      if (objStr && objStr !== '[object Object]') return objStr || 'None';
+      // Fall back to JSON for plain objects
+      try {
+        const json = JSON.stringify(value);
+        return json || 'None';
+      } catch {
+        return 'None';
+      }
+    }
+    // For remaining types (symbol, bigint, function), use String with type assertion
+    return String(value as string | number | boolean | bigint) || 'None';
+  }
+
+  /**
+   * Get frontmatter directly from Obsidian's metadata cache (bypasses Bases getValue)
+   * This is needed because Bases getValue may not return custom frontmatter properties
+   */
+  private getFrontmatter(entry: BasesEntry): Record<string, unknown> | undefined {
+    const file = entry.file;
+    const cache = this.plugin.app.metadataCache.getFileCache(file);
+    return cache?.frontmatter;
+  }
+
+  /**
+   * Get a property value from an entry, trying Bases getValue first, then falling back to frontmatter
+   */
+  private getEntryValue(entry: BasesEntry, propId: string): unknown {
+    // Try Bases getValue first
+    const basesValue = entry.getValue(propId as BasesPropertyId);
+    // Check for valid value - not null, undefined, or empty string
+    if (basesValue !== null && basesValue !== undefined && basesValue !== '') {
+      return basesValue;
+    }
+
+    // Fall back to reading frontmatter directly
+    const propName = propId.replace(/^(note|file)\./, '');
+
+    // Handle special file properties
+    if (propId.startsWith('file.')) {
+      if (propName === 'folder') {
+        const folderPath = entry.file.parent?.path || '/';
+        return folderPath === '/' ? 'Root' : entry.file.parent?.name || 'Root';
+      }
+      if (propName === 'basename') {
+        return entry.file.basename;
+      }
+      if (propName === 'path') {
+        return entry.file.path;
+      }
+    }
+
+    // Get from frontmatter
+    const frontmatter = this.getFrontmatter(entry);
+    if (frontmatter) {
+      return frontmatter[propName];
+    }
+
+    return undefined;
   }
 
   /**
@@ -826,10 +894,10 @@ export class BasesKanbanView extends BasesView {
 
     for (const group of this.data.groupedData) {
       for (const entry of group.entries) {
-        const swimlaneValue = entry.getValue(swimlaneBy as BasesPropertyId);
+        const swimlaneValue = this.getEntryValue(entry, swimlaneBy);
         const swimlaneKey = this.valueToString(swimlaneValue);
 
-        const columnValue = entry.getValue(groupByField as BasesPropertyId);
+        const columnValue = this.getEntryValue(entry, groupByField);
         const columnKey = this.valueToString(columnValue);
 
         allColumnKeys.add(columnKey);
@@ -853,12 +921,6 @@ export class BasesKanbanView extends BasesView {
     // Create swimlane container
     const swimlaneContainer = document.createElement('div');
     swimlaneContainer.className = 'planner-kanban-swimlanes';
-    swimlaneContainer.style.cssText = `
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      min-width: fit-content;
-    `;
 
     // Calculate column totals across all swimlanes
     const columnCounts = new Map<string, number>();
@@ -874,14 +936,10 @@ export class BasesKanbanView extends BasesView {
     const headerRow = document.createElement('div');
     headerRow.className = 'planner-kanban-header-row';
     const swimLabelWidth = isVerticalSwimHeader ? 48 : 150;
-    headerRow.style.cssText = `
-      display: flex;
-      gap: 12px;
-      padding-left: ${swimLabelWidth}px;
-      ${freezeColumns ? 'position: sticky; top: 0; z-index: 10;' : ''}
-      background: var(--background-primary);
-      padding-bottom: 8px;
-    `;
+    headerRow.setCssProps({ '--swim-label-width': `${swimLabelWidth}px` });
+    if (freezeColumns) {
+      headerRow.classList.add('planner-kanban-header-row--frozen');
+    }
 
     const groupByProp = groupByField.replace(/^note\./, '');
 
@@ -889,35 +947,12 @@ export class BasesKanbanView extends BasesView {
       const headerCell = document.createElement('div');
       headerCell.className = 'planner-kanban-swimlane-header-cell';
       headerCell.setAttribute('data-group', columnKey);
-      headerCell.style.cssText = `
-        width: ${columnWidth}px;
-        min-width: ${columnWidth}px;
-        font-weight: 600;
-        padding: 8px 12px;
-        background: var(--background-secondary);
-        border-radius: 6px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-      `;
+      headerCell.setCssProps({ '--column-width': `${columnWidth}px` });
 
-      // Grab handle for column reordering
+      // Grab handle for column reordering (CSS handles styles and hover states)
       const grabHandle = document.createElement('span');
       grabHandle.className = 'planner-kanban-column-grab';
-      grabHandle.style.cssText = `
-        cursor: grab;
-        opacity: 0.4;
-        transition: opacity 0.15s ease;
-        display: flex;
-        align-items: center;
-      `;
       setIcon(grabHandle, 'grip-vertical');
-      grabHandle.addEventListener('mouseenter', () => {
-        grabHandle.style.opacity = '1';
-      });
-      grabHandle.addEventListener('mouseleave', () => {
-        grabHandle.style.opacity = '0.4';
-      });
       grabHandle.setAttribute('draggable', 'true');
       this.setupSwimlaneColumnDragHandlers(grabHandle, headerCell, columnKey);
       headerCell.appendChild(grabHandle);
@@ -929,6 +964,7 @@ export class BasesKanbanView extends BasesView {
           const iconEl = document.createElement('span');
           iconEl.className = 'planner-kanban-column-icon';
           setIcon(iconEl, config.icon || 'circle');
+           
           iconEl.style.color = config.color;
           headerCell.appendChild(iconEl);
         }
@@ -938,6 +974,7 @@ export class BasesKanbanView extends BasesView {
           const iconEl = document.createElement('span');
           iconEl.className = 'planner-kanban-column-icon';
           setIcon(iconEl, config.icon || 'signal');
+           
           iconEl.style.color = config.color;
           headerCell.appendChild(iconEl);
         }
@@ -946,28 +983,22 @@ export class BasesKanbanView extends BasesView {
         const iconEl = document.createElement('span');
         iconEl.className = 'planner-kanban-column-icon';
         setIcon(iconEl, 'calendar');
+         
         iconEl.style.color = color;
         headerCell.appendChild(iconEl);
       }
 
-      // Title (with flex: 1 to push count to the right)
+      // Title (CSS class handles flex: 1)
       const titleSpan = document.createElement('span');
-      titleSpan.style.flex = '1';
+      titleSpan.className = 'planner-kanban-column-title';
       titleSpan.textContent = columnKey;
       headerCell.appendChild(titleSpan);
 
-      // Count badge
+      // Count badge (CSS class handles all styles)
       const count = columnCounts.get(columnKey) || 0;
       const countBadge = document.createElement('span');
       countBadge.className = 'planner-kanban-column-count';
       countBadge.textContent = String(count);
-      countBadge.style.cssText = `
-        background: var(--background-modifier-border);
-        padding: 2px 8px;
-        border-radius: 10px;
-        font-size: 12px;
-        font-weight: 500;
-      `;
       headerCell.appendChild(countBadge);
 
       headerRow.appendChild(headerCell);
@@ -992,81 +1023,35 @@ export class BasesKanbanView extends BasesView {
       const swimlaneRow = document.createElement('div');
       swimlaneRow.className = 'planner-kanban-swimlane-row';
       swimlaneRow.setAttribute('data-swimlane-row', swimlaneKey);
-      swimlaneRow.style.cssText = `
-        display: flex;
-        gap: 12px;
-        align-items: stretch;
-      `;
 
       // Swimlane label with drag handle, icon, title, and count
       const swimlaneLabel = document.createElement('div');
-      swimlaneLabel.className = 'planner-kanban-swimlane-label';
       swimlaneLabel.setAttribute('data-swimlane', swimlaneKey);
 
       if (isVerticalSwimHeader) {
-        swimlaneLabel.style.cssText = `
-          width: 36px;
-          min-width: 36px;
-          font-weight: 600;
-          padding: 8px 4px;
-          background: var(--background-modifier-border);
-          border-radius: 6px;
-          ${freezeSwimlanes ? 'position: sticky; left: 0; z-index: 5;' : ''}
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 8px;
-        `;
+        swimlaneLabel.className = 'planner-kanban-swimlane-label planner-kanban-swimlane-label--vertical';
+        if (freezeSwimlanes) {
+          swimlaneLabel.classList.add('planner-kanban-swimlane-label--frozen');
+        }
       } else {
-        swimlaneLabel.style.cssText = `
-          width: 138px;
-          min-width: 138px;
-          font-weight: 600;
-          padding: 8px;
-          background: var(--background-modifier-border);
-          border-radius: 6px;
-          ${freezeSwimlanes ? 'position: sticky; left: 0; z-index: 5;' : ''}
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-          min-height: 60px;
-        `;
+        swimlaneLabel.className = 'planner-kanban-swimlane-label planner-kanban-swimlane-label--horizontal';
+        if (freezeSwimlanes) {
+          swimlaneLabel.classList.add('planner-kanban-swimlane-label--frozen');
+        }
       }
 
       // Header row with grab handle, icon, and title
       const labelHeader = document.createElement('div');
       if (isVerticalSwimHeader) {
-        labelHeader.style.cssText = `
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 4px;
-        `;
+        labelHeader.className = 'planner-kanban-label-header--vertical';
       } else {
-        labelHeader.style.cssText = `
-          display: flex;
-          align-items: center;
-          gap: 4px;
-        `;
+        labelHeader.className = 'planner-kanban-label-header--horizontal';
       }
 
-      // Grab handle for swimlane reordering
+      // Grab handle for swimlane reordering (CSS handles styles and hover states)
       const grabHandle = document.createElement('span');
       grabHandle.className = 'planner-kanban-swimlane-grab';
-      grabHandle.style.cssText = `
-        cursor: grab;
-        opacity: 0.4;
-        transition: opacity 0.15s ease;
-        display: flex;
-        align-items: center;
-      `;
       setIcon(grabHandle, 'grip-vertical');
-      grabHandle.addEventListener('mouseenter', () => {
-        grabHandle.style.opacity = '1';
-      });
-      grabHandle.addEventListener('mouseleave', () => {
-        grabHandle.style.opacity = '0.4';
-      });
       grabHandle.setAttribute('draggable', 'true');
       this.setupSwimlaneDragHandlers(grabHandle, swimlaneRow, swimlaneKey);
       labelHeader.appendChild(grabHandle);
@@ -1079,6 +1064,7 @@ export class BasesKanbanView extends BasesView {
           const iconEl = document.createElement('span');
           iconEl.className = 'planner-kanban-swimlane-icon';
           setIcon(iconEl, config.icon || 'circle');
+           
           iconEl.style.color = config.color;
           labelHeader.appendChild(iconEl);
         }
@@ -1088,6 +1074,7 @@ export class BasesKanbanView extends BasesView {
           const iconEl = document.createElement('span');
           iconEl.className = 'planner-kanban-swimlane-icon';
           setIcon(iconEl, config.icon || 'signal');
+           
           iconEl.style.color = config.color;
           labelHeader.appendChild(iconEl);
         }
@@ -1096,52 +1083,28 @@ export class BasesKanbanView extends BasesView {
         const iconEl = document.createElement('span');
         iconEl.className = 'planner-kanban-swimlane-icon';
         setIcon(iconEl, 'calendar');
+         
         iconEl.style.color = color;
         labelHeader.appendChild(iconEl);
       }
 
-      // Title
+      // Title (CSS class handles styles based on orientation)
       const titleSpan = document.createElement('span');
-      if (isVerticalSwimHeader) {
-        titleSpan.style.cssText = `
-          writing-mode: vertical-rl;
-          text-orientation: mixed;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          max-height: 120px;
-        `;
-      } else {
-        titleSpan.style.cssText = 'flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
-      }
+      titleSpan.className = isVerticalSwimHeader
+        ? 'planner-kanban-swimlane-title--vertical'
+        : 'planner-kanban-swimlane-title--horizontal';
       titleSpan.textContent = swimlaneKey;
       labelHeader.appendChild(titleSpan);
 
       swimlaneLabel.appendChild(labelHeader);
 
-      // Count badge
+      // Count badge (CSS class handles styles based on orientation)
       const count = swimlaneCounts.get(swimlaneKey) || 0;
       const countBadge = document.createElement('span');
-      countBadge.className = 'planner-kanban-swimlane-count';
+      countBadge.className = isVerticalSwimHeader
+        ? 'planner-kanban-swimlane-count planner-kanban-swimlane-count--vertical'
+        : 'planner-kanban-swimlane-count planner-kanban-swimlane-count--horizontal';
       countBadge.textContent = String(count);
-      if (isVerticalSwimHeader) {
-        countBadge.style.cssText = `
-          background: var(--background-primary);
-          padding: 2px 6px;
-          border-radius: 10px;
-          font-size: 10px;
-          font-weight: 500;
-        `;
-      } else {
-        countBadge.style.cssText = `
-          background: var(--background-primary);
-          padding: 2px 8px;
-          border-radius: 10px;
-          font-size: 11px;
-          font-weight: 500;
-          align-self: flex-start;
-        `;
-      }
       swimlaneLabel.appendChild(countBadge);
 
       swimlaneRow.appendChild(swimlaneLabel);
@@ -1157,15 +1120,8 @@ export class BasesKanbanView extends BasesView {
         if (hideEmpty && entries.length === 0) {
           // Add empty placeholder to maintain grid alignment
           const placeholder = document.createElement('div');
-          placeholder.style.cssText = `
-            width: ${columnWidth}px;
-            min-width: ${columnWidth}px;
-            min-height: 60px;
-            background: var(--background-secondary);
-            border-radius: 6px;
-            opacity: 0.5;
-            flex: 1;
-          `;
+          placeholder.className = 'planner-kanban-placeholder';
+          placeholder.setCssProps({ '--column-width': `${columnWidth}px` });
           swimlaneRow.appendChild(placeholder);
         } else {
           const cell = this.createSwimlaneCell(columnKey, swimlaneKey, entries, columnWidth);
@@ -1185,17 +1141,7 @@ export class BasesKanbanView extends BasesView {
   private createSwimlaneCell(groupKey: string, swimlaneKey: string, entries: BasesEntry[], width: number): HTMLElement {
     const cell = document.createElement('div');
     cell.className = 'planner-kanban-swimlane-cell';
-    cell.style.cssText = `
-      width: ${width}px;
-      min-width: ${width}px;
-      min-height: 60px;
-      background: var(--background-secondary);
-      border-radius: 6px;
-      padding: 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    `;
+    cell.setCssProps({ '--column-width': `${width}px` });
     cell.setAttribute('data-group', groupKey);
     cell.setAttribute('data-swimlane', swimlaneKey);
 
@@ -1229,26 +1175,11 @@ export class BasesKanbanView extends BasesView {
     // Create a wrapper that holds both header row (if sticky) and columns
     const wrapperContainer = document.createElement('div');
     wrapperContainer.className = 'planner-kanban-wrapper';
-    wrapperContainer.style.cssText = `
-      display: flex;
-      flex-direction: column;
-      min-width: fit-content;
-      min-height: fit-content;
-    `;
 
     // If freeze columns is enabled, create a sticky header row
     if (freezeColumns) {
       const headerRow = document.createElement('div');
-      headerRow.className = 'planner-kanban-header-row';
-      headerRow.style.cssText = `
-        display: flex;
-        gap: 12px;
-        position: sticky;
-        top: 0;
-        background: var(--background-primary);
-        z-index: 10;
-        padding-bottom: 8px;
-      `;
+      headerRow.className = 'planner-kanban-header-row planner-kanban-header-row--frozen';
 
       const groupByField = this.getGroupBy();
       const propName = groupByField.replace(/^note\./, '');
@@ -1260,35 +1191,12 @@ export class BasesKanbanView extends BasesView {
         const headerCell = document.createElement('div');
         headerCell.className = 'planner-kanban-column-header-cell';
         headerCell.setAttribute('data-group', columnKey);
-        headerCell.style.cssText = `
-          width: ${columnWidth}px;
-          min-width: ${columnWidth}px;
-          font-weight: 600;
-          padding: 8px 12px;
-          background: var(--background-secondary);
-          border-radius: 6px;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-        `;
+        headerCell.setCssProps({ '--column-width': `${columnWidth}px` });
 
         // Grab handle for column reordering
         const grabHandle = document.createElement('span');
         grabHandle.className = 'planner-kanban-column-grab';
-        grabHandle.style.cssText = `
-          cursor: grab;
-          opacity: 0.4;
-          transition: opacity 0.15s ease;
-          display: flex;
-          align-items: center;
-        `;
         setIcon(grabHandle, 'grip-vertical');
-        grabHandle.addEventListener('mouseenter', () => {
-          grabHandle.style.opacity = '1';
-        });
-        grabHandle.addEventListener('mouseleave', () => {
-          grabHandle.style.opacity = '0.4';
-        });
         grabHandle.setAttribute('draggable', 'true');
         this.setupSwimlaneColumnDragHandlers(grabHandle, headerCell, columnKey);
         headerCell.appendChild(grabHandle);
@@ -1300,6 +1208,7 @@ export class BasesKanbanView extends BasesView {
             const iconEl = document.createElement('span');
             iconEl.className = 'planner-kanban-column-icon';
             setIcon(iconEl, config.icon || 'circle');
+             
             iconEl.style.color = config.color;
             headerCell.appendChild(iconEl);
           }
@@ -1309,6 +1218,7 @@ export class BasesKanbanView extends BasesView {
             const iconEl = document.createElement('span');
             iconEl.className = 'planner-kanban-column-icon';
             setIcon(iconEl, config.icon || 'signal');
+             
             iconEl.style.color = config.color;
             headerCell.appendChild(iconEl);
           }
@@ -1317,27 +1227,21 @@ export class BasesKanbanView extends BasesView {
           const iconEl = document.createElement('span');
           iconEl.className = 'planner-kanban-column-icon';
           setIcon(iconEl, 'calendar');
+           
           iconEl.style.color = color;
           headerCell.appendChild(iconEl);
         }
 
-        // Title
+        // Title (CSS class handles flex: 1)
         const titleSpan = document.createElement('span');
-        titleSpan.style.flex = '1';
+        titleSpan.className = 'planner-kanban-column-title';
         titleSpan.textContent = columnKey;
         headerCell.appendChild(titleSpan);
 
-        // Count badge
+        // Count badge (CSS class handles all styles)
         const countBadge = document.createElement('span');
         countBadge.className = 'planner-kanban-column-count';
         countBadge.textContent = String(entries.length);
-        countBadge.style.cssText = `
-          background: var(--background-modifier-border);
-          padding: 2px 8px;
-          border-radius: 10px;
-          font-size: 12px;
-          font-weight: 500;
-        `;
         headerCell.appendChild(countBadge);
 
         headerRow.appendChild(headerCell);
@@ -1346,16 +1250,9 @@ export class BasesKanbanView extends BasesView {
       wrapperContainer.appendChild(headerRow);
     }
 
-    // Create columns container
+    // Create columns container (CSS class handles all styles)
     const columnsContainer = document.createElement('div');
     columnsContainer.className = 'planner-kanban-columns-container';
-    columnsContainer.style.cssText = `
-      display: flex;
-      align-items: stretch;
-      gap: 12px;
-      min-width: fit-content;
-      min-height: fit-content;
-    `;
 
     for (const columnKey of columnKeys) {
       const entries = groups.get(columnKey) || [];
@@ -1374,15 +1271,8 @@ export class BasesKanbanView extends BasesView {
   private createColumn(groupKey: string, entries: BasesEntry[], width: number, skipHeader = false): HTMLElement {
     const column = document.createElement('div');
     column.className = 'planner-kanban-column';
-    column.style.cssText = `
-      width: ${width}px;
-      min-width: ${width}px;
-      display: flex;
-      flex-direction: column;
-      background: var(--background-secondary);
-      border-radius: 8px;
-      flex-shrink: 0;
-    `;
+    // Dynamic width from user setting requires inline style
+    column.setCssProps({ '--column-width': `${width}px` });
     column.setAttribute('data-group', groupKey);
 
     // Column header (pass column for drag handlers) - skip if using sticky header row
@@ -1391,16 +1281,10 @@ export class BasesKanbanView extends BasesView {
       column.appendChild(header);
     }
 
-    // Cards container - fills column, no internal scrolling so content expands column
+    // Cards container - fills column, no internal scrolling so content expands column (CSS class handles styles)
     const cardsContainer = document.createElement('div');
     cardsContainer.className = 'planner-kanban-cards';
-    cardsContainer.style.cssText = `
-      flex: 1;
-      padding: 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    `;
+    cardsContainer.setAttribute('data-group', groupKey);
 
     // Setup drop handlers on cards container
     this.setupDropHandlers(cardsContainer, groupKey);
@@ -1423,33 +1307,13 @@ export class BasesKanbanView extends BasesView {
   }
 
   private createColumnHeader(groupKey: string, count: number, column: HTMLElement): HTMLElement {
+    // CSS class handles all header styles
     const header = document.createElement('div');
     header.className = 'planner-kanban-column-header';
-    header.style.cssText = `
-      padding: 12px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      border-bottom: 1px solid var(--background-modifier-border);
-    `;
 
-    // Grab handle for column reordering
+    // Grab handle for column reordering (CSS class handles styles and hover states)
     const grabHandle = header.createSpan({ cls: 'planner-kanban-column-grab' });
-    grabHandle.style.cssText = `
-      cursor: grab;
-      opacity: 0.4;
-      transition: opacity 0.15s ease;
-      display: flex;
-      align-items: center;
-    `;
     setIcon(grabHandle, 'grip-vertical');
-    grabHandle.addEventListener('mouseenter', () => {
-      grabHandle.style.opacity = '1';
-    });
-    grabHandle.addEventListener('mouseleave', () => {
-      grabHandle.style.opacity = '0.4';
-    });
 
     // Make the grab handle draggable for column reordering
     grabHandle.setAttribute('draggable', 'true');
@@ -1464,6 +1328,7 @@ export class BasesKanbanView extends BasesView {
       if (config) {
         const iconEl = header.createSpan({ cls: 'planner-kanban-column-icon' });
         setIcon(iconEl, config.icon || 'circle');
+         
         iconEl.style.color = config.color;
       }
     } else if (propName === 'priority') {
@@ -1471,23 +1336,16 @@ export class BasesKanbanView extends BasesView {
       if (config) {
         const iconEl = header.createSpan({ cls: 'planner-kanban-column-icon' });
         setIcon(iconEl, config.icon || 'signal');
+         
         iconEl.style.color = config.color;
       }
     }
 
-    // Title
-    const title = header.createSpan({ cls: 'planner-kanban-column-title', text: groupKey });
-    title.style.flex = '1';
+    // Title (CSS class handles flex: 1)
+    header.createSpan({ cls: 'planner-kanban-column-title', text: groupKey });
 
-    // Count badge
-    const countBadge = header.createSpan({ cls: 'planner-kanban-column-count', text: String(count) });
-    countBadge.style.cssText = `
-      background: var(--background-modifier-border);
-      padding: 2px 8px;
-      border-radius: 10px;
-      font-size: 12px;
-      font-weight: 500;
-    `;
+    // Count badge (CSS class handles all styles)
+    header.createSpan({ cls: 'planner-kanban-column-count', text: String(count) });
 
     return header;
   }
@@ -1782,15 +1640,8 @@ export class BasesKanbanView extends BasesView {
     const labelEl = swimlaneRow.querySelector('.planner-kanban-swimlane-label');
     if (labelEl) {
       this.touchDragSwimlaneClone = labelEl.cloneNode(true) as HTMLElement;
-      this.touchDragSwimlaneClone.style.cssText = `
-        position: fixed;
-        pointer-events: none;
-        z-index: 1000;
-        opacity: 0.9;
-        transform: scale(1.02);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        width: ${labelEl.clientWidth}px;
-      `;
+      this.touchDragSwimlaneClone.className = 'planner-kanban-swimlane-drag-clone';
+      this.touchDragSwimlaneClone.setCssProps({ '--clone-width': `${labelEl.clientWidth}px` });
       document.body.appendChild(this.touchDragSwimlaneClone);
     }
 
@@ -1885,7 +1736,7 @@ export class BasesKanbanView extends BasesView {
     const swimlaneKeys: string[] = [];
     for (const group of this.data.groupedData) {
       for (const entry of group.entries) {
-        const value = entry.getValue(swimlaneBy as BasesPropertyId);
+        const value = this.getEntryValue(entry, swimlaneBy);
         const key = this.valueToString(value);
         if (!swimlaneKeys.includes(key)) {
           swimlaneKeys.push(key);
@@ -1934,10 +1785,9 @@ export class BasesKanbanView extends BasesView {
     const BUFFER_SIZE = 5; // Cards to render above/below viewport
     const ESTIMATED_CARD_HEIGHT = 100; // px - used for placeholder sizing
 
-    // Create a wrapper to hold placeholders and cards
+    // Create a wrapper to hold placeholders and cards (CSS class handles position)
     const wrapper = document.createElement('div');
     wrapper.className = 'planner-kanban-virtual-wrapper';
-    wrapper.style.cssText = 'position: relative;';
 
     // Create placeholder elements for all entries
     const placeholders: HTMLElement[] = [];
@@ -1946,7 +1796,8 @@ export class BasesKanbanView extends BasesView {
       placeholder.className = 'planner-kanban-card-placeholder';
       placeholder.setAttribute('data-index', String(index));
       placeholder.setAttribute('data-path', entry.file.path);
-      placeholder.style.cssText = `min-height: ${ESTIMATED_CARD_HEIGHT}px;`;
+      // Dynamic min-height for virtual scrolling placeholder sizing
+      placeholder.setCssProps({ '--placeholder-height': `${ESTIMATED_CARD_HEIGHT}px` });
       placeholders.push(placeholder);
       wrapper.appendChild(placeholder);
     });
@@ -1977,9 +1828,8 @@ export class BasesKanbanView extends BasesView {
                 const card = this.createCard(entry);
                 const targetPlaceholder = placeholders[i];
 
-                // Replace placeholder content with actual card
-                targetPlaceholder.innerHTML = '';
-                targetPlaceholder.style.minHeight = '';
+                // Replace placeholder content with actual card (CSS class handles min-height reset)
+                targetPlaceholder.empty();
                 targetPlaceholder.appendChild(card);
                 targetPlaceholder.classList.add('planner-kanban-card-rendered');
               }
@@ -2021,60 +1871,50 @@ export class BasesKanbanView extends BasesView {
     const color = this.getEntryColor(entry);
     const borderStyle = this.getBorderStyle();
 
-    // Base card styles
-    let cardStyles = `
-      background: var(--background-primary);
-      border-radius: 6px;
-      cursor: pointer;
-      transition: box-shadow 0.15s ease;
-      overflow: hidden;
-    `;
-
-    // Apply border style
+    // Apply base card styles and border variant via CSS classes
+    card.classList.add('planner-kanban-card-base');
     if (borderStyle === 'left-accent') {
-      cardStyles += `border-left: 4px solid ${color};`;
+      card.classList.add('planner-kanban-card-base--left-accent');
+      card.setCssProps({ '--card-accent-color': color });
     } else if (borderStyle === 'full-border') {
-      cardStyles += `border: 2px solid ${color};`;
+      card.classList.add('planner-kanban-card-base--full-border');
+      card.setCssProps({ '--card-accent-color': color });
     } else {
-      cardStyles += `border: 1px solid var(--background-modifier-border);`;
+      card.classList.add('planner-kanban-card-base--default-border');
     }
-
-    card.style.cssText = cardStyles;
 
     // Cover image
     const coverField = this.getCoverField();
     const coverDisplay = this.getCoverDisplay();
     if (coverField && coverDisplay !== 'none') {
-      const coverValue = entry.getValue(coverField as BasesPropertyId);
+      const coverValue = this.getEntryValue(entry, coverField);
       if (coverValue) {
-        this.renderCover(card, String(coverValue), coverDisplay);
+        this.renderCover(card, this.valueToString(coverValue), coverDisplay);
       }
     }
 
-    // Card content container
+    // Card content container (CSS class handles padding)
     const content = card.createDiv({ cls: 'planner-kanban-card-content' });
-    content.style.padding = '12px';
 
     const placement = this.getBadgePlacement();
 
-    // Title row (may include inline badges)
-    const titleRow = content.createDiv({ cls: 'planner-kanban-card-title-row' });
-    if (placement === 'inline') {
-      titleRow.style.cssText = 'display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-bottom: 4px;';
-    }
+    // Title row (may include inline badges - CSS class handles inline layout)
+    const titleRowCls = placement === 'inline'
+      ? 'planner-kanban-card-title-row planner-kanban-card-title-row--inline'
+      : 'planner-kanban-card-title-row';
+    const titleRow = content.createDiv({ cls: titleRowCls });
 
-    // Title
+    // Title (CSS class handles font-weight)
     const titleField = this.getTitleBy();
-    const title = entry.getValue(titleField as BasesPropertyId) || entry.file.basename;
-    const titleEl = titleRow.createSpan({ cls: 'planner-kanban-card-title', text: String(title) });
-    titleEl.style.cssText = 'font-weight: 500;';
+    const title = this.getEntryValue(entry, titleField) || entry.file.basename;
+    titleRow.createSpan({ cls: 'planner-kanban-card-title', text: this.valueToString(title) });
 
     // For inline placement, render badges in title row
     if (placement === 'inline') {
       this.renderBadges(titleRow, entry);
     }
 
-    // Summary - only show if configured and visible
+    // Summary - only show if configured and visible (CSS class handles all styles)
     const summaryField = this.getSummaryField();
     const visibleProps = this.getVisibleProperties();
     const summaryFieldProp = summaryField ? summaryField.replace(/^note\./, '') : 'summary';
@@ -2086,19 +1926,9 @@ export class BasesKanbanView extends BasesView {
 
     if (isSummaryVisible) {
       const summarySource = summaryField || 'note.summary';
-      const summary = entry.getValue(summarySource as BasesPropertyId);
+      const summary = this.getEntryValue(entry, summarySource);
       if (summary && summary !== 'null' && summary !== null) {
-        const summaryEl = content.createDiv({ cls: 'planner-kanban-card-summary', text: String(summary) });
-        summaryEl.style.cssText = `
-          font-size: 12px;
-          color: var(--text-muted);
-          overflow: hidden;
-          text-overflow: ellipsis;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          margin-top: 4px;
-        `;
+        content.createDiv({ cls: 'planner-kanban-card-summary', text: this.valueToString(summary) });
       }
     }
 
@@ -2111,7 +1941,7 @@ export class BasesKanbanView extends BasesView {
     this.setupCardDragHandlers(card, entry);
 
     // Click handler
-    card.addEventListener('click', () => this.handleCardClick(entry));
+    card.addEventListener('click', () => { void this.handleCardClick(entry); });
 
     return card;
   }
@@ -2123,67 +1953,42 @@ export class BasesKanbanView extends BasesView {
       return; // Don't render cover if image path can't be resolved
     }
 
-    const coverEl = card.createDiv({ cls: 'planner-kanban-card-cover' });
     const coverHeight = this.getCoverHeight();
 
     // Create actual img element - works better with Obsidian's resource paths
-    const img = coverEl.createEl('img');
-    img.src = imgSrc;
-    img.alt = '';
-
     if (display === 'banner') {
-      coverEl.style.cssText = `
-        width: 100%;
-        height: ${coverHeight}px;
-        overflow: hidden;
-      `;
-      img.style.cssText = `
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        object-position: center;
-        display: block;
-      `;
+      const coverEl = card.createDiv({ cls: 'planner-kanban-card-cover planner-kanban-cover--banner' });
+      // Dynamic cover height from user settings
+      coverEl.setCssProps({ '--cover-height': `${coverHeight}px` });
+      const img = coverEl.createEl('img');
+      img.src = imgSrc;
+      img.alt = '';
+      this.setupCoverErrorHandler(coverEl, img);
     } else if (display === 'thumbnail-left' || display === 'thumbnail-right') {
-      coverEl.style.cssText = `
-        width: 60px;
-        height: 60px;
-        flex-shrink: 0;
-        overflow: hidden;
-        border-radius: 4px;
-      `;
-      img.style.cssText = `
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        object-position: center;
-        display: block;
-      `;
-      // Adjust card layout for thumbnails
-      card.style.display = 'flex';
-      card.style.flexDirection = display === 'thumbnail-left' ? 'row' : 'row-reverse';
-      card.style.gap = '8px';
-      card.style.alignItems = 'flex-start';
+      const coverEl = card.createDiv({ cls: 'planner-kanban-card-cover planner-kanban-cover--thumbnail planner-kanban-cover--thumbnail-small' });
+      const img = coverEl.createEl('img');
+      img.src = imgSrc;
+      img.alt = '';
+      // Adjust card layout for thumbnails (CSS classes handle styles)
+      const thumbnailCls = display === 'thumbnail-left'
+        ? 'planner-kanban-card--thumbnail-left'
+        : 'planner-kanban-card--thumbnail-right';
+      card.addClass(thumbnailCls);
+      this.setupCoverErrorHandler(coverEl, img);
     } else if (display === 'background') {
-      coverEl.style.cssText = `
-        position: absolute;
-        inset: 0;
-        overflow: hidden;
-        pointer-events: none;
-      `;
-      img.style.cssText = `
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        object-position: center;
-        opacity: 0.2;
-      `;
-      card.style.position = 'relative';
+      const coverEl = card.createDiv({ cls: 'planner-kanban-card-cover planner-kanban-cover--background' });
+      const img = coverEl.createEl('img');
+      img.src = imgSrc;
+      img.alt = '';
+      card.addClass('planner-kanban-card--background-cover');
+      this.setupCoverErrorHandler(coverEl, img);
     }
+  }
 
+  private setupCoverErrorHandler(coverEl: HTMLElement, img: HTMLImageElement): void {
     // Handle image load errors - hide cover if image fails
     img.addEventListener('error', () => {
-      coverEl.style.display = 'none';
+      coverEl.addClass('planner-display-none');
     });
   }
 
@@ -2216,7 +2021,7 @@ export class BasesKanbanView extends BasesView {
     // Try direct path lookup first (works for absolute vault paths)
     const file = this.plugin.app.vault.getAbstractFileByPath(normalizedPath);
     if (file) {
-      return this.plugin.app.vault.getResourcePath(file as any);
+      return this.plugin.app.vault.getResourcePath(file as unknown);
     }
 
     // Try with common image extensions if no extension present
@@ -2225,7 +2030,7 @@ export class BasesKanbanView extends BasesView {
       for (const ext of ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg']) {
         const fileWithExt = this.plugin.app.vault.getAbstractFileByPath(normalizedPath + ext);
         if (fileWithExt) {
-          return this.plugin.app.vault.getResourcePath(fileWithExt as any);
+          return this.plugin.app.vault.getResourcePath(fileWithExt as unknown);
         }
       }
     }
@@ -2258,23 +2063,11 @@ export class BasesKanbanView extends BasesView {
       cls: `planner-kanban-badges planner-kanban-badges--${placement}`
     });
 
+    // CSS classes handle badge container layout based on placement
     if (placement === 'inline') {
-      badgeContainer.style.cssText = `
-        display: inline-flex;
-        flex-wrap: wrap;
-        gap: 4px;
-        margin-left: 8px;
-        vertical-align: middle;
-      `;
+      badgeContainer.classList.add('planner-kanban-badges--inline');
     } else {
-      badgeContainer.style.cssText = `
-        display: flex;
-        flex-wrap: wrap;
-        gap: 4px;
-        margin-top: 8px;
-        padding-top: 8px;
-        border-top: 1px solid var(--background-modifier-border);
-      `;
+      badgeContainer.classList.add('planner-kanban-badges--bottom');
     }
 
     // Helper to check if a property is visible
@@ -2284,31 +2077,33 @@ export class BasesKanbanView extends BasesView {
 
     // Status badge (skip if grouping by status)
     if (groupByProp !== 'status' && isVisible('status')) {
-      const status = entry.getValue('note.status' as BasesPropertyId);
+      const status = this.getEntryValue(entry, 'note.status');
       if (status) {
-        const config = getStatusConfig(this.plugin.settings, String(status));
+        const statusStr = this.valueToString(status);
+        const config = getStatusConfig(this.plugin.settings, statusStr);
         if (config) {
-          this.createBadge(badgeContainer, String(status), config.color, config.icon);
+          this.createBadge(badgeContainer, statusStr, config.color, config.icon);
         }
       }
     }
 
     // Priority badge (skip if grouping by priority)
     if (groupByProp !== 'priority' && isVisible('priority')) {
-      const priority = entry.getValue('note.priority' as BasesPropertyId);
+      const priority = this.getEntryValue(entry, 'note.priority');
       if (priority) {
-        const config = getPriorityConfig(this.plugin.settings, String(priority));
+        const priorityStr = this.valueToString(priority);
+        const config = getPriorityConfig(this.plugin.settings, priorityStr);
         if (config) {
-          this.createBadge(badgeContainer, String(priority), config.color, config.icon);
+          this.createBadge(badgeContainer, priorityStr, config.color, config.icon);
         }
       }
     }
 
     // Calendar badge (skip if grouping by calendar)
     if (groupByProp !== 'calendar' && isVisible('calendar')) {
-      const calendar = entry.getValue('note.calendar' as BasesPropertyId);
+      const calendar = this.getEntryValue(entry, 'note.calendar');
       if (calendar) {
-        const calendarName = Array.isArray(calendar) ? calendar[0] : String(calendar);
+        const calendarName = this.valueToString(Array.isArray(calendar) ? calendar[0] : calendar);
         const color = getCalendarColor(this.plugin.settings, calendarName);
         this.createBadge(badgeContainer, calendarName, color);
       }
@@ -2316,9 +2111,9 @@ export class BasesKanbanView extends BasesView {
 
     // Recurrence badge
     if (isVisible('repeat_frequency')) {
-      const repeatFreq = entry.getValue('note.repeat_frequency' as BasesPropertyId);
+      const repeatFreq = this.getEntryValue(entry, 'note.repeat_frequency');
       if (repeatFreq) {
-        this.createBadge(badgeContainer, String(repeatFreq), '#6c71c4', 'repeat');
+        this.createBadge(badgeContainer, this.valueToString(repeatFreq), '#6c71c4', 'repeat');
       }
     }
 
@@ -2329,14 +2124,14 @@ export class BasesKanbanView extends BasesView {
     const dateEndProp = dateEndField.replace(/^note\./, '');
 
     if (isVisible(dateStartProp)) {
-      const dateStart = entry.getValue(dateStartField as BasesPropertyId);
+      const dateStart = this.getEntryValue(entry, dateStartField);
       if (dateStart) {
         this.createDateBadge(badgeContainer, dateStart, 'calendar');
       }
     }
 
     if (isVisible(dateEndProp)) {
-      const dateEnd = entry.getValue(dateEndField as BasesPropertyId);
+      const dateEnd = this.getEntryValue(entry, dateEndField);
       if (dateEnd) {
         this.createDateBadge(badgeContainer, dateEnd, 'calendar-check');
       }
@@ -2354,38 +2149,33 @@ export class BasesKanbanView extends BasesView {
       const coverField = this.getCoverField();
       if (coverField && propId === coverField) continue;
 
-      const value = entry.getValue(propId as BasesPropertyId);
+      const value = this.getEntryValue(entry, propId);
       // Skip null, undefined, empty, and "null" string values
       if (value === null || value === undefined || value === '' || value === 'null') continue;
 
       // Render as generic badge
-      const displayValue = Array.isArray(value) ? value.filter(v => v && v !== 'null').join(', ') : String(value);
-      if (displayValue && displayValue !== 'null') {
+      const displayValue = Array.isArray(value)
+        ? value.filter(v => v && v !== 'null').map(v => this.valueToString(v)).join(', ')
+        : this.valueToString(value);
+      if (displayValue && displayValue !== 'null' && displayValue !== 'None') {
         this.createGenericBadge(badgeContainer, propName, displayValue);
       }
     }
 
-    // Hide empty badge container
+    // Hide empty badge container (use CSS class)
     if (badgeContainer.childElementCount === 0) {
-      badgeContainer.style.display = 'none';
+      badgeContainer.addClass('planner-display-none');
     }
   }
 
   private createBadge(container: HTMLElement, text: string, color: string, icon?: string): void {
     const badge = container.createSpan({ cls: 'planner-badge planner-kanban-badge' });
-    badge.style.cssText = `
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
-      padding: 2px 6px;
-      border-radius: 10px;
-      font-size: 10px;
-      font-weight: 500;
-      background-color: ${color};
-      color: ${this.getContrastColor(color)};
-      line-height: 1.2;
-      max-height: 18px;
-    `;
+    // Dynamic color from user config - use setCssProps for background, inline for computed text color
+    badge.setCssProps({ '--badge-bg': color });
+     
+    badge.style.backgroundColor = color;
+     
+    badge.style.color = this.getContrastColor(color);
 
     if (icon) {
       const iconEl = badge.createSpan({ cls: 'planner-kanban-badge-icon' });
@@ -2399,20 +2189,8 @@ export class BasesKanbanView extends BasesView {
     const dateStr = this.formatDate(value);
     if (!dateStr) return;
 
-    const badge = container.createSpan({ cls: 'planner-badge planner-badge-date planner-kanban-badge' });
-    badge.style.cssText = `
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
-      padding: 2px 6px;
-      border-radius: 10px;
-      font-size: 10px;
-      font-weight: 500;
-      background-color: var(--interactive-accent);
-      color: var(--text-on-accent);
-      line-height: 1.2;
-      max-height: 18px;
-    `;
+    // CSS class handles all styles for date badge
+    const badge = container.createSpan({ cls: 'planner-badge planner-kanban-badge planner-kanban-badge-date' });
 
     const iconEl = badge.createSpan({ cls: 'planner-kanban-badge-icon' });
     setIcon(iconEl, icon);
@@ -2421,20 +2199,8 @@ export class BasesKanbanView extends BasesView {
   }
 
   private createGenericBadge(container: HTMLElement, label: string, value: string): void {
+    // CSS class handles all styles for generic badge
     const badge = container.createSpan({ cls: 'planner-badge planner-kanban-badge planner-kanban-badge-generic' });
-    badge.style.cssText = `
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
-      padding: 2px 6px;
-      border-radius: 10px;
-      font-size: 10px;
-      font-weight: 500;
-      background-color: var(--background-modifier-border);
-      color: var(--text-normal);
-      line-height: 1.2;
-      max-height: 18px;
-    `;
 
     // Truncate long values
     const displayValue = value.length > 20 ? value.substring(0, 18) + '…' : value;
@@ -2444,9 +2210,10 @@ export class BasesKanbanView extends BasesView {
 
   private formatDate(value: unknown): string | null {
     if (!value) return null;
+    if (typeof value !== 'string' && typeof value !== 'number' && !(value instanceof Date)) return null;
 
     try {
-      const date = new Date(String(value));
+      const date = value instanceof Date ? value : new Date(value);
       if (isNaN(date.getTime())) return null;
 
       // Format as short date
@@ -2501,11 +2268,19 @@ export class BasesKanbanView extends BasesView {
     const HOLD_DELAY_MS = 200; // Time finger must be held before drag is enabled
 
     card.addEventListener('touchstart', (e: TouchEvent) => {
+      // Clear any previous touch state (important after scrolling on iOS)
+      this.cancelTouchHold();
+
       this.touchStartX = e.touches[0].clientX;
       this.touchStartY = e.touches[0].clientY;
       this.touchHoldReady = false;
       this.touchHoldCard = card;
       this.touchHoldEntry = entry;
+
+      // CRITICAL: Set touch-action: none IMMEDIATELY to prevent iOS from committing to scroll.
+      // iOS decides touch behavior at touchstart based on CSS at that moment.
+      // If user moves before hold completes, we remove this class in cancelTouchHold().
+      card.classList.add('planner-kanban-card--touch-active');
 
       // Start hold timer - drag only enabled after delay
       this.touchHoldTimer = window.setTimeout(() => {
@@ -2525,13 +2300,18 @@ export class BasesKanbanView extends BasesView {
         return; // Allow default scroll behavior
       }
 
-      // Only start drag if hold delay completed and we're not already dragging
+      // Once hold-ready, ALWAYS prevent default to stop iOS from committing to scroll
+      // This must happen on every touchmove, not just when movement threshold is met
+      if (this.touchHoldReady) {
+        e.preventDefault();
+      }
+
+      // Start drag if hold delay completed, not already dragging, and moved enough
       if (this.touchHoldReady && !this.touchDragCard && !this.touchDragClone) {
         if (dx > 10 || dy > 10) {
           this.startTouchDrag(card, entry, e);
         }
       } else if (this.touchDragClone) {
-        e.preventDefault();
         this.updateTouchDrag(e);
       }
     }, { passive: false });
@@ -2546,17 +2326,25 @@ export class BasesKanbanView extends BasesView {
     card.addEventListener('touchcancel', () => {
       this.cancelTouchHold();
       if (this.touchDragCard) {
+        const doc = this.containerEl.ownerDocument;
+        // Remove context menu blocker
+        doc.removeEventListener('contextmenu', this.boundContextMenuBlocker, true);
         // Clean up drag state on cancel
         if (this.touchDragClone) {
           this.touchDragClone.remove();
           this.touchDragClone = null;
         }
         if (this.touchDragCard) {
+          // Remove all drag-related classes
           this.touchDragCard.classList.remove('planner-kanban-card--dragging');
+          this.touchDragCard.classList.remove('planner-kanban-card--hold-ready');
+          this.touchDragCard.classList.remove('planner-kanban-card--touch-active');
           this.touchDragCard = null;
         }
         this.draggedCardPath = null;
         this.draggedFromColumn = null;
+        this.lastTouchX = 0;
+        this.lastTouchY = 0;
         this.stopAutoScroll();
       }
     });
@@ -2569,6 +2357,8 @@ export class BasesKanbanView extends BasesView {
     }
     if (this.touchHoldCard) {
       this.touchHoldCard.classList.remove('planner-kanban-card--hold-ready');
+      // Restore touch-action to allow normal scrolling
+      this.touchHoldCard.classList.remove('planner-kanban-card--touch-active');
     }
     this.touchHoldReady = false;
     this.touchHoldCard = null;
@@ -2576,24 +2366,25 @@ export class BasesKanbanView extends BasesView {
   }
 
   private startTouchDrag(card: HTMLElement, entry: BasesEntry, e: TouchEvent): void {
+    const doc = this.containerEl.ownerDocument;
+
     this.touchDragCard = card;
     this.draggedCardPath = entry.file.path;
     this.draggedFromColumn = card.closest('.planner-kanban-column')?.getAttribute('data-group') ||
                              card.closest('.planner-kanban-swimlane-cell')?.getAttribute('data-group') || null;
 
+    // Block context menu during drag (critical for iOS long-press)
+    doc.addEventListener('contextmenu', this.boundContextMenuBlocker, true);
+
     // Create a clone for visual feedback
     this.touchDragClone = card.cloneNode(true) as HTMLElement;
-    this.touchDragClone.style.cssText = `
-      position: fixed;
-      pointer-events: none;
-      z-index: 1000;
-      opacity: 0.8;
-      transform: rotate(2deg) scale(1.02);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      width: ${card.offsetWidth}px;
-    `;
-    document.body.appendChild(this.touchDragClone);
+    this.touchDragClone.className = 'planner-kanban-drag-clone';
+    this.touchDragClone.setCssProps({ '--clone-width': `${card.offsetWidth}px` });
+    doc.body.appendChild(this.touchDragClone);
 
+    // Remove hold-ready class (has touch-action: none which must not persist)
+    // and add dragging class
+    card.classList.remove('planner-kanban-card--hold-ready');
     card.classList.add('planner-kanban-card--dragging');
 
     this.updateTouchDrag(e);
@@ -2606,6 +2397,10 @@ export class BasesKanbanView extends BasesView {
     this.touchDragClone.style.left = `${touch.clientX - 50}px`;
     this.touchDragClone.style.top = `${touch.clientY - 20}px`;
 
+    // Store last touch position for iOS fallback (touchend coordinates can be unreliable)
+    this.lastTouchX = touch.clientX;
+    this.lastTouchY = touch.clientY;
+
     // Handle edge scrolling
     this.handleEdgeScroll(touch.clientX, touch.clientY);
 
@@ -2614,7 +2409,25 @@ export class BasesKanbanView extends BasesView {
   }
 
   private endTouchDrag(e: TouchEvent): void {
+    const doc = this.containerEl.ownerDocument;
+
     this.stopAutoScroll();
+
+    // Remove context menu blocker
+    doc.removeEventListener('contextmenu', this.boundContextMenuBlocker, true);
+
+    // Find drop target BEFORE removing clone (iOS Safari needs this timing)
+    // The clone has pointer-events: none, so elementFromPoint sees through it
+    let dropTarget: { group: string; swimlane?: string } | null = null;
+    if (this.touchDragCard) {
+      const touch = e.changedTouches[0];
+      // Try touchend coordinates first, fall back to last stored position from touchmove
+      // (iOS touchend coordinates can be unreliable)
+      dropTarget = this.findDropTarget(touch.clientX, touch.clientY);
+      if (!dropTarget && (this.lastTouchX !== 0 || this.lastTouchY !== 0)) {
+        dropTarget = this.findDropTarget(this.lastTouchX, this.lastTouchY);
+      }
+    }
 
     if (this.touchDragClone) {
       this.touchDragClone.remove();
@@ -2622,14 +2435,13 @@ export class BasesKanbanView extends BasesView {
     }
 
     if (this.touchDragCard) {
+      // Remove all drag-related classes
       this.touchDragCard.classList.remove('planner-kanban-card--dragging');
-
-      // Find drop target
-      const touch = e.changedTouches[0];
-      const dropTarget = this.findDropTarget(touch.clientX, touch.clientY);
+      this.touchDragCard.classList.remove('planner-kanban-card--hold-ready');
+      this.touchDragCard.classList.remove('planner-kanban-card--touch-active');
 
       if (dropTarget && this.draggedCardPath) {
-        this.handleCardDrop(this.draggedCardPath, dropTarget.group, dropTarget.swimlane);
+        void this.handleCardDrop(this.draggedCardPath, dropTarget.group, dropTarget.swimlane);
       }
 
       this.touchDragCard = null;
@@ -2637,9 +2449,11 @@ export class BasesKanbanView extends BasesView {
 
     this.draggedCardPath = null;
     this.draggedFromColumn = null;
+    this.lastTouchX = 0;
+    this.lastTouchY = 0;
 
     // Clear all dragover highlights
-    document.querySelectorAll('.planner-kanban-cards--dragover').forEach(el => {
+    doc.querySelectorAll('.planner-kanban-cards--dragover').forEach(el => {
       el.classList.remove('planner-kanban-cards--dragover');
     });
   }
@@ -2709,13 +2523,22 @@ export class BasesKanbanView extends BasesView {
   }
 
   private highlightDropTarget(clientX: number, clientY: number): void {
+    const doc = this.containerEl.ownerDocument;
+
     // Clear previous highlights
-    document.querySelectorAll('.planner-kanban-cards--dragover').forEach(el => {
+    doc.querySelectorAll('.planner-kanban-cards--dragover').forEach(el => {
       el.classList.remove('planner-kanban-cards--dragover');
     });
 
+    // Hide ghost before elementFromPoint (critical for iOS Safari)
+    if (this.touchDragClone) this.touchDragClone.classList.add('planner-kanban-drag-clone--hidden');
+
     // Find and highlight current target
-    const target = document.elementFromPoint(clientX, clientY);
+    const target = doc.elementFromPoint(clientX, clientY);
+
+    // Restore ghost visibility
+    if (this.touchDragClone) this.touchDragClone.classList.remove('planner-kanban-drag-clone--hidden');
+
     const dropZone = target?.closest('.planner-kanban-cards, .planner-kanban-swimlane-cell');
     if (dropZone) {
       dropZone.classList.add('planner-kanban-cards--dragover');
@@ -2723,7 +2546,16 @@ export class BasesKanbanView extends BasesView {
   }
 
   private findDropTarget(clientX: number, clientY: number): { group: string; swimlane?: string } | null {
-    const target = document.elementFromPoint(clientX, clientY);
+    const doc = this.containerEl.ownerDocument;
+
+    // Hide ghost before elementFromPoint (critical for iOS Safari)
+    if (this.touchDragClone) this.touchDragClone.classList.add('planner-kanban-drag-clone--hidden');
+
+    const target = doc.elementFromPoint(clientX, clientY);
+
+    // Restore ghost visibility
+    if (this.touchDragClone) this.touchDragClone.classList.remove('planner-kanban-drag-clone--hidden');
+
     const dropZone = target?.closest('.planner-kanban-cards, .planner-kanban-swimlane-cell, .planner-kanban-column');
     const group = dropZone?.getAttribute('data-group');
     if (!group) return null;
@@ -2742,12 +2574,12 @@ export class BasesKanbanView extends BasesView {
       container.classList.remove('planner-kanban-cards--dragover');
     });
 
-    container.addEventListener('drop', async (e: DragEvent) => {
+    container.addEventListener('drop', (e: DragEvent) => {
       e.preventDefault();
       container.classList.remove('planner-kanban-cards--dragover');
 
       if (this.draggedCardPath) {
-        await this.handleCardDrop(this.draggedCardPath, groupKey, swimlaneKey);
+        void this.handleCardDrop(this.draggedCardPath, groupKey, swimlaneKey);
       }
     });
   }
@@ -2793,9 +2625,9 @@ export class BasesKanbanView extends BasesView {
 
       if (needsFrontmatterUpdate) {
         const fileToUpdate = this.plugin.app.vault.getAbstractFileByPath(newFilePath);
-        if (!fileToUpdate) return;
+        if (!(fileToUpdate instanceof TFile)) return;
 
-        await this.plugin.app.fileManager.processFrontMatter(fileToUpdate as TFile, (fm) => {
+        await this.plugin.app.fileManager.processFrontMatter(fileToUpdate, (fm: Record<string, unknown>) => {
           // Update groupBy field (if not folder)
           if (!isFolderGroupBy) {
             fm[fieldName] = this.convertValueForField(fieldName, newGroupValue);
@@ -2871,7 +2703,7 @@ export class BasesKanbanView extends BasesView {
   private async handleCardClick(entry: BasesEntry): Promise<void> {
     const item = await this.plugin.itemService.getItem(entry.file.path);
     if (item) {
-      openItemModal(this.plugin, { mode: 'edit', item });
+      void openItemModal(this.plugin, { mode: 'edit', item });
     } else {
       // Fallback: open the file
       const leaf = this.plugin.app.workspace.getLeaf();

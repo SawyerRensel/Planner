@@ -1,6 +1,7 @@
 import { Menu } from 'obsidian';
 import type PlannerPlugin from '../../main';
 import { isOngoing, ONGOING_KEYWORD } from '../../utils/dateUtils';
+import { DateTimePickerModal } from '../DateTimePickerModal';
 
 export interface DateContextMenuOptions {
   currentValue: string | null;
@@ -44,7 +45,7 @@ export class DateContextMenu {
     this.menu.addItem((item) => {
       item.setTitle('Weekdays');
       item.setIcon('calendar-days');
-      const submenu = (item as any).setSubmenu();
+      const submenu = (item as { setSubmenu: () => Menu }).setSubmenu();
       this.addWeekdaySubmenu(submenu);
     });
 
@@ -160,66 +161,29 @@ export class DateContextMenu {
   }
 
   private showDateTimePicker(): void {
-    // Create a simple date/time picker modal
-    const modal = document.createElement('div');
-    modal.className = 'planner-datetime-picker-overlay';
-    modal.innerHTML = `
-      <div class="planner-datetime-picker">
-        <h3>Pick date & time</h3>
-        <div class="planner-datetime-inputs">
-          <label>
-            Date
-            <input type="date" class="planner-date-input" />
-          </label>
-          <label>
-            Time (optional)
-            <input type="time" class="planner-time-input" />
-          </label>
-        </div>
-        <div class="planner-datetime-buttons">
-          <button class="planner-btn" data-action="cancel">Cancel</button>
-          <button class="planner-btn planner-btn-primary" data-action="confirm">Confirm</button>
-        </div>
-      </div>
-    `;
+    // Parse current value to extract date and time parts
+    let currentDate: string | null = null;
+    let currentTime: string | null = null;
 
-    const dateInput = modal.querySelector('.planner-date-input') as HTMLInputElement;
-    const timeInput = modal.querySelector('.planner-time-input') as HTMLInputElement;
-
-    // Pre-fill with current value if exists (skip if "ongoing")
     if (this.options.currentValue && !isOngoing(this.options.currentValue)) {
       const current = new Date(this.options.currentValue);
-      dateInput.value = this.formatDateForInput(current);
-      timeInput.value = this.formatTimeForInput(current);
-    } else {
-      dateInput.value = this.formatDateForInput(new Date());
+      currentDate = this.formatDateForInput(current);
+      currentTime = this.formatTimeForInput(current);
     }
 
-    modal.querySelector('[data-action="cancel"]')?.addEventListener('click', () => {
-      modal.remove();
-    });
-
-    modal.querySelector('[data-action="confirm"]')?.addEventListener('click', () => {
-      if (dateInput.value) {
-        let dateStr = dateInput.value;
-        if (timeInput.value) {
-          dateStr += `T${timeInput.value}:00`;
-        } else {
-          dateStr += 'T00:00:00';
+    // Use Obsidian's Modal class for better iOS compatibility
+    const modal = new DateTimePickerModal(this.options.plugin, {
+      currentDate,
+      currentTime,
+      title: 'Pick date & time',
+      onSelect: (isoDateTime) => {
+        if (isoDateTime) {
+          this.options.onSelect(isoDateTime);
         }
-        this.options.onSelect(new Date(dateStr).toISOString());
-      }
-      modal.remove();
-    });
-
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
-        modal.remove();
       }
     });
 
-    document.body.appendChild(modal);
-    dateInput.focus();
+    modal.open();
   }
 
   // Date utility methods

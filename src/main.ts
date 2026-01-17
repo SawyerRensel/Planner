@@ -51,20 +51,20 @@ export default class PlannerPlugin extends Plugin {
     this.registerCommands();
 
     // Add ribbon icons
-    this.addRibbonIcon('list-checks', 'Open Planner Task List', () => {
-      this.activateTaskListView();
+    this.addRibbonIcon('list-checks', 'Open Planner task list', () => {
+      void this.activateTaskListView();
     });
 
-    this.addRibbonIcon('calendar-range', 'Open Planner Calendar', () => {
-      this.activateCalendarView();
+    this.addRibbonIcon('calendar-range', 'Open Planner calendar', () => {
+      void this.activateCalendarView();
     });
 
-    this.addRibbonIcon('square-chart-gantt', 'Open Planner Timeline', () => {
-      this.activateTimelineView();
+    this.addRibbonIcon('square-chart-gantt', 'Open Planner timeline', () => {
+      void this.activateTimelineView();
     });
 
-    this.addRibbonIcon('square-kanban', 'Open Planner Kanban', () => {
-      this.activateKanbanView();
+    this.addRibbonIcon('square-kanban', 'Open Planner kanban', () => {
+      void this.activateKanbanView();
     });
   }
 
@@ -73,29 +73,28 @@ export default class PlannerPlugin extends Plugin {
    */
   private registerBasesViews(): void {
     // Register Task List view for Bases
-    const taskListRegistered = this.registerBasesView(
+    this.registerBasesView(
       BASES_TASK_LIST_VIEW_ID,
       createTaskListViewRegistration(this)
     );
 
     // Register Calendar view for Bases
-    const calendarRegistered = this.registerBasesView(
+    this.registerBasesView(
       BASES_CALENDAR_VIEW_ID,
       createCalendarViewRegistration(this)
     );
 
     // Register Timeline view for Bases
-    const timelineRegistered = this.registerBasesView(
+    this.registerBasesView(
       BASES_TIMELINE_VIEW_ID,
       createTimelineViewRegistration(this)
     );
 
     // Register Kanban view for Bases
-    const kanbanRegistered = this.registerBasesView(
+    this.registerBasesView(
       BASES_KANBAN_VIEW_ID,
       createKanbanViewRegistration(this)
     );
-
   }
 
   onunload() {
@@ -103,12 +102,12 @@ export default class PlannerPlugin extends Plugin {
   }
 
   async loadSettings() {
-    const loadedData = await this.loadData();
+    const loadedData = await this.loadData() as Partial<PlannerSettings & { calendarColors?: Record<string, string> }> | null;
     this.settings = Object.assign({}, DEFAULT_SETTINGS, loadedData);
 
     // Migrate old calendarColors format to new calendars format
     if (loadedData?.calendarColors && !loadedData?.calendars) {
-      const oldCalendarColors = loadedData.calendarColors as Record<string, string>;
+      const oldCalendarColors = loadedData.calendarColors;
       this.settings.calendars = {};
       for (const [name, color] of Object.entries(oldCalendarColors)) {
         // Only migrate if value is a string (old format)
@@ -131,7 +130,7 @@ export default class PlannerPlugin extends Plugin {
       id: 'open-task-list',
       name: 'Open task list view',
       callback: () => {
-        this.activateTaskListView();
+        void this.activateTaskListView();
       },
     });
 
@@ -140,7 +139,7 @@ export default class PlannerPlugin extends Plugin {
       id: 'open-calendar',
       name: 'Open calendar view',
       callback: () => {
-        this.activateCalendarView();
+        void this.activateCalendarView();
       },
     });
 
@@ -149,7 +148,7 @@ export default class PlannerPlugin extends Plugin {
       id: 'open-timeline',
       name: 'Open timeline view',
       callback: () => {
-        this.activateTimelineView();
+        void this.activateTimelineView();
       },
     });
 
@@ -158,7 +157,7 @@ export default class PlannerPlugin extends Plugin {
       id: 'open-kanban',
       name: 'Open kanban view',
       callback: () => {
-        this.activateKanbanView();
+        void this.activateKanbanView();
       },
     });
 
@@ -167,7 +166,7 @@ export default class PlannerPlugin extends Plugin {
       id: 'create-item',
       name: 'Create new item',
       callback: () => {
-        openItemModal(this, { mode: 'create' });
+        void openItemModal(this, { mode: 'create' });
       },
     });
 
@@ -176,14 +175,14 @@ export default class PlannerPlugin extends Plugin {
       id: 'quick-capture',
       name: 'Quick capture',
       callback: () => {
-        openItemModal(this, { mode: 'create' });
+        void openItemModal(this, { mode: 'create' });
       },
     });
 
     // Navigate to today in calendar
     this.addCommand({
       id: 'calendar-today',
-      name: 'Calendar: Go to today',
+      name: 'Calendar: go to today',
       callback: () => {
         // Dispatch custom event that calendar view listens for
         window.dispatchEvent(new CustomEvent('planner:calendar-today'));
@@ -193,7 +192,7 @@ export default class PlannerPlugin extends Plugin {
     // Navigate forward in calendar
     this.addCommand({
       id: 'calendar-next',
-      name: 'Calendar: Go to next period',
+      name: 'Calendar: go to next period',
       callback: () => {
         window.dispatchEvent(new CustomEvent('planner:calendar-next'));
       },
@@ -202,12 +201,11 @@ export default class PlannerPlugin extends Plugin {
     // Navigate backward in calendar
     this.addCommand({
       id: 'calendar-prev',
-      name: 'Calendar: Go to previous period',
+      name: 'Calendar: go to previous period',
       callback: () => {
         window.dispatchEvent(new CustomEvent('planner:calendar-prev'));
       },
     });
-
   }
 
   async activateTaskListView() {

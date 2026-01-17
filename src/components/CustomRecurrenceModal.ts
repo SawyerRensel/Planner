@@ -95,7 +95,7 @@ export class CustomRecurrenceModal extends Modal {
     contentEl.empty();
     contentEl.addClass('planner-custom-recurrence-modal');
 
-    contentEl.createEl('h2', { text: 'Custom Recurrence' });
+    contentEl.createEl('h2', { text: 'Custom recurrence' });
 
     // Frequency dropdown
     new Setting(contentEl).setName('Repeat').addDropdown((dropdown) => {
@@ -124,7 +124,7 @@ export class CustomRecurrenceModal extends Modal {
           });
         text.inputEl.type = 'number';
         text.inputEl.min = '1';
-        text.inputEl.style.width = '60px';
+        text.inputEl.addClass('planner-input-narrow');
       })
       .addExtraButton((btn) => {
         btn.setDisabled(true);
@@ -147,7 +147,8 @@ export class CustomRecurrenceModal extends Modal {
       .addDropdown((dropdown) => {
         dropdown
           .addOption('dayOfMonth', 'Day of month (e.g., the 15th)')
-          .addOption('nthWeekday', 'Day of week (e.g., second Sunday)')
+          // eslint-disable-next-line obsidianmd/ui/sentence-case -- "Second Sunday" is proper noun (day name pattern)
+          .addOption('nthWeekday', 'Day of week (e.g., Second Sunday)')
           .setValue(this.monthlyType)
           .onChange((value) => {
             this.monthlyType = value as 'dayOfMonth' | 'nthWeekday';
@@ -196,7 +197,7 @@ export class CustomRecurrenceModal extends Modal {
           });
         text.inputEl.type = 'number';
         text.inputEl.min = '1';
-        text.inputEl.style.width = '80px';
+        text.inputEl.addClass('planner-input-narrow');
       });
 
     // End until date
@@ -328,13 +329,13 @@ export class CustomRecurrenceModal extends Modal {
     if (this.byDayContainer) {
       const byDaySetting = this.byDayContainer.closest('.setting-item') as HTMLElement;
       if (byDaySetting) {
-        byDaySetting.style.display = this.frequency === 'weekly' ? '' : 'none';
+        byDaySetting.toggleClass('planner-hidden', this.frequency !== 'weekly');
       }
     }
 
     // Show/hide monthly type toggle (monthly only)
     if (this.monthlyTypeSetting) {
-      this.monthlyTypeSetting.settingEl.style.display = this.frequency === 'monthly' ? '' : 'none';
+      this.monthlyTypeSetting.settingEl.toggleClass('planner-hidden', this.frequency !== 'monthly');
     }
 
     // Show/hide day of month and nth weekday based on frequency and monthly type
@@ -356,15 +357,13 @@ export class CustomRecurrenceModal extends Modal {
     if (this.byMonthDayContainer) {
       const byMonthDaySetting = this.byMonthDayContainer.closest('.setting-item') as HTMLElement;
       if (byMonthDaySetting) {
-        byMonthDaySetting.style.display =
-          isMonthly && this.monthlyType === 'dayOfMonth' ? '' : 'none';
+        byMonthDaySetting.toggleClass('planner-hidden', !(isMonthly && this.monthlyType === 'dayOfMonth'));
       }
     }
 
     // Show/hide nth weekday selector
     if (this.nthWeekdaySetting) {
-      this.nthWeekdaySetting.settingEl.style.display =
-        isMonthly && this.monthlyType === 'nthWeekday' ? '' : 'none';
+      this.nthWeekdaySetting.settingEl.toggleClass('planner-hidden', !(isMonthly && this.monthlyType === 'nthWeekday'));
     }
   }
 
@@ -376,10 +375,10 @@ export class CustomRecurrenceModal extends Modal {
 
   private updateEndFields(): void {
     if (this.endCountSetting) {
-      this.endCountSetting.settingEl.style.display = this.endType === 'count' ? '' : 'none';
+      this.endCountSetting.settingEl.toggleClass('planner-hidden', this.endType !== 'count');
     }
     if (this.endUntilSetting) {
-      this.endUntilSetting.settingEl.style.display = this.endType === 'until' ? '' : 'none';
+      this.endUntilSetting.settingEl.toggleClass('planner-hidden', this.endType !== 'until');
     }
   }
 

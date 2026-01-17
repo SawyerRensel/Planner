@@ -5,8 +5,65 @@ import {
   BasesPropertyId,
   QueryController,
   setIcon,
+  App,
+  TFile,
 } from 'obsidian';
-import { Calendar, EventInput, EventClickArg, DateSelectArg } from '@fullcalendar/core';
+import { Calendar, EventInput, EventClickArg, DateSelectArg, EventDropArg } from '@fullcalendar/core';
+
+/**
+ * Type interfaces for FullCalendar event handlers
+ */
+interface EventResizeArg {
+  event: {
+    start: Date | null;
+    end: Date | null;
+    extendedProps: { entry: BasesEntry };
+  };
+}
+
+/**
+ * Type interfaces for Obsidian's undocumented internal plugins API
+ */
+interface DailyNotesPluginOptions {
+  format?: string;
+  folder?: string;
+  template?: string;
+}
+
+interface DailyNotesPluginInstance {
+  options?: DailyNotesPluginOptions;
+}
+
+interface InternalPlugin {
+  enabled?: boolean;
+  instance?: DailyNotesPluginInstance;
+}
+
+interface InternalPluginsManager {
+  getPluginById?(id: string): InternalPlugin | undefined;
+}
+
+interface AppWithInternals extends App {
+  internalPlugins?: InternalPluginsManager;
+}
+
+/**
+ * Type interface for BasesView grouped data entries
+ */
+interface BasesGroupedData {
+  entries: BasesEntry[];
+  key?: unknown;
+  hasKey(): boolean;
+}
+
+/**
+ * Type interface for frontmatter date fields we modify
+ */
+interface ItemFrontmatter {
+  date_start_scheduled?: string;
+  date_end_scheduled?: string;
+  date_modified?: string;
+}
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
@@ -137,11 +194,9 @@ export class BasesCalendarView extends BasesView {
   private setupContainer(): void {
     this.containerEl.empty();
     this.containerEl.addClass('planner-bases-calendar');
-    this.containerEl.style.cssText = 'height: 100%; display: flex; flex-direction: column;';
 
     // Single calendar element - no separate toolbar
     this.calendarEl = this.containerEl.createDiv({ cls: 'planner-calendar-container' });
-    this.calendarEl.style.cssText = 'flex: 1; min-height: 500px; overflow: auto;';
   }
 
   private setupResizeObserver(): void {
@@ -176,7 +231,6 @@ export class BasesCalendarView extends BasesView {
     this.keyboardEventHandlers = [];
     // Clean up styles and classes added to the shared container
     this.containerEl.removeClass('planner-bases-calendar');
-    this.containerEl.style.cssText = '';
   }
 
   private render(): void {
@@ -324,20 +378,20 @@ export class BasesCalendarView extends BasesView {
       eventStartEditable: true,
       eventDurationEditable: true,
       navLinks: true, // Make day numbers clickable
-      navLinkDayClick: (date) => this.openDailyNote(date), // Click on day number opens daily note
+      navLinkDayClick: (date) => { void this.openDailyNote(date); }, // Click on day number opens daily note
       events: events,
-      eventClick: (info) => this.handleEventClick(info),
-      eventDrop: (info) => this.handleEventDrop(info),
-      eventResize: (info) => this.handleEventResize(info),
+      eventClick: (info) => { void this.handleEventClick(info); },
+      eventDrop: (info) => { void this.handleEventDrop(info); },
+      eventResize: (info) => { void this.handleEventResize(info); },
       select: (info) => this.handleDateSelect(info),
       dayHeaderDidMount: (arg) => {
         // Make day header clickable in day/week views to open daily note
         const el = arg.el;
-        el.style.cursor = 'pointer';
+        el.addClass('planner-cursor-pointer');
         el.addEventListener('click', (e) => {
           // Prevent if clicking on an actual nav link (already handled)
           if ((e.target as HTMLElement).closest('.fc-col-header-cell-cushion')) {
-            this.openDailyNote(arg.date);
+            void this.openDailyNote(arg.date);
           }
         });
       },
@@ -371,15 +425,15 @@ export class BasesCalendarView extends BasesView {
     // Set today button icon
     const todayBtn = this.calendarEl?.querySelector('.fc-todayButton-button');
     if (todayBtn) {
-      todayBtn.innerHTML = '';
-      setIcon(todayBtn as HTMLElement, 'square-split-horizontal');
+      todayBtn.empty();
+      setIcon(todayBtn, 'square-split-horizontal');
     }
 
     // Set refresh button icon
     const refreshBtn = this.calendarEl?.querySelector('.fc-refreshButton-button');
     if (refreshBtn) {
-      refreshBtn.innerHTML = '';
-      setIcon(refreshBtn as HTMLElement, 'refresh-ccw');
+      refreshBtn.empty();
+      setIcon(refreshBtn, 'refresh-ccw');
     }
 
     // Set initial active view button
@@ -422,9 +476,9 @@ export class BasesCalendarView extends BasesView {
   }
 
   private updateYearToggleButtonContent(): void {
-    const toggleBtn = this.calendarEl?.querySelector('.fc-yearToggleButton-button') as HTMLElement;
+    const toggleBtn = this.calendarEl?.querySelector('.fc-yearToggleButton-button') as HTMLElement | null;
     if (toggleBtn) {
-      toggleBtn.innerHTML = '';
+      toggleBtn.empty();
       // Use different icons for split vs continuous mode
       // layout-grid = split by month (⧉), align-justify = continuous scroll (☰)
       setIcon(toggleBtn, this.yearViewSplit ? 'layout-grid' : 'align-justify');
@@ -475,22 +529,23 @@ export class BasesCalendarView extends BasesView {
 
     // Collect all unique values
     const uniqueValues = new Set<string>();
-    for (const group of this.data.groupedData) {
+    const groupedData = this.data.groupedData as BasesGroupedData[];
+    for (const group of groupedData) {
       for (const entry of group.entries) {
         let value: unknown;
         if (colorByField === 'note.folder') {
           const folderPath = entry.file.parent?.path || '/';
           value = folderPath === '/' ? 'Root' : entry.file.parent?.name || 'Root';
         } else {
-          value = entry.getValue(colorByField as any);
+          value = entry.getValue(colorByField as BasesPropertyId);
         }
 
         if (value) {
           if (Array.isArray(value)) {
-            const firstVal = value[0]?.toString();
+            const firstVal = value[0] != null ? String(value[0]) : undefined;
             if (firstVal) uniqueValues.add(firstVal);
-          } else {
-            uniqueValues.add(value.toString());
+          } else if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+            uniqueValues.add(String(value));
           }
         }
       }
@@ -524,8 +579,9 @@ export class BasesCalendarView extends BasesView {
     rangeEnd.setFullYear(rangeEnd.getFullYear() + 1);
 
     const validFrequencies = ['daily', 'weekly', 'monthly', 'yearly'];
+    const groupedData = this.data.groupedData as BasesGroupedData[];
 
-    for (const group of this.data.groupedData) {
+    for (const group of groupedData) {
       for (const entry of group.entries) {
         // Get frontmatter directly from Obsidian's metadata cache
         const frontmatter = this.getFrontmatter(entry);
@@ -580,13 +636,13 @@ export class BasesCalendarView extends BasesView {
 
     // If using non-default date fields, try Bases getValue as fallback
     if (!dateStart && dateStartField !== 'note.date_start_scheduled') {
-      const basesValue = entry.getValue(dateStartField as any);
+      const basesValue = entry.getValue(dateStartField as unknown);
       if (this.isValidBasesValue(basesValue)) {
         dateStart = basesValue;
       }
     }
     if (!dateEnd && dateEndField !== 'note.date_end_scheduled') {
-      const basesValue = entry.getValue(dateEndField as any);
+      const basesValue = entry.getValue(dateEndField as unknown);
       if (this.isValidBasesValue(basesValue)) {
         dateEnd = basesValue;
       }
@@ -801,14 +857,14 @@ export class BasesCalendarView extends BasesView {
   private expandRecurringEntry(entry: BasesEntry, rangeStart: Date, rangeEnd: Date): EventInput[] {
     const colorByProp = this.getColorByField();
     const titleField = this.getTitleField();
-    const allDayValue = entry.getValue('note.all_day' as any);
+    const allDayValue = entry.getValue('note.all_day' as unknown);
 
     // Get title
     let title: string;
     if (titleField === 'file.basename') {
       title = entry.file.basename;
     } else {
-      const titleValue = entry.getValue(titleField as any);
+      const titleValue = entry.getValue(titleField as unknown);
       title = titleValue ? String(titleValue) : entry.file.basename || 'Untitled';
     }
 
@@ -912,9 +968,9 @@ export class BasesCalendarView extends BasesView {
     const dateEndField = this.getDateEndField();
     const titleField = this.getTitleField();
 
-    const dateStart = entry.getValue(dateStartField as any);
-    const dateEnd = entry.getValue(dateEndField as any);
-    const allDayValue = entry.getValue('note.all_day' as any);
+    const dateStart = entry.getValue(dateStartField as unknown);
+    const dateEnd = entry.getValue(dateEndField as unknown);
+    const allDayValue = entry.getValue('note.all_day' as unknown);
 
     // Must have a start date
     if (!dateStart) return null;
@@ -924,7 +980,7 @@ export class BasesCalendarView extends BasesView {
     if (titleField === 'file.basename') {
       title = entry.file.basename;
     } else {
-      const titleValue = entry.getValue(titleField as any);
+      const titleValue = entry.getValue(titleField as unknown);
       title = titleValue ? String(titleValue) : entry.file.basename || 'Untitled';
     }
 
@@ -967,7 +1023,7 @@ export class BasesCalendarView extends BasesView {
     if (propName === 'color') {
       const colorValue = entry.getValue(colorByProp as BasesPropertyId);
       if (colorValue) {
-        const colorStr = colorValue.toString();
+        const colorStr = String(colorValue);
         // Ensure it starts with #
         return colorStr.startsWith('#') ? colorStr : `#${colorStr}`;
       }
@@ -987,8 +1043,9 @@ export class BasesCalendarView extends BasesView {
 
     // Handle fields with colors defined in settings
     if (propName === 'calendar') {
-      const calendarName = Array.isArray(value) ? value[0] : String(value);
-      return this.plugin.settings.calendars[calendarName]?.color ?? '#6b7280';
+      const calendarName = Array.isArray(value) ? String(value[0]) : String(value);
+      const calendarConfig = this.plugin.settings.calendars[calendarName] as { color?: string } | undefined;
+      return calendarConfig?.color ?? '#6b7280';
     }
 
     if (propName === 'priority') {
@@ -1003,7 +1060,9 @@ export class BasesCalendarView extends BasesView {
 
     // For all other fields (parent, people, tags, context, location, and custom properties):
     // Use auto-assigned Solarized colors from the cache
-    const valueStr = Array.isArray(value) ? value[0]?.toString() : value.toString();
+    const valueStr = Array.isArray(value)
+      ? (value[0] != null ? String(value[0]) : undefined)
+      : String(value);
     if (valueStr) {
       return this.colorMapCache[valueStr] ?? '#6b7280';
     }
@@ -1113,8 +1172,8 @@ export class BasesCalendarView extends BasesView {
       case 'split-down': {
         const leaf = this.app.workspace.getLeaf('split', 'horizontal');
         const file = this.app.vault.getAbstractFileByPath(path);
-        if (file && 'extension' in file) {
-          await leaf.openFile(file as any);
+        if (file instanceof TFile) {
+          await leaf.openFile(file);
         }
         break;
       }
@@ -1129,21 +1188,21 @@ export class BasesCalendarView extends BasesView {
     // Load the full item data for editing
     const item = await this.plugin.itemService.getItem(entry.file.path);
     if (item) {
-      openItemModal(this.plugin, { mode: 'edit', item });
+      void openItemModal(this.plugin, { mode: 'edit', item });
     } else {
       // Fallback to opening the file if item can't be loaded
       await this.openFileWithBehavior(entry.file.path);
     }
   }
 
-  private async handleEventDrop(info: any): Promise<void> {
+  private async handleEventDrop(info: EventDropArg): Promise<void> {
     const entry = info.event.extendedProps.entry as BasesEntry;
     const newStart = info.event.start;
     const newEnd = info.event.end;
 
     // Update the file's frontmatter - preserve duration by updating both start and end
     // Use local timezone format for user-friendly display in frontmatter
-    await this.app.fileManager.processFrontMatter(entry.file, (fm) => {
+    await this.app.fileManager.processFrontMatter(entry.file, (fm: ItemFrontmatter) => {
       fm.date_start_scheduled = this.toLocalISOString(newStart);
       if (newEnd) {
         fm.date_end_scheduled = this.toLocalISOString(newEnd);
@@ -1152,14 +1211,14 @@ export class BasesCalendarView extends BasesView {
     });
   }
 
-  private async handleEventResize(info: any): Promise<void> {
-    const entry = info.event.extendedProps.entry as BasesEntry;
+  private async handleEventResize(info: EventResizeArg): Promise<void> {
+    const entry = info.event.extendedProps.entry;
     const newStart = info.event.start;
     const newEnd = info.event.end;
 
     // Update the file's frontmatter with new start/end times
     // Use local timezone format for user-friendly display in frontmatter
-    await this.app.fileManager.processFrontMatter(entry.file, (fm) => {
+    await this.app.fileManager.processFrontMatter(entry.file, (fm: ItemFrontmatter) => {
       if (newStart) {
         fm.date_start_scheduled = this.toLocalISOString(newStart);
       }
@@ -1183,18 +1242,18 @@ export class BasesCalendarView extends BasesView {
     const dateStr = `${year}-${month}-${day}`;
 
     // Try to use the daily-notes core plugin settings
-    const internalPlugins = (this.app as any).internalPlugins;
-    const dailyNotesPlugin = internalPlugins?.getPluginById?.('daily-notes');
+    const appWithInternals = this.app as AppWithInternals;
+    const dailyNotesPlugin = appWithInternals.internalPlugins?.getPluginById?.('daily-notes');
 
     let path: string;
     let templatePath: string | undefined;
     let folder: string | undefined;
 
-    if (dailyNotesPlugin?.enabled && dailyNotesPlugin?.instance?.options) {
+    if (dailyNotesPlugin?.enabled && dailyNotesPlugin.instance?.options) {
       const options = dailyNotesPlugin.instance.options;
-      const format = options.format || 'YYYY-MM-DD';
-      folder = options.folder || '';
-      templatePath = options.template || undefined;
+      const format = options.format ?? 'YYYY-MM-DD';
+      folder = options.folder ?? '';
+      templatePath = options.template;
 
       // Format the date according to the daily notes format
       const filename = this.formatDate(date, format);
@@ -1215,9 +1274,9 @@ export class BasesCalendarView extends BasesView {
         // Try to load the template
         const templateFile = this.app.vault.getAbstractFileByPath(templatePath) ||
                              this.app.vault.getAbstractFileByPath(`${templatePath}.md`);
-        if (templateFile && 'path' in templateFile) {
+        if (templateFile instanceof TFile) {
           try {
-            content = await this.app.vault.read(templateFile as any);
+            content = await this.app.vault.read(templateFile);
             // Process template variables
             content = this.processTemplateVariables(content, date);
           } catch {
@@ -1256,7 +1315,7 @@ export class BasesCalendarView extends BasesView {
     return content
       // Date patterns
       .replace(/\{\{date\}\}/g, `${year}-${month}-${day}`)
-      .replace(/\{\{date:([^}]+)\}\}/g, (_, format) => this.formatDate(date, format))
+      .replace(/\{\{date:([^}]+)\}\}/g, (_, format: string) => this.formatDate(date, format))
       // Title patterns
       .replace(/\{\{title\}\}/g, `${year}-${month}-${day}`)
       // Time patterns
@@ -1292,9 +1351,9 @@ export class BasesCalendarView extends BasesView {
       .replace(/ddd/g, weekdaysShort[date.getDay()]);
   }
 
-  private async createNewItem(startDate?: string, endDate?: string, allDay?: boolean): Promise<void> {
+  private createNewItem(startDate?: string, endDate?: string, allDay?: boolean): void {
     // Open ItemModal with pre-populated date from calendar click
-    openItemModal(this.plugin, {
+    void openItemModal(this.plugin, {
       mode: 'create',
       prePopulate: {
         date_start_scheduled: startDate || new Date().toISOString(),

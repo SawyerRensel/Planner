@@ -6,6 +6,29 @@ import { App } from 'obsidian';
 export type PropertyCategory = 'date' | 'categorical' | 'text' | 'unknown';
 
 /**
+ * Interface for Obsidian's undocumented metadataTypeManager
+ * Used to access property type information from Obsidian's internal API
+ */
+interface MetadataTypeManager {
+  properties?: Record<string, { type?: string }>;
+  getPropertyInfo?: (fieldName: string) => { type?: string } | undefined;
+}
+
+/**
+ * Extended App interface for accessing undocumented Obsidian internals
+ */
+interface AppWithInternals extends App {
+  metadataTypeManager?: MetadataTypeManager;
+}
+
+/**
+ * Extended Vault interface for accessing adapter basePath
+ */
+interface VaultWithAdapter {
+  adapter?: { basePath?: string };
+}
+
+/**
  * Memoization cache for property category lookups
  * Key format: "propId|vaultPath" to handle multiple vaults
  */
@@ -38,8 +61,7 @@ export class PropertyTypeService {
     const fieldName = propId.replace(/^(note|file|formula)\./, '');
 
     // Access Obsidian's metadataTypeManager (undocumented API)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const metadataTypeManager = (app as any).metadataTypeManager;
+    const metadataTypeManager = (app as AppWithInternals).metadataTypeManager;
     if (metadataTypeManager) {
       // Try the properties object first (more reliable in recent Obsidian versions)
       // Property names in Obsidian are stored lowercase
@@ -134,8 +156,7 @@ export class PropertyTypeService {
    */
   static getPropertyCategory(propId: string, app: App): PropertyCategory {
     // Check cache first
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const cacheKey = `${propId}|${(app.vault as any).adapter?.basePath || 'default'}`;
+    const cacheKey = `${propId}|${(app.vault as VaultWithAdapter).adapter?.basePath || 'default'}`;
     const cached = propertyCategoryCache.get(cacheKey);
     if (cached !== undefined) {
       return cached;

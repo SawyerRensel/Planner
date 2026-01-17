@@ -61,7 +61,7 @@ const copyToExampleVault = {
     build.onEnd((result) => {
       if (result.errors.length > 0) return;
 
-      const targetDir = "./example-vault/.obsidian/plugins/planner";
+      const targetDir = "./vault/.obsidian/plugins/planner";
       const filesToCopy = ["main.js", "manifest.json", "styles.css"];
 
       // Ensure target directory exists
