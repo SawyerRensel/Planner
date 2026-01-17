@@ -1,0 +1,98 @@
+{
+  "itemsFolder": "Planner/",
+  "basesFolder": "Planner/",
+  "itemTemplate": "Templates/Planner Template.md",
+  "defaultCalendar": "Personal",
+  "dateFormat": "YYYY-MM-DD",
+  "timeFormat": "24h",
+  "weekStartsOn": "monday",
+  "statuses": [
+    {
+      "name": "Idea",
+      "color": "#f7e955",
+      "isCompleted": false,
+      "icon": "circle-dashed"
+    },
+    {
+      "name": "To-Do",
+      "color": "#9c5ee8",
+      "isCompleted": false,
+      "icon": "circle-dot-dashed"
+    },
+    {
+      "name": "In-Progress",
+      "color": "#3b82f6",
+      "isCompleted": false,
+      "icon": "circle-dot"
+    },
+    {
+      "name": "In-Review",
+      "color": "#f97316",
+      "isCompleted": false,
+      "icon": "eye"
+    },
+    {
+      "name": "Done",
+      "color": "#22c55e",
+      "isCompleted": true,
+      "icon": "circle-check-big"
+    },
+    {
+      "name": "Cancelled",
+      "color": "#ef4444",
+      "isCompleted": true,
+      "icon": "ban"
+    }
+  ],
+  "priorities": [
+    {
+      "name": "Urgent",
+      "color": "#ef4444",
+      "weight": 4,
+      "icon": "signal"
+    },
+    {
+      "name": "High",
+      "color": "#f97316",
+      "weight": 3,
+      "icon": "signal-high"
+    },
+    {
+      "name": "Medium",
+      "color": "#eab308",
+      "weight": 2,
+      "icon": "signal-medium"
+    },
+    {
+      "name": "Low",
+      "color": "#3b82f6",
+      "weight": 1,
+      "icon": "signal-low"
+    },
+    {
+      "name": "None",
+      "color": "#6b7280",
+      "weight": 0,
+      "icon": "signal-zero"
+    }
+  ],
+  "calendars": {
+    "Woodworking": {
+      "color": "#af722c",
+      "folder": "Personas/Hobby-Project-Manager"
+    },
+    "Photography": {
+      "color": "#4b8fd8",
+      "folder": "Personas/Hobby-Project-Manager"
+    },
+    "test": {
+      "color": "#dc322f"
+    }
+  },
+  "calendarFontSize": 10,
+  "quickCaptureHotkey": "Ctrl+Shift+N",
+  "quickCaptureDefaultTags": [],
+  "quickCaptureDefaultStatus": "To-Do",
+  "quickCaptureOpenAfterCreate": false,
+  "openBehavior": "new-tab"
+}

@@ -219,8 +219,8 @@ Screenshot_20260101-185045.png]]:1  Failed to load resource: net::ERR_FILE_NOT_F
 ## 0.1.2
 
 - Fixing issues for [PR 9481](Planner/PR%209481.md)
-	- [ ] Kanban view is broken
-	- [ ] Task List view is broken
+	- [x] Kanban view is broken
+	- [x] Task List view is broken
 	- [ ] Fix calendar view time input in iOS closing before input
 	- [ ] Fix Kanban View drag-n-drop on ios
 	- [ ] Relative pathing not working - needs an extra `../`
@@ -245,6 +245,10 @@ Screenshot_20260101-185045.png]]:1  Failed to load resource: net::ERR_FILE_NOT_F
 - [ ] Customize what shows up in "Show Details" for Item Modal.  Allow reordering
 	- [ ] Checklist of default frontmatter from schema
 	- [ ] Select from existing frontmatter fields
+- [ ] Edit Task List Properties directly.  Special rendering for calendar, status, and priorty (custom color / icon fields in properties)
+- [ ] Task Lists special properties should show icons
+- [ ] Task List View properties should preserve links, e.g. "Title", "tags", "backlinks", etc.
+- [ ] Add open behavior option for all items in all views: Open Item Note or Open Item Modal
 
 ## Other
 

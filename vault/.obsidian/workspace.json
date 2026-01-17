@@ -48,35 +48,9 @@
               "icon": "lucide-file",
               "title": "PR 9481"
             }
-          },
-          {
-            "id": "ef17080a1c13146e",
-            "type": "leaf",
-            "state": {
-              "type": "bases",
-              "state": {
-                "file": "Bases/Task List.base",
-                "viewName": "Task List"
-              },
-              "icon": "list-checks",
-              "title": "Task List"
-            }
-          },
-          {
-            "id": "1929f7b1f6ad3471",
-            "type": "leaf",
-            "state": {
-              "type": "bases",
-              "state": {
-                "file": "Bases/Kanban.base",
-                "viewName": "Kanban"
-              },
-              "icon": "square-kanban",
-              "title": "Kanban"
-            }
           }
         ],
-        "currentTab": 3
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -242,23 +216,23 @@
       "bases:Create new base": false
     }
   },
-  "active": "ef17080a1c13146e",
+  "active": "40145a8631a96686",
   "lastOpenFiles": [
-    "Planner/PR 9481.md",
-    "Bases/Task List.base",
-    "Bases/Kanban.base",
     "Planner/test.md",
+    "Planner/Calendar.base",
+    "Planner/Task List.base",
+    "Planner/PR 9481.md",
+    "Bases/Kanban.base",
+    "Bases/Task List.base",
+    "Planner/Kanban.base",
+    "Planner/Timeline.base",
     "Ideas.md",
     "Bases/Timeline.base",
     "Bases/Calendar.base",
     "Templates/Planner Template.md",
     "PRD",
     "PRD.md",
-    "Planner/Calendar.base",
-    "Planner/Timeline.base",
     "Bases",
-    "Planner/Task List.base",
-    "Planner/Kanban.base",
     "Personas/Professional-PM/Update Project Roadmap.md",
     "Personas/Professional-PM/Technical Debt Review.md",
     "Personas/Professional-PM/Stakeholder Update Meeting.md",
