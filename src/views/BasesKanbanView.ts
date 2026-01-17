@@ -629,8 +629,8 @@ export class BasesKanbanView extends BasesView {
       for (const entry of group.entries) {
         const value = this.getEntryValue(entry, colorByField);
         if (value) {
-          const strValue = Array.isArray(value) ? String(value[0]) : String(value);
-          if (strValue) uniqueValues.add(strValue);
+          const strValue = this.valueToString(Array.isArray(value) ? value[0] : value);
+          if (strValue && strValue !== 'None') uniqueValues.add(strValue);
         }
       }
     }
@@ -650,22 +650,22 @@ export class BasesKanbanView extends BasesView {
 
     // Handle special properties with predefined colors
     if (propName === 'calendar') {
-      const calendarName = Array.isArray(value) ? String(value[0]) : String(value);
+      const calendarName = this.valueToString(Array.isArray(value) ? value[0] : value);
       return getCalendarColor(this.plugin.settings, calendarName);
     }
 
     if (propName === 'priority') {
-      const config = getPriorityConfig(this.plugin.settings, String(value));
+      const config = getPriorityConfig(this.plugin.settings, this.valueToString(value));
       return config?.color ?? '#6b7280';
     }
 
     if (propName === 'status') {
-      const config = getStatusConfig(this.plugin.settings, String(value));
+      const config = getStatusConfig(this.plugin.settings, this.valueToString(value));
       return config?.color ?? '#6b7280';
     }
 
     // Use cached color for other fields
-    const strValue = Array.isArray(value) ? String(value[0]) : String(value);
+    const strValue = this.valueToString(Array.isArray(value) ? value[0] : value);
     return this.colorMapCache[strValue] ?? '#6b7280';
   }
 
@@ -1884,7 +1884,7 @@ export class BasesKanbanView extends BasesView {
     if (coverField && coverDisplay !== 'none') {
       const coverValue = this.getEntryValue(entry, coverField);
       if (coverValue) {
-        this.renderCover(card, String(coverValue), coverDisplay);
+        this.renderCover(card, this.valueToString(coverValue), coverDisplay);
       }
     }
 
@@ -1902,7 +1902,7 @@ export class BasesKanbanView extends BasesView {
     // Title (CSS class handles font-weight)
     const titleField = this.getTitleBy();
     const title = this.getEntryValue(entry, titleField) || entry.file.basename;
-    titleRow.createSpan({ cls: 'planner-kanban-card-title', text: String(title) });
+    titleRow.createSpan({ cls: 'planner-kanban-card-title', text: this.valueToString(title) });
 
     // For inline placement, render badges in title row
     if (placement === 'inline') {
@@ -1923,7 +1923,7 @@ export class BasesKanbanView extends BasesView {
       const summarySource = summaryField || 'note.summary';
       const summary = this.getEntryValue(entry, summarySource);
       if (summary && summary !== 'null' && summary !== null) {
-        content.createDiv({ cls: 'planner-kanban-card-summary', text: String(summary) });
+        content.createDiv({ cls: 'planner-kanban-card-summary', text: this.valueToString(summary) });
       }
     }
 
@@ -2074,9 +2074,10 @@ export class BasesKanbanView extends BasesView {
     if (groupByProp !== 'status' && isVisible('status')) {
       const status = this.getEntryValue(entry, 'note.status');
       if (status) {
-        const config = getStatusConfig(this.plugin.settings, String(status));
+        const statusStr = this.valueToString(status);
+        const config = getStatusConfig(this.plugin.settings, statusStr);
         if (config) {
-          this.createBadge(badgeContainer, String(status), config.color, config.icon);
+          this.createBadge(badgeContainer, statusStr, config.color, config.icon);
         }
       }
     }
@@ -2085,9 +2086,10 @@ export class BasesKanbanView extends BasesView {
     if (groupByProp !== 'priority' && isVisible('priority')) {
       const priority = this.getEntryValue(entry, 'note.priority');
       if (priority) {
-        const config = getPriorityConfig(this.plugin.settings, String(priority));
+        const priorityStr = this.valueToString(priority);
+        const config = getPriorityConfig(this.plugin.settings, priorityStr);
         if (config) {
-          this.createBadge(badgeContainer, String(priority), config.color, config.icon);
+          this.createBadge(badgeContainer, priorityStr, config.color, config.icon);
         }
       }
     }
@@ -2096,7 +2098,7 @@ export class BasesKanbanView extends BasesView {
     if (groupByProp !== 'calendar' && isVisible('calendar')) {
       const calendar = this.getEntryValue(entry, 'note.calendar');
       if (calendar) {
-        const calendarName = Array.isArray(calendar) ? String(calendar[0]) : String(calendar);
+        const calendarName = this.valueToString(Array.isArray(calendar) ? calendar[0] : calendar);
         const color = getCalendarColor(this.plugin.settings, calendarName);
         this.createBadge(badgeContainer, calendarName, color);
       }
@@ -2106,7 +2108,7 @@ export class BasesKanbanView extends BasesView {
     if (isVisible('repeat_frequency')) {
       const repeatFreq = this.getEntryValue(entry, 'note.repeat_frequency');
       if (repeatFreq) {
-        this.createBadge(badgeContainer, String(repeatFreq), '#6c71c4', 'repeat');
+        this.createBadge(badgeContainer, this.valueToString(repeatFreq), '#6c71c4', 'repeat');
       }
     }
 
@@ -2147,8 +2149,10 @@ export class BasesKanbanView extends BasesView {
       if (value === null || value === undefined || value === '' || value === 'null') continue;
 
       // Render as generic badge
-      const displayValue = Array.isArray(value) ? value.filter(v => v && v !== 'null').join(', ') : String(value);
-      if (displayValue && displayValue !== 'null') {
+      const displayValue = Array.isArray(value)
+        ? value.filter(v => v && v !== 'null').map(v => this.valueToString(v)).join(', ')
+        : this.valueToString(value);
+      if (displayValue && displayValue !== 'null' && displayValue !== 'None') {
         this.createGenericBadge(badgeContainer, propName, displayValue);
       }
     }

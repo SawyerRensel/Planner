@@ -49,7 +49,6 @@ views:
     colorBy: note.calendar
     borderStyle: left-accent
     badgePlacement: properties-section
-    swimlaneBy: note.priority
-    groupBy: note.status
+    swimlaneBy: note.calendar
   - type: table
     name: Table
