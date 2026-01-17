@@ -2347,6 +2347,11 @@ body.is-mobile .planner-timeline-iframe-container {
   box-shadow: 4px 0 0 var(--interactive-accent) !important;
 }
 
+/* Card touch-active state (prevents iOS from committing to scroll during hold detection) */
+.planner-kanban-card--touch-active {
+  touch-action: none;
+}
+
 /* Card hold-ready state (visual feedback before drag starts on mobile) */
 .planner-kanban-card--hold-ready {
   transform: scale(1.02);

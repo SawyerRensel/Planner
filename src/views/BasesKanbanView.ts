@@ -2277,6 +2277,11 @@ export class BasesKanbanView extends BasesView {
       this.touchHoldCard = card;
       this.touchHoldEntry = entry;
 
+      // CRITICAL: Set touch-action: none IMMEDIATELY to prevent iOS from committing to scroll.
+      // iOS decides touch behavior at touchstart based on CSS at that moment.
+      // If user moves before hold completes, we remove this class in cancelTouchHold().
+      card.classList.add('planner-kanban-card--touch-active');
+
       // Start hold timer - drag only enabled after delay
       this.touchHoldTimer = window.setTimeout(() => {
         this.touchHoldReady = true;
@@ -2295,14 +2300,18 @@ export class BasesKanbanView extends BasesView {
         return; // Allow default scroll behavior
       }
 
-      // Only start drag if hold delay completed and we're not already dragging
+      // Once hold-ready, ALWAYS prevent default to stop iOS from committing to scroll
+      // This must happen on every touchmove, not just when movement threshold is met
+      if (this.touchHoldReady) {
+        e.preventDefault();
+      }
+
+      // Start drag if hold delay completed, not already dragging, and moved enough
       if (this.touchHoldReady && !this.touchDragCard && !this.touchDragClone) {
         if (dx > 10 || dy > 10) {
-          e.preventDefault(); // Prevent scroll on drag start
           this.startTouchDrag(card, entry, e);
         }
       } else if (this.touchDragClone) {
-        e.preventDefault(); // Prevent scroll during drag
         this.updateTouchDrag(e);
       }
     }, { passive: false });
@@ -2329,6 +2338,7 @@ export class BasesKanbanView extends BasesView {
           // Remove all drag-related classes
           this.touchDragCard.classList.remove('planner-kanban-card--dragging');
           this.touchDragCard.classList.remove('planner-kanban-card--hold-ready');
+          this.touchDragCard.classList.remove('planner-kanban-card--touch-active');
           this.touchDragCard = null;
         }
         this.draggedCardPath = null;
@@ -2347,6 +2357,8 @@ export class BasesKanbanView extends BasesView {
     }
     if (this.touchHoldCard) {
       this.touchHoldCard.classList.remove('planner-kanban-card--hold-ready');
+      // Restore touch-action to allow normal scrolling
+      this.touchHoldCard.classList.remove('planner-kanban-card--touch-active');
     }
     this.touchHoldReady = false;
     this.touchHoldCard = null;
@@ -2423,9 +2435,10 @@ export class BasesKanbanView extends BasesView {
     }
 
     if (this.touchDragCard) {
-      // Remove all drag-related classes (hold-ready has touch-action: none which must not persist)
+      // Remove all drag-related classes
       this.touchDragCard.classList.remove('planner-kanban-card--dragging');
       this.touchDragCard.classList.remove('planner-kanban-card--hold-ready');
+      this.touchDragCard.classList.remove('planner-kanban-card--touch-active');
 
       if (dropTarget && this.draggedCardPath) {
         void this.handleCardDrop(this.draggedCardPath, dropTarget.group, dropTarget.swimlane);
