@@ -2659,6 +2659,11 @@ body.is-mobile .planner-timeline-iframe-container {
   min-width: fit-content;
 }
 
+/* Add margin between consecutive swimlane rows */
+.planner-kanban-swimlane-row + .planner-kanban-swimlane-row {
+  margin-top: 12px;
+}
+
 /* Header row layout */
 .planner-kanban-header-row {
   display: flex;
