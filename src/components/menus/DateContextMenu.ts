@@ -1,6 +1,7 @@
 import { Menu } from 'obsidian';
 import type PlannerPlugin from '../../main';
 import { isOngoing, ONGOING_KEYWORD } from '../../utils/dateUtils';
+import { DateTimePickerModal } from '../DateTimePickerModal';
 
 export interface DateContextMenuOptions {
   currentValue: string | null;
@@ -160,93 +161,29 @@ export class DateContextMenu {
   }
 
   private showDateTimePicker(): void {
-    // Create a simple date/time picker modal
-    const modal = document.createElement('div');
-    modal.className = 'planner-datetime-picker-overlay';
+    // Parse current value to extract date and time parts
+    let currentDate: string | null = null;
+    let currentTime: string | null = null;
 
-    const picker = document.createElement('div');
-    picker.className = 'planner-datetime-picker';
-
-    const heading = document.createElement('h3');
-    heading.textContent = 'Pick date & time';
-    picker.appendChild(heading);
-
-    const inputsContainer = document.createElement('div');
-    inputsContainer.className = 'planner-datetime-inputs';
-
-    // Date input
-    const dateLabel = document.createElement('label');
-    dateLabel.textContent = 'Date';
-    const dateInput = document.createElement('input');
-    dateInput.type = 'date';
-    dateInput.className = 'planner-date-input';
-    dateLabel.appendChild(dateInput);
-    inputsContainer.appendChild(dateLabel);
-
-    // Time input
-    const timeLabel = document.createElement('label');
-    timeLabel.textContent = 'Time (optional)';
-    const timeInput = document.createElement('input');
-    timeInput.type = 'time';
-    timeInput.className = 'planner-time-input';
-    timeLabel.appendChild(timeInput);
-    inputsContainer.appendChild(timeLabel);
-
-    picker.appendChild(inputsContainer);
-
-    // Buttons
-    const buttonsContainer = document.createElement('div');
-    buttonsContainer.className = 'planner-datetime-buttons';
-
-    const cancelBtn = document.createElement('button');
-    cancelBtn.className = 'planner-btn';
-    cancelBtn.textContent = 'Cancel';
-    cancelBtn.setAttribute('data-action', 'cancel');
-    buttonsContainer.appendChild(cancelBtn);
-
-    const confirmBtn = document.createElement('button');
-    confirmBtn.className = 'planner-btn planner-btn-primary';
-    confirmBtn.textContent = 'Confirm';
-    confirmBtn.setAttribute('data-action', 'confirm');
-    buttonsContainer.appendChild(confirmBtn);
-
-    picker.appendChild(buttonsContainer);
-    modal.appendChild(picker);
-
-    // Pre-fill with current value if exists (skip if "ongoing")
     if (this.options.currentValue && !isOngoing(this.options.currentValue)) {
       const current = new Date(this.options.currentValue);
-      dateInput.value = this.formatDateForInput(current);
-      timeInput.value = this.formatTimeForInput(current);
-    } else {
-      dateInput.value = this.formatDateForInput(new Date());
+      currentDate = this.formatDateForInput(current);
+      currentTime = this.formatTimeForInput(current);
     }
 
-    cancelBtn.addEventListener('click', () => {
-      modal.remove();
-    });
-
-    confirmBtn.addEventListener('click', () => {
-      if (dateInput.value) {
-        let dateStr = dateInput.value;
-        if (timeInput.value) {
-          dateStr += `T${timeInput.value}:00`;
-        } else {
-          dateStr += 'T00:00:00';
+    // Use Obsidian's Modal class for better iOS compatibility
+    const modal = new DateTimePickerModal(this.options.plugin, {
+      currentDate,
+      currentTime,
+      title: 'Pick date & time',
+      onSelect: (isoDateTime) => {
+        if (isoDateTime) {
+          this.options.onSelect(isoDateTime);
         }
-        this.options.onSelect(new Date(dateStr).toISOString());
-      }
-      modal.remove();
-    });
-
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
-        modal.remove();
       }
     });
 
-    document.body.appendChild(modal);
-    dateInput.focus();
+    modal.open();
   }
 
   // Date utility methods

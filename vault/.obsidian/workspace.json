@@ -50,7 +50,7 @@
             }
           },
           {
-            "id": "f15259ef616702c5",
+            "id": "7004f51b58b37906",
             "type": "leaf",
             "state": {
               "type": "bases",
@@ -116,8 +116,7 @@
               "title": "Bookmarks"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -229,23 +228,26 @@
       "bases:Create new base": false
     }
   },
-  "active": "f15259ef616702c5",
+  "active": "7004f51b58b37906",
   "lastOpenFiles": [
-    "Bases/Timeline.base",
-    "Bases/Calendar.base",
-    "Bases/Task List.base",
-    "Bases/Kanban.base",
+    "TaskNotes/Views/tasks-default.base",
+    "TaskNotes/Views/relationships.base",
+    "TaskNotes/Views/mini-calendar-default.base",
+    "TaskNotes/Views/calendar-default.base",
+    "TaskNotes/Views/agenda-default.base",
+    "TaskNotes/Views/kanban-default.base",
+    "TaskNotes/Views",
+    "TaskNotes",
+    "ios_item_modal_time_input.png",
+    "IMG_0234.png",
     "Planner/PR 9481.md",
+    "Bases/Calendar.base",
+    "Bases/Kanban.base",
+    "Bases/Timeline.base",
     "Planner/test.md",
-    "Planner/Calendar.base",
-    "Planner/Task List.base",
-    "Planner/Kanban.base",
-    "Planner/Timeline.base",
     "Ideas.md",
     "Templates/Planner Template.md",
-    "PRD",
     "PRD.md",
-    "Bases",
     "Personas/Professional-PM/Update Project Roadmap.md",
     "Personas/Professional-PM/Technical Debt Review.md",
     "Personas/Professional-PM/Stakeholder Update Meeting.md",
@@ -273,8 +275,6 @@
     "notes/Pasted image 20260101091932.png",
     "notes/Pasted image 20260101091842.png",
     "Screenshot_20260108-193249.png",
-    "Screenshot_20260105-200533.png",
-    "Books/media/Guns Germs and Steel.jpg",
-    "Books/media/The Raven King (The Raven Cycle Book 4).jpg"
+    "Screenshot_20260105-200533.png"
   ]
 }

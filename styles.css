@@ -1010,6 +1010,13 @@ body.is-mobile .modal:has(.planner-item-modal) {
   border-radius: 6px;
   background: var(--background-primary);
   color: var(--text-normal);
+  /* iOS touch handling - prevents 300ms delay and picker dismissal */
+  touch-action: manipulation;
+  -webkit-appearance: none;
+  appearance: none;
+  /* Minimum height for better touch targets on mobile */
+  min-height: 44px;
+  box-sizing: border-box;
 }
 
 .planner-datetime-inputs input:focus {
@@ -1021,6 +1028,67 @@ body.is-mobile .modal:has(.planner-item-modal) {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+}
+
+/* DateTime Picker Modal (Obsidian Modal-based) */
+.planner-datetime-picker-modal {
+  min-width: 300px;
+}
+
+.planner-datetime-picker-modal .planner-datetime-picker-title {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.planner-datetime-picker-modal .setting-item {
+  border-top: none;
+  padding: 8px 0;
+}
+
+.planner-datetime-picker-modal .setting-item-info {
+  flex: 0 0 auto;
+  min-width: 120px;
+}
+
+.planner-datetime-picker-modal .setting-item-control {
+  flex: 1;
+}
+
+.planner-datetime-picker-modal input[type="date"],
+.planner-datetime-picker-modal input[type="time"] {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 14px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  /* iOS touch handling - prevents 300ms delay and picker dismissal */
+  touch-action: manipulation;
+  -webkit-appearance: none;
+  appearance: none;
+  /* Minimum height for better touch targets on mobile */
+  min-height: 44px;
+  box-sizing: border-box;
+}
+
+.planner-datetime-picker-modal input[type="date"]:focus,
+.planner-datetime-picker-modal input[type="time"]:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+}
+
+.planner-datetime-picker-modal .planner-datetime-quick-actions {
+  margin: 16px 0;
+  display: flex;
+  gap: 8px;
+}
+
+.planner-datetime-picker-modal .planner-datetime-buttons {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--background-modifier-border);
 }
 
 /* Confirm Dialog */
