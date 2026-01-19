@@ -30,8 +30,7 @@ class RegenerateBasesModal extends Modal {
 
     contentEl.createEl('h2', { text: 'Regenerate base files' });
     contentEl.createEl('p', {
-      // eslint-disable-next-line obsidianmd/ui/sentence-case -- File names must be capitalized
-      text: 'This will overwrite your existing Task List.base, Calendar.base, Timeline.base, and Kanban.base files. Any customizations you have made to these files will be lost.',
+      text: 'This will overwrite your existing task list.base, calendar.base, timeline.base, and kanban.base files. Any customizations you have made to these files will be lost.',
       cls: 'planner-modal-warning'
     });
     contentEl.createEl('p', {
@@ -176,13 +175,10 @@ export class PlannerSettingTab extends PluginSettingTab {
       .setName('Date format')
       .setDesc('Display format for dates')
       .addDropdown(dropdown => dropdown
-        // eslint-disable-next-line obsidianmd/ui/sentence-case -- Date format strings are technical notation
-        .addOption('YYYY-MM-DD', 'yyyy-mm-dd')
-        // eslint-disable-next-line obsidianmd/ui/sentence-case -- Date format strings are technical notation
-        .addOption('MM/DD/YYYY', 'mm/dd/yyyy')
-        // eslint-disable-next-line obsidianmd/ui/sentence-case -- Date format strings are technical notation
-        .addOption('DD/MM/YYYY', 'dd/mm/yyyy')
-        .addOption('MMM D, YYYY', 'Mmm d, yyyy')
+        .addOption('YYYY-MM-DD', 'Year-month-day')
+        .addOption('MM/DD/YYYY', 'Month/day/year')
+        .addOption('DD/MM/YYYY', 'Day/month/year')
+        .addOption('MMM D, YYYY', 'Month day, year')
         .setValue(this.plugin.settings.dateFormat)
         .onChange(async (value) => {
           this.plugin.settings.dateFormat = value;
@@ -237,8 +233,7 @@ export class PlannerSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName('Bases folder')
-      // eslint-disable-next-line obsidianmd/ui/sentence-case -- File names must be capitalized
-      .setDesc('Where to save the Base view files (Task List, Calendar, Timeline, Kanban)')
+      .setDesc('Where to save the base view files (task list, calendar, timeline, kanban)')
       .addText(text => {
         text
           .setPlaceholder('Planner/')
@@ -251,10 +246,8 @@ export class PlannerSettingTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
-      // eslint-disable-next-line obsidianmd/ui/sentence-case -- "Base" is a product name
-      .setName('Generate Base files')
-      // eslint-disable-next-line obsidianmd/ui/sentence-case -- File names must be capitalized
-      .setDesc('Create or regenerate Task List, Calendar, Timeline, and Kanban Base files')
+      .setName('Generate base files')
+      .setDesc('Create or regenerate task list, calendar, timeline, and kanban base files')
       .addButton(button => button
         .setButtonText('Generate')
         .onClick(async () => {
@@ -317,8 +310,7 @@ export class PlannerSettingTab extends PluginSettingTab {
     // Status Configuration
     new Setting(containerEl).setName("Status configuration").setHeading();
     containerEl.createEl('p', {
-      // eslint-disable-next-line obsidianmd/ui/sentence-case -- "Lucide" is a library name, "Completed" starts a sentence
-      text: 'Define statuses for tasks. Use Lucide icon names (e.g., circle, check-circle, lightbulb). Completed statuses auto-set date_completed.',
+      text: 'Define statuses for tasks. Use lucide icon names (e.g., circle, check-circle, lightbulb). Completed statuses auto-set date_completed.',
       cls: 'setting-item-description'
     });
 
@@ -327,8 +319,7 @@ export class PlannerSettingTab extends PluginSettingTab {
     // Priority Configuration
     new Setting(containerEl).setName("Priority configuration").setHeading();
     containerEl.createEl('p', {
-      // eslint-disable-next-line obsidianmd/ui/sentence-case -- "Lucide" is a library name
-      text: 'Define priorities for tasks. Use Lucide icon names (e.g., alert-triangle, chevrons-up, minus).',
+      text: 'Define priorities for tasks. Use lucide icon names (e.g., alert-triangle, chevrons-up, minus).',
       cls: 'setting-item-description'
     });
     this.renderPriorityList(containerEl);

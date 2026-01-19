@@ -51,19 +51,19 @@ export default class PlannerPlugin extends Plugin {
     this.registerCommands();
 
     // Add ribbon icons
-    this.addRibbonIcon('list-checks', 'Open Planner task list', () => {
+    this.addRibbonIcon('list-checks', 'Open task list', () => {
       void this.activateTaskListView();
     });
 
-    this.addRibbonIcon('calendar-range', 'Open Planner calendar', () => {
+    this.addRibbonIcon('calendar-range', 'Open calendar', () => {
       void this.activateCalendarView();
     });
 
-    this.addRibbonIcon('square-chart-gantt', 'Open Planner timeline', () => {
+    this.addRibbonIcon('square-chart-gantt', 'Open timeline', () => {
       void this.activateTimelineView();
     });
 
-    this.addRibbonIcon('square-kanban', 'Open Planner kanban', () => {
+    this.addRibbonIcon('square-kanban', 'Open kanban', () => {
       void this.activateKanbanView();
     });
   }

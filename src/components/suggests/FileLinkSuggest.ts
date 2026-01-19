@@ -81,11 +81,12 @@ export function convertWikilinksToRelativePaths(
             // Use full path from vault root (without .md extension)
             formattedPath = file.path.replace(/\.md$/, '');
             break;
-          case 'relative':
+          case 'relative': {
             // Calculate relative path from items folder
             const filePath = file.path.replace(/\.md$/, '');
             formattedPath = calculateRelativePath(normalizedItemsFolder, filePath);
             break;
+          }
           case 'shortest':
           default:
             // Use just the filename (shortest unique path)
