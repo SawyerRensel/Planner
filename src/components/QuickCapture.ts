@@ -75,17 +75,13 @@ export class QuickCaptureModal extends Modal {
     const helpEl = contentEl.createDiv({ cls: 'planner-quick-capture-help' });
     helpEl.createEl('h4', { text: 'Syntax' });
     const helpList = helpEl.createEl('ul');
-    // eslint-disable-next-line obsidianmd/ui/sentence-case -- "Friday", "Jan" are proper nouns (day/month names)
-    helpList.createEl('li', { text: 'Dates: "tomorrow", "next Friday at 3pm", "Jan 15"' });
+    helpList.createEl('li', { text: 'Dates: "tomorrow", "next friday at 3pm", "jan 15"' });
     helpList.createEl('li', { text: '@context - add context (e.g., @work, @home)' });
     helpList.createEl('li', { text: '#tag - add tags (e.g., #task, #event)' });
     helpList.createEl('li', { text: '!priority - set priority (e.g., !urgent, !high)' });
-    // eslint-disable-next-line obsidianmd/ui/sentence-case -- "In-Progress" is an example status value
-    helpList.createEl('li', { text: '>status - set status (e.g., >In-Progress)' });
-    // eslint-disable-next-line obsidianmd/ui/sentence-case -- "Note" is an example link target
-    helpList.createEl('li', { text: '+[[Note]] - set parent item' });
-    // eslint-disable-next-line obsidianmd/ui/sentence-case -- "Work", "Personal" are example calendar names
-    helpList.createEl('li', { text: '~calendar - set calendar (e.g., ~Work, ~Personal)' });
+    helpList.createEl('li', { text: '>status - set status (e.g., >in-progress)' });
+    helpList.createEl('li', { text: '+[[note]] - set parent item' });
+    helpList.createEl('li', { text: '~calendar - set calendar (e.g., ~work, ~personal)' });
 
     // Buttons
     const buttonContainer = contentEl.createDiv({ cls: 'planner-quick-capture-buttons' });

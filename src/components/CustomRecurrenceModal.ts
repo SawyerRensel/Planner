@@ -147,8 +147,7 @@ export class CustomRecurrenceModal extends Modal {
       .addDropdown((dropdown) => {
         dropdown
           .addOption('dayOfMonth', 'Day of month (e.g., the 15th)')
-          // eslint-disable-next-line obsidianmd/ui/sentence-case -- "Second Sunday" is proper noun (day name pattern)
-          .addOption('nthWeekday', 'Day of week (e.g., Second Sunday)')
+          .addOption('nthWeekday', 'Weekday of month (e.g., second monday)')
           .setValue(this.monthlyType)
           .onChange((value) => {
             this.monthlyType = value as 'dayOfMonth' | 'nthWeekday';
