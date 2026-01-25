@@ -1,23 +1,24 @@
 ---
-title:
-summary:
+title: Encircle current date value in Calendar View
+summary: Help the user find the current day more quickly
 tags:
-  - yarr
-calendar: Personal
+  - task
+calendar:
+  - Optimization
 context:
 people:
 location:
 related:
 status: Idea
-priority:
+priority: Low
 progress:
-date_created:
-date_modified:
+date_created: "2026-01-25T08:26:35.872Z"
+date_modified: "2026-01-25T08:26:35.872Z"
 date_start_scheduled:
 date_start_actual:
 date_end_scheduled:
 date_end_actual:
-all_day: false
+all_day: true
 repeat_frequency:
 repeat_interval:
 repeat_until:
@@ -33,5 +34,3 @@ blocked_by:
 cover:
 color:
 ---
-
-##  Template Test

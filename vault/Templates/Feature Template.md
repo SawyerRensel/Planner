@@ -1,22 +1,22 @@
 ---
-title: Ability to reorder calendars
-summary: Drag and Drop style
+title:
+summary: This is a feature
 tags:
+  - feature
   - task
-calendar: Feature
+calendar: Personal
 context:
-  - "[[v0.2.0]]"
 people:
 location:
 related:
-status: Done
-priority: Medium
+status: Idea
+priority:
 progress:
-date_created: 2026-01-17T18:30:12.360Z
-date_modified: 2026-01-25T13:18:21.559Z
-date_start_scheduled: 2026-01-25T13:01:10.516Z
+date_created:
+date_modified:
+date_start_scheduled:
 date_start_actual:
-date_end_scheduled: 2026-01-25T13:01:12.391Z
+date_end_scheduled:
 date_end_actual:
 all_day: false
 repeat_frequency:
@@ -34,3 +34,5 @@ blocked_by:
 cover:
 color:
 ---
+
+##  Feature

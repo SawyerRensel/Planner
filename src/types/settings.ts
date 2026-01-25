@@ -73,6 +73,7 @@ export interface CalendarConfig {
   name: string;
   color: string;
   folder?: string; // Optional - falls back to global itemsFolder when not set
+  template?: string; // Optional - falls back to global itemTemplate when not set
 }
 
 /**
@@ -167,6 +168,13 @@ export function getCalendarColor(settings: PlannerSettings, calendarName: string
  */
 export function getCalendarFolder(settings: PlannerSettings, calendarName: string): string {
   return getCalendarConfig(settings, calendarName)?.folder || settings.itemsFolder;
+}
+
+/**
+ * Get calendar template (falls back to global itemTemplate if not set)
+ */
+export function getCalendarTemplate(settings: PlannerSettings, calendarName: string): string {
+  return getCalendarConfig(settings, calendarName)?.template || settings.itemTemplate;
 }
 
 /**

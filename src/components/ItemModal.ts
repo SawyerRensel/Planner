@@ -2,7 +2,7 @@ import { Modal, Notice, setIcon, setTooltip, MarkdownRenderer, Component } from 
 import * as chrono from 'chrono-node';
 import type PlannerPlugin from '../main';
 import type { ItemFrontmatter, PlannerItem } from '../types/item';
-import { getCalendarFolder, getCalendarColor } from '../types/settings';
+import { getCalendarFolder, getCalendarColor, getCalendarTemplate } from '../types/settings';
 import { ItemServiceError } from '../services/ItemService';
 import {
   DateContextMenu,
@@ -516,13 +516,92 @@ export class ItemModal extends Modal {
     const menu = new CalendarContextMenu({
       currentValue: this.calendars,
       onSelect: (value) => {
+        const previousCalendar = this.calendars[0];
         this.calendars = value;
         this.updateIconStates();
         this.updateNLPPreview();
+
+        // In create mode, reload template when calendar changes
+        if (this.options.mode === 'create' && value[0] !== previousCalendar) {
+          void this.reloadTemplateForCalendar(value[0]);
+        }
       },
       plugin: this.plugin,
     });
     menu.showAtElement(el);
+  }
+
+  /**
+   * Reload the template for a calendar and apply its values to the form.
+   * Called when the user changes the calendar in create mode.
+   */
+  private async reloadTemplateForCalendar(calendarName: string | undefined): Promise<void> {
+    // Get template path for the new calendar
+    const templatePath = calendarName
+      ? getCalendarTemplate(this.plugin.settings, calendarName)
+      : this.plugin.settings.itemTemplate;
+
+    if (!templatePath) {
+      // No template configured, clear template-derived values
+      this.options.templateFrontmatter = undefined;
+      this.options.templateBody = undefined;
+      this.options.templateCustomFields = undefined;
+      return;
+    }
+
+    const template = await readItemTemplate(this.plugin.app, templatePath);
+    if (!template) {
+      this.options.templateFrontmatter = undefined;
+      this.options.templateBody = undefined;
+      this.options.templateCustomFields = undefined;
+      return;
+    }
+
+    // Store new template data
+    this.options.templateFrontmatter = template.frontmatter;
+    this.options.templateBody = template.body;
+    this.options.templateCustomFields = template.customFields;
+
+    // Apply template frontmatter values
+    this.applyTemplateFrontmatter(template.frontmatter);
+
+    // Apply template body if note content is empty
+    if (!this.details || this.details.trim() === '') {
+      this.details = template.body;
+      if (this.detailsTextarea) {
+        this.detailsTextarea.value = template.body;
+      }
+      // Re-render markdown preview
+      void this.renderDetailsMarkdown();
+    }
+
+    // Update UI to reflect new template values
+    this.updateIconStates();
+    this.updateNLPPreview();
+
+    // Update input fields that may have changed
+    if (this.contextInput && template.frontmatter.context) {
+      const context = convertToSimpleWikilinks(template.frontmatter.context) as string[];
+      this.contextInput.value = context.join(', ');
+    }
+    if (this.peopleInput && template.frontmatter.people) {
+      const people = convertToSimpleWikilinks(template.frontmatter.people) as string[];
+      this.peopleInput.value = people.join(', ');
+    }
+    if (this.parentInput && template.frontmatter.parent) {
+      const parent = convertToSimpleWikilinks(template.frontmatter.parent) as string | null;
+      this.parentInput.value = parent || '';
+    }
+    if (this.blockedByInput && template.frontmatter.blocked_by) {
+      const blockedBy = convertToSimpleWikilinks(template.frontmatter.blocked_by) as string[];
+      this.blockedByInput.value = blockedBy.join(', ');
+    }
+    if (this.tagsChipInput && template.frontmatter.tags) {
+      this.tagsChipInput.setTags(template.frontmatter.tags);
+    }
+    if (this.summaryTextarea && template.frontmatter.summary) {
+      this.summaryTextarea.value = template.frontmatter.summary;
+    }
   }
 
   private updateIconStates(): void {
@@ -1667,12 +1746,22 @@ export async function openItemModal(
   let templateCustomFields: Record<string, unknown> | undefined;
 
   // Load template for create mode if configured
-  if (mode === 'create' && plugin.settings.itemTemplate) {
-    const template = await readItemTemplate(plugin.app, plugin.settings.itemTemplate);
-    if (template) {
-      templateFrontmatter = template.frontmatter;
-      templateBody = template.body;
-      templateCustomFields = template.customFields;
+  if (mode === 'create') {
+    // Determine which calendar will be used for this item
+    const targetCalendar = options.prePopulate?.calendar?.[0] || plugin.settings.defaultCalendar;
+
+    // Get template path: calendar-specific template takes precedence over global template
+    const templatePath = targetCalendar
+      ? getCalendarTemplate(plugin.settings, targetCalendar)
+      : plugin.settings.itemTemplate;
+
+    if (templatePath) {
+      const template = await readItemTemplate(plugin.app, templatePath);
+      if (template) {
+        templateFrontmatter = template.frontmatter;
+        templateBody = template.body;
+        templateCustomFields = template.customFields;
+      }
     }
   }
 

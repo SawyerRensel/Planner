@@ -79,11 +79,14 @@
   "calendars": [
     {
       "name": "Feature",
-      "color": "#859900"
+      "color": "#859900",
+      "template": "Templates/Feature Template.md"
     },
     {
       "name": "Optimization",
-      "color": "#268bd2"
+      "color": "#268bd2",
+      "template": "Templates/Optimization Template.md",
+      "folder": "Optimization"
     },
     {
       "name": "Bugfix",

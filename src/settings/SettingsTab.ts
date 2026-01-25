@@ -532,7 +532,7 @@ export class PlannerSettingTab extends PluginSettingTab {
         }));
   }
 
-  private renderCalendarItem(containerEl: HTMLElement, calendar: { name: string; color: string; folder?: string }, index: number): void {
+  private renderCalendarItem(containerEl: HTMLElement, calendar: { name: string; color: string; folder?: string; template?: string }, index: number): void {
     const setting = new Setting(containerEl)
       .setName('')
       .addExtraButton(button => button
@@ -585,6 +585,18 @@ export class PlannerSettingTab extends PluginSettingTab {
         });
       })
       .addText(text => {
+        // Template input
+        text
+          .setPlaceholder('Template (optional)')
+          .setValue(calendar.template || '')
+          .onChange(async (value) => {
+            this.plugin.settings.calendars[index].template = value || undefined;
+            await this.plugin.saveSettings();
+          });
+        text.inputEl.addClass('planner-calendar-template-input');
+        new FileSuggest(this.app, text.inputEl);
+      })
+      .addText(text => {
         // Folder input
         text
           .setPlaceholder('Folder (optional)')
@@ -618,7 +630,10 @@ export class PlannerSettingTab extends PluginSettingTab {
     // Add tooltips
     const inputs = setting.settingEl.querySelectorAll('.setting-item-control input[type="text"]');
     if (inputs[1]) {
-      inputs[1].setAttribute('title', 'Folder where new items for this calendar are created');
+      inputs[1].setAttribute('title', 'Template file for new items in this calendar');
+    }
+    if (inputs[2]) {
+      inputs[2].setAttribute('title', 'Folder where new items for this calendar are created');
     }
 
     // Drag and drop handlers

@@ -27,11 +27,11 @@
             "state": {
               "type": "bases",
               "state": {
-                "file": "Bases/Kanban.base",
-                "viewName": "Kanban"
+                "file": "Bases/Timeline.base",
+                "viewName": "Timeline"
               },
-              "icon": "square-kanban",
-              "title": "Kanban"
+              "icon": "square-chart-gantt",
+              "title": "Timeline"
             }
           },
           {
@@ -45,6 +45,20 @@
               },
               "icon": "calendar-range",
               "title": "Calendar"
+            }
+          },
+          {
+            "id": "b13fedca619908ba",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Templates/Daily Note Template.md",
+                "mode": "source",
+                "source": true
+              },
+              "icon": "lucide-file",
+              "title": "Daily Note Template"
             }
           }
         ],
@@ -215,18 +229,29 @@
   },
   "active": "1da558433c436995",
   "lastOpenFiles": [
+    "Planner/test.md",
+    "Bases/Kanban.base",
+    "Optimization/test.md",
+    "Optimization",
+    "Bases/Calendar.base",
+    "Templates/Daily Note Template.md",
+    "Templates/Optimization Template.md",
+    "Planner/tests.md",
+    "Templates/Feature Template.md",
+    "Templates/Planner Template.md",
+    "Feature/Feature Item Test.md",
+    "Feature/tesssst.md",
+    "Feature",
+    "Planner/Encircle current date value in Calendar View.md",
+    "Untitled.md",
     "Planner/Timeline View - Always show title field.md",
     "Ideas.md",
-    "Bases/Calendar.base",
     "Planner/Add Persona - The Gardener.md",
-    "Bases/Kanban.base",
-    "Untitled.md",
     "Planner/Reorder Status items in Settings.md",
     "Planner/Reorder Priority items in Settings.md",
     "Planner/Set default tags.md",
     "Planner/Configure fields shown in Item Modal.md",
     "Planner/groupBy is reserved keyword in Bases.md",
-    "Planner/test.md",
     "Planner/Per-Calender Templates.md",
     "Planner/Rename Existing Calendars.md",
     "Bases/Timeline.base",
@@ -235,24 +260,12 @@
     "Personas/Hobby-Project-Manager/Timeline.base.tmp.49908.1769343623801",
     "Personas/Hobby-Project-Manager/Task List.base.tmp.49908.1769343622235",
     "Personas/Professional-PM/Task List.base.tmp.49908.1769343620642",
-    "Personas/Professional-PM/Timeline.base.tmp.49908.1769343619058",
-    "Bases/Kanban.base.tmp.49908.1769343616943",
     "Planner/Show empty columns or swimlanes.md",
     "Planner/Progress bars for items on Calendar, Kanban, Timeline, and Task List.md",
     "Planner/Improve Note Content in Item Modal.md",
     "Planner/Develop Mind Map View.md",
-    "Planner/Ability to reorder calendars.md",
-    "Planner/0.2.0.md",
-    "Planner/PR 9481.md",
-    "Templates/Planner Template.md",
-    "Planner/Fix Kanban View drag-n-drop on ios.md",
-    "Planner/Relative pathing not working - needs an extra up-folder.md",
-    "Planner/Fix calendar view time input in iOS closing before input.md",
     "ios_item_modal_time_input.png",
     "IMG_0234.png",
-    "PRD.md",
-    "Personas/Professional-PM/Update Project Roadmap.md",
-    "Personas/Professional-PM/Technical Debt Review.md",
     "notes/Screenshot_20260101-185045.png",
     "notes/Screenshot_20260101-185036.png",
     "notes/Screenshot_20260101-184811.png",
