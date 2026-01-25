@@ -1,10 +1,9 @@
 ---
 title: Configure fields shown in Item Modal
-summary:
+summary: Customize Item Modal "Detail Options" input fields
 tags:
   - task
-calendar:
-  - Feature
+calendar: Feature
 context:
 people:
 location:
@@ -12,8 +11,8 @@ related:
 status: Idea
 priority: Low
 progress:
-date_created: "2026-01-25T07:35:57.196Z"
-date_modified: "2026-01-25T07:35:57.196Z"
+date_created: 2026-01-25T07:35:57.196Z
+date_modified: 2026-01-25T14:59:58.957Z
 date_start_scheduled:
 date_start_actual:
 date_end_scheduled:
