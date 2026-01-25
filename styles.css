@@ -2146,6 +2146,18 @@ body.is-mobile .planner-timeline-iframe-container {
   cursor: grab;
   transition: background-color 0.15s ease, opacity 0.15s ease;
   border-radius: 4px;
+  padding-left: 0;
+}
+
+.planner-calendar-item .setting-item-control {
+  width: 100%;
+  gap: 8px;
+  padding-left: 0;
+}
+
+/* Push folder, color picker, and delete to the right */
+.planner-calendar-item .planner-calendar-folder-input {
+  margin-left: auto;
 }
 
 .planner-calendar-item:hover {
@@ -2164,6 +2176,8 @@ body.is-mobile .planner-timeline-iframe-container {
 .planner-drag-handle {
   cursor: grab;
   opacity: 0.5;
+  margin-left: 0;
+  margin-right: 4px;
 }
 
 .planner-drag-handle:hover {
