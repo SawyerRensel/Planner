@@ -95,7 +95,9 @@
   },
   "calendarFontSize": 10,
   "quickCaptureHotkey": "Ctrl+Shift+N",
-  "quickCaptureDefaultTags": [],
+  "quickCaptureDefaultTags": [
+    "task"
+  ],
   "quickCaptureDefaultStatus": "To-Do",
   "quickCaptureOpenAfterCreate": false,
   "openBehavior": "new-tab"

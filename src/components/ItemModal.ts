@@ -13,7 +13,7 @@ import {
   type RecurrenceData,
 } from './menus';
 import { CustomRecurrenceModal } from './CustomRecurrenceModal';
-import { FileLinkSuggest, TagSuggest, ContextSuggest, convertToSimpleWikilinks, convertWikilinksToRelativePaths } from './suggests';
+import { FileLinkSuggest, TagSuggest, ContextSuggest, convertToSimpleWikilinks, convertWikilinksToRelativePaths, createTagChipInput } from './suggests';
 import { isOngoing } from '../utils/dateUtils';
 import { readItemTemplate } from '../utils/templateUtils';
 
@@ -84,7 +84,7 @@ export class ItemModal extends Modal {
   private peopleInput: HTMLInputElement | null = null;
   private parentInput: HTMLInputElement | null = null;
   private blockedByInput: HTMLInputElement | null = null;
-  private tagsInput: HTMLInputElement | null = null;
+  private tagsChipInput: { setTags: (tags: string[]) => void } | null = null;
 
   // Mobile keyboard handling
   private viewportResizeHandler: (() => void) | null = null;
@@ -859,15 +859,14 @@ export class ItemModal extends Modal {
       'file'
     );
 
-    // Tags (with tag suggest)
-    this.tagsInput = this.createTextListInputWithSuggest(
-      fieldsContainer,
-      'Tags',
-      this.tags,
-      (value) => { this.tags = value; },
-      'task, event, project',
-      'tag'
-    );
+    // Tags (with tag chip input)
+    const tagsField = fieldsContainer.createDiv({ cls: 'planner-field' });
+    tagsField.createEl('label', { text: 'Tags', cls: 'planner-label' });
+    this.tagsChipInput = createTagChipInput(this.app, tagsField, {
+      initialTags: this.tags,
+      onChange: (tags) => { this.tags = tags; },
+      placeholder: 'Add tag...',
+    });
   }
 
   private createTextInputWithSuggest(
@@ -1059,8 +1058,8 @@ export class ItemModal extends Modal {
     if (this.contextInput && parsed.context) {
       this.contextInput.value = parsed.context.join(', ');
     }
-    if (this.tagsInput && parsed.tags) {
-      this.tagsInput.value = parsed.tags.join(', ');
+    if (this.tagsChipInput && parsed.tags) {
+      this.tagsChipInput.setTags(parsed.tags);
     }
     if (this.parentInput && parsed.parent) {
       this.parentInput.value = parsed.parent;

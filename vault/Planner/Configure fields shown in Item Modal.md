@@ -1,6 +1,6 @@
 ---
-title: Set default tags
-summary: "Current default is #event.  Would be nice to have these customized from settings and also respect the Template's tags."
+title: Configure fields shown in Item Modal
+summary:
 tags:
   - task
 calendar:
@@ -9,12 +9,12 @@ context:
 people:
 location:
 related:
-status: In-Progress
-priority:
+status: Idea
+priority: Low
 progress:
-date_created: "2026-01-17T18:33:07.660Z"
-date_modified: "2026-01-25T07:41:08.608Z"
-date_start_scheduled: "2026-01-18T23:31:59.779Z"
+date_created: "2026-01-25T07:35:57.196Z"
+date_modified: "2026-01-25T07:35:57.196Z"
+date_start_scheduled:
 date_start_actual:
 date_end_scheduled:
 date_end_actual:

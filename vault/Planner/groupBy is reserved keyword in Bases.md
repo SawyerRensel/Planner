@@ -8,11 +8,11 @@ context:
 people:
 location:
 related:
-status: In-Progress
+status: Done
 priority: High
 progress:
 date_created: 2026-01-18T15:09:52.311Z
-date_modified: 2026-01-25T12:05:17.293Z
+date_modified: 2026-01-25T12:23:55.488Z
 date_start_scheduled:
 date_start_actual:
 date_end_scheduled:

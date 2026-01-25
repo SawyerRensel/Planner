@@ -4,6 +4,7 @@ import { PlannerSettings, StatusConfig, PriorityConfig, DEFAULT_SETTINGS, OpenBe
 import { BaseGeneratorService } from '../services/BaseGeneratorService';
 import { FolderSuggest } from '../components/suggests/FolderSuggest';
 import { FileSuggest } from '../components/suggests/FileSuggest';
+import { createTagChipInput } from '../components/suggests';
 
 /**
  * Tab configuration
@@ -342,6 +343,22 @@ export class PlannerSettingTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           });
       });
+
+    const tagsSetting = new Setting(containerEl)
+      .setName('Default tags')
+      .setDesc('Tags for new items. If a template has tags, those will be used instead.');
+
+    // Replace the default control with tag chip input
+    const controlEl = tagsSetting.controlEl;
+    controlEl.empty();
+    createTagChipInput(this.app, controlEl, {
+      initialTags: this.plugin.settings.quickCaptureDefaultTags,
+      onChange: (tags) => {
+        this.plugin.settings.quickCaptureDefaultTags = tags;
+        void this.plugin.saveSettings();
+      },
+      placeholder: 'Add tag...',
+    });
 
     new Setting(containerEl)
       .setName('Open after create')
