@@ -71,7 +71,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import multiMonthPlugin from '@fullcalendar/multimonth';
 import { RRule } from 'rrule';
 import type PlannerPlugin from '../main';
-import type { OpenBehavior } from '../types/settings';
+import { getCalendarColor, type OpenBehavior } from '../types/settings';
 import type { PlannerItem, DayOfWeek } from '../types/item';
 import { openItemModal } from '../components/ItemModal';
 import { PropertyTypeService } from '../services/PropertyTypeService';
@@ -1044,8 +1044,7 @@ export class BasesCalendarView extends BasesView {
     // Handle fields with colors defined in settings
     if (propName === 'calendar') {
       const calendarName = Array.isArray(value) ? String(value[0]) : String(value);
-      const calendarConfig = this.plugin.settings.calendars[calendarName] as { color?: string } | undefined;
-      return calendarConfig?.color ?? '#6b7280';
+      return getCalendarColor(this.plugin.settings, calendarName);
     }
 
     if (propName === 'priority') {

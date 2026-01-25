@@ -33,7 +33,7 @@ export interface PlannerSettings {
   priorities: PriorityConfig[];
 
   // Calendar Configuration
-  calendars: Record<string, CalendarConfig>;
+  calendars: CalendarConfig[];
   calendarFontSize: number; // px value, range 6-18
 
   // Quick Capture
@@ -70,6 +70,7 @@ export interface PriorityConfig {
  * Calendar configuration
  */
 export interface CalendarConfig {
+  name: string;
   color: string;
   folder?: string; // Optional - falls back to global itemsFolder when not set
 }
@@ -117,10 +118,10 @@ export const DEFAULT_SETTINGS: PlannerSettings = {
   ],
 
   // Calendar Configuration
-  calendars: {
-    'Personal': { color: '#b58900' }, // Solarized yellow
-    'Work': { color: '#cb4b16' },     // Solarized orange
-  },
+  calendars: [
+    { name: 'Personal', color: '#b58900' }, // Solarized yellow
+    { name: 'Work', color: '#cb4b16' },     // Solarized orange
+  ],
   calendarFontSize: 10, // 20% smaller than default 12px
 
   // Quick Capture
@@ -148,17 +149,24 @@ export function getPriorityConfig(settings: PlannerSettings, priorityName: strin
 }
 
 /**
+ * Get calendar config by name
+ */
+export function getCalendarConfig(settings: PlannerSettings, calendarName: string): CalendarConfig | undefined {
+  return settings.calendars.find(c => c.name === calendarName);
+}
+
+/**
  * Get calendar color
  */
 export function getCalendarColor(settings: PlannerSettings, calendarName: string): string {
-  return settings.calendars[calendarName]?.color ?? '#6b7280'; // Default gray
+  return getCalendarConfig(settings, calendarName)?.color ?? '#6b7280'; // Default gray
 }
 
 /**
  * Get calendar folder (falls back to global itemsFolder if not set)
  */
 export function getCalendarFolder(settings: PlannerSettings, calendarName: string): string {
-  return settings.calendars[calendarName]?.folder || settings.itemsFolder;
+  return getCalendarConfig(settings, calendarName)?.folder || settings.itemsFolder;
 }
 
 /**

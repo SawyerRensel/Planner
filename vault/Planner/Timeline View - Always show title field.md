@@ -1,6 +1,6 @@
 ---
-title: Show empty columns or swimlanes
-summary: Add a configuration toggle to show all swimlanes/columns in Kanban View
+title: Timeline View - Always show title field
+summary: Always show an Item's title field in Timeline View even when the bar extends beyond the visible viewport.
 tags:
   - task
 calendar:
@@ -10,10 +10,10 @@ people:
 location:
 related:
 status: Idea
-priority: Low
+priority:
 progress:
-date_created: "2026-01-19T18:11:33.033Z"
-date_modified: "2026-01-25T08:05:29.315Z"
+date_created: "2026-01-25T08:10:45.990Z"
+date_modified: "2026-01-25T08:10:45.990Z"
 date_start_scheduled:
 date_start_actual:
 date_end_scheduled:
@@ -28,9 +28,10 @@ repeat_bymonth:
 repeat_bymonthday:
 repeat_bysetpos:
 repeat_completed_dates:
-parent: "[[0.2.0|0.2.0]]"
+parent:
 children:
 blocked_by:
 cover:
 color:
 ---
+Solves the issue of "What bar is this?" when zoomed in.

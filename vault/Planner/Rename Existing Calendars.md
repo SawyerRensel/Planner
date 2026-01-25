@@ -3,16 +3,16 @@ title: Rename Existing Calendars
 summary:
 tags:
   - task
-calendar: Optimization
+calendar: Feature
 context:
 people:
 location:
 related:
-status: In-Progress
+status: Done
 priority: Medium
 progress:
 date_created: 2026-01-25T07:26:54.615Z
-date_modified: 2026-01-25T12:57:42.227Z
+date_modified: 2026-01-25T12:58:34.915Z
 date_start_scheduled: 2026-01-25T12:26:24.427Z
 date_start_actual:
 date_end_scheduled: 2026-01-25T12:26:35.129Z

@@ -346,7 +346,7 @@ views:
     const folders = new Set<string>();
     folders.add(itemsFolder);
 
-    for (const calendar of Object.values(settings.calendars)) {
+    for (const calendar of settings.calendars) {
       if (calendar.folder) {
         folders.add(calendar.folder.replace(/\/$/, ''));
       }

@@ -10,10 +10,10 @@ people:
 location:
 related:
 status: Idea
-priority:
+priority: Medium
 progress:
 date_created: "2026-01-25T07:45:44.778Z"
-date_modified: "2026-01-25T07:45:44.778Z"
+date_modified: "2026-01-25T08:05:19.962Z"
 date_start_scheduled:
 date_start_actual:
 date_end_scheduled:

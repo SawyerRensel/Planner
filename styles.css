@@ -2135,6 +2135,45 @@ body.is-mobile .planner-timeline-iframe-container {
   min-width: 150px;
 }
 
+/* Calendar list drag and drop */
+.planner-calendar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.planner-calendar-item {
+  cursor: grab;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+  border-radius: 4px;
+}
+
+.planner-calendar-item:hover {
+  background-color: var(--background-modifier-hover);
+}
+
+.planner-calendar-item.planner-dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+}
+
+.planner-calendar-item.planner-drag-over {
+  background-color: color-mix(in srgb, var(--interactive-accent) 20%, transparent);
+}
+
+.planner-drag-handle {
+  cursor: grab;
+  opacity: 0.5;
+}
+
+.planner-drag-handle:hover {
+  opacity: 1;
+}
+
+.planner-calendar-item.planner-dragging .planner-drag-handle {
+  cursor: grabbing;
+}
+
 
 /* ==========================================================================
    KANBAN VIEW STYLES

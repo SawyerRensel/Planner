@@ -102,20 +102,37 @@ export default class PlannerPlugin extends Plugin {
   }
 
   async loadSettings() {
-    const loadedData = await this.loadData() as Partial<PlannerSettings & { calendarColors?: Record<string, string> }> | null;
+    type OldCalendarsFormat = Record<string, { color: string; folder?: string }>;
+    const loadedData = await this.loadData() as Partial<PlannerSettings & {
+      calendarColors?: Record<string, string>;
+      calendars?: OldCalendarsFormat | PlannerSettings['calendars'];
+    }> | null;
     this.settings = Object.assign({}, DEFAULT_SETTINGS, loadedData);
 
-    // Migrate old calendarColors format to new calendars format
+    let needsSave = false;
+
+    // Migrate very old calendarColors format (Record<string, string>)
     if (loadedData?.calendarColors && !loadedData?.calendars) {
       const oldCalendarColors = loadedData.calendarColors;
-      this.settings.calendars = {};
+      this.settings.calendars = [];
       for (const [name, color] of Object.entries(oldCalendarColors)) {
-        // Only migrate if value is a string (old format)
         if (typeof color === 'string') {
-          this.settings.calendars[name] = { color };
+          this.settings.calendars.push({ name, color });
         }
       }
-      // Save migrated settings
+      needsSave = true;
+    }
+    // Migrate old calendars object format (Record<string, CalendarConfig>) to array format
+    else if (loadedData?.calendars && !Array.isArray(loadedData.calendars)) {
+      const oldCalendars = loadedData.calendars as OldCalendarsFormat;
+      this.settings.calendars = [];
+      for (const [name, config] of Object.entries(oldCalendars)) {
+        this.settings.calendars.push({ name, color: config.color, folder: config.folder });
+      }
+      needsSave = true;
+    }
+
+    if (needsSave) {
       await this.saveSettings();
     }
   }

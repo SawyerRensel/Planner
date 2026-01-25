@@ -22,7 +22,7 @@ export class CalendarContextMenu {
 
   private buildMenu(): void {
     const calendarConfigs = this.options.plugin.settings.calendars;
-    const calendars = Object.keys(calendarConfigs);
+    const calendars = calendarConfigs.map(c => c.name);
 
     // Add default calendar if not in the list
     const defaultCalendar = this.options.plugin.settings.defaultCalendar;
@@ -95,7 +95,7 @@ export class CalendarContextMenu {
 
   private applyColorStyling(): void {
     const calendarConfigs = this.options.plugin.settings.calendars;
-    const calendars = Object.keys(calendarConfigs);
+    const calendars = calendarConfigs.map(c => c.name);
 
     // Add default calendar if not in the list (must match buildMenu order)
     const defaultCalendar = this.options.plugin.settings.defaultCalendar;
@@ -113,11 +113,11 @@ export class CalendarContextMenu {
 
     calendars.forEach((calendar, index) => {
       const menuItem = menuItems[index] as HTMLElement;
-      const color = calendarConfigs[calendar]?.color;
-      if (menuItem && color) {
+      const config = calendarConfigs.find(c => c.name === calendar);
+      if (menuItem && config?.color) {
         const iconEl = menuItem.querySelector('.menu-item-icon') as HTMLElement;
         if (iconEl) {
-          iconEl.style.color = color;
+          iconEl.style.color = config.color;
         }
       }
     });

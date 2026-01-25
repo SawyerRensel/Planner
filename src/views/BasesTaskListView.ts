@@ -8,6 +8,7 @@ import {
 } from 'obsidian';
 import type PlannerPlugin from '../main';
 import { openItemModal } from '../components/ItemModal';
+import { getCalendarColor } from '../types/settings';
 
 /**
  * Type interface for BasesView grouped data entries
@@ -384,8 +385,7 @@ export class BasesTaskListView extends BasesView {
     if (propName === 'calendar' && value) {
       const calendarName = this.toDisplayString(value);
       if (calendarName) {
-        const calendarConfig = this.plugin.settings.calendars[calendarName] as { color?: string } | undefined;
-        const color = calendarConfig?.color ?? '#6b7280';
+        const color = getCalendarColor(this.plugin.settings, calendarName);
         const badge = cell.createSpan({ cls: 'planner-badge', text: calendarName });
         badge.style.backgroundColor = color;
         badge.style.color = this.getContrastColor(color);

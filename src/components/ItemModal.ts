@@ -2,7 +2,7 @@ import { Modal, Notice, setIcon, setTooltip, MarkdownRenderer, Component } from 
 import * as chrono from 'chrono-node';
 import type PlannerPlugin from '../main';
 import type { ItemFrontmatter, PlannerItem } from '../types/item';
-import { getCalendarFolder } from '../types/settings';
+import { getCalendarFolder, getCalendarColor } from '../types/settings';
 import { ItemServiceError } from '../services/ItemService';
 import {
   DateContextMenu,
@@ -597,12 +597,8 @@ export class ItemModal extends Modal {
       this.updateIconState(calendarIcon as HTMLElement, hasCalendar, calendarName);
       const iconEl = calendarIcon.querySelector('.planner-icon') as HTMLElement;
       if (hasCalendar && iconEl) {
-        const color = this.plugin.settings.calendars[this.calendars[0]]?.color;
-        if (color) {
-          iconEl.style.setProperty('color', color);
-        } else {
-          iconEl.style.removeProperty('color');
-        }
+        const color = getCalendarColor(this.plugin.settings, this.calendars[0]);
+        iconEl.style.setProperty('color', color);
       } else if (iconEl) {
         iconEl.style.removeProperty('color');
       }
@@ -1126,7 +1122,7 @@ export class ItemModal extends Modal {
 
     // Calendar
     if (this.calendars.length > 0) {
-      const color = this.plugin.settings.calendars[this.calendars[0]]?.color;
+      const color = getCalendarColor(this.plugin.settings, this.calendars[0]);
       this.addPreviewBadge(preview, `~${this.calendars[0]}`, 'calendar', color);
     }
 

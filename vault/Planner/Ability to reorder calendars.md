@@ -10,16 +10,16 @@ context:
 people:
 location:
 related:
-status: Idea
-priority:
+status: In-Progress
+priority: Medium
 progress:
 date_created: "2026-01-17T18:30:12.360Z"
-date_modified: "2026-01-17T18:37:39.863Z"
-date_start_scheduled:
+date_modified: "2026-01-25T08:11:07.673Z"
+date_start_scheduled: "2026-01-25T13:01:10.516Z"
 date_start_actual:
-date_end_scheduled:
+date_end_scheduled: "2026-01-25T13:01:12.391Z"
 date_end_actual:
-all_day: true
+all_day: false
 repeat_frequency:
 repeat_interval:
 repeat_until:
