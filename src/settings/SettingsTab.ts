@@ -506,8 +506,52 @@ export class PlannerSettingTab extends PluginSettingTab {
 
     for (const [name, config] of calendars) {
       const setting = new Setting(containerEl)
-        .setName(name)
+        .setName('')
         .addText(text => {
+          // Calendar name input (editable)
+          text
+            .setPlaceholder('Calendar name')
+            .setValue(name)
+            .onChange(() => {
+              // Validation happens on blur/enter
+            });
+          text.inputEl.addClass('planner-calendar-name-input');
+          text.inputEl.setAttribute('title', 'Calendar name (press enter or click away to rename)');
+
+          const handleRename = async () => {
+            const newName = text.getValue().trim();
+            if (newName === name) return; // No change
+
+            // Validate
+            if (!newName) {
+              new Notice('Calendar name cannot be empty');
+              text.setValue(name); // Reset to original
+              return;
+            }
+            if (this.plugin.settings.calendars[newName]) {
+              new Notice(`Calendar "${newName}" already exists`);
+              text.setValue(name); // Reset to original
+              return;
+            }
+
+            // Rename calendar
+            await this.renameCalendar(name, newName);
+            this.refreshCurrentTab();
+          };
+
+          text.inputEl.addEventListener('blur', () => { void handleRename(); });
+          text.inputEl.addEventListener('keydown', (e: KeyboardEvent) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              text.inputEl.blur(); // Trigger blur handler
+            } else if (e.key === 'Escape') {
+              text.setValue(name); // Reset to original
+              text.inputEl.blur();
+            }
+          });
+        })
+        .addText(text => {
+          // Folder input
           text
             .setPlaceholder('Folder (optional)')
             .setValue(config.folder || '')
@@ -515,6 +559,7 @@ export class PlannerSettingTab extends PluginSettingTab {
               this.plugin.settings.calendars[name].folder = value || undefined;
               await this.plugin.saveSettings();
             });
+          text.inputEl.addClass('planner-calendar-folder-input');
           new FolderSuggest(this.app, text.inputEl);
         })
         .addColorPicker(picker => picker
@@ -532,7 +577,11 @@ export class PlannerSettingTab extends PluginSettingTab {
             this.refreshCurrentTab();
           }));
 
-      setting.settingEl.querySelector('.setting-item-control input[type="text"]')?.setAttribute('title', 'Folder where new items for this calendar are created');
+      // Add tooltips
+      const inputs = setting.settingEl.querySelectorAll('.setting-item-control input[type="text"]');
+      if (inputs[1]) {
+        inputs[1].setAttribute('title', 'Folder where new items for this calendar are created');
+      }
     }
 
     // Add new calendar
@@ -555,6 +604,61 @@ export class PlannerSettingTab extends PluginSettingTab {
             this.refreshCurrentTab();
           }
         }));
+  }
+
+  /**
+   * Rename a calendar and update all references
+   */
+  private async renameCalendar(oldName: string, newName: string): Promise<void> {
+    const settings = this.plugin.settings;
+
+    // 1. Update calendars dictionary
+    const config = settings.calendars[oldName];
+    if (!config) return;
+
+    settings.calendars[newName] = config;
+    delete settings.calendars[oldName];
+
+    // 2. Update default calendar if it matches
+    if (settings.defaultCalendar === oldName) {
+      settings.defaultCalendar = newName;
+    }
+
+    // 3. Update all items with the old calendar name
+    const files = this.app.vault.getMarkdownFiles();
+    let updatedCount = 0;
+
+    for (const file of files) {
+      const cache = this.app.metadataCache.getFileCache(file);
+      const frontmatter = cache?.frontmatter;
+
+      if (!frontmatter?.calendar) continue;
+
+      // Check if this file has the old calendar name
+      const calendars = Array.isArray(frontmatter.calendar)
+        ? frontmatter.calendar
+        : [frontmatter.calendar];
+
+      if (!calendars.includes(oldName)) continue;
+
+      // Update the frontmatter
+      await this.app.fileManager.processFrontMatter(file, (fm: Record<string, unknown>) => {
+        if (Array.isArray(fm.calendar)) {
+          fm.calendar = fm.calendar.map((c: string) => c === oldName ? newName : c);
+        } else if (fm.calendar === oldName) {
+          fm.calendar = newName;
+        }
+      });
+      updatedCount++;
+    }
+
+    await this.plugin.saveSettings();
+
+    if (updatedCount > 0) {
+      new Notice(`Renamed "${oldName}" to "${newName}" and updated ${updatedCount} item${updatedCount === 1 ? '' : 's'}`);
+    } else {
+      new Notice(`Renamed "${oldName}" to "${newName}"`);
+    }
   }
 
   private refreshCurrentTab(): void {

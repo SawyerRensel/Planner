@@ -33,6 +33,19 @@
               "icon": "square-kanban",
               "title": "Kanban"
             }
+          },
+          {
+            "id": "d23a9fabbcd87b87",
+            "type": "leaf",
+            "state": {
+              "type": "bases",
+              "state": {
+                "file": "Bases/Calendar.base",
+                "viewName": "Calendar"
+              },
+              "icon": "calendar-range",
+              "title": "Calendar"
+            }
           }
         ],
         "currentTab": 1
@@ -202,8 +215,14 @@
   },
   "active": "1da558433c436995",
   "lastOpenFiles": [
-    "Planner/Set default tags.md",
+    "Ideas.md",
+    "Bases/Calendar.base",
+    "Planner/Add Persona - The Gardener.md",
     "Bases/Kanban.base",
+    "Untitled.md",
+    "Planner/Reorder Status items in Settings.md",
+    "Planner/Reorder Priority items in Settings.md",
+    "Planner/Set default tags.md",
     "Planner/Configure fields shown in Item Modal.md",
     "Planner/groupBy is reserved keyword in Bases.md",
     "Planner/test.md",
@@ -217,9 +236,6 @@
     "Personas/Professional-PM/Task List.base.tmp.49908.1769343620642",
     "Personas/Professional-PM/Timeline.base.tmp.49908.1769343619058",
     "Bases/Kanban.base.tmp.49908.1769343616943",
-    "Bases/Kanban.base.tmp.49908.1769343614878",
-    "Planner/Add Persona - The Gardener.md",
-    "Ideas.md",
     "Planner/Show empty columns or swimlanes.md",
     "Planner/Progress bars for items on Calendar, Kanban, Timeline, and Task List.md",
     "Planner/Improve Note Content in Item Modal.md",
@@ -236,9 +252,6 @@
     "PRD.md",
     "Personas/Professional-PM/Update Project Roadmap.md",
     "Personas/Professional-PM/Technical Debt Review.md",
-    "Personas/Professional-PM/Stakeholder Update Meeting.md",
-    "Personas/Professional-PM/Sprint Retro - Beta.md",
-    "Personas/Professional-PM/Sprint Planning - Alpha.md",
     "notes/Screenshot_20260101-185045.png",
     "notes/Screenshot_20260101-185036.png",
     "notes/Screenshot_20260101-184811.png",

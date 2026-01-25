@@ -1,23 +1,24 @@
 ---
-title: Rename Existing Calendars
-summary:
+title: Reorder Priority items in Settings
+summary: Allow user to drag-n-drop to reorder priority instances
 tags:
   - task
-calendar: Optimization
+calendar:
+  - Optimization
 context:
 people:
 location:
 related:
-status: In-Progress
-priority: Medium
+status: Idea
+priority:
 progress:
-date_created: 2026-01-25T07:26:54.615Z
-date_modified: 2026-01-25T12:57:42.227Z
-date_start_scheduled: 2026-01-25T12:26:24.427Z
+date_created: "2026-01-25T07:45:44.778Z"
+date_modified: "2026-01-25T07:45:44.778Z"
+date_start_scheduled:
 date_start_actual:
-date_end_scheduled: 2026-01-25T12:26:35.129Z
+date_end_scheduled:
 date_end_actual:
-all_day: false
+all_day: true
 repeat_frequency:
 repeat_interval:
 repeat_until:

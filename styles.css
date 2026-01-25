@@ -2125,6 +2125,16 @@ body.is-mobile .planner-timeline-iframe-container {
   display: block;
 }
 
+/* Calendar settings - editable name inputs */
+.planner-calendar-name-input {
+  font-weight: 500;
+  min-width: 120px;
+}
+
+.planner-calendar-folder-input {
+  min-width: 150px;
+}
+
 
 /* ==========================================================================
    KANBAN VIEW STYLES

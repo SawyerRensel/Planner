@@ -9,16 +9,16 @@ context:
 people:
 location:
 related:
-status: In-Progress
+status: Done
 priority:
 progress:
 date_created: "2026-01-17T18:33:07.660Z"
-date_modified: "2026-01-25T07:41:08.608Z"
-date_start_scheduled: "2026-01-18T23:31:59.779Z"
+date_modified: "2026-01-25T07:47:03.319Z"
+date_start_scheduled: "2026-01-25T12:47:01.459Z"
 date_start_actual:
-date_end_scheduled:
+date_end_scheduled: "2026-01-25T12:46:59.605Z"
 date_end_actual:
-all_day: true
+all_day: false
 repeat_frequency:
 repeat_interval:
 repeat_until:

@@ -11,13 +11,13 @@ related:
 status: Done
 priority: High
 progress:
-date_created: 2026-01-18T15:09:52.311Z
-date_modified: 2026-01-25T12:23:55.488Z
-date_start_scheduled:
+date_created: "2026-01-18T15:09:52.311Z"
+date_modified: "2026-01-25T07:46:55.211Z"
+date_start_scheduled: "2026-01-25T12:46:51.581Z"
 date_start_actual:
-date_end_scheduled:
+date_end_scheduled: "2026-01-25T12:46:53.763Z"
 date_end_actual:
-all_day: true
+all_day: false
 repeat_frequency:
 repeat_interval:
 repeat_until:
@@ -33,6 +33,5 @@ blocked_by:
 cover:
 color:
 ---
-
 
 Happens when grouping by a property in Bases' sort menu, then going to Kanban or Calendar view
