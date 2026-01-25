@@ -22,33 +22,20 @@
             }
           },
           {
-            "id": "1da558433c436995",
-            "type": "leaf",
-            "state": {
-              "type": "bases",
-              "state": {
-                "file": "Bases/Calendar.base",
-                "viewName": "Calendar"
-              },
-              "icon": "calendar-range",
-              "title": "Calendar"
-            }
-          },
-          {
             "id": "b13fedca619908ba",
             "type": "leaf",
             "state": {
               "type": "bases",
               "state": {
-                "file": "Bases/Timeline.base",
-                "viewName": "Timeline"
+                "file": "Bases/Kanban.base",
+                "viewName": "Kanban"
               },
-              "icon": "square-chart-gantt",
-              "title": "Timeline"
+              "icon": "square-kanban",
+              "title": "Kanban"
             }
           }
         ],
-        "currentTab": 2
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -215,20 +202,20 @@
   },
   "active": "b13fedca619908ba",
   "lastOpenFiles": [
-    "Planner/test.md",
-    "Bases/Timeline.base",
-    "Templates/Daily Note Template.md",
     "Bases/Calendar.base",
-    "Optimization/tse.md",
+    "Templates/Optimization Template.md",
+    "Planner/test.md",
+    "Templates/Planner Template.md",
+    "Templates/Daily Note Template.md",
+    "Templates/Feature Template.md",
     "Bases/Kanban.base",
     "Optimization/test.md",
+    "Bases/Timeline.base",
+    "Optimization/tse.md",
     "Bases/Task List.base",
     "Planner/Untitled.md",
     "Optimization",
-    "Templates/Optimization Template.md",
     "Planner/tests.md",
-    "Templates/Feature Template.md",
-    "Templates/Planner Template.md",
     "Feature/Feature Item Test.md",
     "Feature/tesssst.md",
     "Feature",

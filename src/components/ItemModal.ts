@@ -545,10 +545,14 @@ export class ItemModal extends Modal {
       : this.plugin.settings.itemTemplate;
 
     if (!templatePath) {
-      // No template configured, clear template-derived values and body
+      // No template configured, clear all template-derived values
       this.options.templateFrontmatter = undefined;
       this.options.templateBody = undefined;
       this.options.templateCustomFields = undefined;
+      this.resetTemplateFields();
+      this.applyDefaultSettings();
+      this.clearAllInputFields();
+      this.updateInputFieldsFromState();
       this.details = '';
       if (this.detailsTextarea) {
         this.detailsTextarea.value = '';
@@ -563,9 +567,14 @@ export class ItemModal extends Modal {
 
     const template = await readItemTemplate(this.plugin.app, templatePath);
     if (!template) {
+      // Template file not found/readable, clear all template-derived values
       this.options.templateFrontmatter = undefined;
       this.options.templateBody = undefined;
       this.options.templateCustomFields = undefined;
+      this.resetTemplateFields();
+      this.applyDefaultSettings();
+      this.clearAllInputFields();
+      this.updateInputFieldsFromState();
       this.details = '';
       if (this.detailsTextarea) {
         this.detailsTextarea.value = '';
@@ -582,6 +591,10 @@ export class ItemModal extends Modal {
     this.options.templateFrontmatter = template.frontmatter;
     this.options.templateBody = template.body;
     this.options.templateCustomFields = template.customFields;
+
+    // Clear all template-derived state before applying new template
+    // This ensures fields without values in the new template don't retain old values
+    this.resetTemplateFields();
 
     // Apply template frontmatter values
     this.applyTemplateFrontmatter(template.frontmatter);
@@ -601,28 +614,108 @@ export class ItemModal extends Modal {
     this.updateIconStates();
     this.updateNLPPreview();
 
-    // Update input fields that may have changed
-    if (this.contextInput && template.frontmatter.context) {
-      const context = convertToSimpleWikilinks(template.frontmatter.context) as string[];
+    // Update input fields - always set values (even empty) to clear stale data
+    if (this.contextInput) {
+      const context = template.frontmatter.context
+        ? convertToSimpleWikilinks(template.frontmatter.context) as string[]
+        : [];
       this.contextInput.value = context.join(', ');
     }
-    if (this.peopleInput && template.frontmatter.people) {
-      const people = convertToSimpleWikilinks(template.frontmatter.people) as string[];
+    if (this.peopleInput) {
+      const people = template.frontmatter.people
+        ? convertToSimpleWikilinks(template.frontmatter.people) as string[]
+        : [];
       this.peopleInput.value = people.join(', ');
     }
-    if (this.parentInput && template.frontmatter.parent) {
-      const parent = convertToSimpleWikilinks(template.frontmatter.parent) as string | null;
+    if (this.parentInput) {
+      const parent = template.frontmatter.parent
+        ? convertToSimpleWikilinks(template.frontmatter.parent) as string | null
+        : null;
       this.parentInput.value = parent || '';
     }
-    if (this.blockedByInput && template.frontmatter.blocked_by) {
-      const blockedBy = convertToSimpleWikilinks(template.frontmatter.blocked_by) as string[];
+    if (this.blockedByInput) {
+      const blockedBy = template.frontmatter.blocked_by
+        ? convertToSimpleWikilinks(template.frontmatter.blocked_by) as string[]
+        : [];
       this.blockedByInput.value = blockedBy.join(', ');
     }
-    if (this.tagsChipInput && template.frontmatter.tags) {
-      this.tagsChipInput.setTags(template.frontmatter.tags);
+    if (this.tagsChipInput) {
+      this.tagsChipInput.setTags(template.frontmatter.tags || []);
     }
-    if (this.summaryTextarea && template.frontmatter.summary) {
-      this.summaryTextarea.value = template.frontmatter.summary;
+    if (this.summaryTextarea) {
+      this.summaryTextarea.value = template.frontmatter.summary || '';
+    }
+  }
+
+  /**
+   * Reset all template-derived fields to their default/empty state.
+   * Called before applying a new template to ensure stale values don't persist.
+   */
+  private resetTemplateFields(): void {
+    // Reset state variables (but preserve calendar - that's user-selected)
+    this.summary = '';
+    this.status = null;
+    this.priority = null;
+    this.context = [];
+    this.people = [];
+    this.parent = null;
+    this.blockedBy = [];
+    this.tags = [];
+    this.recurrence = null;
+  }
+
+  /**
+   * Clear all input field UI elements to empty state.
+   * Called when switching to a calendar with no template.
+   */
+  private clearAllInputFields(): void {
+    if (this.summaryTextarea) {
+      this.summaryTextarea.value = '';
+    }
+    if (this.contextInput) {
+      this.contextInput.value = '';
+    }
+    if (this.peopleInput) {
+      this.peopleInput.value = '';
+    }
+    if (this.parentInput) {
+      this.parentInput.value = '';
+    }
+    if (this.blockedByInput) {
+      this.blockedByInput.value = '';
+    }
+    if (this.tagsChipInput) {
+      this.tagsChipInput.setTags([]);
+    }
+  }
+
+  /**
+   * Apply default Planner settings when no template is available.
+   * Sets default status, tags, etc. from plugin settings.
+   */
+  private applyDefaultSettings(): void {
+    // Apply default status
+    if (!this.status && this.plugin.settings.quickCaptureDefaultStatus) {
+      this.status = this.plugin.settings.quickCaptureDefaultStatus;
+    }
+
+    // Apply default tags
+    if (this.tags.length === 0) {
+      if (this.plugin.settings.quickCaptureDefaultTags.length > 0) {
+        this.tags = [...this.plugin.settings.quickCaptureDefaultTags];
+      } else {
+        this.tags = ['event'];
+      }
+    }
+  }
+
+  /**
+   * Update input field UI elements to reflect current state.
+   * Called after applying defaults to sync UI with state.
+   */
+  private updateInputFieldsFromState(): void {
+    if (this.tagsChipInput) {
+      this.tagsChipInput.setTags(this.tags);
     }
   }
 

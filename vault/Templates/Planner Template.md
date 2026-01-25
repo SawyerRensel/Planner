@@ -2,7 +2,7 @@
 title:
 summary:
 tags:
-  - yarr
+  - task
 calendar: Personal
 context:
 people:

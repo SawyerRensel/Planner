@@ -85,8 +85,7 @@
     {
       "name": "Optimization",
       "color": "#268bd2",
-      "template": "Templates/Optimization Template.md",
-      "folder": "Optimization"
+      "template": "Templates/Optimization Template.md"
     },
     {
       "name": "Bugfix",
