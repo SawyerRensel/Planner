@@ -27,19 +27,6 @@
             "state": {
               "type": "bases",
               "state": {
-                "file": "Bases/Timeline.base",
-                "viewName": "Timeline"
-              },
-              "icon": "square-chart-gantt",
-              "title": "Timeline"
-            }
-          },
-          {
-            "id": "d23a9fabbcd87b87",
-            "type": "leaf",
-            "state": {
-              "type": "bases",
-              "state": {
                 "file": "Bases/Calendar.base",
                 "viewName": "Calendar"
               },
@@ -51,18 +38,17 @@
             "id": "b13fedca619908ba",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "bases",
               "state": {
-                "file": "Templates/Daily Note Template.md",
-                "mode": "source",
-                "source": true
+                "file": "Bases/Timeline.base",
+                "viewName": "Timeline"
               },
-              "icon": "lucide-file",
-              "title": "Daily Note Template"
+              "icon": "square-chart-gantt",
+              "title": "Timeline"
             }
           }
         ],
-        "currentTab": 1
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -227,14 +213,18 @@
       "bases:Create new base": false
     }
   },
-  "active": "1da558433c436995",
+  "active": "b13fedca619908ba",
   "lastOpenFiles": [
     "Planner/test.md",
+    "Bases/Timeline.base",
+    "Templates/Daily Note Template.md",
+    "Bases/Calendar.base",
+    "Optimization/tse.md",
     "Bases/Kanban.base",
     "Optimization/test.md",
+    "Bases/Task List.base",
+    "Planner/Untitled.md",
     "Optimization",
-    "Bases/Calendar.base",
-    "Templates/Daily Note Template.md",
     "Templates/Optimization Template.md",
     "Planner/tests.md",
     "Templates/Feature Template.md",
@@ -254,16 +244,12 @@
     "Planner/groupBy is reserved keyword in Bases.md",
     "Planner/Per-Calender Templates.md",
     "Planner/Rename Existing Calendars.md",
-    "Bases/Timeline.base",
     "Personas/Casual-Planner/Task List.base.tmp.49908.1769343627041",
     "Personas/Hobby-Project-Manager/Kanban.base.tmp.49908.1769343625425",
     "Personas/Hobby-Project-Manager/Timeline.base.tmp.49908.1769343623801",
     "Personas/Hobby-Project-Manager/Task List.base.tmp.49908.1769343622235",
-    "Personas/Professional-PM/Task List.base.tmp.49908.1769343620642",
     "Planner/Show empty columns or swimlanes.md",
     "Planner/Progress bars for items on Calendar, Kanban, Timeline, and Task List.md",
-    "Planner/Improve Note Content in Item Modal.md",
-    "Planner/Develop Mind Map View.md",
     "ios_item_modal_time_input.png",
     "IMG_0234.png",
     "notes/Screenshot_20260101-185045.png",

@@ -337,13 +337,16 @@ export class BasesTimelineView extends BasesView {
    */
   private handleNewEvent(params: NewEventMessage): void {
     // Open ItemModal with pre-filled dates
+    // Pass the default calendar so the correct template is loaded
     // Use requestAnimationFrame to break out of postMessage context (same as handleSetDetailPath)
+    const defaultCalendar = this.plugin.settings.defaultCalendar;
     requestAnimationFrame(() => {
       void openItemModal(this.plugin, {
         mode: 'create',
         prePopulate: {
           date_start_scheduled: params.dateRangeIso.fromDateTimeIso,
           date_end_scheduled: params.dateRangeIso.toDateTimeIso,
+          calendar: defaultCalendar ? [defaultCalendar] : undefined,
         },
       });
     });

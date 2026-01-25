@@ -1352,13 +1352,16 @@ export class BasesCalendarView extends BasesView {
 
   private createNewItem(startDate?: string, endDate?: string, allDay?: boolean): void {
     // Open ItemModal with pre-populated date from calendar click
+    // Note: Don't hardcode tags - let the template or defaults provide them
+    // Pass the default calendar so the correct template is loaded
+    const defaultCalendar = this.plugin.settings.defaultCalendar;
     void openItemModal(this.plugin, {
       mode: 'create',
       prePopulate: {
         date_start_scheduled: startDate || new Date().toISOString(),
         date_end_scheduled: endDate || undefined,
         all_day: allDay ?? true,
-        tags: ['event'],
+        calendar: defaultCalendar ? [defaultCalendar] : undefined,
       },
     });
   }

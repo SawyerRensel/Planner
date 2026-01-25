@@ -2,7 +2,7 @@
   "itemsFolder": "Planner/",
   "basesFolder": "Bases/",
   "itemTemplate": "Templates/Planner Template.md",
-  "defaultCalendar": "Documentation",
+  "defaultCalendar": "Feature",
   "dateFormat": "YYYY-MM-DD",
   "timeFormat": "24h",
   "weekStartsOn": "monday",

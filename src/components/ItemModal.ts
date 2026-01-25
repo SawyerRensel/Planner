@@ -536,16 +536,28 @@ export class ItemModal extends Modal {
    * Called when the user changes the calendar in create mode.
    */
   private async reloadTemplateForCalendar(calendarName: string | undefined): Promise<void> {
+    // Preserve the user-selected calendar - template should not override it
+    const userSelectedCalendars = [...this.calendars];
+
     // Get template path for the new calendar
     const templatePath = calendarName
       ? getCalendarTemplate(this.plugin.settings, calendarName)
       : this.plugin.settings.itemTemplate;
 
     if (!templatePath) {
-      // No template configured, clear template-derived values
+      // No template configured, clear template-derived values and body
       this.options.templateFrontmatter = undefined;
       this.options.templateBody = undefined;
       this.options.templateCustomFields = undefined;
+      this.details = '';
+      if (this.detailsTextarea) {
+        this.detailsTextarea.value = '';
+      }
+      void this.renderDetailsMarkdown();
+      // Restore user-selected calendar even when no template
+      this.calendars = userSelectedCalendars;
+      this.updateIconStates();
+      this.updateNLPPreview();
       return;
     }
 
@@ -554,6 +566,15 @@ export class ItemModal extends Modal {
       this.options.templateFrontmatter = undefined;
       this.options.templateBody = undefined;
       this.options.templateCustomFields = undefined;
+      this.details = '';
+      if (this.detailsTextarea) {
+        this.detailsTextarea.value = '';
+      }
+      void this.renderDetailsMarkdown();
+      // Restore user-selected calendar even when no template
+      this.calendars = userSelectedCalendars;
+      this.updateIconStates();
+      this.updateNLPPreview();
       return;
     }
 
@@ -565,15 +586,16 @@ export class ItemModal extends Modal {
     // Apply template frontmatter values
     this.applyTemplateFrontmatter(template.frontmatter);
 
-    // Apply template body if note content is empty
-    if (!this.details || this.details.trim() === '') {
-      this.details = template.body;
-      if (this.detailsTextarea) {
-        this.detailsTextarea.value = template.body;
-      }
-      // Re-render markdown preview
-      void this.renderDetailsMarkdown();
+    // Restore the user-selected calendar (template's calendar value should not override user selection)
+    this.calendars = userSelectedCalendars;
+
+    // Always update template body when calendar changes - user expects template content to match calendar
+    this.details = template.body;
+    if (this.detailsTextarea) {
+      this.detailsTextarea.value = template.body;
     }
+    // Re-render markdown preview
+    void this.renderDetailsMarkdown();
 
     // Update UI to reflect new template values
     this.updateIconStates();
