@@ -55,7 +55,7 @@ export class BasesTimelineView extends BasesView {
 
   // Configuration getters - now accept any property ID for custom properties
   private getGroupBy(): TimelineGroupBy {
-    const value = this.config?.get('groupBy') as string | undefined;
+    const value = this.config?.get('plannerGroupBy') as string | undefined;
     // Accept any property ID; empty string or undefined means 'none'
     if (!value) return 'none';
     return value;
@@ -446,7 +446,7 @@ export function createTimelineViewRegistration(plugin: PlannerPlugin): BasesView
       },
       {
         type: 'property',
-        key: 'groupBy',
+        key: 'plannerGroupBy',
         displayName: 'Group by',
         default: 'note.calendar',
         placeholder: 'None',

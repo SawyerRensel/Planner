@@ -49,6 +49,6 @@ views:
     badgePlacement: properties-section
     coverDisplay: banner
     coverHeight: "100"
-    groupBy: note.calendar
+    plannerGroupBy: note.calendar
   - type: table
     name: Table

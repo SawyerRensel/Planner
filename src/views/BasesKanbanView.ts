@@ -112,7 +112,7 @@ export class BasesKanbanView extends BasesView {
 
   // Configuration getters
   private getGroupBy(): string {
-    const value = this.config.get('groupBy') as string | undefined;
+    const value = this.config.get('plannerGroupBy') as string | undefined;
     return value || 'note.status';
   }
 
@@ -2725,7 +2725,7 @@ export function createKanbanViewRegistration(plugin: PlannerPlugin): BasesViewRe
     options: () => [
       {
         type: 'property',
-        key: 'groupBy',
+        key: 'plannerGroupBy',
         displayName: 'Columns by',
         default: 'note.status',
         placeholder: 'Select property',

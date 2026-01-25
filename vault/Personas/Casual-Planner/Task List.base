@@ -33,7 +33,7 @@ properties:
 views:
   - type: planner-task-list
     name: Task List
-    groupBy:
+    plannerGroupBy:
       property: status
       direction: ASC
     order:

@@ -210,7 +210,7 @@ export type TimelineSectionsBy = string;
 export type TimelineColorBy = string;
 
 export interface TimelineViewConfig {
-  groupBy: TimelineGroupBy;
+  plannerGroupBy: TimelineGroupBy;
   sectionsBy: TimelineSectionsBy;
   colorBy: TimelineColorBy;
   dateStartField: string;
