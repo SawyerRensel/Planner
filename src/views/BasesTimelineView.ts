@@ -22,6 +22,7 @@ import {
   TimelineGroupBy,
   TimelineSectionsBy,
   TimelineColorBy,
+  TimelineDateLabel,
   MarkwhenState,
   AppState,
   EditEventDateRangeMessage,
@@ -88,6 +89,11 @@ export class BasesTimelineView extends BasesView {
   private getTitleField(): string {
     const value = this.config?.get('titleField') as string | undefined;
     return value || 'note.title';
+  }
+
+  private getDateLabel(): TimelineDateLabel {
+    const value = this.config?.get('dateLabel') as string | undefined;
+    return value === 'end' ? 'end' : 'start';
   }
 
   private getBackgroundColor(): string | undefined {
@@ -251,6 +257,7 @@ export class BasesTimelineView extends BasesView {
       dateStartField: this.getDateStartField(),
       dateEndField: this.getDateEndField(),
       titleField: this.getTitleField(),
+      dateLabel: this.getDateLabel(),
     };
 
     // Adapt entries to Markwhen format
@@ -488,6 +495,16 @@ export function createTimelineViewRegistration(plugin: PlannerPlugin): BasesView
         placeholder: 'Select property',
         filter: (propId: BasesPropertyId) =>
           PropertyTypeService.isTextProperty(propId, plugin.app),
+      },
+      {
+        type: 'dropdown',
+        key: 'dateLabel',
+        displayName: 'Date label',
+        default: 'start',
+        options: {
+          'start': 'Start date',
+          'end': 'End date',
+        },
       },
       {
         type: 'dropdown',

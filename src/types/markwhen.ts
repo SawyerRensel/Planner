@@ -209,6 +209,8 @@ export type TimelineSectionsBy = string;
 
 export type TimelineColorBy = string;
 
+export type TimelineDateLabel = 'start' | 'end';
+
 export interface TimelineViewConfig {
   groupBy: TimelineGroupBy;
   sectionsBy: TimelineSectionsBy;
@@ -216,6 +218,7 @@ export interface TimelineViewConfig {
   dateStartField: string;
   dateEndField: string;
   titleField: string;
+  dateLabel: TimelineDateLabel;
 }
 
 /**

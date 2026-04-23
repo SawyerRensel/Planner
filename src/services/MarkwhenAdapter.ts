@@ -16,6 +16,7 @@ import {
   TimelineGroupBy,
   TimelineSectionsBy,
   TimelineColorBy,
+  TimelineDateLabel,
   PathMapping,
   EventPath,
   Recurrence,
@@ -23,6 +24,28 @@ import {
 import { isOngoing } from '../utils/dateUtils';
 import type { PlannerSettings } from '../types/settings';
 import type { PlannerItem, DayOfWeek } from '../types/item';
+
+/**
+ * Replace Obsidian wikilinks in a string with their display text:
+ *   [[target|alias]] → alias
+ *   [[target]]       → basename of target (no .md extension)
+ *   [[folder/file]]  → file
+ * Leaves any surrounding text intact. Useful when a timeline title comes
+ * from a formula that concatenates link-typed properties (e.g. a
+ * "Name · status · assignee" title built in a .base file), which would
+ * otherwise render as `Name · status · [[Pablo]]` in the Markwhen
+ * timeline UI.
+ */
+function cleanWikilinks(text: string): string {
+  return text.replace(
+    /\[\[([^|\]]+)(?:\|([^\]]+))?\]\]/g,
+    (_match, target: string, alias?: string) => {
+      if (alias) return alias;
+      const basename = target.split('/').pop() ?? target;
+      return basename.replace(/\.md$/, '');
+    }
+  );
+}
 
 /**
  * Safely convert any value to a string, handling objects properly
@@ -53,6 +76,7 @@ export interface AdapterOptions {
   dateStartField: string;
   dateEndField: string;
   titleField: string;
+  dateLabel?: TimelineDateLabel;
 }
 
 /**
@@ -86,6 +110,7 @@ export class MarkwhenAdapter {
   private settings: PlannerSettings;
   private app: App;
   private pathMappings: PathMapping[] = [];
+  private currentDateLabel: TimelineDateLabel = 'start';
 
   constructor(settings: PlannerSettings, app: App) {
     this.settings = settings;
@@ -97,6 +122,7 @@ export class MarkwhenAdapter {
    */
   adapt(entries: BasesEntry[], options: AdapterOptions): AdaptedResult {
     this.pathMappings = [];
+    this.currentDateLabel = options.dateLabel || 'start';
 
     // Convert entries to timeline events
     const timelineEvents = this.entriesToTimelineEvents(entries, options);
@@ -304,8 +330,12 @@ export class MarkwhenAdapter {
     // Parse end date - default to start date if not set
     const endDate = this.parseDate(endValue) || startDate;
 
-    // Get title
-    const title = titleValue?.toString() || entry.file.basename;
+    // Get title. Apply cleanWikilinks so that link-typed values embedded
+    // in the title (directly or via a formula) render as display text
+    // rather than raw [[...]] syntax.
+    const title = cleanWikilinks(
+      titleValue?.toString() || entry.file.basename
+    );
 
     // Get tags from note
     const tagsValue = entry.getValue('note.tags');
@@ -448,10 +478,10 @@ export class MarkwhenAdapter {
 
     if (Array.isArray(value)) {
       const firstVal: unknown = value[0];
-      return firstVal ? safeToString(firstVal).replace(/^#/, '') : 'Unsectioned';
+      return firstVal ? cleanWikilinks(safeToString(firstVal).replace(/^#/, '')) : 'Unsectioned';
     }
 
-    return safeToString(value);
+    return cleanWikilinks(safeToString(value));
   }
 
   /**
@@ -487,10 +517,10 @@ export class MarkwhenAdapter {
 
     if (Array.isArray(value)) {
       const firstVal: unknown = value[0];
-      return firstVal ? safeToString(firstVal).replace(/^#/, '') : 'Ungrouped';
+      return firstVal ? cleanWikilinks(safeToString(firstVal).replace(/^#/, '')) : 'Ungrouped';
     }
 
-    return safeToString(value);
+    return cleanWikilinks(safeToString(value));
   }
 
   /**
@@ -511,10 +541,10 @@ export class MarkwhenAdapter {
 
     if (Array.isArray(value)) {
       const firstVal: unknown = value[0];
-      return firstVal ? safeToString(firstVal).replace(/^#/, '') : undefined;
+      return firstVal ? cleanWikilinks(safeToString(firstVal).replace(/^#/, '')) : undefined;
     }
 
-    return safeToString(value);
+    return cleanWikilinks(safeToString(value));
   }
 
   /**
@@ -688,7 +718,11 @@ export class MarkwhenAdapter {
    * Convert a TimelineEvent to a Markwhen Event
    */
   private timelineEventToMarkwhenEvent(event: TimelineEvent): Event {
-    const datePart = event.dateRangeIso.fromDateTimeIso.split('T')[0];
+    const labelIso =
+      this.currentDateLabel === 'end'
+        ? event.dateRangeIso.toDateTimeIso || event.dateRangeIso.fromDateTimeIso
+        : event.dateRangeIso.fromDateTimeIso;
+    const datePart = labelIso.split('T')[0];
 
     // Create a minimal Event object that Markwhen Timeline can render
     const mwEvent: Event = {
@@ -797,11 +831,11 @@ export class MarkwhenAdapter {
           if (Array.isArray(value)) {
             const first: unknown = value[0];
             if (first) {
-              const firstVal = safeToString(first).replace(/^#/, '');
+              const firstVal = cleanWikilinks(safeToString(first).replace(/^#/, ''));
               if (firstVal) uniqueValues.add(firstVal);
             }
           } else {
-            uniqueValues.add(safeToString(value));
+            uniqueValues.add(cleanWikilinks(safeToString(value)));
           }
         }
       }
