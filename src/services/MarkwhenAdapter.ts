@@ -23,6 +23,7 @@ import {
 import { isOngoing } from '../utils/dateUtils';
 import type { PlannerSettings } from '../types/settings';
 import type { PlannerItem, DayOfWeek } from '../types/item';
+import { cleanLinks } from '../utils/linkUtils';
 import { toRawNumber } from '../types/item';
 
 /**
@@ -331,8 +332,9 @@ export class MarkwhenAdapter {
     // Parse end date - default to start date if not set
     const endDate = this.parseDate(endValue) || startDate;
 
-    // Get title
-    const title = titleValue?.toString() || entry.file.basename;
+    const title = cleanLinks(
+      titleValue?.toString() || entry.file.basename
+    );
 
     // Get tags from note
     const tagsValue = entry.getValue('note.tags');
@@ -482,10 +484,10 @@ export class MarkwhenAdapter {
 
     if (Array.isArray(value)) {
       const firstVal: unknown = value[0];
-      return firstVal ? safeToString(firstVal).replace(/^#/, '') : 'Unsectioned';
+      return firstVal ? cleanLinks(safeToString(firstVal).replace(/^#/, '')) : 'Unsectioned';
     }
 
-    return safeToString(value);
+    return cleanLinks(safeToString(value));
   }
 
   /**
@@ -521,10 +523,10 @@ export class MarkwhenAdapter {
 
     if (Array.isArray(value)) {
       const firstVal: unknown = value[0];
-      return firstVal ? safeToString(firstVal).replace(/^#/, '') : 'Ungrouped';
+      return firstVal ? cleanLinks(safeToString(firstVal).replace(/^#/, '')) : 'Ungrouped';
     }
 
-    return safeToString(value);
+    return cleanLinks(safeToString(value));
   }
 
   /**
@@ -545,10 +547,10 @@ export class MarkwhenAdapter {
 
     if (Array.isArray(value)) {
       const firstVal: unknown = value[0];
-      return firstVal ? safeToString(firstVal).replace(/^#/, '') : undefined;
+      return firstVal ? cleanLinks(safeToString(firstVal).replace(/^#/, '')) : undefined;
     }
 
-    return safeToString(value);
+    return cleanLinks(safeToString(value));
   }
 
   /**

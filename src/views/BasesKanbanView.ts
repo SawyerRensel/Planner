@@ -21,6 +21,7 @@ import {
   getPriorityConfig,
   getCalendarColor,
 } from '../types/settings';
+import { cleanLinks } from '../utils/linkUtils';
 
 /**
  * Type interface for BasesView grouped data entries
@@ -1944,7 +1945,7 @@ export class BasesKanbanView extends BasesView {
     // Title (CSS class handles font-weight)
     const titleField = this.getTitleBy();
     const title = this.getEntryValue(entry, titleField) || entry.file.basename;
-    titleRow.createSpan({ cls: 'planner-kanban-card-title', text: this.valueToString(title) });
+    titleRow.createSpan({ cls: 'planner-kanban-card-title', text: cleanLinks(this.valueToString(title)) });
 
     // For inline placement, render badges in title row
     if (placement === 'inline') {
