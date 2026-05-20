@@ -26,6 +26,10 @@ properties:
     width: 100
   note.cover:
     width: 200
+  note.progress_current:
+    width: 80
+  note.progress_total:
+    width: 80
   note.date_start_scheduled:
     width: 120
   note.date_end_scheduled:
@@ -49,6 +53,7 @@ views:
     colorBy: note.calendar
     borderStyle: left-accent
     badgePlacement: properties-section
-    swimlaneBy: note.calendar
+    showProgress: true
+    progressLabel: percentage
   - type: table
     name: Table

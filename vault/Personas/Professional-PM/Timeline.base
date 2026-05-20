@@ -44,6 +44,6 @@ views:
     sort: []
     colorBy: note.priority
     sectionsBy: note.priority
-    groupBy: note.status
+    plannerGroupBy: note.status
   - type: table
     name: Table

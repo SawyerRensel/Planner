@@ -2,6 +2,7 @@
 title:
 summary:
 tags:
+  - task
 calendar: Personal
 context:
 people:

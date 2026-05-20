@@ -3,22 +3,21 @@ title: groupBy is reserved keyword in Bases
 summary: Calendar/Kanban base runs into error when groupBy is not empty
 tags:
   - task
-calendar:
-  - Bugfix
+calendar: Bugfix
 context:
 people:
 location:
 related:
-status: To-Do
+status: Done
 priority: High
 progress:
 date_created: "2026-01-18T15:09:52.311Z"
-date_modified: "2026-01-19T17:52:29.607Z"
-date_start_scheduled:
+date_modified: "2026-01-25T07:46:55.211Z"
+date_start_scheduled: "2026-01-25T12:46:51.581Z"
 date_start_actual:
-date_end_scheduled:
+date_end_scheduled: "2026-01-25T12:46:53.763Z"
 date_end_actual:
-all_day: true
+all_day: false
 repeat_frequency:
 repeat_interval:
 repeat_until:
@@ -35,7 +34,4 @@ cover:
 color:
 ---
 
-z
 Happens when grouping by a property in Bases' sort menu, then going to Kanban or Calendar view
-
-![](../Media/Pasted%20image%2020260118150959.png)

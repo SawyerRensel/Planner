@@ -167,7 +167,13 @@
   color: var(--text-muted);
 }
 
-/* Progress bar */
+/* ── Progress bar (Task List) ───────────────────────────────── */
+.planner-progress-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .planner-progress-bar {
   display: inline-block;
   width: 60px;
@@ -175,7 +181,7 @@
   background: var(--background-modifier-border);
   border-radius: 3px;
   overflow: hidden;
-  margin-right: 6px;
+  flex-shrink: 0;
   vertical-align: middle;
 }
 
@@ -189,6 +195,111 @@
 .planner-progress-text {
   font-size: 11px;
   color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ── Progress bar (Task List - pill style) ──────────────────── */
+.planner-tasklist-progress-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 4px 0;
+}
+
+.planner-tasklist-progress-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background: var(--interactive-accent);
+  border-radius: 12px;
+  padding: 2px 8px;
+  width: 100%;
+}
+
+.planner-tasklist-progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: var(--progress-percent, 100%);
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.50);
+  pointer-events: none;
+  border-radius: 0 12px 12px 0;
+}
+
+.planner-tasklist-progress-label {
+  position: relative;
+  z-index: 1;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-on-accent);
+  white-space: nowrap;
+}
+
+/* ── Progress bar (Kanban cards) ────────────────────────────── */
+.planner-kanban-card-progress-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0 2px;
+}
+
+.planner-kanban-card-progress-bar {
+  flex: 1;
+  height: 4px;
+  background: var(--background-modifier-border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.planner-kanban-card-progress-fill {
+  height: 100%;
+  width: var(--progress-width, 0%);
+  background: var(--interactive-accent);
+  border-radius: 2px;
+}
+
+/* ── Progress (Calendar events) ─────────────────────────────── */
+/*
+ * Continuous progress display for calendar events.
+ * Completed portion: solid event colour (the normal background).
+ * Incomplete portion: semi-transparent overlay via ::after pseudo-element.
+ *
+ * Two modes:
+ * - Horizontal (daygrid/all-day): overlay starts at --progress-percent from left
+ * - Vertical (timegrid/timed): overlay starts at --progress-percent from top
+ */
+.planner-event-progress {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Horizontal progress (daygrid views, all-day events) - transparent overlay left to right */
+.planner-event-progress--horizontal::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: var(--progress-percent, 100%);
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.50);
+  pointer-events: none;
+}
+
+/* Vertical progress (timegrid views, timed events) - transparent overlay top to bottom */
+.planner-event-progress--vertical::after {
+  content: '';
+  position: absolute;
+  top: var(--progress-percent, 100%);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.50);
+  pointer-events: none;
 }
 
 /* Bases Task List View */
@@ -403,32 +514,132 @@
 /* Calendar title scales with font size setting */
 .planner-calendar-view .fc .fc-toolbar-title,
 .planner-bases-calendar .fc .fc-toolbar-title {
-  font-size: calc(var(--planner-calendar-font-size, 10px) * 1.6);
+  font-size: calc(var(--planner-calendar-font-size, 10px) * 1.4) !important;
   font-weight: 600;
 }
 
 /* Day header names (Mon, Tue, etc.) scale with font size setting */
 .planner-calendar-view .fc .fc-col-header-cell,
-.planner-bases-calendar .fc .fc-col-header-cell {
-  font-size: calc(var(--planner-calendar-font-size, 10px) * 1.1);
+.planner-bases-calendar .fc .fc-col-header-cell,
+.planner-calendar-view .fc .fc-col-header-cell-cushion,
+.planner-bases-calendar .fc .fc-col-header-cell-cushion {
+  font-size: calc(var(--planner-calendar-font-size, 10px) * 1.1) !important;
 }
 
 /* Day numbers scale with font size setting */
 .planner-calendar-view .fc .fc-daygrid-day-number,
 .planner-bases-calendar .fc .fc-daygrid-day-number {
-  font-size: calc(var(--planner-calendar-font-size, 10px) * 1.2);
+  font-size: var(--planner-calendar-font-size, 10px) !important;
+}
+
+/* Year view (split) month titles scale with font size setting */
+.planner-calendar-view .fc .fc-multimonth-title,
+.planner-bases-calendar .fc .fc-multimonth-title {
+  font-size: calc(var(--planner-calendar-font-size, 10px) * 1.3) !important;
+  font-weight: 600;
+}
+
+/* Year view (continuous) configurable row height */
+.planner-bases-calendar .fc .fc-dayGridYear-view .fc-daygrid-day-frame {
+  min-height: var(--planner-year-continuous-row-height, 60px) !important;
+}
+
+.planner-bases-calendar .fc .fc-dayGridYear-view .fc-daygrid-day {
+  min-height: var(--planner-year-continuous-row-height, 60px) !important;
+}
+
+.planner-bases-calendar .fc .fc-dayGridYear-view .fc-daygrid-day-events {
+  min-height: calc(var(--planner-year-continuous-row-height, 60px) - 24px) !important;
+}
+
+/* Year view (split by month) configurable row height */
+.planner-bases-calendar .fc .fc-multiMonthYear-view .fc-daygrid-day-frame {
+  min-height: var(--planner-year-split-row-height, 60px);
+}
+
+/* "More" link scales with font size setting */
+.planner-calendar-view .fc .fc-daygrid-more-link,
+.planner-bases-calendar .fc .fc-daygrid-more-link {
+  font-size: var(--planner-calendar-font-size, 10px) !important;
+}
+
+/* List view elements scale with font size setting */
+.planner-calendar-view .fc .fc-list-day-text,
+.planner-bases-calendar .fc .fc-list-day-text,
+.planner-calendar-view .fc .fc-list-day-side-text,
+.planner-bases-calendar .fc .fc-list-day-side-text {
+  font-size: calc(var(--planner-calendar-font-size, 10px) * 1.1) !important;
+}
+
+.planner-calendar-view .fc .fc-list-event-title,
+.planner-bases-calendar .fc .fc-list-event-title,
+.planner-calendar-view .fc .fc-list-event-time,
+.planner-bases-calendar .fc .fc-list-event-time {
+  font-size: var(--planner-calendar-font-size, 10px) !important;
+}
+
+/* Today indicator - Month view: Circle around day number */
+.planner-calendar-view .fc .fc-dayGridMonth-view .fc-daygrid-day.fc-day-today .fc-daygrid-day-number,
+.planner-bases-calendar .fc .fc-dayGridMonth-view .fc-daygrid-day.fc-day-today .fc-daygrid-day-number,
+.planner-calendar-view .fc .fc-multiMonthYear-view .fc-daygrid-day.fc-day-today .fc-daygrid-day-number,
+.planner-bases-calendar .fc .fc-multiMonthYear-view .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border-radius: 50%;
+  min-width: 1.8em;
+  height: 1.8em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+/* Today indicator - Year continuous scroll view: Pill around day number (e.g., "February 1") */
+.planner-calendar-view .fc .fc-dayGridYear-view .fc-daygrid-day.fc-day-today .fc-daygrid-day-number,
+.planner-bases-calendar .fc .fc-dayGridYear-view .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border-radius: 999px;
+  padding: 2px 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Today indicator - Week/3-Day views: Pill-shaped header */
+.planner-calendar-view .fc .fc-col-header-cell.fc-day-today .fc-col-header-cell-cushion,
+.planner-bases-calendar .fc .fc-col-header-cell.fc-day-today .fc-col-header-cell-cushion {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+/* Today indicator - List view: Pill-shaped date on right side only */
+.planner-calendar-view .fc .fc-list-day.fc-day-today .fc-list-day-side-text,
+.planner-bases-calendar .fc .fc-list-day.fc-day-today .fc-list-day-side-text {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border-radius: 999px;
+  padding: 2px 8px;
 }
 
 /* Week/day view time labels scale with font size setting */
 .planner-calendar-view .fc .fc-timegrid-slot-label,
 .planner-bases-calendar .fc .fc-timegrid-slot-label {
-  font-size: var(--planner-calendar-font-size, 10px);
+  font-size: var(--planner-calendar-font-size, 10px) !important;
+}
+
+/* Week/day view axis (time column) scales with font size setting */
+.planner-calendar-view .fc .fc-timegrid-axis-cushion,
+.planner-bases-calendar .fc .fc-timegrid-axis-cushion {
+  font-size: var(--planner-calendar-font-size, 10px) !important;
 }
 
 /* List view text scales with font size setting */
 .planner-calendar-view .fc .fc-list-day-cushion,
 .planner-bases-calendar .fc .fc-list-day-cushion {
-  font-size: calc(var(--planner-calendar-font-size, 10px) * 1.2);
+  font-size: calc(var(--planner-calendar-font-size, 10px) * 1.2) !important;
 }
 
 .planner-calendar-view .fc .fc-event,
@@ -436,12 +647,61 @@
   cursor: pointer;
   border-radius: 4px;
   padding: 2px 4px;
-  font-size: var(--planner-calendar-font-size, 10px);
+  font-size: var(--planner-calendar-font-size, 10px) !important;
 }
 
 .planner-calendar-view .fc .fc-event:hover,
 .planner-bases-calendar .fc .fc-event:hover {
   opacity: 0.9;
+}
+
+/* Compact multi-day event bars (Month/Year views and all-day row in Week/3-Day/Day) */
+.planner-calendar-view .fc .fc-daygrid-event,
+.planner-bases-calendar .fc .fc-daygrid-event,
+.planner-calendar-view .fc .fc-daygrid-block-event,
+.planner-bases-calendar .fc .fc-daygrid-block-event {
+  padding: 0 4px;
+  line-height: calc(var(--planner-calendar-font-size, 10px) * 1.4);
+  min-height: 0;
+  margin-top: 1px;
+  margin-bottom: 0;
+}
+
+.planner-calendar-view .fc .fc-daygrid-event .fc-event-main,
+.planner-bases-calendar .fc .fc-daygrid-event .fc-event-main,
+.planner-calendar-view .fc .fc-daygrid-block-event .fc-event-main,
+.planner-bases-calendar .fc .fc-daygrid-block-event .fc-event-main {
+  padding: 0;
+}
+
+.planner-calendar-view .fc .fc-daygrid-event .fc-event-main-frame,
+.planner-bases-calendar .fc .fc-daygrid-event .fc-event-main-frame,
+.planner-calendar-view .fc .fc-daygrid-block-event .fc-event-main-frame,
+.planner-bases-calendar .fc .fc-daygrid-block-event .fc-event-main-frame {
+  padding: 0;
+  min-height: 0;
+}
+
+.planner-calendar-view .fc .fc-daygrid-event .fc-event-title,
+.planner-bases-calendar .fc .fc-daygrid-event .fc-event-title,
+.planner-calendar-view .fc .fc-daygrid-block-event .fc-event-title,
+.planner-bases-calendar .fc .fc-daygrid-block-event .fc-event-title {
+  padding: 0;
+}
+
+.planner-calendar-view .fc .fc-daygrid-event .fc-event-time,
+.planner-bases-calendar .fc .fc-daygrid-event .fc-event-time,
+.planner-calendar-view .fc .fc-daygrid-block-event .fc-event-time,
+.planner-bases-calendar .fc .fc-daygrid-block-event .fc-event-time {
+  padding: 0;
+  margin: 0;
+}
+
+/* Compact "more" link in day cells */
+.planner-calendar-view .fc .fc-daygrid-more-link,
+.planner-bases-calendar .fc .fc-daygrid-more-link {
+  line-height: calc(var(--planner-calendar-font-size, 10px) * 1.4);
+  margin-top: 1px;
 }
 
 .planner-event-completed {
@@ -521,6 +781,75 @@
   color: white;
 }
 
+/* Tag chip input component */
+.planner-tag-input-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  min-height: 32px;
+  background: var(--background-modifier-form-field);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--input-radius);
+  cursor: text;
+}
+
+.planner-tag-input-container:focus-within {
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 2px var(--background-modifier-border-focus);
+}
+
+.planner-tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px 2px 8px;
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.planner-tag-chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  color: var(--text-on-accent);
+  cursor: pointer;
+  opacity: 0.7;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.planner-tag-chip-remove:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.planner-tag-input {
+  flex: 1;
+  min-width: 80px;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 13px;
+  padding: 2px 0;
+}
+
+.planner-tag-input::placeholder {
+  color: var(--text-faint);
+}
+
 .planner-preview-parent {
   background: #0ea5e9;
   color: white;
@@ -558,8 +887,48 @@
   margin-bottom: 8px;
 }
 
-.planner-status-item .setting-item-control {
-  flex-wrap: nowrap;
+/* Hide the empty setting-item-info on status/priority items */
+.planner-status-item .setting-item-info,
+.planner-priority-item .setting-item-info {
+  display: none;
+}
+
+/* Mobile: wrap status/priority items into two lines */
+.is-mobile .planner-status-item .setting-item-control,
+.is-mobile .planner-priority-item .setting-item-control {
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.is-mobile .planner-status-item .setting-item-control input[type="text"]:first-of-type,
+.is-mobile .planner-priority-item .setting-item-control input[type="text"]:first-of-type {
+  flex: 1 0 calc(100% - 50px);
+}
+
+.is-mobile .planner-status-item .setting-item-control input[type="text"]:nth-of-type(2),
+.is-mobile .planner-priority-item .setting-item-control input[type="text"]:nth-of-type(2) {
+  flex: 1 1 auto;
+}
+
+.is-mobile .planner-priority-item .setting-item-control input[type="text"]:nth-of-type(3) {
+  flex: 0 1 60px;
+}
+
+.planner-status-item,
+.planner-priority-item {
+  cursor: grab;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.planner-status-item.planner-dragging,
+.planner-priority-item.planner-dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+}
+
+.planner-status-item.planner-drag-over,
+.planner-priority-item.planner-drag-over {
+  background-color: color-mix(in srgb, var(--interactive-accent) 20%, transparent);
 }
 
 /* ============================================
@@ -1235,6 +1604,38 @@ body.is-mobile .modal:has(.planner-item-modal) {
 
 .planner-nth-day-select {
   min-width: 120px;
+}
+
+/* Custom Progress Modal */
+.planner-custom-progress-modal {
+  padding: 20px;
+  min-width: 320px;
+}
+
+.planner-custom-progress-modal h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.planner-progress-separator {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 12px;
+  margin: 12px 0;
+}
+
+.planner-custom-progress-modal .setting-item {
+  border-top: none;
+  padding: 8px 0;
+}
+
+.planner-custom-progress-modal .setting-item-info {
+  flex: 1;
+}
+
+.planner-custom-progress-modal .setting-item-control input {
+  width: 80px;
+  text-align: right;
 }
 
 /* Summary Input */
@@ -2054,6 +2455,81 @@ body.is-mobile .planner-timeline-iframe-container {
 
 .planner-settings-tab-content.is-active {
   display: block;
+}
+
+/* Calendar settings - editable name inputs */
+.planner-calendar-name-input {
+  font-weight: 500;
+  min-width: 120px;
+}
+
+.planner-calendar-folder-input {
+  min-width: 150px;
+}
+
+/* Calendar list drag and drop */
+.planner-calendar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.planner-calendar-item {
+  cursor: grab;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+  overflow: hidden;
+}
+
+.planner-calendar-item .setting-item-control {
+  width: 100%;
+  gap: 6px;
+}
+
+/* Hide the empty setting-item-info to reclaim space */
+.planner-calendar-item .setting-item-info {
+  display: none;
+}
+
+/* Mobile: wrap calendar items into two lines */
+.is-mobile .planner-calendar-item .setting-item-control {
+  flex-wrap: wrap;
+}
+
+.is-mobile .planner-calendar-item .setting-item-control input[type="text"]:first-of-type {
+  flex: 1 0 calc(100% - 50px);
+}
+
+.is-mobile .planner-calendar-item .planner-calendar-template-input,
+.is-mobile .planner-calendar-item .planner-calendar-folder-input {
+  flex: 1 1 auto;
+}
+
+.planner-calendar-item:hover {
+  background-color: var(--background-modifier-hover);
+}
+
+.planner-calendar-item.planner-dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+}
+
+.planner-calendar-item.planner-drag-over {
+  background-color: color-mix(in srgb, var(--interactive-accent) 20%, transparent);
+}
+
+.planner-drag-handle {
+  cursor: grab;
+  opacity: 0.5;
+  margin-left: 0;
+  margin-right: 4px;
+}
+
+.planner-drag-handle:hover {
+  opacity: 1;
+}
+
+.planner-calendar-item.planner-dragging .planner-drag-handle {
+  cursor: grabbing;
 }
 
 

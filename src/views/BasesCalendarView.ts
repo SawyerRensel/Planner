@@ -72,8 +72,9 @@ import interactionPlugin from '@fullcalendar/interaction';
 import multiMonthPlugin from '@fullcalendar/multimonth';
 import { RRule } from 'rrule';
 import type PlannerPlugin from '../main';
-import type { OpenBehavior } from '../types/settings';
+import { getCalendarColor, type OpenBehavior } from '../types/settings';
 import type { PlannerItem, DayOfWeek } from '../types/item';
+import { computeProgressPercent, formatProgressLabel, toRawNumber } from '../types/item';
 import { openItemModal } from '../components/ItemModal';
 import { PropertyTypeService } from '../services/PropertyTypeService';
 import { isOngoing } from '../utils/dateUtils';
@@ -81,6 +82,7 @@ import { isOngoing } from '../utils/dateUtils';
 export const BASES_CALENDAR_VIEW_ID = 'planner-calendar';
 
 type CalendarViewType = 'multiMonthYear' | 'dayGridYear' | 'dayGridMonth' | 'timeGridWeek' | 'timeGridThreeDay' | 'timeGridDay' | 'listWeek';
+type ProgressLabelFormat = 'fraction' | 'percentage' | 'both' | 'none';
 
 /**
  * Solarized Accent Colors (for fields without predefined colors)
@@ -141,6 +143,59 @@ export class BasesCalendarView extends BasesView {
   private getDateEndField(): string {
     const value = this.config.get('dateEndField') as string | undefined;
     return value || 'note.date_end_scheduled';
+  }
+
+  private getYearContinuousRowHeight(): number {
+    const value = this.config.get('yearContinuousRowHeight') as number | undefined;
+    return value ?? 60;
+  }
+
+  private getYearSplitRowHeight(): number {
+    const value = this.config.get('yearSplitRowHeight') as number | undefined;
+    return value ?? 60;
+  }
+
+  private getShowProgress(): boolean {
+    const value = this.config.get('showProgress') as string | boolean | undefined;
+    if (typeof value === 'string') return value === 'true';
+    return value ?? false;
+  }
+
+  private getProgressLabel(): ProgressLabelFormat {
+    const val = this.config.get('progressLabel') as string | undefined;
+    if (val === 'percentage' || val === 'both' || val === 'none') return val;
+    return 'fraction';
+  }
+
+  private getShowStartTime(): boolean {
+    const value = this.config.get('showStartTime') as string | boolean | undefined;
+    if (typeof value === 'string') return value === 'true';
+    return value ?? false;
+  }
+
+  /**
+   * Get a numeric value from an entry, falling back to frontmatter if Bases doesn't return it.
+   * This handles cases where the .base file doesn't have the property defined.
+   */
+  private getNumericValue(entry: BasesEntry, propId: string): number | null {
+    // Try Bases getValue first
+    const basesValue = entry.getValue(propId as BasesPropertyId);
+    const rawFromBases = toRawNumber(basesValue);
+    if (rawFromBases !== null) {
+      return rawFromBases;
+    }
+
+    // Fall back to reading frontmatter directly
+    const propName = propId.replace(/^note\./, '');
+    const fm = this.getFrontmatter(entry);
+    if (fm) {
+      const fmValue = fm[propName];
+      if (typeof fmValue === 'number') {
+        return fmValue;
+      }
+    }
+
+    return null;
   }
 
   // Keyboard navigation event handlers
@@ -284,6 +339,15 @@ export class BasesCalendarView extends BasesView {
           duration: { days: 3 },
           buttonText: '3',
         },
+        multiMonthYear: {
+          displayEventTime: this.getShowStartTime(),
+        },
+        dayGridYear: {
+          displayEventTime: this.getShowStartTime(),
+        },
+        dayGridMonth: {
+          displayEventTime: this.getShowStartTime(),
+        },
       },
       customButtons: {
         yearButton: {
@@ -385,6 +449,120 @@ export class BasesCalendarView extends BasesView {
       eventDrop: (info) => { void this.handleEventDrop(info); },
       eventResize: (info) => { void this.handleEventResize(info); },
       select: (info) => this.handleDateSelect(info),
+      eventDidMount: (info) => {
+        if (!this.getShowProgress()) return;
+        const entry = info.event.extendedProps.entry as BasesEntry | undefined;
+        if (!entry) return;
+        const current = this.getNumericValue(entry, 'note.progress_current');
+        if (current === null) return;
+        const total = this.getNumericValue(entry, 'note.progress_total') ?? undefined;
+        const pct = computeProgressPercent(current, total);
+        if (pct === null) return;
+
+        // Determine view type for stripe direction
+        const viewType = info.view.type;
+        const isTimeGrid = viewType.includes('timeGrid');
+        const isDayGrid = viewType.includes('dayGrid') || viewType.includes('multiMonth');
+        const isAllDay = info.event.allDay;
+
+        // Get event dates
+        const eventStart = info.event.start;
+        const eventEnd = info.event.end || eventStart;
+        if (!eventStart || !eventEnd) return;
+
+        // Calculate total event duration in ms
+        const totalDurationMs = eventEnd.getTime() - eventStart.getTime();
+        const oneDayMs = 24 * 60 * 60 * 1000;
+        const isMultiDay = totalDurationMs > oneDayMs;
+
+        // Add base progress class
+        info.el.classList.add('planner-event-progress');
+
+        // Add direction class based on view type and event type
+        if (isTimeGrid && !isAllDay) {
+          info.el.classList.add('planner-event-progress--vertical');
+        } else {
+          info.el.classList.add('planner-event-progress--horizontal');
+        }
+
+        // Calculate segment-relative progress for multi-day events
+        let segmentProgress = pct;
+        if (isMultiDay) {
+          // Detect segment bounds based on view type and DOM structure
+          let segStart: Date | null = null;
+          let segEnd: Date | null = null;
+
+          if (isDayGrid) {
+            // For daygrid views, find the week row this segment is in
+            // by looking at the parent row's day cells with data-date attributes
+            const rowEl = info.el.closest('.fc-daygrid-body tr, .fc-scrollgrid-sync-table tr');
+            if (rowEl) {
+              const dayCells = rowEl.querySelectorAll('[data-date]');
+              if (dayCells.length > 0) {
+                const firstDate = dayCells[0].getAttribute('data-date');
+                const lastDate = dayCells[dayCells.length - 1].getAttribute('data-date');
+                if (firstDate && lastDate) {
+                  const rowStart = new Date(firstDate);
+                  // Row end is the END of the last day (start of next day)
+                  const rowEnd = new Date(lastDate);
+                  rowEnd.setDate(rowEnd.getDate() + 1);
+
+                  // Segment bounds are the intersection of event and row
+                  segStart = new Date(Math.max(eventStart.getTime(), rowStart.getTime()));
+                  segEnd = new Date(Math.min(eventEnd.getTime(), rowEnd.getTime()));
+                }
+              }
+            }
+          } else if (isTimeGrid && !isAllDay) {
+            // For timegrid timed events, find the day column from closest day container
+            const colEl = info.el.closest('.fc-timegrid-col');
+            const dateAttr = colEl?.getAttribute('data-date');
+            if (dateAttr) {
+              const dayStart = new Date(dateAttr);
+              const dayEnd = new Date(dateAttr);
+              dayEnd.setDate(dayEnd.getDate() + 1);
+
+              // Segment bounds are intersection of event times and this day
+              segStart = new Date(Math.max(eventStart.getTime(), dayStart.getTime()));
+              segEnd = new Date(Math.min(eventEnd.getTime(), dayEnd.getTime()));
+            }
+          }
+
+          // Calculate segment progress if we found valid segment bounds
+          if (segStart && segEnd && segEnd > segStart) {
+            // Calculate where this segment falls in the overall event (0-100%)
+            const segStartOffset = segStart.getTime() - eventStart.getTime();
+            const segEndOffset = segEnd.getTime() - eventStart.getTime();
+
+            const segStartPct = (segStartOffset / totalDurationMs) * 100;
+            const segEndPct = (segEndOffset / totalDurationMs) * 100;
+            const segRangePct = segEndPct - segStartPct;
+
+            // Calculate how much of this segment is complete
+            if (pct <= segStartPct) {
+              // Progress hasn't reached this segment yet
+              segmentProgress = 0;
+            } else if (pct >= segEndPct) {
+              // Progress has passed this entire segment
+              segmentProgress = 100;
+            } else {
+              // Progress falls within this segment
+              segmentProgress = ((pct - segStartPct) / segRangePct) * 100;
+            }
+          }
+        }
+
+        info.el.style.setProperty('--progress-percent', `${segmentProgress}%`);
+
+        // Append progress label to title with separator
+        const label = formatProgressLabel(current, total, this.getProgressLabel());
+        if (label) {
+          const titleEl = info.el.querySelector('.fc-event-title');
+          if (titleEl && titleEl.textContent) {
+            titleEl.textContent = `${titleEl.textContent} · ${label}`;
+          }
+        }
+      },
       dayHeaderDidMount: (arg) => {
         // Make day header clickable in day/week views to open daily note
         const el = arg.el;
@@ -422,6 +600,10 @@ export class BasesCalendarView extends BasesView {
 
     // Apply font size CSS variable
     this.calendarEl.style.setProperty('--planner-calendar-font-size', `${this.plugin.settings.calendarFontSize}px`);
+
+    // Apply year view row height CSS variables
+    this.calendarEl.style.setProperty('--planner-year-continuous-row-height', `${this.getYearContinuousRowHeight()}px`);
+    this.calendarEl.style.setProperty('--planner-year-split-row-height', `${this.getYearSplitRowHeight()}px`);
 
     // Set today button icon
     const todayBtn = this.calendarEl?.querySelector('.fc-todayButton-button');
@@ -1045,8 +1227,7 @@ export class BasesCalendarView extends BasesView {
     // Handle fields with colors defined in settings
     if (propName === 'calendar') {
       const calendarName = Array.isArray(value) ? String(value[0]) : String(value);
-      const calendarConfig = this.plugin.settings.calendars[calendarName] as { color?: string } | undefined;
-      return calendarConfig?.color ?? '#6b7280';
+      return getCalendarColor(this.plugin.settings, calendarName);
     }
 
     if (propName === 'priority') {
@@ -1354,13 +1535,16 @@ export class BasesCalendarView extends BasesView {
 
   private createNewItem(startDate?: string, endDate?: string, allDay?: boolean): void {
     // Open ItemModal with pre-populated date from calendar click
+    // Note: Don't hardcode tags - let the template or defaults provide them
+    // Pass the default calendar so the correct template is loaded
+    const defaultCalendar = this.plugin.settings.defaultCalendar;
     void openItemModal(this.plugin, {
       mode: 'create',
       prePopulate: {
         date_start_scheduled: startDate || new Date().toISOString(),
         date_end_scheduled: endDate || undefined,
         all_day: allDay ?? true,
-        tags: ['event'],
+        calendar: defaultCalendar ? [defaultCalendar] : undefined,
       },
     });
   }
@@ -1425,6 +1609,48 @@ export function createCalendarViewRegistration(plugin: PlannerPlugin): BasesView
         placeholder: 'Select property',
         filter: (propId: BasesPropertyId) =>
           PropertyTypeService.isDateProperty(propId, plugin.app),
+      },
+      {
+        type: 'slider',
+        key: 'yearContinuousRowHeight',
+        displayName: 'Year view (continuous) row height',
+        min: 40,
+        max: 150,
+        step: 10,
+        default: 60,
+      },
+      {
+        type: 'slider',
+        key: 'yearSplitRowHeight',
+        displayName: 'Year view (split) row height',
+        min: 40,
+        max: 150,
+        step: 10,
+        default: 60,
+      },
+      {
+        type: 'toggle',
+        key: 'showProgress',
+        displayName: 'Show progress',
+        default: false,
+      },
+      {
+        type: 'toggle',
+        key: 'showStartTime',
+        displayName: 'Show start time',
+        default: false,
+      },
+      {
+        type: 'dropdown',
+        key: 'progressLabel',
+        displayName: 'Progress label',
+        default: 'fraction',
+        options: {
+          'fraction': 'Fraction (32/350)',
+          'percentage': 'Percentage (9%)',
+          'both': 'Both (32/350, 9%)',
+          'none': 'None (bar only)',
+        },
       },
     ],
   };

@@ -28,7 +28,9 @@ properties:
     width: 120
   note.color:
     width: 80
-  note.progress:
+  note.progress_current:
+    width: 80
+  note.progress_total:
     width: 80
   note.date_start_scheduled:
     width: 120
@@ -54,5 +56,6 @@ views:
     sort: []
     colorBy: note.calendar
     sectionsBy: note.calendar
+    showProgress: true
   - type: table
     name: Table

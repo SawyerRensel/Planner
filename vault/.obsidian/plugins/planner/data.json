@@ -76,26 +76,35 @@
       "icon": "signal-zero"
     }
   ],
-  "calendars": {
-    "Feature": {
-      "color": "#859900"
+  "calendars": [
+    {
+      "name": "Feature",
+      "color": "#859900",
+      "template": "Templates/Feature Template.md"
     },
-    "Optimization": {
-      "color": "#268bd2"
+    {
+      "name": "Optimization",
+      "color": "#268bd2",
+      "template": "Templates/Optimization Template.md"
     },
-    "Bugfix": {
+    {
+      "name": "Bugfix",
       "color": "#dc322f"
     },
-    "Research": {
+    {
+      "name": "Research",
       "color": "#d33682"
     },
-    "Documentation": {
+    {
+      "name": "Documentation",
       "color": "#6c71c4"
     }
-  },
+  ],
   "calendarFontSize": 10,
   "quickCaptureHotkey": "Ctrl+Shift+N",
-  "quickCaptureDefaultTags": [],
+  "quickCaptureDefaultTags": [
+    "task"
+  ],
   "quickCaptureDefaultStatus": "To-Do",
   "quickCaptureOpenAfterCreate": false,
   "openBehavior": "new-tab"

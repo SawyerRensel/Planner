@@ -42,7 +42,7 @@ views:
     sort: []
     colorBy: note.calendar
     sectionsBy: note.calendar
-    groupBy: note.status
+    plannerGroupBy: note.status
     backgroundColor: "#24273a"
   - type: table
     name: Table

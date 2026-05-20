@@ -112,6 +112,10 @@ properties:
     width: 120
   note.color:
     width: 80
+  note.progress_current:
+    width: 80
+  note.progress_total:
+    width: 80
   note.date_start_scheduled:
     width: 120
   note.date_start_actual:
@@ -181,6 +185,10 @@ properties:
     width: 120
   note.color:
     width: 80
+  note.progress_current:
+    width: 80
+  note.progress_total:
+    width: 80
   note.date_start_scheduled:
     width: 120
   note.date_start_actual:
@@ -242,7 +250,9 @@ properties:
     width: 120
   note.color:
     width: 80
-  note.progress:
+  note.progress_current:
+    width: 80
+  note.progress_total:
     width: 80
   note.date_start_scheduled:
     width: 120
@@ -306,6 +316,10 @@ properties:
     width: 100
   note.cover:
     width: 200
+  note.progress_current:
+    width: 80
+  note.progress_total:
+    width: 80
   note.date_start_scheduled:
     width: 120
   note.date_end_scheduled:
@@ -346,7 +360,7 @@ views:
     const folders = new Set<string>();
     folders.add(itemsFolder);
 
-    for (const calendar of Object.values(settings.calendars)) {
+    for (const calendar of settings.calendars) {
       if (calendar.folder) {
         folders.add(calendar.folder.replace(/\/$/, ''));
       }

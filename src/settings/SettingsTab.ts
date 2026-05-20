@@ -4,6 +4,7 @@ import { PlannerSettings, StatusConfig, PriorityConfig, DEFAULT_SETTINGS, OpenBe
 import { BaseGeneratorService } from '../services/BaseGeneratorService';
 import { FolderSuggest } from '../components/suggests/FolderSuggest';
 import { FileSuggest } from '../components/suggests/FileSuggest';
+import { createTagChipInput } from '../components/suggests';
 
 /**
  * Tab configuration
@@ -276,8 +277,8 @@ export class PlannerSettingTab extends PluginSettingTab {
       .setDesc('Auto-assigned to new items')
       .addDropdown(dropdown => {
         dropdown.addOption('', 'None');
-        for (const calendarName of Object.keys(this.plugin.settings.calendars)) {
-          dropdown.addOption(calendarName, calendarName);
+        for (const calendar of this.plugin.settings.calendars) {
+          dropdown.addOption(calendar.name, calendar.name);
         }
         return dropdown
           .setValue(this.plugin.settings.defaultCalendar)
@@ -343,6 +344,22 @@ export class PlannerSettingTab extends PluginSettingTab {
           });
       });
 
+    const tagsSetting = new Setting(containerEl)
+      .setName('Default tags')
+      .setDesc('Tags for new items. If a template has tags, those will be used instead.');
+
+    // Replace the default control with tag chip input
+    const controlEl = tagsSetting.controlEl;
+    controlEl.empty();
+    createTagChipInput(this.app, controlEl, {
+      initialTags: this.plugin.settings.quickCaptureDefaultTags,
+      onChange: (tags) => {
+        this.plugin.settings.quickCaptureDefaultTags = tags;
+        void this.plugin.saveSettings();
+      },
+      placeholder: 'Add tag...',
+    });
+
     new Setting(containerEl)
       .setName('Open after create')
       .setDesc('Open the note in editor after quick capture')
@@ -380,6 +397,10 @@ export class PlannerSettingTab extends PluginSettingTab {
 
   private renderStatusItem(containerEl: HTMLElement, status: StatusConfig, index: number): void {
     const setting = new Setting(containerEl)
+      .addExtraButton(button => button
+        .setIcon('grip-vertical')
+        .setTooltip('Drag to reorder')
+        .extraSettingsEl.addClass('planner-drag-handle'))
       .addText(text => text
         .setValue(status.name)
         .setPlaceholder('Status name')
@@ -417,6 +438,43 @@ export class PlannerSettingTab extends PluginSettingTab {
         }));
 
     setting.settingEl.addClass('planner-status-item');
+    setting.settingEl.setAttribute('data-index', String(index));
+    setting.settingEl.setAttribute('draggable', 'true');
+
+    // Drag and drop handlers
+    setting.settingEl.addEventListener('dragstart', (e: DragEvent) => {
+      setting.settingEl.addClass('planner-dragging');
+      e.dataTransfer?.setData('text/plain', String(index));
+    });
+
+    setting.settingEl.addEventListener('dragend', () => {
+      setting.settingEl.removeClass('planner-dragging');
+    });
+
+    setting.settingEl.addEventListener('dragover', (e: DragEvent) => {
+      e.preventDefault();
+      setting.settingEl.addClass('planner-drag-over');
+    });
+
+    setting.settingEl.addEventListener('dragleave', () => {
+      setting.settingEl.removeClass('planner-drag-over');
+    });
+
+    setting.settingEl.addEventListener('drop', (e: DragEvent) => {
+      e.preventDefault();
+      setting.settingEl.removeClass('planner-drag-over');
+
+      const fromIndex = parseInt(e.dataTransfer?.getData('text/plain') || '-1', 10);
+      const toIndex = index;
+
+      if (fromIndex === -1 || fromIndex === toIndex) return;
+
+      const statuses = this.plugin.settings.statuses;
+      const [moved] = statuses.splice(fromIndex, 1);
+      statuses.splice(toIndex, 0, moved);
+
+      void this.plugin.saveSettings().then(() => this.refreshCurrentTab());
+    });
   }
 
   private renderPriorityList(containerEl: HTMLElement): void {
@@ -445,6 +503,10 @@ export class PlannerSettingTab extends PluginSettingTab {
 
   private renderPriorityItem(containerEl: HTMLElement, priority: PriorityConfig, index: number): void {
     const setting = new Setting(containerEl)
+      .addExtraButton(button => button
+        .setIcon('grip-vertical')
+        .setTooltip('Drag to reorder')
+        .extraSettingsEl.addClass('planner-drag-handle'))
       .addText(text => text
         .setValue(priority.name)
         .setPlaceholder('Priority name')
@@ -482,40 +544,51 @@ export class PlannerSettingTab extends PluginSettingTab {
         }));
 
     setting.settingEl.addClass('planner-priority-item');
+    setting.settingEl.setAttribute('data-index', String(index));
+    setting.settingEl.setAttribute('draggable', 'true');
+
+    // Drag and drop handlers
+    setting.settingEl.addEventListener('dragstart', (e: DragEvent) => {
+      setting.settingEl.addClass('planner-dragging');
+      e.dataTransfer?.setData('text/plain', String(index));
+    });
+
+    setting.settingEl.addEventListener('dragend', () => {
+      setting.settingEl.removeClass('planner-dragging');
+    });
+
+    setting.settingEl.addEventListener('dragover', (e: DragEvent) => {
+      e.preventDefault();
+      setting.settingEl.addClass('planner-drag-over');
+    });
+
+    setting.settingEl.addEventListener('dragleave', () => {
+      setting.settingEl.removeClass('planner-drag-over');
+    });
+
+    setting.settingEl.addEventListener('drop', (e: DragEvent) => {
+      e.preventDefault();
+      setting.settingEl.removeClass('planner-drag-over');
+
+      const fromIndex = parseInt(e.dataTransfer?.getData('text/plain') || '-1', 10);
+      const toIndex = index;
+
+      if (fromIndex === -1 || fromIndex === toIndex) return;
+
+      const priorities = this.plugin.settings.priorities;
+      const [moved] = priorities.splice(fromIndex, 1);
+      priorities.splice(toIndex, 0, moved);
+
+      void this.plugin.saveSettings().then(() => this.refreshCurrentTab());
+    });
   }
 
   private renderCalendarColors(containerEl: HTMLElement): void {
-    const calendars = Object.entries(this.plugin.settings.calendars);
+    const listEl = containerEl.createDiv({ cls: 'planner-calendar-list' });
 
-    for (const [name, config] of calendars) {
-      const setting = new Setting(containerEl)
-        .setName(name)
-        .addText(text => {
-          text
-            .setPlaceholder('Folder (optional)')
-            .setValue(config.folder || '')
-            .onChange(async (value) => {
-              this.plugin.settings.calendars[name].folder = value || undefined;
-              await this.plugin.saveSettings();
-            });
-          new FolderSuggest(this.app, text.inputEl);
-        })
-        .addColorPicker(picker => picker
-          .setValue(config.color)
-          .onChange(async (value) => {
-            this.plugin.settings.calendars[name].color = value;
-            await this.plugin.saveSettings();
-          }))
-        .addExtraButton(button => button
-          .setIcon('trash')
-          .setTooltip('Delete calendar')
-          .onClick(async () => {
-            delete this.plugin.settings.calendars[name];
-            await this.plugin.saveSettings();
-            this.refreshCurrentTab();
-          }));
-
-      setting.settingEl.querySelector('.setting-item-control input[type="text"]')?.setAttribute('title', 'Folder where new items for this calendar are created');
+    for (let i = 0; i < this.plugin.settings.calendars.length; i++) {
+      const calendar = this.plugin.settings.calendars[i];
+      this.renderCalendarItem(listEl, calendar, i);
     }
 
     // Add new calendar
@@ -530,14 +603,210 @@ export class PlannerSettingTab extends PluginSettingTab {
       .addButton(button => button
         .setButtonText('Add')
         .onClick(async () => {
-          if (newCalendarName && !this.plugin.settings.calendars[newCalendarName]) {
-            const calendarCount = Object.keys(this.plugin.settings.calendars).length;
+          const exists = this.plugin.settings.calendars.some(c => c.name === newCalendarName);
+          if (newCalendarName && !exists) {
+            const calendarCount = this.plugin.settings.calendars.length;
             const nextColor = getNextCalendarColor(calendarCount);
-            this.plugin.settings.calendars[newCalendarName] = { color: nextColor };
+            this.plugin.settings.calendars.push({ name: newCalendarName, color: nextColor });
             await this.plugin.saveSettings();
             this.refreshCurrentTab();
           }
         }));
+  }
+
+  private renderCalendarItem(containerEl: HTMLElement, calendar: { name: string; color: string; folder?: string; template?: string }, index: number): void {
+    const setting = new Setting(containerEl)
+      .setName('')
+      .addExtraButton(button => button
+        .setIcon('grip-vertical')
+        .setTooltip('Drag to reorder')
+        .extraSettingsEl.addClass('planner-drag-handle'))
+      .addText(text => {
+        // Calendar name input (editable)
+        text
+          .setPlaceholder('Calendar name')
+          .setValue(calendar.name)
+          .onChange(() => {
+            // Validation happens on blur/enter
+          });
+        text.inputEl.addClass('planner-calendar-name-input');
+        text.inputEl.setAttribute('title', 'Calendar name (press enter or click away to rename)');
+
+        const originalName = calendar.name;
+        const handleRename = async () => {
+          const newName = text.getValue().trim();
+          if (newName === originalName) return; // No change
+
+          // Validate
+          if (!newName) {
+            new Notice('Calendar name cannot be empty');
+            text.setValue(originalName); // Reset to original
+            return;
+          }
+          const exists = this.plugin.settings.calendars.some(c => c.name === newName);
+          if (exists) {
+            new Notice(`Calendar "${newName}" already exists`);
+            text.setValue(originalName); // Reset to original
+            return;
+          }
+
+          // Rename calendar
+          await this.renameCalendar(originalName, newName);
+          this.refreshCurrentTab();
+        };
+
+        text.inputEl.addEventListener('blur', () => { void handleRename(); });
+        text.inputEl.addEventListener('keydown', (e: KeyboardEvent) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            text.inputEl.blur(); // Trigger blur handler
+          } else if (e.key === 'Escape') {
+            text.setValue(originalName); // Reset to original
+            text.inputEl.blur();
+          }
+        });
+      })
+      .addText(text => {
+        // Template input
+        text
+          .setPlaceholder('Template (optional)')
+          .setValue(calendar.template || '')
+          .onChange(async (value) => {
+            this.plugin.settings.calendars[index].template = value || undefined;
+            await this.plugin.saveSettings();
+          });
+        text.inputEl.addClass('planner-calendar-template-input');
+        new FileSuggest(this.app, text.inputEl);
+      })
+      .addText(text => {
+        // Folder input
+        text
+          .setPlaceholder('Folder (optional)')
+          .setValue(calendar.folder || '')
+          .onChange(async (value) => {
+            this.plugin.settings.calendars[index].folder = value || undefined;
+            await this.plugin.saveSettings();
+          });
+        text.inputEl.addClass('planner-calendar-folder-input');
+        new FolderSuggest(this.app, text.inputEl);
+      })
+      .addColorPicker(picker => picker
+        .setValue(calendar.color)
+        .onChange(async (value) => {
+          this.plugin.settings.calendars[index].color = value;
+          await this.plugin.saveSettings();
+        }))
+      .addExtraButton(button => button
+        .setIcon('trash')
+        .setTooltip('Delete calendar')
+        .onClick(async () => {
+          this.plugin.settings.calendars.splice(index, 1);
+          await this.plugin.saveSettings();
+          this.refreshCurrentTab();
+        }));
+
+    setting.settingEl.addClass('planner-calendar-item');
+    setting.settingEl.setAttribute('data-index', String(index));
+    setting.settingEl.setAttribute('draggable', 'true');
+
+    // Add tooltips
+    const inputs = setting.settingEl.querySelectorAll('.setting-item-control input[type="text"]');
+    if (inputs[1]) {
+      inputs[1].setAttribute('title', 'Template file for new items in this calendar');
+    }
+    if (inputs[2]) {
+      inputs[2].setAttribute('title', 'Folder where new items for this calendar are created');
+    }
+
+    // Drag and drop handlers
+    setting.settingEl.addEventListener('dragstart', (e: DragEvent) => {
+      setting.settingEl.addClass('planner-dragging');
+      e.dataTransfer?.setData('text/plain', String(index));
+    });
+
+    setting.settingEl.addEventListener('dragend', () => {
+      setting.settingEl.removeClass('planner-dragging');
+    });
+
+    setting.settingEl.addEventListener('dragover', (e: DragEvent) => {
+      e.preventDefault();
+      setting.settingEl.addClass('planner-drag-over');
+    });
+
+    setting.settingEl.addEventListener('dragleave', () => {
+      setting.settingEl.removeClass('planner-drag-over');
+    });
+
+    setting.settingEl.addEventListener('drop', (e: DragEvent) => {
+      e.preventDefault();
+      setting.settingEl.removeClass('planner-drag-over');
+
+      const fromIndex = parseInt(e.dataTransfer?.getData('text/plain') || '-1', 10);
+      const toIndex = index;
+
+      if (fromIndex === -1 || fromIndex === toIndex) return;
+
+      // Reorder the array
+      const calendars = this.plugin.settings.calendars;
+      const [moved] = calendars.splice(fromIndex, 1);
+      calendars.splice(toIndex, 0, moved);
+
+      void this.plugin.saveSettings().then(() => this.refreshCurrentTab());
+    });
+  }
+
+  /**
+   * Rename a calendar and update all references
+   */
+  private async renameCalendar(oldName: string, newName: string): Promise<void> {
+    const settings = this.plugin.settings;
+
+    // 1. Find and update calendar in array
+    const calendarIndex = settings.calendars.findIndex(c => c.name === oldName);
+    if (calendarIndex === -1) return;
+
+    settings.calendars[calendarIndex].name = newName;
+
+    // 2. Update default calendar if it matches
+    if (settings.defaultCalendar === oldName) {
+      settings.defaultCalendar = newName;
+    }
+
+    // 3. Update all items with the old calendar name
+    const files = this.app.vault.getMarkdownFiles();
+    let updatedCount = 0;
+
+    for (const file of files) {
+      const cache = this.app.metadataCache.getFileCache(file);
+      const frontmatter = cache?.frontmatter;
+
+      if (!frontmatter?.calendar) continue;
+
+      // Check if this file has the old calendar name
+      const calendars = Array.isArray(frontmatter.calendar)
+        ? frontmatter.calendar
+        : [frontmatter.calendar];
+
+      if (!calendars.includes(oldName)) continue;
+
+      // Update the frontmatter
+      await this.app.fileManager.processFrontMatter(file, (fm: Record<string, unknown>) => {
+        if (Array.isArray(fm.calendar)) {
+          fm.calendar = fm.calendar.map((c: string) => c === oldName ? newName : c);
+        } else if (fm.calendar === oldName) {
+          fm.calendar = newName;
+        }
+      });
+      updatedCount++;
+    }
+
+    await this.plugin.saveSettings();
+
+    if (updatedCount > 0) {
+      new Notice(`Renamed "${oldName}" to "${newName}" and updated ${updatedCount} item${updatedCount === 1 ? '' : 's'}`);
+    } else {
+      new Notice(`Renamed "${oldName}" to "${newName}"`);
+    }
   }
 
   private refreshCurrentTab(): void {

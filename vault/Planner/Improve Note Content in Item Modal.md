@@ -10,10 +10,10 @@ people:
 location:
 related:
 status: Idea
-priority:
+priority: Low
 progress:
 date_created: "2026-01-17T18:51:49.292Z"
-date_modified: "2026-01-17T18:51:49.292Z"
+date_modified: "2026-01-25T08:05:10.062Z"
 date_start_scheduled:
 date_start_actual:
 date_end_scheduled:

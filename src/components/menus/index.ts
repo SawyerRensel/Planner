@@ -7,3 +7,4 @@ export {
   type RecurrenceContextMenuOptions,
   type RecurrenceData,
 } from './RecurrenceContextMenu';
+export { ProgressContextMenu, type ProgressContextMenuOptions } from './ProgressContextMenu';

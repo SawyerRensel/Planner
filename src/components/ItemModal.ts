@@ -2,7 +2,7 @@ import { Modal, Notice, setIcon, setTooltip, MarkdownRenderer, Component } from 
 import * as chrono from 'chrono-node';
 import type PlannerPlugin from '../main';
 import type { ItemFrontmatter, PlannerItem } from '../types/item';
-import { getCalendarFolder } from '../types/settings';
+import { getCalendarFolder, getCalendarColor, getCalendarTemplate } from '../types/settings';
 import { ItemServiceError } from '../services/ItemService';
 import {
   DateContextMenu,
@@ -10,10 +10,12 @@ import {
   PriorityContextMenu,
   CalendarContextMenu,
   RecurrenceContextMenu,
+  ProgressContextMenu,
   type RecurrenceData,
 } from './menus';
 import { CustomRecurrenceModal } from './CustomRecurrenceModal';
-import { FileLinkSuggest, TagSuggest, ContextSuggest, convertToSimpleWikilinks, convertWikilinksToRelativePaths } from './suggests';
+import { CustomProgressModal } from './CustomProgressModal';
+import { FileLinkSuggest, TagSuggest, ContextSuggest, convertToSimpleWikilinks, convertWikilinksToRelativePaths, createTagChipInput } from './suggests';
 import { isOngoing } from '../utils/dateUtils';
 import { readItemTemplate } from '../utils/templateUtils';
 
@@ -60,6 +62,8 @@ export class ItemModal extends Modal {
   private blockedBy: string[] = [];
   private details = '';
   private tags: string[] = [];
+  private progressCurrent: number | null = null;
+  private progressTotal: number | null = null;
   private originalCalendar: string | null = null; // Track original calendar for move detection
   private originalValues: Partial<ItemFrontmatter> = {}; // Track original values for change detection in edit mode
 
@@ -84,7 +88,7 @@ export class ItemModal extends Modal {
   private peopleInput: HTMLInputElement | null = null;
   private parentInput: HTMLInputElement | null = null;
   private blockedByInput: HTMLInputElement | null = null;
-  private tagsInput: HTMLInputElement | null = null;
+  private tagsChipInput: { setTags: (tags: string[]) => void } | null = null;
 
   // Mobile keyboard handling
   private viewportResizeHandler: (() => void) | null = null;
@@ -133,6 +137,10 @@ export class ItemModal extends Modal {
         };
       }
 
+      // Load progress data
+      this.progressCurrent = item.progress_current ?? null;
+      this.progressTotal = item.progress_total ?? null;
+
       // Store original values for change detection in edit mode
       // These are the values as loaded from the note, before any user modifications
       this.originalValues = {
@@ -156,6 +164,8 @@ export class ItemModal extends Modal {
         repeat_bysetpos: item.repeat_bysetpos,
         repeat_until: item.repeat_until,
         repeat_count: item.repeat_count,
+        progress_current: item.progress_current ?? null,
+        progress_total: item.progress_total ?? null,
       };
     }
 
@@ -435,6 +445,15 @@ export class ItemModal extends Modal {
       'recurrence'
     );
 
+    // Progress icon
+    this.createActionIcon(
+      this.actionBar,
+      'chart-pie',
+      'Progress',
+      (el, event) => this.showProgressContextMenu(event),
+      'progress'
+    );
+
     // Calendar icon
     this.createCalendarIcon(this.actionBar);
 
@@ -516,13 +535,207 @@ export class ItemModal extends Modal {
     const menu = new CalendarContextMenu({
       currentValue: this.calendars,
       onSelect: (value) => {
+        const previousCalendar = this.calendars[0];
         this.calendars = value;
         this.updateIconStates();
         this.updateNLPPreview();
+
+        // In create mode, reload template when calendar changes
+        if (this.options.mode === 'create' && value[0] !== previousCalendar) {
+          void this.reloadTemplateForCalendar(value[0]);
+        }
       },
       plugin: this.plugin,
     });
     menu.showAtElement(el);
+  }
+
+  /**
+   * Reload the template for a calendar and apply its values to the form.
+   * Called when the user changes the calendar in create mode.
+   */
+  private async reloadTemplateForCalendar(calendarName: string | undefined): Promise<void> {
+    // Preserve the user-selected calendar - template should not override it
+    const userSelectedCalendars = [...this.calendars];
+
+    // Get template path for the new calendar
+    const templatePath = calendarName
+      ? getCalendarTemplate(this.plugin.settings, calendarName)
+      : this.plugin.settings.itemTemplate;
+
+    if (!templatePath) {
+      // No template configured, clear all template-derived values
+      this.options.templateFrontmatter = undefined;
+      this.options.templateBody = undefined;
+      this.options.templateCustomFields = undefined;
+      this.resetTemplateFields();
+      this.applyDefaultSettings();
+      this.clearAllInputFields();
+      this.updateInputFieldsFromState();
+      this.details = '';
+      if (this.detailsTextarea) {
+        this.detailsTextarea.value = '';
+      }
+      void this.renderDetailsMarkdown();
+      // Restore user-selected calendar even when no template
+      this.calendars = userSelectedCalendars;
+      this.updateIconStates();
+      this.updateNLPPreview();
+      return;
+    }
+
+    const template = await readItemTemplate(this.plugin.app, templatePath);
+    if (!template) {
+      // Template file not found/readable, clear all template-derived values
+      this.options.templateFrontmatter = undefined;
+      this.options.templateBody = undefined;
+      this.options.templateCustomFields = undefined;
+      this.resetTemplateFields();
+      this.applyDefaultSettings();
+      this.clearAllInputFields();
+      this.updateInputFieldsFromState();
+      this.details = '';
+      if (this.detailsTextarea) {
+        this.detailsTextarea.value = '';
+      }
+      void this.renderDetailsMarkdown();
+      // Restore user-selected calendar even when no template
+      this.calendars = userSelectedCalendars;
+      this.updateIconStates();
+      this.updateNLPPreview();
+      return;
+    }
+
+    // Store new template data
+    this.options.templateFrontmatter = template.frontmatter;
+    this.options.templateBody = template.body;
+    this.options.templateCustomFields = template.customFields;
+
+    // Clear all template-derived state before applying new template
+    // This ensures fields without values in the new template don't retain old values
+    this.resetTemplateFields();
+
+    // Apply template frontmatter values
+    this.applyTemplateFrontmatter(template.frontmatter);
+
+    // Restore the user-selected calendar (template's calendar value should not override user selection)
+    this.calendars = userSelectedCalendars;
+
+    // Always update template body when calendar changes - user expects template content to match calendar
+    this.details = template.body;
+    if (this.detailsTextarea) {
+      this.detailsTextarea.value = template.body;
+    }
+    // Re-render markdown preview
+    void this.renderDetailsMarkdown();
+
+    // Update UI to reflect new template values
+    this.updateIconStates();
+    this.updateNLPPreview();
+
+    // Update input fields - always set values (even empty) to clear stale data
+    if (this.contextInput) {
+      const context = template.frontmatter.context
+        ? convertToSimpleWikilinks(template.frontmatter.context) as string[]
+        : [];
+      this.contextInput.value = context.join(', ');
+    }
+    if (this.peopleInput) {
+      const people = template.frontmatter.people
+        ? convertToSimpleWikilinks(template.frontmatter.people) as string[]
+        : [];
+      this.peopleInput.value = people.join(', ');
+    }
+    if (this.parentInput) {
+      const parent = template.frontmatter.parent
+        ? convertToSimpleWikilinks(template.frontmatter.parent) as string | null
+        : null;
+      this.parentInput.value = parent || '';
+    }
+    if (this.blockedByInput) {
+      const blockedBy = template.frontmatter.blocked_by
+        ? convertToSimpleWikilinks(template.frontmatter.blocked_by) as string[]
+        : [];
+      this.blockedByInput.value = blockedBy.join(', ');
+    }
+    if (this.tagsChipInput) {
+      this.tagsChipInput.setTags(template.frontmatter.tags || []);
+    }
+    if (this.summaryTextarea) {
+      this.summaryTextarea.value = template.frontmatter.summary || '';
+    }
+  }
+
+  /**
+   * Reset all template-derived fields to their default/empty state.
+   * Called before applying a new template to ensure stale values don't persist.
+   */
+  private resetTemplateFields(): void {
+    // Reset state variables (but preserve calendar - that's user-selected)
+    this.summary = '';
+    this.status = null;
+    this.priority = null;
+    this.context = [];
+    this.people = [];
+    this.parent = null;
+    this.blockedBy = [];
+    this.tags = [];
+    this.recurrence = null;
+  }
+
+  /**
+   * Clear all input field UI elements to empty state.
+   * Called when switching to a calendar with no template.
+   */
+  private clearAllInputFields(): void {
+    if (this.summaryTextarea) {
+      this.summaryTextarea.value = '';
+    }
+    if (this.contextInput) {
+      this.contextInput.value = '';
+    }
+    if (this.peopleInput) {
+      this.peopleInput.value = '';
+    }
+    if (this.parentInput) {
+      this.parentInput.value = '';
+    }
+    if (this.blockedByInput) {
+      this.blockedByInput.value = '';
+    }
+    if (this.tagsChipInput) {
+      this.tagsChipInput.setTags([]);
+    }
+  }
+
+  /**
+   * Apply default Planner settings when no template is available.
+   * Sets default status, tags, etc. from plugin settings.
+   */
+  private applyDefaultSettings(): void {
+    // Apply default status
+    if (!this.status && this.plugin.settings.quickCaptureDefaultStatus) {
+      this.status = this.plugin.settings.quickCaptureDefaultStatus;
+    }
+
+    // Apply default tags
+    if (this.tags.length === 0) {
+      if (this.plugin.settings.quickCaptureDefaultTags.length > 0) {
+        this.tags = [...this.plugin.settings.quickCaptureDefaultTags];
+      } else {
+        this.tags = ['event'];
+      }
+    }
+  }
+
+  /**
+   * Update input field UI elements to reflect current state.
+   * Called after applying defaults to sync UI with state.
+   */
+  private updateInputFieldsFromState(): void {
+    if (this.tagsChipInput) {
+      this.tagsChipInput.setTags(this.tags);
+    }
   }
 
   private updateIconStates(): void {
@@ -589,6 +802,17 @@ export class ItemModal extends Modal {
       this.updateIconState(recurrenceIcon as HTMLElement, hasRecurrence, hasRecurrence ? 'Recurring' : 'Recurrence');
     }
 
+    // Progress
+    const progressIcon = this.actionBar.querySelector('[data-type="progress"]');
+    if (progressIcon) {
+      const hasProgress = this.progressCurrent !== null && this.progressCurrent > 0;
+      const total = this.progressTotal ?? 100;
+      const current = this.progressCurrent ?? 0;
+      const percentage = total > 0 ? Math.round((current / total) * 100) : 0;
+      const tooltip = hasProgress ? `${percentage}% complete` : 'Progress';
+      this.updateIconState(progressIcon as HTMLElement, hasProgress, tooltip);
+    }
+
     // Calendar
     const calendarIcon = this.actionBar.querySelector('[data-type="calendar"]');
     if (calendarIcon) {
@@ -597,12 +821,8 @@ export class ItemModal extends Modal {
       this.updateIconState(calendarIcon as HTMLElement, hasCalendar, calendarName);
       const iconEl = calendarIcon.querySelector('.planner-icon') as HTMLElement;
       if (hasCalendar && iconEl) {
-        const color = this.plugin.settings.calendars[this.calendars[0]]?.color;
-        if (color) {
-          iconEl.style.setProperty('color', color);
-        } else {
-          iconEl.style.removeProperty('color');
-        }
+        const color = getCalendarColor(this.plugin.settings, this.calendars[0]);
+        iconEl.style.setProperty('color', color);
       } else if (iconEl) {
         iconEl.style.removeProperty('color');
       }
@@ -703,6 +923,57 @@ export class ItemModal extends Modal {
       },
       plugin: this.plugin,
       referenceDate,
+    });
+    menu.show(event);
+  }
+
+  private showProgressContextMenu(event: MouseEvent | KeyboardEvent): void {
+    const menu = new ProgressContextMenu({
+      currentValue: this.progressCurrent,
+      totalValue: this.progressTotal,
+      onSelect: (value) => {
+        this.progressCurrent = value;
+        // Set a default total of 100 if not already set
+        if (this.progressTotal === null) {
+          this.progressTotal = 100;
+        }
+        this.updateIconStates();
+        this.updateNLPPreview();
+      },
+      onAdjust: (deltaPercent) => {
+        // Calculate adjustment from current authoritative state
+        const total = this.progressTotal ?? 100;
+        const current = this.progressCurrent ?? 0;
+        const adjustment = Math.round(total * (deltaPercent / 100));
+        const newValue = Math.max(0, Math.min(total, current + adjustment));
+        this.progressCurrent = newValue;
+        if (this.progressTotal === null) {
+          this.progressTotal = 100;
+        }
+        this.updateIconStates();
+        this.updateNLPPreview();
+      },
+      onCustom: () => {
+        const modal = new CustomProgressModal(
+          this.plugin,
+          this.progressCurrent,
+          this.progressTotal,
+          (result) => {
+            this.progressCurrent = result.current;
+            this.progressTotal = result.total;
+            this.updateIconStates();
+            this.updateNLPPreview();
+          }
+        );
+        modal.open();
+      },
+      onClear: () => {
+        // Set to null to remove progress entirely (not just set to 0)
+        this.progressCurrent = null;
+        this.progressTotal = null;
+        this.updateIconStates();
+        this.updateNLPPreview();
+      },
     });
     menu.show(event);
   }
@@ -859,15 +1130,14 @@ export class ItemModal extends Modal {
       'file'
     );
 
-    // Tags (with tag suggest)
-    this.tagsInput = this.createTextListInputWithSuggest(
-      fieldsContainer,
-      'Tags',
-      this.tags,
-      (value) => { this.tags = value; },
-      'task, event, project',
-      'tag'
-    );
+    // Tags (with tag chip input)
+    const tagsField = fieldsContainer.createDiv({ cls: 'planner-field' });
+    tagsField.createEl('label', { text: 'Tags', cls: 'planner-label' });
+    this.tagsChipInput = createTagChipInput(this.app, tagsField, {
+      initialTags: this.tags,
+      onChange: (tags) => { this.tags = tags; },
+      placeholder: 'Add tag...',
+    });
   }
 
   private createTextInputWithSuggest(
@@ -1059,8 +1329,8 @@ export class ItemModal extends Modal {
     if (this.contextInput && parsed.context) {
       this.contextInput.value = parsed.context.join(', ');
     }
-    if (this.tagsInput && parsed.tags) {
-      this.tagsInput.value = parsed.tags.join(', ');
+    if (this.tagsChipInput && parsed.tags) {
+      this.tagsChipInput.setTags(parsed.tags);
     }
     if (this.parentInput && parsed.parent) {
       this.parentInput.value = parsed.parent;
@@ -1127,7 +1397,7 @@ export class ItemModal extends Modal {
 
     // Calendar
     if (this.calendars.length > 0) {
-      const color = this.plugin.settings.calendars[this.calendars[0]]?.color;
+      const color = getCalendarColor(this.plugin.settings, this.calendars[0]);
       this.addPreviewBadge(preview, `~${this.calendars[0]}`, 'calendar', color);
     }
 
@@ -1309,6 +1579,14 @@ export class ItemModal extends Modal {
       frontmatter.repeat_count = undefined;
     }
 
+    // Handle progress fields
+    if (this.progressCurrent !== orig.progress_current) {
+      frontmatter.progress_current = this.progressCurrent ?? undefined;
+    }
+    if (this.progressTotal !== orig.progress_total) {
+      frontmatter.progress_total = this.progressTotal ?? undefined;
+    }
+
     return frontmatter;
   }
 
@@ -1349,6 +1627,10 @@ export class ItemModal extends Modal {
       if (this.recurrence.repeat_until) frontmatter.repeat_until = this.recurrence.repeat_until;
       if (this.recurrence.repeat_count) frontmatter.repeat_count = this.recurrence.repeat_count;
     }
+
+    // Progress fields
+    if (this.progressCurrent !== null) frontmatter.progress_current = this.progressCurrent;
+    if (this.progressTotal !== null) frontmatter.progress_total = this.progressTotal;
 
     return frontmatter;
   }
@@ -1672,12 +1954,22 @@ export async function openItemModal(
   let templateCustomFields: Record<string, unknown> | undefined;
 
   // Load template for create mode if configured
-  if (mode === 'create' && plugin.settings.itemTemplate) {
-    const template = await readItemTemplate(plugin.app, plugin.settings.itemTemplate);
-    if (template) {
-      templateFrontmatter = template.frontmatter;
-      templateBody = template.body;
-      templateCustomFields = template.customFields;
+  if (mode === 'create') {
+    // Determine which calendar will be used for this item
+    const targetCalendar = options.prePopulate?.calendar?.[0] || plugin.settings.defaultCalendar;
+
+    // Get template path: calendar-specific template takes precedence over global template
+    const templatePath = targetCalendar
+      ? getCalendarTemplate(plugin.settings, targetCalendar)
+      : plugin.settings.itemTemplate;
+
+    if (templatePath) {
+      const template = await readItemTemplate(plugin.app, templatePath);
+      if (template) {
+        templateFrontmatter = template.frontmatter;
+        templateBody = template.body;
+        templateCustomFields = template.customFields;
+      }
     }
   }
 

@@ -8,6 +8,10 @@ import {
 } from 'obsidian';
 import type PlannerPlugin from '../main';
 import { openItemModal } from '../components/ItemModal';
+import { getCalendarColor } from '../types/settings';
+import { computeProgressPercent, formatProgressLabel, toRawNumber } from '../types/item';
+
+type ProgressLabelFormat = 'fraction' | 'percentage' | 'both' | 'none';
 
 /**
  * Type interface for BasesView grouped data entries
@@ -35,6 +39,52 @@ export class BasesTaskListView extends BasesView {
   private containerEl: HTMLElement;
   private tableEl: HTMLElement | null = null;
   private virtualScrollObserver: IntersectionObserver | null = null;
+
+  private getShowProgress(): boolean {
+    const value = this.config.get('showProgress') as string | boolean | undefined;
+    if (typeof value === 'string') return value === 'true';
+    return value ?? false;
+  }
+
+  private getProgressLabel(): ProgressLabelFormat {
+    const val = this.config.get('progressLabel') as string | undefined;
+    if (val === 'percentage' || val === 'both' || val === 'none') return val;
+    return 'fraction';
+  }
+
+  /**
+   * Get frontmatter directly from Obsidian's metadata cache
+   */
+  private getFrontmatter(entry: BasesEntry): Record<string, unknown> | undefined {
+    const file = entry.file;
+    const cache = this.app.metadataCache.getFileCache(file);
+    return cache?.frontmatter;
+  }
+
+  /**
+   * Get a numeric value from an entry, falling back to frontmatter if Bases doesn't return it.
+   * This handles cases where the .base file doesn't have the property defined.
+   */
+  private getNumericValue(entry: BasesEntry, propId: string): number | null {
+    // Try Bases getValue first
+    const basesValue = entry.getValue(propId as BasesPropertyId);
+    const rawFromBases = toRawNumber(basesValue);
+    if (rawFromBases !== null) {
+      return rawFromBases;
+    }
+
+    // Fall back to reading frontmatter directly
+    const propName = propId.replace(/^note\./, '');
+    const fm = this.getFrontmatter(entry);
+    if (fm) {
+      const fmValue = fm[propName];
+      if (typeof fmValue === 'number') {
+        return fmValue;
+      }
+    }
+
+    return null;
+  }
 
   constructor(
     controller: QueryController,
@@ -263,9 +313,8 @@ export class BasesTaskListView extends BasesView {
     for (const propId of propsToShow) {
       const td = row.createEl('td');
       const value = entry.getValue(propId);
-      if (value !== null) {
-        this.renderValue(td, propId, value);
-      }
+      // Always call renderValue - it handles null and has fallback for progress
+      this.renderValue(td, propId, value, entry);
     }
   }
 
@@ -297,10 +346,8 @@ export class BasesTaskListView extends BasesView {
     for (const propId of propsToShow) {
       const td = row.createEl('td');
       const value = entry.getValue(propId);
-
-      if (value !== null) {
-        this.renderValue(td, propId, value);
-      }
+      // Always call renderValue - it handles null and has fallback for progress
+      this.renderValue(td, propId, value, entry);
     }
   }
 
@@ -363,7 +410,7 @@ export class BasesTaskListView extends BasesView {
     return '';
   }
 
-  private renderValue(cell: HTMLElement, propId: BasesPropertyId, value: unknown): void {
+  private renderValue(cell: HTMLElement, propId: BasesPropertyId, value: unknown, entry?: BasesEntry): void {
     const propName = propId.split('.')[1];
 
     // Special rendering for known properties
@@ -384,8 +431,7 @@ export class BasesTaskListView extends BasesView {
     if (propName === 'calendar' && value) {
       const calendarName = this.toDisplayString(value);
       if (calendarName) {
-        const calendarConfig = this.plugin.settings.calendars[calendarName] as { color?: string } | undefined;
-        const color = calendarConfig?.color ?? '#6b7280';
+        const color = getCalendarColor(this.plugin.settings, calendarName);
         const badge = cell.createSpan({ cls: 'planner-badge', text: calendarName });
         badge.style.backgroundColor = color;
         badge.style.color = this.getContrastColor(color);
@@ -393,11 +439,21 @@ export class BasesTaskListView extends BasesView {
       return;
     }
 
-    if (propName === 'progress' && typeof value === 'number') {
-      const progressBar = cell.createDiv({ cls: 'planner-progress-bar' });
-      const progressFill = progressBar.createDiv({ cls: 'planner-progress-fill' });
-      progressFill.setCssProps({ '--progress-width': `${value}%` });
-      cell.createSpan({ text: `${value}%`, cls: 'planner-progress-text' });
+    if (propName === 'progress_current' && entry) {
+      // Always show progress bar when progress_current column is enabled
+      const current = this.getNumericValue(entry, 'note.progress_current');
+      if (current !== null) {
+        const total = this.getNumericValue(entry, 'note.progress_total') ?? undefined;
+        const pct = computeProgressPercent(current, total);
+        if (pct !== null) {
+          // Create inner wrapper for progress bar with proper spacing
+          const wrapper = cell.createDiv({ cls: 'planner-tasklist-progress-wrapper' });
+          const bar = wrapper.createDiv({ cls: 'planner-tasklist-progress-bar' });
+          bar.setCssProps({ '--progress-percent': `${pct}%` });
+          const label = formatProgressLabel(current, total, this.getProgressLabel());
+          bar.createSpan({ text: label || `${Math.round(pct)}%`, cls: 'planner-tasklist-progress-label' });
+        }
+      }
       return;
     }
 
@@ -512,8 +568,24 @@ export function createTaskListViewRegistration(plugin: PlannerPlugin): BasesView
       return new BasesTaskListView(controller, containerEl, plugin);
     },
     options: () => [
-      // View options can be added here in the future
-      // These appear in the view's settings menu
+      {
+        type: 'toggle',
+        key: 'showProgress',
+        displayName: 'Show progress',
+        default: false,
+      },
+      {
+        type: 'dropdown',
+        key: 'progressLabel',
+        displayName: 'Progress label',
+        default: 'fraction',
+        options: {
+          'fraction': 'Fraction (32/350)',
+          'percentage': 'Percentage (9%)',
+          'both': 'Both (32/350, 9%)',
+          'none': 'None (bar only)',
+        },
+      },
     ],
   };
 }

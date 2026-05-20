@@ -2,6 +2,7 @@ import { Modal, Notice } from 'obsidian';
 import * as chrono from 'chrono-node';
 import type PlannerPlugin from '../main';
 import { ItemFrontmatter } from '../types/item';
+import { getCalendarColor } from '../types/settings';
 
 interface ParsedInput {
   title: string;
@@ -267,7 +268,7 @@ export class QuickCaptureModal extends Modal {
 
     // Calendar
     if (parsedInput.calendar?.length) {
-      const calendarColor = this.plugin.settings.calendars[parsedInput.calendar[0]]?.color;
+      const calendarColor = getCalendarColor(this.plugin.settings, parsedInput.calendar[0]);
       this.addPreviewBadge(
         previewDetails,
         `~${parsedInput.calendar[0]}`,

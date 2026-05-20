@@ -8,7 +8,7 @@
         "type": "tabs",
         "children": [
           {
-            "id": "7590a842cb82c1de",
+            "id": "3b4a2898b0a4f8b6",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -22,62 +22,72 @@
             }
           },
           {
-            "id": "08a78c0431d22f85",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Planner/PR 9481.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "PR 9481"
-            }
-          },
-          {
-            "id": "40145a8631a96686",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Planner/PR 9481.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "PR 9481"
-            }
-          },
-          {
-            "id": "7004f51b58b37906",
+            "id": "b13fedca619908ba",
             "type": "leaf",
             "state": {
               "type": "bases",
               "state": {
-                "file": "Bases/Kanban.base",
-                "viewName": "Kanban"
+                "file": "Bases/Calendar.base",
+                "viewName": "Calendar"
               },
-              "icon": "square-kanban",
-              "title": "Kanban"
+              "icon": "calendar-range",
+              "title": "Calendar"
             }
           },
           {
-            "id": "f14d328505c6548e",
+            "id": "a6da692d382bf119",
+            "type": "leaf",
+            "state": {
+              "type": "image",
+              "state": {
+                "file": "Screenshot_20260403-212943.png"
+              },
+              "icon": "lucide-image",
+              "title": "Screenshot_20260403-212943"
+            }
+          },
+          {
+            "id": "ea19877dfeffb384",
+            "type": "leaf",
+            "state": {
+              "type": "bases",
+              "state": {
+                "file": "Bases/Timeline.base",
+                "viewName": "Timeline"
+              },
+              "icon": "square-chart-gantt",
+              "title": "Timeline"
+            }
+          },
+          {
+            "id": "3a7dfece7d3e5990",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Planner/Fix Kanban View drag-n-drop on ios.md",
+                "file": "Planner/Progress bars for items on Calendar, Kanban, Timeline, and Task List.md",
                 "mode": "source",
-                "source": true
+                "source": false
               },
               "icon": "lucide-file",
-              "title": "Fix Kanban View drag-n-drop on ios"
+              "title": "Progress bars for items on Calendar, Kanban, Timeline, and Task List"
+            }
+          },
+          {
+            "id": "76fd50415ba3b93e",
+            "type": "leaf",
+            "state": {
+              "type": "bases",
+              "state": {
+                "file": "Bases/Task List.base",
+                "viewName": "Task List"
+              },
+              "icon": "list-checks",
+              "title": "Task List"
             }
           }
         ],
-        "currentTab": 3
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -211,12 +221,13 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "Bases/Kanban.base",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline"
+              "title": "Outline of Kanban"
             }
           }
         ],
@@ -224,7 +235,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 261.5,
+    "width": 397.5,
     "collapsed": true
   },
   "left-ribbon": {
@@ -242,53 +253,52 @@
       "bases:Create new base": false
     }
   },
-  "active": "7004f51b58b37906",
+  "active": "a6da692d382bf119",
   "lastOpenFiles": [
-    "Planner/Show empty columns or swimlanes.md",
-    "Planner/0.2.0.md",
-    "Planner/groupBy is reserved keyword in Bases.md",
-    "Planner/Kanban.base",
-    "Planner/Set default tags.md",
-    "Planner/Develop Mind Map View.md",
-    "Planner/Progress bars for items on Calendar, Kanban, Timeline, and Task List.md",
-    "Planner/Improve Note Content in Item Modal.md",
-    "Planner/Ability to reorder calendars.md",
-    "Planner/Fix Kanban View drag-n-drop on ios.md",
     "Bases/Kanban.base",
-    "Ideas.md",
-    "Planner/Relative pathing not working - needs an extra up-folder.md",
-    "Templates/Untitled",
-    "Planner/Fix calendar view time input in iOS closing before input.md",
-    "TaskNotes/Views/tasks-default.base",
-    "TaskNotes/Views/relationships.base",
-    "TaskNotes/Views/mini-calendar-default.base",
+    "Screenshot_20260403-212943.png",
+    "Planner/Hide Start Time in Calendar View on Mobile.md",
+    "Planner/Create Issue Templates.md",
+    "Planner/Add 'All Day' as an option in Item Modal start and end menus.md",
+    "Planner/Add Plus Buttons to Kanban without Swimlanes.md",
+    "Planner/Add Planner frontmatter to current Note.md",
+    "Planner/Start and End Modal Options - Default to All Day.md",
+    "Bases/Calendar.base",
+    "Bases/Timeline.base",
+    "Bases/Task List.base",
+    "Planner/Progress bars for items on Calendar, Kanban, Timeline, and Task List.md",
+    "Planner/Remember scroll position after updating Item.md",
+    "Planner/0.2.0.md",
+    "Planner/test.md",
+    "Planner/example.md",
+    "DailyNotes/2026-04-07.md",
+    "DailyNotes",
+    "Planner/Add progress menu to Item Modal.md",
+    "Planner/Progress Example.md",
+    "Planner/Option to hide Calendar - Month and year view mode start times.md",
+    "Planner/Progress bars for items on Calendar, Kanban, Timeline, and Task List.md.tmp.5693.1771159962864",
+    "Bases/Untitled.base",
     "TaskNotes/Views/calendar-default.base",
+    "TaskNotes/Views/relationships.base",
     "TaskNotes/Views/agenda-default.base",
-    "TaskNotes/Views/kanban-default.base",
-    "TaskNotes/Views",
+    "Screenshot_20260215-063627.png",
+    "Planner/Replace Relevant View Dropdowns with Sliders.md",
+    "DailyNotes/2026-01-16.md",
+    "Ideas.md",
+    "Screenshot_20260201-071259.png",
+    "Planner/Abbreviate Year View Mode Month Display.md",
+    "Screenshot_20260201-071250.png",
+    "Planner/Reduce height of icon row in Calendar View.md",
+    "Planner/Configure Calendar View Cell Height.md",
+    "Planner/Reduce Multi-Day Bar Height.md",
+    "Planner/Ensure Calendar Dates and Spillover plus x More adhere to font size.md",
+    "Planner/Option to Generate 1 Base with all Four Views.md",
+    "Planner/Fix Settings Menus Spillover on Mobile.md",
     "ios_item_modal_time_input.png",
     "IMG_0234.png",
-    "Planner/PR 9481.md",
-    "Planner/test.md",
-    "Templates/Planner Template.md",
-    "PRD.md",
-    "Personas/Professional-PM/Update Project Roadmap.md",
-    "Personas/Professional-PM/Technical Debt Review.md",
-    "Personas/Professional-PM/Stakeholder Update Meeting.md",
-    "Personas/Professional-PM/Sprint Retro - Beta.md",
-    "Personas/Professional-PM/Sprint Planning - Alpha.md",
-    "Personas/Professional-PM/Shared Component Library Update.md",
-    "Personas/Professional-PM/Security Audit - Alpha.md",
-    "Personas/Professional-PM/Resource Planning Q2.md",
-    "Personas/Professional-PM/Project Gamma - Infrastructure.md",
-    "Personas/Professional-PM/Project Beta - Mobile App.md",
     "notes/Screenshot_20260101-185045.png",
     "notes/Screenshot_20260101-185036.png",
     "notes/Screenshot_20260101-184811.png",
-    "notes/Screenshot_20260101-184627.png",
-    "notes/Pasted image 20260101091932.png",
-    "notes/Pasted image 20260101091842.png",
-    "Screenshot_20260108-193249.png",
-    "Screenshot_20260105-200533.png"
+    "notes/Screenshot_20260101-184627.png"
   ]
 }

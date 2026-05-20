@@ -23,7 +23,8 @@ export interface PlannerItem {
   // Status
   status?: string;
   priority?: string;
-  progress?: number;
+  progress_current?: number;
+  progress_total?: number;
 
   // Dates (ISO 8601 format)
   date_created?: string;
@@ -103,7 +104,8 @@ export const FRONTMATTER_FIELD_ORDER: (keyof ItemFrontmatter)[] = [
   // Status
   'status',
   'priority',
-  'progress',
+  'progress_current',
+  'progress_total',
   // Dates
   'date_created',
   'date_modified',
@@ -157,4 +159,54 @@ export function isParent(item: PlannerItem): boolean {
  */
 export function isRecurring(item: PlannerItem): boolean {
   return item.repeat_frequency !== undefined;
+}
+
+/**
+ * Extract a raw JS number from either a plain number or a Bases PrimitiveValue<number> object.
+ * Returns null for any other type, including null/undefined.
+ * Bases' entry.getValue() returns Value objects, not primitives, so this is needed everywhere
+ * we read numeric fields from BasesEntry.
+ *
+ * Bases wraps primitives in PrimitiveValue objects with a `.data` property.
+ * Some older/alternative patterns use `.value`. We check both for compatibility.
+ */
+export function toRawNumber(value: unknown): number | null {
+  if (typeof value === 'number') return value;
+  if (value !== null && value !== undefined && typeof value === 'object') {
+    // PrimitiveValue pattern: .data contains the raw value
+    if ('data' in value) {
+      const inner = (value as { data: unknown }).data;
+      if (typeof inner === 'number') return inner;
+    }
+    // Alternative pattern: .value contains the raw value
+    if ('value' in value) {
+      const inner = (value as { value: unknown }).value;
+      if (typeof inner === 'number') return inner;
+    }
+  }
+  return null;
+}
+
+/**
+ * Compute a 0–100 progress percentage from progress_current and progress_total.
+ * Returns null if progress_current is not set (item has no progress data).
+ * progress_total defaults to 100 when absent.
+ */
+export function computeProgressPercent(current: number | undefined, total: number | undefined): number | null {
+  if (current === undefined || current === null) return null;
+  const t = (total !== undefined && total !== null && total > 0) ? total : 100;
+  return Math.min(100, Math.max(0, (current / t) * 100));
+}
+
+/**
+ * Format a progress label string based on the chosen display format.
+ * Returns empty string when format is 'none'.
+ */
+export function formatProgressLabel(current: number, total: number | undefined, format: 'fraction' | 'percentage' | 'both' | 'none'): string {
+  const t = (total !== undefined && total !== null && total > 0) ? total : 100;
+  const pct = Math.round(Math.min(100, Math.max(0, (current / t) * 100)));
+  if (format === 'fraction') return `${current}/${t}`;
+  if (format === 'percentage') return `${pct}%`;
+  if (format === 'both') return `${current}/${t} (${pct}%)`;
+  return '';
 }

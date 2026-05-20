@@ -55,7 +55,7 @@ export class BasesTimelineView extends BasesView {
 
   // Configuration getters - now accept any property ID for custom properties
   private getGroupBy(): TimelineGroupBy {
-    const value = this.config?.get('groupBy') as string | undefined;
+    const value = this.config?.get('plannerGroupBy') as string | undefined;
     // Accept any property ID; empty string or undefined means 'none'
     if (!value) return 'none';
     return value;
@@ -95,6 +95,12 @@ export class BasesTimelineView extends BasesView {
     // Return undefined for 'default' or empty to use theme defaults
     if (!value || value === 'default') return undefined;
     return value;
+  }
+
+  private getShowProgress(): boolean {
+    const value = this.config?.get('showProgress') as string | boolean | undefined;
+    if (typeof value === 'string') return value === 'true';
+    return value ?? false;
   }
 
   constructor(
@@ -251,6 +257,7 @@ export class BasesTimelineView extends BasesView {
       dateStartField: this.getDateStartField(),
       dateEndField: this.getDateEndField(),
       titleField: this.getTitleField(),
+      showProgress: this.getShowProgress(),
     };
 
     // Adapt entries to Markwhen format
@@ -337,13 +344,16 @@ export class BasesTimelineView extends BasesView {
    */
   private handleNewEvent(params: NewEventMessage): void {
     // Open ItemModal with pre-filled dates
+    // Pass the default calendar so the correct template is loaded
     // Use requestAnimationFrame to break out of postMessage context (same as handleSetDetailPath)
+    const defaultCalendar = this.plugin.settings.defaultCalendar;
     requestAnimationFrame(() => {
       void openItemModal(this.plugin, {
         mode: 'create',
         prePopulate: {
           date_start_scheduled: params.dateRangeIso.fromDateTimeIso,
           date_end_scheduled: params.dateRangeIso.toDateTimeIso,
+          calendar: defaultCalendar ? [defaultCalendar] : undefined,
         },
       });
     });
@@ -446,7 +456,7 @@ export function createTimelineViewRegistration(plugin: PlannerPlugin): BasesView
       },
       {
         type: 'property',
-        key: 'groupBy',
+        key: 'plannerGroupBy',
         displayName: 'Group by',
         default: 'note.calendar',
         placeholder: 'None',
@@ -512,6 +522,12 @@ export function createTimelineViewRegistration(plugin: PlannerPlugin): BasesView
           '#282a36': 'Dracula',
           '#1e1e1e': 'VS Code Dark',
         },
+      },
+      {
+        type: 'toggle',
+        key: 'showProgress',
+        displayName: 'Show progress',
+        default: false,
       },
     ],
   };

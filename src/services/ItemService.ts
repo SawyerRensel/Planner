@@ -133,6 +133,9 @@ export class ItemService {
       // Display
       cover: frontmatter.cover,
       color: frontmatter.color,
+      // Progress
+      progress_current: frontmatter.progress_current,
+      progress_total: frontmatter.progress_total,
     });
   }
 

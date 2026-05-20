@@ -22,6 +22,8 @@
     "people": "multitext",
     "repeat_completed_dates": "multitext",
     "finished": "date",
-    "started": "date"
+    "started": "date",
+    "progress_current": "number",
+    "progress_total": "number"
   }
 }

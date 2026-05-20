@@ -24,6 +24,7 @@ import { isOngoing } from '../utils/dateUtils';
 import type { PlannerSettings } from '../types/settings';
 import type { PlannerItem, DayOfWeek } from '../types/item';
 import { cleanLinks } from '../utils/linkUtils';
+import { toRawNumber } from '../types/item';
 
 /**
  * Safely convert any value to a string, handling objects properly
@@ -54,6 +55,7 @@ export interface AdapterOptions {
   dateStartField: string;
   dateEndField: string;
   titleField: string;
+  showProgress: boolean;
 }
 
 /**
@@ -155,6 +157,31 @@ export class MarkwhenAdapter {
     } catch {
       return null;
     }
+  }
+
+  /**
+   * Get a numeric value from an entry, falling back to frontmatter if Bases doesn't return it.
+   * This handles cases where the .base file doesn't have the property defined.
+   */
+  private getNumericValue(entry: BasesEntry, propId: string): number | null {
+    // Try Bases getValue first
+    const basesValue = entry.getValue(propId as BasesPropertyId);
+    const rawFromBases = toRawNumber(basesValue);
+    if (rawFromBases !== null) {
+      return rawFromBases;
+    }
+
+    // Fall back to reading frontmatter directly
+    const propName = propId.replace(/^note\./, '');
+    const fm = this.getFrontmatter(entry);
+    if (fm) {
+      const fmValue = fm[propName];
+      if (typeof fmValue === 'number') {
+        return fmValue;
+      }
+    }
+
+    return null;
   }
 
   /**
@@ -315,9 +342,16 @@ export class MarkwhenAdapter {
       ? tagsValue.map(t => String(t).replace(/^#/, ''))
       : [];
 
-    // Get progress
-    const progressValue = entry.getValue('note.progress');
-    const percent = typeof progressValue === 'number' ? progressValue : undefined;
+    // Get progress (use getNumericValue which has frontmatter fallback)
+    let percent: number | undefined;
+    if (options.showProgress) {
+      const current = this.getNumericValue(entry, 'note.progress_current');
+      if (current !== null) {
+        const totalRaw = this.getNumericValue(entry, 'note.progress_total');
+        const total = (totalRaw !== null && totalRaw > 0) ? totalRaw : 100;
+        percent = Math.min(100, Math.max(0, (current / total) * 100));
+      }
+    }
 
     // Get status for completion check
     const statusValue = entry.getValue('note.status');
@@ -758,8 +792,8 @@ export class MarkwhenAdapter {
 
     // Fields with colors defined in settings
     if (fieldName === 'calendar') {
-      for (const [name, config] of Object.entries(this.settings.calendars)) {
-        innerMap[name] = this.hexToRgb(config.color);
+      for (const calendar of this.settings.calendars) {
+        innerMap[calendar.name] = this.hexToRgb(calendar.color);
       }
     } else if (fieldName === 'priority') {
       for (const priority of this.settings.priorities) {
