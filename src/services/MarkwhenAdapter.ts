@@ -23,28 +23,7 @@ import {
 import { isOngoing } from '../utils/dateUtils';
 import type { PlannerSettings } from '../types/settings';
 import type { PlannerItem, DayOfWeek } from '../types/item';
-
-/**
- * Replace Obsidian wikilinks in a string with their display text:
- *   [[target|alias]] → alias
- *   [[target]]       → basename of target (no .md extension)
- *   [[folder/file]]  → file
- * Leaves any surrounding text intact. Useful when a timeline title comes
- * from a formula that concatenates link-typed properties (e.g. a
- * "Name · status · assignee" title built in a .base file), which would
- * otherwise render as `Name · status · [[Pablo]]` in the Markwhen
- * timeline UI.
- */
-function cleanWikilinks(text: string): string {
-  return text.replace(
-    /\[\[([^|\]]+)(?:\|([^\]]+))?\]\]/g,
-    (_match, target: string, alias?: string) => {
-      if (alias) return alias;
-      const basename = target.split('/').pop() ?? target;
-      return basename.replace(/\.md$/, '');
-    }
-  );
-}
+import { cleanLinks } from '../utils/linkUtils';
 
 /**
  * Safely convert any value to a string, handling objects properly
@@ -326,10 +305,7 @@ export class MarkwhenAdapter {
     // Parse end date - default to start date if not set
     const endDate = this.parseDate(endValue) || startDate;
 
-    // Get title. Apply cleanWikilinks so that link-typed values embedded
-    // in the title (directly or via a formula) render as display text
-    // rather than raw [[...]] syntax.
-    const title = cleanWikilinks(
+    const title = cleanLinks(
       titleValue?.toString() || entry.file.basename
     );
 
@@ -474,10 +450,10 @@ export class MarkwhenAdapter {
 
     if (Array.isArray(value)) {
       const firstVal: unknown = value[0];
-      return firstVal ? cleanWikilinks(safeToString(firstVal).replace(/^#/, '')) : 'Unsectioned';
+      return firstVal ? cleanLinks(safeToString(firstVal).replace(/^#/, '')) : 'Unsectioned';
     }
 
-    return cleanWikilinks(safeToString(value));
+    return cleanLinks(safeToString(value));
   }
 
   /**
@@ -513,10 +489,10 @@ export class MarkwhenAdapter {
 
     if (Array.isArray(value)) {
       const firstVal: unknown = value[0];
-      return firstVal ? cleanWikilinks(safeToString(firstVal).replace(/^#/, '')) : 'Ungrouped';
+      return firstVal ? cleanLinks(safeToString(firstVal).replace(/^#/, '')) : 'Ungrouped';
     }
 
-    return cleanWikilinks(safeToString(value));
+    return cleanLinks(safeToString(value));
   }
 
   /**
@@ -537,10 +513,10 @@ export class MarkwhenAdapter {
 
     if (Array.isArray(value)) {
       const firstVal: unknown = value[0];
-      return firstVal ? cleanWikilinks(safeToString(firstVal).replace(/^#/, '')) : undefined;
+      return firstVal ? cleanLinks(safeToString(firstVal).replace(/^#/, '')) : undefined;
     }
 
-    return cleanWikilinks(safeToString(value));
+    return cleanLinks(safeToString(value));
   }
 
   /**

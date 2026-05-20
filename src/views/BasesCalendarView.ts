@@ -9,6 +9,7 @@ import {
   TFile,
 } from 'obsidian';
 import { Calendar, EventInput, EventClickArg, DateSelectArg, EventDropArg } from '@fullcalendar/core';
+import { cleanLinks } from '../utils/linkUtils';
 
 /**
  * Type interfaces for FullCalendar event handlers
@@ -865,7 +866,7 @@ export class BasesCalendarView extends BasesView {
       title = entry.file.basename;
     } else {
       const titleValue = entry.getValue(titleField as unknown);
-      title = titleValue ? String(titleValue) : entry.file.basename || 'Untitled';
+      title = titleValue ? cleanLinks(String(titleValue)) : entry.file.basename || 'Untitled';
     }
 
     // Get color
@@ -981,7 +982,7 @@ export class BasesCalendarView extends BasesView {
       title = entry.file.basename;
     } else {
       const titleValue = entry.getValue(titleField as unknown);
-      title = titleValue ? String(titleValue) : entry.file.basename || 'Untitled';
+      title = titleValue ? cleanLinks(String(titleValue)) : entry.file.basename || 'Untitled';
     }
 
     // Get color
